@@ -1,79 +1,75 @@
+:root {
+    --ungu-tua: #4C1D95; /* Warna ungu figma */
+    --ungu-hover: rgba(255, 255, 255, 0.15);
+    --putih: #ffffff;
+}
+
+/* SIDEBAR STYLE */
 .sidebar {
     width: 280px;
-    background: #2c3e50;
-    color: white;
-    min-height: 100vh;
-    padding: 20px;
+    background-color: var(--ungu-tua);
+    height: 100vh;
+    color: var(--putih);
+    position: fixed;
     display: flex;
     flex-direction: column;
 }
 
-/* Profile Section */
 .sidebar-profile {
-    text-align: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #3e5a6f;
-}
-
-.profile-avatar img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid #4D0B87;
-    margin-bottom: 10px;
-}
-
-.profile-info h4 {
-    margin: 0;
-    color: white;
-    font-size: 1rem;
-}
-
-.profile-info span {
-    font-size: 0.8rem;
-    color: #b0c4de;
-}
-
-/* Navigation Menu */
-.sidebar-nav {
-    flex: 1;
-}
-
-.sidebar-nav ul {
-    list-style: none;
-    padding: 0;
-}
-
-.sidebar-nav li {
-    margin-bottom: 5px;
-}
-
-.sidebar-nav li a {
+    padding: 30px 20px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 15px;
-    color: #ecf0f1;
+    gap: 15px;
+}
+
+.avatar-circle {
+    width: 50px; height: 50px;
+    background: var(--putih);
+    border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    color: var(--ungu-tua); font-size: 20px;
+}
+
+.user-name { font-size: 16px; margin: 0; font-weight: 600; }
+.user-role { font-size: 13px; margin: 0; opacity: 0.8; }
+
+.nav-item {
+    display: flex; align-items: center; gap: 15px;
+    padding: 15px 25px;
+    color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
-    border-radius: 8px;
-    transition: background 0.3s;
+    transition: 0.3s;
 }
 
-.sidebar-nav li a:hover {
-    background: #3e5a6f;
+.nav-item i { width: 25px; font-size: 18px; }
+
+.nav-item:hover, .nav-item.active {
+    background: var(--ungu-hover);
+    color: var(--putih);
+    border-radius: 10px;
+    margin: 0 10px;
 }
 
-/* Icon placeholders (ganti dengan icon font atau gambar nanti) */
-.sidebar-nav li a i {
-    width: 20px;
-    font-style: normal;
+/* HEADER STYLE */
+.header {
+    margin-left: 280px;
+    height: 75px;
+    background: var(--putih);
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 30px;
+    border-bottom: 1px solid #eee;
 }
 
-/* Logout menu di bagian bawah */
-.logout-menu {
-    margin-top: 30px;
-    border-top: 1px solid #3e5a6f;
-    padding-top: 15px;
+.tagline {
+    font-family: 'Pacifico', cursive;
+    color: var(--ungu-tua);
+    font-size: 24px;
+}
+
+.profile-circle {
+    width: 45px; height: 45px;
+    background: #F3E8FF;
+    border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    color: var(--ungu-tua);
 }

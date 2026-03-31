@@ -11,6 +11,10 @@ use App\Http\Controllers\LandingPageController;
 
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 
+Route::get('/login-dummy', function () {
+    return "Halaman Login sedang dikerjakan teman saya.";
+})->name('login'); //dummy login nyak
+
 // ========== ROUTE UNTUK BRANCH DESAIN (TAMPILAN STATIS) ==========
 
 // Dashboard Tentor
@@ -53,5 +57,3 @@ Route::get('/dashboard/profil/edit', function () {
 Route::get('/dashboard/profil/ubah-password', function () {
     return view('dashboard.profil.ubah-password');
 });
-
-require __DIR__.'/auth.php';

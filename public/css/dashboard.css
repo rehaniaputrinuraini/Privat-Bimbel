@@ -1,21 +1,84 @@
-/* Sembunyikan semua menu superadmin & admin secara default */
-.menu-superadmin,
-.menu-admin {
-    display: none;
+:root {
+    --ungu-utama: #4a148c; /* Sesuaikan dengan warna di Figma kamu */
+    --ungu-muda: #6a1b9a;
+    --putih: #ffffff;
+    --abu-bg: #f4f7f6;
 }
 
-/* Tampilkan menu superadmin jika body punya class 'role-superadmin' */
-body.role-superadmin .menu-superadmin {
-    display: block;
+/* HEADER */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    background: var(--putih);
+    border-bottom: 1px solid #ddd;
+    height: 70px;
 }
 
-/* Tampilkan menu admin jika body punya class 'role-admin' */
-body.role-admin .menu-superadmin,
-body.role-admin .menu-admin {
-    display: block;
+.tagline {
+    font-family: 'Pacifico', cursive; /* Gunakan font sambung jika ada */
+    color: var(--ungu-utama);
+    font-size: 24px;
 }
 
-/* Tampilkan menu tentor jika body punya class 'role-tentor' */
-body.role-tentor .menu-tentor {
-    display: block;
+.profile-circle {
+    width: 45px;
+    height: 45px;
+    background: #e1d5f2;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--ungu-utama);
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 260px;
+    background: var(--ungu-utama);
+    height: 100vh;
+    color: var(--putih);
+    padding-top: 20px;
+    position: fixed;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 50%;
+    margin-right: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--ungu-utama);
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 25px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.nav-item i {
+    width: 30px;
+    font-size: 18px;
+}
+
+.nav-item:hover, .nav-item.active {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 10px;
+    margin: 0 10px;
 }
