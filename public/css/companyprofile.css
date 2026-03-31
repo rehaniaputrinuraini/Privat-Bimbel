@@ -1,0 +1,619 @@
+/* --- RESET --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif; /* Font default mirip desain */
+    color: #333;
+    line-height: 1.6;
+    background-color: #FDF5FF; /* Warna background utama dari desain */
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* --- VARIABEL WARNA & UTILITAS --- */
+:root {
+    --purple-main: #6F2DA8; /* Ungu utama dari logo/navbar */
+    --purple-light: #E0CFFC; /* Ungu muda background card */
+    --white: #FFFFFF;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.text-purple {
+    color: var(--purple-main);
+}
+
+.text-white {
+    color: var(--white);
+}
+
+.bg-white {
+    background-color: var(--white);
+}
+
+.bg-purple {
+    background-color: var(--purple-main);
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.section-subtitle {
+    text-align: center;
+    color: #777;
+    margin-bottom: 50px;
+}
+
+/* --- TOMBOL login --- */
+.btn-primary {
+    background-color: var(--purple-main);
+    color: var(--white);
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #5d228e;
+}
+
+/* --- CSS TOMBOL PERSIS GAMBAR DESAIN --- */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    
+    /* Warna Dasar & Stroke */
+    background-color: transparent; /* Biarkan mengikuti background ungu muda section */
+    border: 2px solid #5d228e; /* Stroke ungu tua yang tegas */
+    color: #5d228e !important; /* Teks ungu tua */
+    
+    /* Ukuran & Bentuk */
+    padding: 12px 30px;
+    border-radius: 12px; /* Sudut membulat sesuai gambar */
+    
+    /* Font */
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+/* Ikon Telepon di dalam Tombol */
+.btn-primary i {
+    font-size: 1.2rem;
+    transform: rotate(0deg); /* Pastikan ikon tegak atau sedikit miring sesuai FontAwesome */
+}
+
+/* Efek Hover (Opsional agar interaktif) */
+.btn-primary:hover {
+    background-color: #5d228e;
+    color: #ffffff !important;
+}
+/* --- NAVBAR --- */
+.navbar {
+    background-color: var(--white);
+    padding: 15px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--purple-main);
+}
+
+.navbar .logo img {
+    height: 40px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 25px;
+}
+
+.nav-links a {
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: var(--purple-main);
+}
+
+.btn-login {
+    background-color: var(--purple-main);
+    color: var(--white);
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* --- HERO SECTION --- */
+.hero {
+    padding: 100px 0;
+}
+
+.hero-content {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+}
+
+.hero-text {
+    flex: 1;
+}
+
+.hero-text h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.hero-text h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.hero-text p {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.hero-image {
+    flex: 1;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* --- STATS CARDS --- */
+.stats {
+    padding: 50px 0;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.stat-card {
+    background-color: var(--purple-main);
+    color: var(--white);
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.stat-card i {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.stat-card h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+/* --- VISI MISI --- */
+.visi-misi {
+    padding: 80px 0;
+}
+
+.visi-misi-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    margin-top: 50px;
+}
+
+.visi-box, .misi-box {
+    background-color: var(--white);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.visi-box h3, .misi-box h3 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.misi-box ul li {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: start;
+    gap: 10px;
+}
+
+.misi-box ul li i {
+    margin-top: 5px;
+    color: #4CAF50; /* Warna centang */
+}
+
+/* --- FASILITAS --- */
+.fasilitas {
+    padding: 80px 0;
+}
+
+.fasilitas-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-top: 50px;
+}
+
+.fasilitas-card {
+    background-color: var(--purple-light);
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    transition: transform 0.3s;
+}
+
+.fasilitas-card:hover {
+    transform: translateY(-5px);
+}
+
+.icon-box {
+    background-color: var(--purple-main);
+    color: var(--white);
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 1.5rem;
+}
+
+.fasilitas-card h4 {
+    margin-bottom: 10px;
+}
+
+.fasilitas-card p {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* --- PROGRAM KAMI TERBARU (REVISI) --- */
+.program {
+    padding: 80px 0;
+}
+
+/* Judul & Subtitle ke Tengah */
+.program h2, .section-title {
+    text-align: center;
+    width: 100%;
+}
+
+.program-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-top: 50px;
+    align-items: start;
+}
+
+.program-card {
+    background-color: #FFFFFF;
+    border-radius: 20px;
+    padding: 40px 30px;
+    box-shadow: 0 10px 30px rgba(111, 45, 168, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Konten utama tetap center */
+    text-align: center;
+    transition: transform 0.3s;
+}
+
+.program-card h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #6F2DA8;
+    margin-bottom: 8px;
+}
+
+/* --- BOX PROGRAM UNGGULAN (KARTU PRIVAT) --- */
+.unggulan-box {
+    border: 2px solid #E0CFFC; /* Kotak Ungu Muda */
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    background-color: #FFFFFF;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.unggulan-box span {
+    font-weight: 700;
+    color: #333;
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* --- FASILITAS RATA KIRI --- */
+.detail-section {
+    width: 100%;
+    text-align: left; /* Judul seperti 'Fasilitas:' jadi rata kiri */
+    margin-bottom: 20px;
+}
+
+.fasilitas-list {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+}
+
+.fasilitas-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: #555;
+    text-align: left; /* Teks list rata kiri */
+    justify-content: flex-start; /* Ikon centang & teks menempel ke kiri */
+}
+
+.fasilitas-list i {
+    color: #6F2DA8;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* --- HARGA & ITEM KHUSUS (TETAP) --- */
+.pendaftaran-box {
+    background-color: #F3E8FF;
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pendaftaran-box .price {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #6F2DA8;
+}
+
+.harga-list li {
+    background-color: #F8F9FA;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.khusus-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    width: 100%;
+    text-align: left;
+}
+
+.khusus-osn-sd, .khusus-osn-smp { background-color: #FFFDE7; color: #F57C00; }
+.khusus-ptn { background-color: #E3F2FD; color: #1976D2; }
+.khusus-kedinasan { background-color: #E8F5E9; color: #388E3C; }
+.khusus-alumni { background-color: #FBE9E7; color: #D84315; }
+
+.mapel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #555;
+    text-align: left;
+    margin-bottom: 25px;
+    width: 100%;
+}
+/* --- GALERI --- */
+.galeri {
+    padding: 80px 0;
+}
+
+.galeri-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 50px;
+}
+
+.galeri-grid img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 15px;
+}
+
+/* --- TESTIMONI (REVISI URUTAN: NAMA -> BINTANG -> DESKRIPSI) --- */
+
+.testimoni {
+    padding: 80px 0;
+}
+
+.testimoni-container {
+    display: flex;
+    gap: 30px;
+    overflow-x: auto; /* Agar bisa di-scroll horizontal */
+    padding: 20px 0;
+}
+
+.testimoni-card {
+    background-color: var(--white);
+    padding: 30px;
+    border-radius: 15px;
+    width: 350px;
+    flex-shrink: 0;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    text-align: center;
+    
+    /* KUNCI UTAMA: MEMAKSA SEMUA ELEMEN BERTUMPUK KE BAWAH */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Meratakan konten di tengah secara horizontal */
+    justify-content: center; /* Meratakan konten di tengah secara vertikal */
+}
+
+.testimoni-card img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 15px; /* Jarak ke Nama */
+    object-fit: cover;
+}
+
+.testimoni-card h4 {
+    margin-bottom: 5px; /* Jarak ke Bintang */
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #333;
+    width: 100%; /* Agar teks mengambil lebar penuh untuk alignment */
+}
+
+/* Bintang di bawah Nama */
+.rating {
+    color: #FFC107; /* Warna Kuning Bintang */
+    margin-bottom: 15px; /* Jarak ke Deskripsi */
+    font-size: 0.9rem;
+    width: 100%; /* Agar bintang mengambil lebar penuh untuk alignment */
+    display: flex;
+    justify-content: center; /* Memastikan ikon bintang di tengah */
+    gap: 2px; /* Jarak antar ikon bintang */
+}
+
+/* Deskripsi Paling Bawah */
+.testimoni-card p {
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+    line-height: 1.5;
+    width: 100%; /* Agar teks mengambil lebar penuh untuk alignment */
+}
+
+/* --- FOOTER (4 Kolom: Brand, Alamat, Kontak, Jam) --- */
+.footer {
+    background-color: var(--purple-main);
+    color: var(--white);
+    padding: 60px 0 30px;
+    margin-top: 50px;
+}
+
+.footer-content {
+    display: grid;
+    /* Dibagi menjadi 4 kolom sama rata */
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 30px;
+    align-items: start;
+}
+
+.footer-section h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+.footer-section h4 {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.footer-section p {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    opacity: 0.9;
+    margin-bottom: 5px;
+}
+
+section {
+    scroll-margin-top: 100px; /* Atur angka ini (misal 100px) agar judul tidak tertutup */
+}
+
+/* Efek scroll halus saat klik menu navbar */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Responsive untuk HP agar tumpuk ke bawah */
+@media (max-width: 992px) {
+    .footer-content {
+        grid-template-columns: 1fr 1fr; /* 2 kolom di tablet */
+    }
+}
+
+@media (max-width: 600px) {
+    .footer-content {
+        grid-template-columns: 1fr; /* 1 kolom di HP */
+        text-align: center;
+    }
+    .footer-section h4 {
+        justify-content: center;
+    }
+}

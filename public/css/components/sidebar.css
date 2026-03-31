@@ -1,0 +1,79 @@
+.sidebar {
+    width: 280px;
+    background: #2c3e50;
+    color: white;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Profile Section */
+.sidebar-profile {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #3e5a6f;
+}
+
+.profile-avatar img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #4D0B87;
+    margin-bottom: 10px;
+}
+
+.profile-info h4 {
+    margin: 0;
+    color: white;
+    font-size: 1rem;
+}
+
+.profile-info span {
+    font-size: 0.8rem;
+    color: #b0c4de;
+}
+
+/* Navigation Menu */
+.sidebar-nav {
+    flex: 1;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar-nav li {
+    margin-bottom: 5px;
+}
+
+.sidebar-nav li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    color: #ecf0f1;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+.sidebar-nav li a:hover {
+    background: #3e5a6f;
+}
+
+/* Icon placeholders (ganti dengan icon font atau gambar nanti) */
+.sidebar-nav li a i {
+    width: 20px;
+    font-style: normal;
+}
+
+/* Logout menu di bagian bawah */
+.logout-menu {
+    margin-top: 30px;
+    border-top: 1px solid #3e5a6f;
+    padding-top: 15px;
+}

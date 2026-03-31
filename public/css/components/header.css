@@ -1,0 +1,44 @@
+.header {
+    background: white;
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.menu-toggle {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #4D0B87;
+}
+
+.logo img {
+    height: 40px;
+}
+
+.header-text h2 {
+    font-size: 1.2rem;
+    color: #4D0B87;
+    margin: 0;
+}
+
+.header-right .profile-link {
+    text-decoration: none;
+}
+
+.user-avatar img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #4D0B87;
+}

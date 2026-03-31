@@ -1,0 +1,21 @@
+/* Sembunyikan semua menu superadmin & admin secara default */
+.menu-superadmin,
+.menu-admin {
+    display: none;
+}
+
+/* Tampilkan menu superadmin jika body punya class 'role-superadmin' */
+body.role-superadmin .menu-superadmin {
+    display: block;
+}
+
+/* Tampilkan menu admin jika body punya class 'role-admin' */
+body.role-admin .menu-superadmin,
+body.role-admin .menu-admin {
+    display: block;
+}
+
+/* Tampilkan menu tentor jika body punya class 'role-tentor' */
+body.role-tentor .menu-tentor {
+    display: block;
+}
