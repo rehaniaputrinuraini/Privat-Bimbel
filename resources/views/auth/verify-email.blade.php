@@ -16,7 +16,7 @@
         <div class="w-full max-w-md">
             <!-- Header: Logo + Bimbel Privat 1 baris -->
             <div class="flex items-center justify-center gap-3 mb-6">
-                <img src="/images/foto_logo.png" alt="Logo" class="h-10 w-auto">
+                <img src="/images/logo/foto_logo.png" alt="Logo" class="h-10 w-auto">
                 <h2 class="text-2xl font-bold" style="color: #4D0B87;">Bimbel Privat</h2>
             </div>
 

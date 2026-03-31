@@ -11,7 +11,7 @@
         <div class="flex flex-col md:flex-row bg-white rounded-2xl shadow-lg overflow-hidden max-w-5xl w-full">
             
             <!-- KIRI: Full Foto dengan Teks Overlay -->
-            <div class="w-full md:w-1/2 relative bg-cover bg-center" style="background-image: url('/images/foto_login.png'); min-height: 500px;">
+            <div class="w-full md:w-1/2 relative bg-cover bg-center" style="background-image: url('/images/auth/foto_login.png'); min-height: 500px;">
                 <div class="absolute inset-0 bg-black bg-opacity-40"></div>
                 <div class="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-8">
                     <h2 class="text-3xl md:text-4xl font-bold mb-4">Selamat Datang</h2>
@@ -27,7 +27,7 @@
                     <p class="text-sm text-gray-500">Silahkan masuk ke akun Anda</p>
                 </div>
 
-                <form method="POST" action="{{ route('login') }}">
+                <form method="POST" action="{{ route('login.post') }}">
                     @csrf
 
                     @if ($errors->any())

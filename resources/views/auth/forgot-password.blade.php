@@ -12,7 +12,7 @@
             
             <!-- Header: Logo + Bimbel Privat 1 baris (di luar kontainer) -->
             <div class="flex items-center justify-center gap-3 mb-8">
-                <img src="/images/foto_logo.png" alt="Logo Bimbel Privat" class="h-12 w-auto">
+                <img src="/images/logo/foto_logo.png" alt="Logo Bimbel Privat" class="h-12 w-auto">
                 <h2 class="text-3xl font-bold" style="color: #4D0B87;">Bimbel Privat</h2>
             </div>
 

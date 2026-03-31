@@ -17,7 +17,7 @@
             
             <!-- Header: Logo + Bimbel Privat 1 baris -->
             <div class="flex items-center justify-center gap-3 mb-4">
-                <img src="/images/foto_logo.png" alt="Logo Bimbel Privat" class="h-10 w-auto">
+                <img src="/images/logo/foto_logo.png" alt="Logo Bimbel Privat" class="h-10 w-auto">
                 <h2 class="text-2xl font-bold" style="color: #4D0B87;">Bimbel Privat</h2>
             </div>
 
@@ -71,7 +71,7 @@
                     <button type="submit" 
                             class="w-full text-white py-2 rounded-lg font-semibold hover:opacity-90 transition flex items-center justify-center gap-2 text-sm"
                             style="background-color: #4D0B87;">
-                        <img src="/images/aktivasi/icon_kirim.png" alt="Kirim" class="h-4 w-auto">
+                        <img src="/images/auth/aktivasi/icon_kirim.png" alt="Kirim" class="h-4 w-auto">
                         Aktivasi
                     </button>
                 </form>

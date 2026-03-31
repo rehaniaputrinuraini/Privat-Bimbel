@@ -1,16 +1,16 @@
 <header class="header">
     <div class="header-left">
-        <i class="fas fa-bars toggle-menu"></i>
-        <img src="{{ asset('images/logo/logo.png') }}" alt="Logo Privat" class="logo-img">
+        <i class="fas fa-bars burger-btn" id="toggle-sidebar"></i>
+        <img src="{{ asset('images/logo/foto_logo.png') }}" alt="Logo" class="logo-img">
     </div>
-
     <div class="header-center">
-        <h1 class="tagline">Prestasi lebih baik</h1>
+        <div class="tagline">Prestasi Lebih Baik</div>
     </div>
-
     <div class="header-right">
-        <div class="profile-circle">
-            <i class="fas fa-user"></i>
-        </div>
+        <a href="{{ route('profile.index') }}" class="profile-link">
+            <div class="user-avatar-top">
+                <img src="{{ asset('images/icon_orang.png') }}" alt="Avatar">
+            </div>
+        </a>
     </div>
 </header>

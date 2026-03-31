@@ -6,29 +6,37 @@
     <title>@yield('title', 'Bimbel Privat')</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
+    
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/components/header.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/components/sidebar.css') }}">
 
     @stack('styles')
 </head>
 <body>
-    <div class="dashboard-container">
+    <!-- HEADER DI ATAS -->
+    @include('components.header')
+
+    <div class="main-container">
+        <!-- SIDEBAR DI KIRI -->
         @include('components.sidebar')
 
-        <main class="main-content">
-            @include('components.header')
-
-            <div class="content">
-                @yield('content')
-            </div>
+        <!-- KONTEN UTAMA -->
+        <main class="content-wrapper">
+            @yield('content')
         </main>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('toggle-sidebar');
+            const sidebar = document.querySelector('.sidebar');
+            if (toggleBtn && sidebar) {
+                toggleBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                });
+            }
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>
