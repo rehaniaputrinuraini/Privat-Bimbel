@@ -16,7 +16,7 @@
     <nav class="navbar">
         <div class="container">
             <div class="logo">
-                <img src="{{ asset('images/galeri/foto_logo.png') }}" alt="Logo Bimbel Privat" class="h-12 w-auto">
+                <img src="{{ asset('images/logo/foto_logo.png') }}" alt="Logo Bimbel Privat" class="h-12 w-auto">
             </div>
             <ul class="nav-links">
                 <li><a href="#beranda">Beranda</a></li>
@@ -44,7 +44,7 @@
                 <span>Daftar atau Hubungi Kami</span></a> 
             </div>
             <div class="hero-image">
-                <img src="{{ asset('images/galeri/gambar1.jpg') }}" alt="Aktivitas Belajar"> </div>
+                <img src="{{ asset('images/companyprofile/galeri/gambar1.jpg') }}" alt="Aktivitas Belajar"> </div>
         </div>
     </section>
 
@@ -277,12 +277,12 @@
             <h2 class="section-title">Galeri Kegiatan</h2>
             <p class="section-subtitle">Dokumentasi kegiatan belajar mengajar kami</p>
             <div class="galeri-grid">
-                <img src="{{ asset('images/galeri/gambar1.jpg') }}" alt="Galeri 1"> 
-                <img src="{{ asset('images/galeri/gambar2.jpg') }}" alt="Galeri 2">
-                <img src="{{ asset('images/galeri/gambar3.jpg') }}" alt="Galeri 3">
-                <img src="{{ asset('images/galeri/gambar1.jpg') }}" alt="Galeri 4">
-                <img src="{{ asset('images/galeri/gambar2.jpg') }}" alt="Galeri 5">
-                <img src="{{ asset('images/galeri/gambar3.jpg') }}" alt="Galeri 6">
+                <img src="{{ asset('images/companyprofile/galeri/gambar1.jpg') }}" alt="Galeri 1"> 
+                <img src="{{ asset('images/companyprofile/galeri/gambar2.jpg') }}" alt="Galeri 2">
+                <img src="{{ asset('images/companyprofile/galeri/gambar3.jpg') }}" alt="Galeri 3">
+                <img src="{{ asset('images/companyprofile/galeri/gambar1.jpg') }}" alt="Galeri 4">
+                <img src="{{ asset('images/companyprofile/galeri/gambar2.jpg') }}" alt="Galeri 5">
+                <img src="{{ asset('images/companyprofile/galeri/gambar3.jpg') }}" alt="Galeri 6">
             </div>
         </div>
     </section>

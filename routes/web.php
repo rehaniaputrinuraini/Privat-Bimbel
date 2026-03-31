@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LandingPageController;
+use App\Http\Controllers\MuridController;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -93,9 +94,9 @@ Route::get('/superadmin/kelola-tentor', function () {
     return view('dashboard.superadmin.kelola-tentor');
 })->name('superadmin.kelola-tentor');
 
-Route::get('/superadmin/kelola-murid', function () {
-    return view('dashboard.superadmin.kelola-murid');
-})->name('superadmin.kelola-murid');
+Route::get('/superadmin/kelola-murid', [MuridController::class, 'index'])->name('superadmin.kelola-murid');
+Route::get('/superadmin/kelola-murid/create', [MuridController::class, 'create'])->name('superadmin.murid.create');
+Route::get('/superadmin/kelola-murid/edit/{id}', [MuridController::class, 'edit'])->name('superadmin.murid.edit');
 
 Route::get('/superadmin/harga-paket', function () {
     return view('dashboard.superadmin.harga-paket');
@@ -122,9 +123,9 @@ Route::get('/admin/data-tentor', function () {
     return view('dashboard.admin.data-tentor');
 })->name('admin.data-tentor');
 
-Route::get('/admin/kelola-murid', function () {
-    return view('dashboard.admin.kelola-murid');
-})->name('admin.kelola-murid');
+Route::get('/admin/kelola-murid', [MuridController::class, 'index'])->name('admin.kelola-murid');
+Route::get('/admin/kelola-murid/create', [MuridController::class, 'create'])->name('admin.murid.create');
+Route::get('/admin/kelola-murid/edit/{id}', [MuridController::class, 'edit'])->name('admin.murid.edit');
 
 Route::get('/admin/harga-paket', function () {
     return view('dashboard.admin.harga-paket');
