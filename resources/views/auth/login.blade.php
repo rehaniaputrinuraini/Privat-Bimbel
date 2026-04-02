@@ -51,7 +51,7 @@
                     <div class="flex justify-between items-center mb-6">
                         <a href="{{ route('register') }}" class="text-sm text-[#4D0B87] hover:underline">Aktivasi Akun</a>
                         @if (Route::has('password.request'))
-                            <a href="{{ route('password.request') }}" class="text-sm text-[#4D0B87] hover:underline">Lupa Kata Sandi?</a>
+                            
                         @endif
                     </div>
 

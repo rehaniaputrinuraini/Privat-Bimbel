@@ -1,18 +1,20 @@
-/* Sidebar Utama */
+/* =========================================
+   SIDEBAR UTAMA
+   ========================================= */
 .sidebar { 
     width: 280px; 
     background-color: #5D10A2; 
     color: white; 
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
+    display: flex;             /* WAJIB: Mengaktifkan Flexbox */
+    flex-direction: column;    /* WAJIB: Susunan vertikal (Atas ke Bawah) */
+    height: 100vh;             /* WAJIB: Tinggi harus 100% layar agar scroll jalan */
     transition: all 0.3s ease;
-    overflow: hidden;
+    overflow: hidden;          /* WAJIB: Agar container utama tidak ikut scroll */
     position: sticky;
     top: 0;
 }
 
-/* Sidebar saat di-collapse */
+/* Sidebar saat di-collapse (Burger Menu) */
 .sidebar.collapsed {
     width: 0 !important;
     min-width: 0 !important;
@@ -20,16 +22,16 @@
     overflow: hidden;
 }
 
-/* ============================================
-   1. PROFILE SECTION (Tetap di atas)
-============================================ */
+/* =========================================
+   1. PROFILE SECTION (TETAP / FIXED DI ATAS)
+   ========================================= */
 .sidebar-profile { 
     padding: 30px 20px; 
     display: flex; 
     align-items: center; 
     gap: 15px; 
     border-bottom: 1px solid rgba(255,255,255,0.1);
-    flex-shrink: 0;
+    flex-shrink: 0;            /* WAJIB: Mencegah profile gepeng/mengecil */
 }
 
 .avatar-circle { 
@@ -51,55 +53,25 @@
     object-fit: cover; 
 }
 
-.profile-info h4 { 
-    font-size: 16px; 
-    font-weight: 600; 
-    margin: 0; 
-    color: white; 
-}
+.profile-info h4 { font-size: 16px; font-weight: 600; margin: 0; color: white; }
+.profile-info p { font-size: 12px; opacity: 0.8; margin: 0; color: white; }
 
-.profile-info p { 
-    font-size: 12px; 
-    opacity: 0.8; 
-    margin: 0; 
-    color: white; 
-}
-
-/* ============================================
-   2. NAVIGASI MENU (Area Scrollable)
-   Hanya menu Dashboard sampai Laporan Keuangan yang scroll
-============================================ */
+/* =========================================
+   2. NAVIGASI MENU (AREA YANG BISA DI-SCROLL)
+   ========================================= */
 .sidebar-nav { 
     padding: 15px; 
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0; /* Penting agar flex bisa menyesuaikan */
+    flex-grow: 1;              /* WAJIB: Mengambil semua sisa ruang di tengah */
+    overflow-y: auto;          /* WAJIB: Scrollbar aktif HANYA di bagian menu ini */
+    min-height: 0;             /* Mencegah flexbox pecah di beberapa browser */
 }
 
-.sidebar-nav ul { 
-    list-style: none; 
-    padding: 0; 
-    margin: 0; 
-}
+.sidebar-nav ul { list-style: none; padding: 0; margin: 0; }
 
-/* Custom Scrollbar - Cantik */
-.sidebar-nav::-webkit-scrollbar {
-    width: 5px;
-}
-
-.sidebar-nav::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 10px;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
-}
+/* Custom Scrollbar Tipis (Cantik) */
+.sidebar-nav::-webkit-scrollbar { width: 4px; }
+.sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
 
 .nav-link-custom { 
     display: flex; 
@@ -117,26 +89,24 @@
     width: 20px; 
     height: 20px; 
     margin-right: 12px;
-    filter: brightness(0) invert(1);
+    filter: brightness(0) invert(1); /* Ikon jadi putih */
 }
 
-.nav-link-custom:hover, 
-.nav-active { 
+.nav-link-custom:hover, .nav-active { 
     background: rgba(255, 255, 255, 0.2); 
     color: white;
     font-weight: 600; 
 }
 
-/* ============================================
-   3. LOGOUT SECTION (Tetap di bawah)
-   Selalu terlihat, tidak ikut scroll
-============================================ */
+/* =========================================
+   3. LOGOUT SECTION (TETAP / FIXED DI BAWAH)
+   ========================================= */
 .sidebar-footer {
     padding: 20px;
     border-top: 1px solid rgba(255,255,255,0.1);
-    flex-shrink: 0;
+    flex-shrink: 0;            /* WAJIB: Mencegah logout terdorong/mengecil */
     background-color: #5D10A2;
-    margin-top: auto;
+    margin-top: auto;          /* Memastikan menempel di paling bawah */
 }
 
 .logout-btn {
@@ -153,6 +123,4 @@
     transition: 0.3s;
 }
 
-.logout-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
+.logout-btn:hover { background: rgba(255, 255, 255, 0.1); }

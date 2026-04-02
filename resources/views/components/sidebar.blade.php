@@ -16,14 +16,14 @@
 
     <nav class="sidebar-nav">
         <ul>
-            {{-- DASHBOARD --}}
+            {{-- Dashboard --}}
             <li>
                 <a href="{{ route($role . '.dashboard') }}" class="nav-link-custom {{ request()->routeIs($role . '.dashboard') ? 'nav-active' : '' }}">
                     <img src="{{ asset('images/dashboard/icons/icon_dashboard.png') }}" class="sidebar-icon"> Dashboard
                 </a>
             </li>
 
-            {{-- MENU KHUSUS SUPERADMIN --}}
+            {{-- Menu Superadmin --}}
             @if($role == 'superadmin')
                 <li><a href="{{ route('superadmin.kelola-admin') }}" class="nav-link-custom {{ request()->routeIs('superadmin.kelola-admin*') ? 'nav-active' : '' }}">
                     <img src="{{ asset('images/dashboard/icons/icon_orang.png') }}" class="sidebar-icon"> Kelola Admin
@@ -33,14 +33,14 @@
                 </a></li>
             @endif
 
-            {{-- MENU KHUSUS ADMIN --}}
+            {{-- Menu Admin --}}
             @if($role == 'admin')
                 <li><a href="{{ route('admin.data-tentor') }}" class="nav-link-custom {{ request()->routeIs('admin.data-tentor*') ? 'nav-active' : '' }}">
                     <img src="{{ asset('images/dashboard/icons/icon_datatentor.png') }}" class="sidebar-icon"> Data Tentor
                 </a></li>
             @endif
 
-            {{-- MENU SHARED (ADMIN & SUPERADMIN) --}}
+            {{-- Menu Shared (Admin & Superadmin) --}}
             @if($role == 'admin' || $role == 'superadmin')
                 <li><a href="{{ route($role . '.kelola-murid') }}" class="nav-link-custom {{ request()->routeIs($role . '.kelola-murid*') ? 'nav-active' : '' }}">
                     <img src="{{ asset('images/dashboard/icons/icon_kelolamurid.png') }}" class="sidebar-icon"> Kelola Murid
@@ -59,16 +59,6 @@
                 </a></li>
                 <li><a href="{{ route($role . '.laporan-keuangan') }}" class="nav-link-custom {{ request()->routeIs($role . '.laporan-keuangan*') ? 'nav-active' : '' }}">
                     <img src="{{ asset('images/dashboard/icons/icon_laporankeuangan.png') }}" class="sidebar-icon"> Laporan Keuangan
-                </a></li>
-            @endif
-
-            {{-- MENU KHUSUS TENTOR --}}
-            @if($role == 'tentor')
-                <li><a href="{{ route('tentor.presensi') }}" class="nav-link-custom {{ request()->routeIs('tentor.presensi*') ? 'nav-active' : '' }}">
-                    <img src="{{ asset('images/dashboard/icons/icon_riwayat_presensi.png') }}" class="sidebar-icon"> Presensi
-                </a></li>
-                <li><a href="{{ route('tentor.riwayat-presensi') }}" class="nav-link-custom {{ request()->routeIs('tentor.riwayat-presensi*') ? 'nav-active' : '' }}">
-                    <img src="{{ asset('images/dashboard/icons/icon_riwayatpresensi.png') }}" class="sidebar-icon"> Riwayat Presensi
                 </a></li>
             @endif
         </ul>

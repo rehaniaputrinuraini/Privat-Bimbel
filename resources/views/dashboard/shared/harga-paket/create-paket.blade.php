@@ -1,66 +1,56 @@
 @extends('layouts.app')
 
-@section('title', 'Manajemen Harga Paket')
+@section('title', 'Tambah Harga Paket')
 
 @section('content')
-<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
-    <div>
-        <p style="color: #6B7280; font-size: 14px; margin-bottom: 5px;">{{ date('F Y') }}</p>
-        <h1 style="font-size: 32px; font-weight: 700; color: #111827; margin: 0;">Harga Paket</h1>
-        <p style="color: #6B7280; margin-top: 5px;">Daftar harga paket kursus aktif (Aktor: {{ ucfirst($role) }})</p>
-    </div>
-    
-    {{-- Tombol Tambah Dinamis --}}
-    <a href="{{ route($role . '.harga-paket.create') }}" style="text-decoration: none;">
-        <button style="background-color: #5D10A2; color: white; border: none; padding: 12px 25px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(93, 16, 162, 0.3);">
-            <i class="fas fa-plus"></i> Tambah
-        </button>
-    </a>
-</div>
+<div class="container-fluid" style="padding: 20px;">
+    {{-- Judul Halaman --}}
+    <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 20px; font-family: 'Poppins', sans-serif; color: #111827;">
+        Input Harga Paket
+    </h2>
 
-<div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-    <table style="width: 100%; border-collapse: collapse; text-align: center;">
-        <thead>
-            <tr style="background-color: #F3E8FF; color: #111827; font-weight: 700;">
-                <td style="padding: 20px;">No</td>
-                <td style="padding: 20px;">ID</td>
-                <td style="padding: 20px;">Harga Paket</td>
-                <td style="padding: 20px;">Tingkat</td>
-                <td style="padding: 20px;">Aksi</td>
-            </tr>
-        </thead>
+    {{-- Container Form --}}
+    <div style="background: white; padding: 40px; border-radius: 15px; border: 1.5px solid #D1D5DB; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
         
-        <tbody style="color: #111827; font-weight: 600;">
-            @php
-                // Data dummy untuk contoh tampilan
-                $pakets = [
-                    (object)['id_paket' => 1, 'kode' => 'PK0001', 'harga' => '120.000', 'tingkat' => 'SD'],
-                    (object)['id_paket' => 2, 'kode' => 'PK0002', 'harga' => '150.000', 'tingkat' => 'SMP'],
-                    (object)['id_paket' => 3, 'kode' => 'PK0003', 'harga' => '180.000', 'tingkat' => 'SMA'],
-                ];
-            @endphp
+        <form action="{{ route($role.'.harga-paket.store') }}" method="POST">
+            @csrf
+            
+            {{-- Input ID --}}
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; font-weight: 500; margin-bottom: 10px; color: #374151; font-family: 'Poppins', sans-serif;">ID</label>
+                <input type="text" name="kode" placeholder="Masukkan ID" required 
+                       style="width: 100%; padding: 14px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #F9FAFB; outline: none; font-size: 14px;">
+            </div>
 
-            @foreach($pakets as $index => $p)
-            <tr style="border-bottom: 1px solid #F3F4F6;">
-                <td style="padding: 20px;">{{ $index + 1 }}</td>
-                <td style="padding: 20px;">{{ $p->kode }}</td>
-                <td style="padding: 20px;">Rp {{ $p->harga }}</td>
-                <td style="padding: 20px;">{{ $p->tingkat }}</td>
-                <td style="padding: 20px;">
-                    <div style="display: flex; gap: 8px; justify-content: center;">
-                        <a href="{{ route($role . '.harga-paket.edit', $p->id_paket) }}" style="text-decoration: none;">
-                            <button style="background-color: #5CB85C; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 5px;">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                        </a>
-                        <button style="background-color: #D9534F; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 5px;">
-                            <i class="fas fa-trash"></i> Hapus
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+            {{-- Input Harga Paket --}}
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; font-weight: 500; margin-bottom: 10px; color: #374151; font-family: 'Poppins', sans-serif;">Harga Paket</label>
+                <input type="text" name="harga" placeholder="Masukkan Harga Paket" required 
+                       style="width: 100%; padding: 14px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #F9FAFB; outline: none; font-size: 14px;">
+            </div>
+
+            {{-- Input Tingkat --}}
+            <div style="margin-bottom: 40px;">
+                <label style="display: block; font-weight: 500; margin-bottom: 10px; color: #374151; font-family: 'Poppins', sans-serif;">Tingkat</label>
+                <input type="text" name="tingkat" placeholder="Masukkan Tingkat" required 
+                       style="width: 100%; padding: 14px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #F9FAFB; outline: none; font-size: 14px;">
+            </div>
+
+            {{-- Tombol Aksi (Sesuai Gambar) --}}
+            <div style="display: flex; justify-content: flex-end; gap: 20px; align-items: center;">
+                {{-- Tombol Keluar --}}
+                <a href="{{ route($role.'.harga-paket') }}" 
+                   style="padding: 12px 60px; border-radius: 12px; border: 2px solid #5D10A2; color: #5D10A2; text-decoration: none; font-weight: 600; text-align: center; font-size: 16px; transition: 0.3s; font-family: 'Poppins', sans-serif;">
+                    Keluar
+                </a>
+                
+                {{-- Tombol Simpan --}}
+                <button type="submit" 
+                        style="padding: 14px 60px; border-radius: 12px; border: none; background: #4D0B87; color: white; font-weight: 600; cursor: pointer; font-size: 16px; transition: 0.3s; font-family: 'Poppins', sans-serif;">
+                    Simpan
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 @endsection
