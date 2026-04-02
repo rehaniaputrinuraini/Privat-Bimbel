@@ -1,17 +1,18 @@
 /* Sidebar Utama */
-.sidebar {
-    width: 280px;
-    background-color: #5D10A2;
-    color: white;
+.sidebar { 
+    width: 280px; 
+    background-color: #5D10A2; 
+    color: white; 
     display: flex;
     flex-direction: column;
-    height: 100%;
-    overflow-y: auto;
-    padding: 20px;
+    height: 100vh;
     transition: all 0.3s ease;
+    overflow: hidden;
+    position: sticky;
+    top: 0;
 }
 
-/* Sidebar collapse (sembunyi) */
+/* Sidebar saat di-collapse */
 .sidebar.collapsed {
     width: 0 !important;
     min-width: 0 !important;
@@ -19,130 +20,139 @@
     overflow: hidden;
 }
 
-/* Scrollbar styling */
-.sidebar::-webkit-scrollbar {
-    width: 5px;
+/* ============================================
+   1. PROFILE SECTION (Tetap di atas)
+============================================ */
+.sidebar-profile { 
+    padding: 30px 20px; 
+    display: flex; 
+    align-items: center; 
+    gap: 15px; 
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
 }
 
-.sidebar::-webkit-scrollbar-track {
-    background: rgba(255,255,255,0.1);
-    border-radius: 10px;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.3);
-    border-radius: 10px;
-}
-
-/* Profile Section - Horizontal Layout */
-.sidebar-profile {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-}
-
-.avatar-circle {
-    width: 50px;
-    height: 50px;
-    background: white;
-    border-radius: 50%;
+.avatar-circle { 
+    width: 55px; 
+    height: 55px; 
+    border-radius: 50%; 
+    border: 2px solid white; 
+    background: white; 
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-}
-
-.avatar-circle img {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.profile-info {
-    flex: 1;
     overflow: hidden;
 }
 
-.profile-info h4 {
-    margin: 0;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: white;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.avatar-circle img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
 }
 
-.profile-info p {
-    margin: 2px 0 0;
-    font-size: 0.7rem;
-    opacity: 0.8;
-    color: white;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.profile-info h4 { 
+    font-size: 16px; 
+    font-weight: 600; 
+    margin: 0; 
+    color: white; 
 }
 
-/* Navigation Menu */
-.sidebar-nav {
+.profile-info p { 
+    font-size: 12px; 
+    opacity: 0.8; 
+    margin: 0; 
+    color: white; 
+}
+
+/* ============================================
+   2. NAVIGASI MENU (Area Scrollable)
+   Hanya menu Dashboard sampai Laporan Keuangan yang scroll
+============================================ */
+.sidebar-nav { 
+    padding: 15px; 
     flex: 1;
     overflow-y: auto;
-    margin-bottom: 20px;
+    min-height: 0; /* Penting agar flex bisa menyesuaikan */
 }
 
-.sidebar-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.sidebar-nav ul { 
+    list-style: none; 
+    padding: 0; 
+    margin: 0; 
 }
 
-.sidebar-nav li {
-    margin-bottom: 5px;
+/* Custom Scrollbar - Cantik */
+.sidebar-nav::-webkit-scrollbar {
+    width: 5px;
 }
 
-.nav-link-custom {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 15px;
-    color: rgba(255,255,255,0.8);
-    text-decoration: none;
-    border-radius: 8px;
-    transition: all 0.3s;
-    font-size: 14px;
+.sidebar-nav::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
 }
 
-.nav-link-custom:hover {
-    background-color: rgba(255,255,255,0.1);
-    color: white;
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
 }
 
-.nav-active {
-    background-color: rgba(255,255,255,0.2);
-    color: white;
-    font-weight: 600;
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
 }
 
-.sidebar-icon {
-    width: 20px;
-    height: 20px;
+.nav-link-custom { 
+    display: flex; 
+    align-items: center; 
+    padding: 12px 18px; 
+    color: rgba(255, 255, 255, 0.8); 
+    text-decoration: none; 
+    border-radius: 12px; 
+    margin-bottom: 8px; 
+    font-size: 14px; 
+    transition: 0.3s;
+}
+
+.sidebar-icon { 
+    width: 20px; 
+    height: 20px; 
+    margin-right: 12px;
     filter: brightness(0) invert(1);
 }
 
-/* Footer (Logout) */
-.sidebar-footer {
-    margin-top: auto;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255,255,255,0.2);
+.nav-link-custom:hover, 
+.nav-active { 
+    background: rgba(255, 255, 255, 0.2); 
+    color: white;
+    font-weight: 600; 
 }
 
-.sidebar-footer button {
+/* ============================================
+   3. LOGOUT SECTION (Tetap di bawah)
+   Selalu terlihat, tidak ikut scroll
+============================================ */
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+    background-color: #5D10A2;
+    margin-top: auto;
+}
+
+.logout-btn {
+    width: 100%;
     background: none;
     border: none;
     cursor: pointer;
-    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 12px 18px;
+    color: white;
+    font-size: 14px;
+    border-radius: 12px;
+    transition: 0.3s;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
 }

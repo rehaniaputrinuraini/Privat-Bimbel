@@ -1,20 +1,23 @@
-.header {
-    background: white;
-    height: 80px;
-    display: flex;
-    align-items: center;
+/* Header Styling */
+.header { 
+    height: 80px; 
+    background: white; 
+    display: flex; 
+    align-items: center; 
     justify-content: space-between;
-    padding: 0 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    position: sticky;
+    padding: 0 30px; 
+    border-bottom: 1px solid #E5E7EB; 
+    width: 100%; 
+    position: sticky; 
     top: 0;
     z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+.header-left { 
+    display: flex; 
+    align-items: center; 
+    gap: 20px; 
 }
 
 .burger-btn {
@@ -23,42 +26,48 @@
     color: #5D10A2;
     background: none;
     border: none;
+    display: flex;
+    align-items: center;
 }
 
-.logo-img {
-    height: 45px;
+.logo-img { 
+    height: 50px; 
+    object-fit: contain;
 }
 
-.header-center {
-    flex: 1;
-    text-align: center;
+.header-center { 
+    flex: 1; 
+    text-align: center; 
 }
 
-.tagline {
-    font-family: 'Pacifico', cursive;
-    font-size: 28px;
-    color: #5D10A2;
+.tagline { 
+    font-family: 'Brush Script MT', cursive; 
+    color: #5D10A2; 
+    font-size: 40px; 
     margin: 0;
 }
 
-.header-right .profile-link {
-    text-decoration: none;
-}
-
-.user-avatar-top {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 2px solid #5D10A2;
-    background: white;
+.header-right {
     display: flex;
     align-items: center;
-    justify-content: center;
+}
+
+.user-avatar-top { 
+    width: 45px; 
+    height: 45px; 
+    background: #F3E8FF; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    color: #5D10A2; 
+    font-size: 20px; 
+    border: 2px solid #5D10A2;
+    overflow: hidden;
 }
 
 .user-avatar-top img {
-    width: 30px;
-    height: 30px;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
 }
