@@ -1,3 +1,8 @@
+/* =============================================
+   Sidebar Styling
+   File: public/css/components/sidebar.css
+============================================= */
+
 /* =========================================
    SIDEBAR UTAMA
    ========================================= */
@@ -5,16 +10,16 @@
     width: 280px; 
     background-color: #5D10A2; 
     color: white; 
-    display: flex;             /* WAJIB: Mengaktifkan Flexbox */
-    flex-direction: column;    /* WAJIB: Susunan vertikal (Atas ke Bawah) */
-    height: 100vh;             /* WAJIB: Tinggi harus 100% layar agar scroll jalan */
+    display: flex;
+    flex-direction: column;
+    height: 100%;              /* FIX: ikut tinggi parent (.main-container) */
     transition: all 0.3s ease;
-    overflow: hidden;          /* WAJIB: Agar container utama tidak ikut scroll */
+    overflow: hidden;
     position: sticky;
     top: 0;
 }
 
-/* Sidebar saat di-collapse (Burger Menu) */
+/* Sidebar saat di-collapse */
 .sidebar.collapsed {
     width: 0 !important;
     min-width: 0 !important;
@@ -23,7 +28,7 @@
 }
 
 /* =========================================
-   1. PROFILE SECTION (TETAP / FIXED DI ATAS)
+   1. PROFILE SECTION (TETAP DI ATAS)
    ========================================= */
 .sidebar-profile { 
     padding: 30px 20px; 
@@ -31,7 +36,7 @@
     align-items: center; 
     gap: 15px; 
     border-bottom: 1px solid rgba(255,255,255,0.1);
-    flex-shrink: 0;            /* WAJIB: Mencegah profile gepeng/mengecil */
+    flex-shrink: 0;
 }
 
 .avatar-circle { 
@@ -61,14 +66,14 @@
    ========================================= */
 .sidebar-nav { 
     padding: 15px; 
-    flex-grow: 1;              /* WAJIB: Mengambil semua sisa ruang di tengah */
-    overflow-y: auto;          /* WAJIB: Scrollbar aktif HANYA di bagian menu ini */
-    min-height: 0;             /* Mencegah flexbox pecah di beberapa browser */
+    flex-grow: 1;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 .sidebar-nav ul { list-style: none; padding: 0; margin: 0; }
 
-/* Custom Scrollbar Tipis (Cantik) */
+/* Custom Scrollbar */
 .sidebar-nav::-webkit-scrollbar { width: 4px; }
 .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
 .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
@@ -89,7 +94,7 @@
     width: 20px; 
     height: 20px; 
     margin-right: 12px;
-    filter: brightness(0) invert(1); /* Ikon jadi putih */
+    filter: brightness(0) invert(1);
 }
 
 .nav-link-custom:hover, .nav-active { 
@@ -99,14 +104,13 @@
 }
 
 /* =========================================
-   3. LOGOUT SECTION (TETAP / FIXED DI BAWAH)
+   3. LOGOUT SECTION (TETAP DI BAWAH)
    ========================================= */
 .sidebar-footer {
     padding: 20px;
     border-top: 1px solid rgba(255,255,255,0.1);
-    flex-shrink: 0;            /* WAJIB: Mencegah logout terdorong/mengecil */
+    flex-shrink: 0;
     background-color: #5D10A2;
-    margin-top: auto;          /* Memastikan menempel di paling bawah */
 }
 
 .logout-btn {
@@ -119,6 +123,7 @@
     padding: 12px 18px;
     color: white;
     font-size: 14px;
+    font-family: inherit;
     border-radius: 12px;
     transition: 0.3s;
 }

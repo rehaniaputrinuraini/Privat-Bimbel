@@ -31,7 +31,7 @@ Route::post('/login', function (Request $request) {
 })->name('login.post');
 
 Route::get('/register', function () {
-    return view('auth.register'); 
+    return view('auth.register');
 })->name('register');
 
 Route::post('/logout', function () {
@@ -44,7 +44,11 @@ Route::post('/logout', function () {
 Route::get('/superadmin/dashboard', [DashboardController::class, 'superadmin'])->name('superadmin.dashboard');
 Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
 Route::get('/tentor/dashboard', function () {
-    return view('dashboard.tentor.index');
+    return view('dashboard.tentor.index', [
+        'total_hadir'     => 12,
+        'total_jam'       => 100,
+        'status_hari_ini' => 'belum',
+    ]);
 })->name('tentor.dashboard');
 
 
@@ -64,11 +68,11 @@ Route::delete('/admin/kelola-murid/destroy/{id}', [MuridController::class, 'dest
 
 
 // ========== 5. FITUR HARGA PAKET ==========
-Route::get('/superadmin/harga-paket', function () { 
-    return view('dashboard.shared.harga-paket.harga-paket', ['role' => 'superadmin']); 
+Route::get('/superadmin/harga-paket', function () {
+    return view('dashboard.shared.harga-paket.harga-paket', ['role' => 'superadmin']);
 })->name('superadmin.harga-paket');
-Route::get('/admin/harga-paket', function () { 
-    return view('dashboard.shared.harga-paket.harga-paket', ['role' => 'admin']); 
+Route::get('/admin/harga-paket', function () {
+    return view('dashboard.shared.harga-paket.harga-paket', ['role' => 'admin']);
 })->name('admin.harga-paket');
 
 Route::get('/superadmin/harga-paket/create', function () {
@@ -132,20 +136,20 @@ Route::put('/profil/password-update', function (Request $request) {
 
 
 // ========== 8. KHUSUS KELOLA TENTOR (SUPERADMIN & ADMIN) ==========
-Route::get('/superadmin/kelola-tentor', function () { 
-    return view('dashboard.superadmin.kelola-tentor.kelola-tentor'); 
+Route::get('/superadmin/kelola-tentor', function () {
+    return view('dashboard.superadmin.kelola-tentor.kelola-tentor');
 })->name('superadmin.kelola-tentor');
 
-Route::get('/superadmin/kelola-tentor/create', function () { 
-    return view('dashboard.superadmin.kelola-tentor.create-tentor'); 
+Route::get('/superadmin/kelola-tentor/create', function () {
+    return view('dashboard.superadmin.kelola-tentor.create-tentor');
 })->name('superadmin.kelola-tentor.create');
 
 Route::post('/superadmin/kelola-tentor/store', function (Request $request) {
     return redirect()->route('superadmin.kelola-tentor')->with('success', 'Akun Tentor berhasil dibuat');
 })->name('superadmin.kelola-tentor.store');
 
-Route::get('/admin/data-tentor', function () { 
-    return view('dashboard.admin.kelola-tentor.kelola-tentor'); 
+Route::get('/admin/data-tentor', function () {
+    return view('dashboard.admin.kelola-tentor.kelola-tentor');
 })->name('admin.data-tentor');
 
 
@@ -164,9 +168,8 @@ Route::post('/superadmin/kelola-admin/store', function (Request $request) {
 
 
 // ========== 10. FITUR LAPORAN KEUANGAN (SHARED ADMIN & SUPERADMIN) ==========
-// --- Superadmin ---
-Route::get('/superadmin/laporan-keuangan', function () { 
-    return view('dashboard.shared.laporan-keuangan.laporan-keuangan', ['role' => 'superadmin']); 
+Route::get('/superadmin/laporan-keuangan', function () {
+    return view('dashboard.shared.laporan-keuangan.laporan-keuangan', ['role' => 'superadmin']);
 })->name('superadmin.laporan-keuangan');
 
 Route::get('/superadmin/laporan-keuangan/create', function () {
@@ -177,9 +180,8 @@ Route::post('/superadmin/laporan-keuangan/store', function () {
     return redirect()->route('superadmin.laporan-keuangan')->with('success', 'Data keuangan berhasil disimpan');
 })->name('superadmin.laporan-keuangan.store');
 
-// --- Admin ---
-Route::get('/admin/laporan-keuangan', function () { 
-    return view('dashboard.shared.laporan-keuangan.laporan-keuangan', ['role' => 'admin']); 
+Route::get('/admin/laporan-keuangan', function () {
+    return view('dashboard.shared.laporan-keuangan.laporan-keuangan', ['role' => 'admin']);
 })->name('admin.laporan-keuangan');
 
 Route::get('/admin/laporan-keuangan/create', function () {
@@ -191,19 +193,43 @@ Route::post('/admin/laporan-keuangan/store', function () {
 })->name('admin.laporan-keuangan.store');
 
 
-// ========== 11. FITUR LAINNYA (RIWAYAT & REKAP) ==========
-Route::get('/superadmin/riwayat-presensi', function () { 
-    return view('dashboard.shared.riwayat presensi.riwayat-presensi', ['role' => 'superadmin']); 
+// ========== 11. FITUR RIWAYAT PRESENSI (SUPERADMIN & ADMIN) ==========
+// REVISI: Menggunakan spasi pada nama folder sesuai deteksi sistem Anda
+Route::get('/superadmin/riwayat-presensi', function () {
+    return view('dashboard.shared.riwayat presensi.riwayat-presensi', ['role' => 'superadmin']);
 })->name('superadmin.riwayat-presensi');
-Route::get('/admin/riwayat-presensi', function () { 
-    return view('dashboard.shared.riwayat presensi.riwayat-presensi', ['role' => 'admin']); 
+
+Route::get('/admin/riwayat-presensi', function () {
+    return view('dashboard.shared.riwayat presensi.riwayat-presensi', ['role' => 'admin']);
 })->name('admin.riwayat-presensi');
 
-Route::get('/superadmin/rekap-gaji', function () { 
-    return view('dashboard.shared.rekap-gaji.rekap-gaji', ['role' => 'superadmin']); 
+
+// ========== 12. KHUSUS TENTOR ==========
+Route::get('/tentor/presensi', function () {
+    return view('dashboard.tentor.presensi');
+})->name('tentor.presensi');
+
+// REVISI: Route POST untuk menangani pengiriman data presensi
+Route::post('/tentor/presensi/masuk', function (Request $request) {
+    return redirect()->route('tentor.presensi')->with('success', 'Berhasil melakukan presensi masuk!');
+})->name('tentor.presensi.masuk');
+
+Route::get('/tentor/riwayat-presensi', function () {
+    return view('dashboard.tentor.riwayat-presensi');
+})->name('tentor.riwayat-presensi');
+
+
+// ========== 13. REKAP GAJI (SHARED ADMIN & SUPERADMIN) ==========
+Route::get('/superadmin/rekap-gaji', function () {
+    return view('dashboard.shared.rekap-gaji.rekap-gaji', ['role' => 'superadmin']);
 })->name('superadmin.rekap-gaji');
-Route::get('/admin/rekap-gaji', function () { 
-    return view('dashboard.shared.rekap-gaji.rekap-gaji', ['role' => 'admin']); 
+
+Route::get('/admin/rekap-gaji', function () {
+    return view('dashboard.shared.rekap-gaji.rekap-gaji', ['role' => 'admin']);
 })->name('admin.rekap-gaji');
 
-Route::get('/companyprofile', function () { return view('companyprofile.landing'); })->name('companyprofile');
+
+// ========== 14. COMPANY PROFILE ==========
+Route::get('/companyprofile', function () {
+    return view('companyprofile.landing');
+})->name('companyprofile');
