@@ -1,3 +1,7 @@
+/* =============================================
+   MASTER DASHBOARD STYLING
+   ============================================= */
+
 /* Import komponen */
 @import url('components/sidebar.css');
 @import url('components/header.css');
@@ -11,6 +15,7 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #F8F9FA;
+    color: #111827;
 }
 
 /* Container utama setelah header */
@@ -20,25 +25,32 @@ body {
     overflow: hidden;
 }
 
-/* Konten utama */
+/* KONTEN UTAMA 
+   Inilah pusat pengaturan jarak kiri & atas untuk SEMUA halaman
+*/
 .content-wrapper {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 25px; /* Jarak standar: 25px dari semua sisi */
     background-color: #F8F9FA;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Scrollbar styling untuk konten (opsional) */
+/* Scrollbar styling untuk konten */
 .content-wrapper::-webkit-scrollbar {
-    width: 5px;
+    width: 6px;
 }
 
 .content-wrapper::-webkit-scrollbar-track {
-    background: #e0e0e0;
-    border-radius: 10px;
+    background: #F1F1F1;
 }
 
 .content-wrapper::-webkit-scrollbar-thumb {
-    background: #c0c0c0;
+    background: #D1D5DB;
     border-radius: 10px;
+}
+
+.content-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #9CA3AF;
 }

@@ -1,95 +1,130 @@
+{{-- =============================================
+     Dashboard Shared - Data Tentor
+     File: resources/views/dashboard/shared/data-tentor/index.blade.php
+============================================= --}}
+
 @extends('layouts.app')
 
 @section('title', 'Data Tentor')
 
 @section('content')
-<div style="margin-bottom: 20px;">
-    <p style="color: #6B7280; font-size: 14px; margin-bottom: 5px;">{{ \Carbon\Carbon::now()->translatedFormat('F Y') }}</p>
-    <h1 style="font-size: 24px; font-weight: 700; color: #111827; margin: 0;">Data Tentor</h1>
-    <p style="color: #6B7280; font-size: 13px;">Manajemen Data Tentor</p>
-</div>
+<div style="width: 100%;">
 
-{{-- Filter Area --}}
-<div style="display: flex; gap: 15px; margin-bottom: 20px;">
-    <div style="position: relative; flex: 1; max-width: 300px;">
-        <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
-        <input type="text" placeholder="Cari" style="width: 100%; padding: 10px 15px 10px 40px; border-radius: 10px; border: 1px solid #E5E7EB; outline: none;">
+    {{-- ── 1. HEADER HALAMAN (Sesuai Standar 26px) ── --}}
+    <div style="margin-bottom: 25px;">
+        <p style="color: #6B7280; font-size: 13px; margin-bottom: 4px;">
+            {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+        </p>
+        <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px;">
+            Data Tentor
+        </h1>
+        <p style="color: #6B7280; font-size: 14px; margin-top: 4px;">Manajemen Data dan Honorarium Tentor Bimbel Privat</p>
     </div>
-    <select style="padding: 10px 20px; border-radius: 10px; border: 1px solid #E5E7EB; color: #6B7280; background: white; outline: none;">
-        <option value="">---Status Gaji---</option>
-        <option value="Sudah">Sudah</option>
-        <option value="Belum">Belum</option>
-    </select>
-</div>
 
-{{-- Table Area --}}
-<div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #E5E7EB;">
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
-            <thead>
-                <tr style="background: #F3E8FF; color: #111827;">
-                    <th style="padding: 15px; text-align: center;">No</th>
-                    <th style="padding: 15px;">ID</th>
-                    <th style="padding: 15px;">Nama Lengkap</th>
-                    <th style="padding: 15px;">Alamat</th>
-                    <th style="padding: 15px;">No HP</th>
-                    <th style="padding: 15px;">Mapel</th>
-                    <th style="padding: 15px; text-align: center;">Grade</th>
-                    <th style="padding: 15px;">HR SD</th>
-                    <th style="padding: 15px;">HR SMP</th>
-                    <th style="padding: 15px;">HR SMA</th>
-                    <th style="padding: 15px;">Uang Makan</th>
-                    <th style="padding: 15px;">Transport</th>
-                    <th style="padding: 15px;">Status Gaji</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php
-                    $tentors = [
-                        ['id' => 'TE0001', 'nama' => 'Rati Maria', 'alamat' => 'xxxxxxxxxxxxx', 'hp' => '0881999999', 'mapel' => 'xxxxxxxxxx', 'grade' => 'A', 'sd' => '50.000', 'smp' => '50.000', 'sma' => '50.000', 'makan' => '10.000', 'trans' => '-', 'status' => 'Sudah'],
-                        ['id' => 'TE0002', 'nama' => 'Dwi Rahayu', 'alamat' => 'xxxxxxxxxxxxx', 'hp' => '0881999999', 'mapel' => 'xxxxxxxxxx', 'grade' => 'A', 'sd' => '50.000', 'smp' => '50.000', 'sma' => '50.000', 'makan' => '-', 'trans' => '-', 'status' => 'Sudah'],
-                        ['id' => 'TE0003', 'nama' => 'Rahma Tyas', 'alamat' => 'xxxxxxxxxxxxx', 'hp' => '0881999999', 'mapel' => 'xxxxxxxxxx', 'grade' => 'B', 'sd' => '40.000', 'smp' => '40.000', 'sma' => '40.000', 'makan' => '-', 'trans' => '10.000', 'status' => 'Belum'],
-                        ['id' => 'TE0004', 'nama' => 'Sinta Putri', 'alamat' => 'xxxxxxxxxxxxx', 'hp' => '0881999999', 'mapel' => 'xxxxxxxxxx', 'grade' => 'B', 'sd' => '40.000', 'smp' => '40.000', 'sma' => '40.000', 'makan' => '10.000', 'trans' => '10.000', 'status' => 'Belum'],
-                    ];
-                @endphp
+    {{-- ── 2. FILTER AREA & TOMBOL AKSI ── --}}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <div style="display: flex; gap: 15px; flex: 1;">
+            {{-- Search Bar --}}
+            <div style="position: relative; width: 100%; max-width: 300px;">
+                <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
+                <input type="text" placeholder="Cari Nama atau ID Tentor..." 
+                       style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; font-size: 14px; background: white;">
+            </div>
+            
+            {{-- Filter Dropdown --}}
+            <select style="padding: 10px 15px; border-radius: 12px; border: 1px solid #E5E7EB; color: #6B7280; background: white; font-size: 14px; outline: none; cursor: pointer; min-width: 180px;">
+                <option value="">--- Status Gaji ---</option>
+                <option value="Sudah">Sudah Dibayar</option>
+                <option value="Belum">Belum Dibayar</option>
+            </select>
+        </div>
 
-                @foreach($tentors as $index => $t)
-                <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.3s;" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor='transparent'">
-                    <td style="padding: 15px; text-align: center; color: #6B7280;">{{ $index + 1 }}</td>
-                    <td style="padding: 15px; font-weight: 600;">{{ $t['id'] }}</td>
-                    <td style="padding: 15px;">{{ $t['nama'] }}</td>
-                    <td style="padding: 15px; color: #6B7280;">{{ $t['alamat'] }}</td>
-                    <td style="padding: 15px;">{{ $t['hp'] }}</td>
-                    <td style="padding: 15px; color: #6B7280;">{{ $t['mapel'] }}</td>
-                    <td style="padding: 15px; text-align: center;"><span style="background: #EEF2FF; color: #4F46E5; padding: 4px 10px; border-radius: 6px; font-weight: 700;">{{ $t['grade'] }}</span></td>
-                    <td style="padding: 15px;">{{ $t['sd'] }}</td>
-                    <td style="padding: 15px;">{{ $t['smp'] }}</td>
-                    <td style="padding: 15px;">{{ $t['sma'] }}</td>
-                    <td style="padding: 15px;">{{ $t['makan'] }}</td>
-                    <td style="padding: 15px;">{{ $t['trans'] }}</td>
-                    <td style="padding: 15px;">
-                        <span style="color: {{ $t['status'] == 'Sudah' ? '#059669' : '#DC2626' }}; font-weight: 600;">
-                            {{ $t['status'] }}
-                        </span>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+        {{-- Tombol Tambah (Menyesuaikan konteks Data Tentor) --}}
+        <button style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: 0.3s; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
+            <i class="fas fa-plus"></i> Tambah Tentor
+        </button>
     </div>
-</div>
 
-{{-- Pagination Area --}}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-    <div style="color: #6B7280; font-size: 13px;">
-        <select style="padding: 5px; border-radius: 5px; border: 1px solid #E5E7EB;">
-            <option>10 baris</option>
-        </select>
+    {{-- ── 3. TABLE AREA (Shadow 0.08 halus & Font 12px) ── --}}
+    <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; white-space: nowrap;">
+                <thead>
+                    <tr style="background: #F3E8FF; color: #111827;">
+                        <th style="padding: 18px 15px; text-align: center; font-weight: 700;">No</th>
+                        <th style="padding: 18px 15px; font-weight: 700;">ID</th>
+                        <th style="padding: 18px 15px; font-weight: 700;">Nama Lengkap</th>
+                        <th style="padding: 18px 15px; font-weight: 700;">Alamat</th>
+                        <th style="padding: 18px 15px; font-weight: 700;">No HP</th>
+                        <th style="padding: 18px 15px; font-weight: 700;">Mapel</th>
+                        <th style="padding: 18px 15px; font-weight: 700; text-align: center;">Grade</th>
+                        <th style="padding: 18px 15px; font-weight: 700;">HR SD</th>
+                        <th style="padding: 18px 15px; font-weight: 700;">HR SMP</th>
+                        <th style="padding: 18px 15px; font-weight: 700;">HR SMA</th>
+                        <th style="padding: 18px 15px; font-weight: 700;">Makan</th>
+                        <th style="padding: 18px 15px; text-align: center; font-weight: 700;">Status Gaji</th>
+                        <th style="padding: 18px 15px; text-align: center; font-weight: 700;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody style="color: #4B5563;">
+                    @php
+                        $tentors = [
+                            ['id' => 'TE0001', 'nama' => 'Rati Maria', 'alamat' => 'Madiun, Jawa Timur', 'hp' => '0881999999', 'mapel' => 'Matematika', 'grade' => 'A', 'sd' => '50.000', 'smp' => '50.000', 'sma' => '50.000', 'makan' => '10.000', 'status' => 'Sudah'],
+                            ['id' => 'TE0002', 'nama' => 'Dwi Rahayu', 'alamat' => 'Madiun, Jawa Timur', 'hp' => '0881999999', 'mapel' => 'B. Inggris', 'grade' => 'A', 'sd' => '50.000', 'smp' => '50.000', 'sma' => '50.000', 'makan' => '-', 'status' => 'Sudah'],
+                            ['id' => 'TE0003', 'nama' => 'Rahma Tyas', 'alamat' => 'Madiun, Jawa Timur', 'hp' => '0881999999', 'mapel' => 'Fisika', 'grade' => 'B', 'sd' => '40.000', 'smp' => '40.000', 'sma' => '40.000', 'makan' => '-', 'status' => 'Belum'],
+                        ];
+                    @endphp
+
+                    @foreach($tentors as $index => $t)
+                    <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                        <td style="padding: 15px; text-align: center; color: #6B7280;">{{ $index + 1 }}</td>
+                        <td style="padding: 15px; font-weight: 600; color: #4D0B87;">{{ $t['id'] }}</td>
+                        <td style="padding: 15px; font-weight: 600; color: #111827;">{{ $t['nama'] }}</td>
+                        <td style="padding: 15px; color: #6B7280;">{{ $t['alamat'] }}</td>
+                        <td style="padding: 15px;">{{ $t['hp'] }}</td>
+                        <td style="padding: 15px; color: #6B7280;">{{ $t['mapel'] }}</td>
+                        <td style="padding: 15px; text-align: center;">
+                            <span style="background: #E0E7FF; color: #4338CA; padding: 2px 8px; border-radius: 6px; font-weight: 600;">{{ $t['grade'] }}</span>
+                        </td>
+                        <td style="padding: 15px;">{{ $t['sd'] }}</td>
+                        <td style="padding: 15px;">{{ $t['smp'] }}</td>
+                        <td style="padding: 15px;">{{ $t['sma'] }}</td>
+                        <td style="padding: 15px;">{{ $t['makan'] }}</td>
+                        <td style="padding: 15px; text-align: center;">
+                            <span style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; background: {{ $t['status'] == 'Sudah' ? '#D1FAE5' : '#FEE2E2' }}; color: {{ $t['status'] == 'Sudah' ? '#065F46' : '#991B1B' }}; font-weight: 600; font-size: 10px;">
+                                <div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></div>
+                                {{ $t['status'] == 'Sudah' ? 'LUNAS' : 'PENDING' }}
+                            </span>
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <div style="display: flex; gap: 8px; justify-content: center;">
+                                <button title="Edit" style="background: #F3E8FF; color: #4D0B87; border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; transition: 0.3s;"><i class="fas fa-edit"></i></button>
+                                <button title="Hapus" style="background: #FEE2E2; color: #EF4444; border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; transition: 0.3s;"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div style="display: flex; gap: 5px;">
-        <button style="padding: 5px 10px; border-radius: 5px; border: 1px solid #E5E7EB; background: #F3F4F6; cursor: pointer;"><i class="fas fa-chevron-left"></i></button>
-        <button style="padding: 5px 12px; border-radius: 5px; border: none; background: #5D10A2; color: white; cursor: pointer;">1</button>
-        <button style="padding: 5px 10px; border-radius: 5px; border: 1px solid #E5E7EB; background: #F3F4F6; cursor: pointer;"><i class="fas fa-chevron-right"></i></button>
+
+    {{-- ── 4. PAGINATION AREA ── --}}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
+        <div style="color: #6B7280; font-size: 13px;">
+            Menampilkan 
+            <select style="padding: 5px 10px; border-radius: 8px; border: 1px solid #E5E7EB; outline: none; margin: 0 5px;">
+                <option>10</option>
+                <option>25</option>
+            </select>
+            baris per halaman
+        </div>
+        <div style="display: flex; gap: 5px;">
+            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #6B7280; cursor: pointer;"><i class="fas fa-angle-left"></i></button>
+            <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">1</button>
+            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #6B7280; cursor: pointer;"><i class="fas fa-angle-right"></i></button>
+        </div>
     </div>
+
 </div>
 @endsection

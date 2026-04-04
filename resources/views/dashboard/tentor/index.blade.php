@@ -1,5 +1,5 @@
 {{-- =============================================
-     Dashboard - Tentor
+     Dashboard Tentor - Home (REVISI FINAL)
      File: resources/views/dashboard/tentor/index.blade.php
 ============================================= --}}
 
@@ -7,164 +7,143 @@
 
 @push('styles')
 <style>
-    /* ── DASHBOARD HEADER ── */
-    .dashboard-header { margin-bottom: 24px; }
-    .dashboard-header .month { font-size: 13px; color: #888; font-weight: 500; margin-bottom: 4px; }
-    .dashboard-header h1 { font-size: 26px; font-weight: 800; color: #1a1a2e; margin-bottom: 4px; }
-    .dashboard-header p { font-size: 13px; color: #888; }
+    /* ── 1. FIX LAYOUT (Tanpa Padding Tambahan) ── */
+    .dashboard-wrapper {
+        width: 100%;
+        /* Mengandalkan .content-wrapper bawaan (25px), 
+           tanpa padding kiri tambahan agar lurus dengan sidebar */
+    }
 
-    /* ── STAT CARDS ── */
-    .stats-grid-tentor {
+    /* ── 2. HEADER STYLE (Sesuai Hirarki Visual) ── */
+    .dashboard-header { 
+        margin-bottom: 25px; 
+    }
+    /* Baris 1: Bulan & Tahun (13px) */
+    .header-meta { 
+        font-size: 13px; 
+        color: #6B7280; 
+        margin-bottom: 4px; 
+        font-weight: 400;
+        display: block;
+    }
+    /* Baris 2: Judul Halaman (26px) */
+    .header-title { 
+        font-size: 26px; 
+        font-weight: 700; 
+        color: #111827; 
+        margin: 0; 
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+    }
+    /* Baris 3: Keterangan (14px) */
+    .header-desc { 
+        font-size: 14px; 
+        color: #6B7280; 
+        margin-top: 4px;
+        display: block;
+    }
+
+    /* ── 3. STAT CARDS (Style Kotak 160px) ── */
+    .stats-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-        margin-bottom: 24px;
+        gap: 20px;
+        margin-bottom: 25px;
     }
-    .stat-card-tentor {
+    .stat-box {
         background: #fff;
-        border-radius: 16px;
-        padding: 28px 24px;
+        height: 160px;
+        border-radius: 20px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        padding: 25px;
+        border: 1px solid #F3F4F6;
+    }
+    .stat-box .icon-wrap {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
-        gap: 18px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-        transition: transform 0.2s, box-shadow 0.2s;
-        cursor: default;
-    }
-    .stat-card-tentor:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.10);
-    }
-    .stat-card-tentor .s-icon {
-        font-size: 2rem;
-        color: #1a1a2e;
-    }
-    .stat-card-tentor .s-info h3 {
-        font-size: 24px;
-        font-weight: 800;
-        color: #1a1a2e;
-        margin: 0 0 4px;
-    }
-    .stat-card-tentor .s-info p {
-        font-size: 13px;
-        color: #888;
-        margin: 0;
-        line-height: 1.4;
+        justify-content: center;
+        color: white;
+        font-size: 22px;
     }
 
-    /* ── STATUS PANEL ── */
+    /* ── 4. STATUS INDICATOR & ALERT ── */
     .status-panel {
-        background: #f0ebff;
-        border-radius: 16px;
-        padding: 18px 24px;
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 1px solid #F3F4F6;
+        margin-bottom: 20px;
+        display: flex;
+        gap: 30px;
+    }
+    .indicator { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #4B5563; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    .alert-banner {
         display: flex;
         align-items: center;
-        gap: 32px;
-        margin-bottom: 16px;
-        flex-wrap: wrap;
-    }
-    .status-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        padding: 16px 20px;
+        border-radius: 15px;
+        color: white;
         font-size: 14px;
-        font-weight: 500;
-        color: #1a1a2e;
-    }
-    .status-dot {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        flex-shrink: 0;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-    .dot-red    { background: #e53935; }
-    .dot-yellow { background: #f5c518; }
-    .dot-green  { background: #34a853; }
-
-    /* ── ALERT ── */
-    .alert-presensi {
-        font-size: 14px;
-        font-weight: 600;
-        color: #e53935;
-        padding: 4px 0 0 2px;
-    }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 640px) {
-        .stats-grid-tentor { grid-template-columns: 1fr; }
-        .status-panel { gap: 16px; }
+        font-weight: 700;
     }
 </style>
 @endpush
 
 @section('content')
+<div class="dashboard-wrapper">
 
-    {{-- ── DASHBOARD HEADER ── --}}
+    {{-- ── HEADER DASHBOARD ── --}}
     <div class="dashboard-header">
-        <div class="month">{{ \Carbon\Carbon::now()->translatedFormat('F Y') }}</div>
-        <h1>Dashboard Tentor</h1>
-        <p>Selamat Datang di Sistem Manajemen Bimbel Privat</p>
+        <span class="header-meta">{{ \Carbon\Carbon::now()->translatedFormat('F Y') }}</span>
+        <h1 class="header-title">Dashboard Tentor</h1>
+        <span class="header-desc">Selamat Datang di Sistem Manajemen Bimbel Privat</span>
     </div>
 
-    {{-- ── STAT CARDS ── --}}
-    <div class="stats-grid-tentor">
-
-        <div class="stat-card-tentor">
-            <div class="s-icon">
-                <i class="fas fa-person-chalkboard"></i>
+    {{-- ── KARTU STATISTIK ── --}}
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="icon-wrap" style="background: #4D0B87;">
+                <i class="fas fa-calendar-check"></i>
             </div>
-            <div class="s-info">
-                <h3>{{ $total_hadir }} Kali</h3>
-                <p>Total Hadir Bulan Ini</p>
-            </div>
+            <h3 style="font-size: 32px; font-weight: 800; margin: 0;">{{ $total_hadir ?? 12 }} Kali</h3>
+            <p style="font-size: 12px; color: #6B7280; margin: 5px 0 0 0;">TOTAL HADIR BULAN INI</p>
         </div>
 
-        <div class="stat-card-tentor">
-            <div class="s-icon">
+        <div class="stat-box">
+            <div class="icon-wrap" style="background: #F59E0B;">
                 <i class="fas fa-clock"></i>
             </div>
-            <div class="s-info">
-                <h3>{{ $total_jam }} Jam</h3>
-                <p>Total Jam Mengajar Bulan Ini</p>
-            </div>
+            <h3 style="font-size: 32px; font-weight: 800; margin: 0;">{{ $total_jam ?? 100 }} Jam</h3>
+            <p style="font-size: 12px; color: #6B7280; margin: 5px 0 0 0;">TOTAL JAM MENGAJAR</p>
         </div>
-
     </div>
-    {{-- end stats-grid-tentor --}}
 
-    {{-- ── STATUS PRESENSI ── --}}
+    {{-- ── INDIKATOR STATUS ── --}}
     <div class="status-panel">
-        <div class="status-item">
-            <div class="status-dot dot-red"></div>
-            <span>Belum Presensi</span>
-        </div>
-        <div class="status-item">
-            <div class="status-dot dot-yellow"></div>
-            <span>Sedang Mengajar</span>
-        </div>
-        <div class="status-item">
-            <div class="status-dot dot-green"></div>
-            <span>Selesai</span>
-        </div>
+        <div class="indicator"><div class="dot" style="background: #EF4444;"></div> Belum Presensi</div>
+        <div class="indicator"><div class="dot" style="background: #F59E0B;"></div> Sedang Mengajar</div>
+        <div class="indicator"><div class="dot" style="background: #10B981;"></div> Selesai Sesi</div>
     </div>
 
-    {{-- ── ALERT STATUS HARI INI ── --}}
-    @if($status_hari_ini === 'belum')
-        <p class="alert-presensi">
-            <i class="fas fa-circle-exclamation"></i>
-            Silahkan lakukan presensi masuk terlebih dahulu
-        </p>
-    @elseif($status_hari_ini === 'mengajar')
-        <p class="alert-presensi" style="color: #f5c518;">
-            <i class="fas fa-circle-info"></i>
-            Anda sedang dalam sesi mengajar
-        </p>
-    @elseif($status_hari_ini === 'selesai')
-        <p class="alert-presensi" style="color: #34a853;">
-            <i class="fas fa-circle-check"></i>
-            Presensi hari ini sudah selesai. Terima kasih!
-        </p>
-    @endif
+    {{-- ── BANNER NOTIFIKASI ── --}}
+    <div class="alert-banner" style="background: #EF4444;">
+        <i class="fas fa-exclamation-triangle" style="margin-right: 12px; font-size: 18px;"></i>
+        Silakan lakukan presensi masuk terlebih dahulu untuk memulai sesi mengajar hari ini.
+    </div>
 
+</div>
 @endsection

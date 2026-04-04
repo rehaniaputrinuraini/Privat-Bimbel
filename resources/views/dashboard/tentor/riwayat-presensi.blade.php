@@ -1,72 +1,88 @@
+{{-- =============================================
+     Dashboard Tentor - Riwayat Presensi (FINAL SYNC)
+     File: resources/views/dashboard/tentor/riwayat.blade.php
+============================================= --}}
+
 @extends('layouts.app')
 
 @section('content')
-<div class="riwayat-container">
-    {{-- Header Halaman --}}
-    <div class="dashboard-header" style="margin-bottom: 24px;">
-        <div class="month" style="font-size: 13px; color: #888; font-weight: 500;">
+{{-- 
+    INFO: Mengandalkan .content-wrapper bawaan (otomatis 25px). 
+    Tanpa div padding tambahan agar sejajar lurus dengan sidebar.
+--}}
+<div style="width: 100%;">
+
+    {{-- ── 1. HEADER HALAMAN (Hirarki Visual Sync) ── --}}
+    <div style="margin-bottom: 25px;">
+        <p style="color: #6B7280; font-size: 13px; margin: 0 0 4px 0;">
             {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
-        </div>
-        <h1 style="font-size: 26px; font-weight: 800; color: #1a1a2e; margin-bottom: 4px;">Riwayat Presensi</h1>
-        <p style="font-size: 13px; color: #888;">Lihat Riwayat Kehadiran Mengajar Anda</p>
+        </p>
+        <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
+            Riwayat Presensi
+        </h1>
+        <p style="color: #6B7280; font-size: 14px; margin: 4px 0 0 0;">Lihat riwayat kehadiran mengajar Anda setiap bulannya.</p>
     </div>
 
-    {{-- Filter Bulan --}}
+    {{-- ── 2. FILTER AREA ── --}}
     <div class="filter-card">
         <div class="filter-group">
             <label>Filter Bulan</label>
             <div class="filter-controls">
-                <select class="form-control-custom select-bulan">
-                    <option value="Maret">Maret</option>
-                    <option value="April" selected>April</option>
-                </select>
-                <button type="button" class="btn-cari">Cari</button>
+                <div style="position: relative; flex: 1; max-width: 400px;">
+                    <select class="form-control-custom select-bulan">
+                        <option value="Maret">Maret 2026</option>
+                        <option value="April" selected>April 2026</option>
+                        <option value="Mei">Mei 2026</option>
+                    </select>
+                    <i class="fas fa-chevron-down" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF; pointer-events: none; font-size: 12px;"></i>
+                </div>
+                <button type="button" class="btn-cari">
+                    <i class="fas fa-search" style="margin-right: 8px;"></i> Cari
+                </button>
             </div>
         </div>
     </div>
 
-    {{-- Tabel Riwayat --}}
+    {{-- ── 3. TABLE AREA (Shadow & Master Style) ── --}}
     <div class="table-card">
-        <table class="table-custom">
-            <thead>
-                <tr>
-                    <th>Tanggal</th>
-                    <th>Kelas</th>
-                    <th>Jam Masuk</th>
-                    <th>Jam Keluar</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{-- Data Dummy 1 --}}
-                <tr>
-                    <td>11 Maret 2026</td>
-                    <td>12-A</td>
-                    <td>19.00</td>
-                    <td>24.00</td>
-                    <td><span class="badge badge-hadir">Hadir</span></td>
-                </tr>
-                {{-- Data Dummy 2 --}}
-                <tr>
-                    <td>10 Maret 2026</td>
-                    <td>6-G</td>
-                    <td>19.00</td>
-                    <td>24.00</td>
-                    <td><span class="badge badge-tidak-hadir">Tidak Hadir</span></td>
-                </tr>
-            </tbody>
-        </table>
+        <div style="overflow-x: auto;">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th style="width: 180px;">Tanggal</th>
+                        <th>Kelas</th>
+                        <th>Jam Masuk</th>
+                        <th>Jam Keluar</th>
+                        <th style="width: 150px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{-- Data Dummy 1 --}}
+                    <tr>
+                        <td style="font-weight: 600; color: #111827;">11 April 2026</td>
+                        <td><span class="badge-kelas">12-A</span></td>
+                        <td>19:00</td>
+                        <td>20:30</td>
+                        <td><span class="badge badge-hadir">Hadir</span></td>
+                    </tr>
+                    {{-- Data Dummy 2 --}}
+                    <tr>
+                        <td style="font-weight: 600; color: #111827;">10 April 2026</td>
+                        <td><span class="badge-kelas">6-G</span></td>
+                        <td>19:00</td>
+                        <td>-</td>
+                        <td><span class="badge badge-tidak-hadir">Tidak Hadir</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-        {{-- Footer Tabel & Pagination --}}
+        {{-- ── 4. PAGINATION SYNC ── --}}
         <div class="table-footer">
-            <div class="rows-per-page">
-                <select class="form-control-custom">
-                    <option>10 baris</option>
-                    <option>20 baris</option>
-                </select>
+            <div style="color: #6B7280; font-size: 13px;">
+                Menampilkan 2 baris data
             </div>
-            <div class="pagination">
-                <button class="page-btn"><i class="fas fa-angle-double-left"></i></button>
+            <div class="pagination-group">
                 <button class="page-btn"><i class="fas fa-angle-left"></i></button>
                 <button class="page-btn active">1</button>
                 <button class="page-btn"><i class="fas fa-angle-right"></i></button>
@@ -76,102 +92,115 @@
 </div>
 
 <style>
-    /* Global Card Style */
+    /* Global Card Style (Sync with Master) */
     .filter-card, .table-card {
         background: #fff;
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        margin-bottom: 24px;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        margin-bottom: 25px;
+        border: 1px solid #F3F4F6;
     }
 
     /* Filter Styling */
     .filter-group label {
         display: block;
         font-weight: 700;
-        font-size: 14px;
-        margin-bottom: 12px;
+        font-size: 12px;
+        color: #374151;
+        margin-bottom: 10px;
+        text-transform: uppercase;
     }
-    .filter-controls {
-        display: flex;
-        gap: 12px;
-    }
-    .select-bulan {
+    .filter-controls { display: flex; gap: 15px; }
+    
+    .form-control-custom {
         width: 100%;
-        max-width: 600px;
-        padding: 10px 15px;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
+        padding: 12px 15px;
+        border: 1px solid #E5E7EB;
+        border-radius: 12px;
         outline: none;
-        color: #666;
+        color: #4B5563;
+        font-size: 14px;
+        appearance: none;
+        background: #fff;
     }
+
     .btn-cari {
-        background-color: #4b1a8d; /* Warna ungu sesuai desain */
+        background-color: #4D0B87;
         color: white;
         border: none;
-        padding: 0 40px;
-        border-radius: 10px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    /* Table Styling */
-    .table-custom {
-        width: 100%;
-        border-collapse: collapse;
-        text-align: center;
-    }
-    .table-custom thead {
-        background-color: #f3e8ff; /* Ungu muda transparan */
-    }
-    .table-custom th {
-        padding: 15px;
-        font-size: 14px;
+        padding: 0 35px;
+        border-radius: 12px;
         font-weight: 700;
-        color: #1a1a2e;
+        font-size: 14px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .btn-cari:hover { opacity: 0.9; }
+
+    /* Table Styling (Identik Riwayat Admin) */
+    .table-custom { width: 100%; border-collapse: collapse; text-align: center; }
+    .table-custom thead { background-color: #F3E8FF; }
+    .table-custom th {
+        padding: 18px 15px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #111827;
     }
     .table-custom td {
-        padding: 20px 15px;
+        padding: 18px 15px;
         font-size: 13px;
-        border-bottom: 1px solid #f3f4f6;
-        color: #4b5563;
+        border-bottom: 1px solid #F3F4F6;
+        color: #4B5563;
     }
 
-    /* Badges */
+    /* Badges & Labels */
+    .badge-kelas {
+        background: #E0E7FF;
+        color: #4338CA;
+        padding: 5px 12px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 11px;
+    }
     .badge {
-        padding: 8px 24px;
-        border-radius: 10px;
-        font-weight: 600;
+        padding: 6px 15px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 11px;
         display: inline-block;
+        min-width: 90px;
     }
-    .badge-hadir {
-        background-color: #bbf7d0; /* Hijau muda */
-        color: #166534;
-    }
-    .badge-tidak-hadir {
-        background-color: #fee2e2; /* Merah muda */
-        color: #991b1b;
-    }
+    .badge-hadir { background-color: #DCFCE7; color: #166534; }
+    .badge-tidak-hadir { background-color: #FEE2E2; color: #991B1B; }
 
     /* Pagination */
     .table-footer {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-top: 24px;
+        margin-top: 25px;
     }
+    .pagination-group { display: flex; gap: 5px; }
     .page-btn {
-        background: #f3f4f6;
-        border: none;
-        padding: 8px 12px;
-        margin: 0 2px;
-        border-radius: 6px;
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        border: 1px solid #E5E7EB;
+        background: white;
+        color: #6B7280;
         cursor: pointer;
-        color: #666;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.3s;
     }
     .page-btn.active {
-        background: #4b1a8d;
+        background: #4D0B87;
         color: white;
+        border: none;
+        font-weight: 600;
     }
 </style>
 @endsection
