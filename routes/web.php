@@ -68,28 +68,71 @@ Route::delete('/admin/kelola-murid/destroy/{id}', [MuridController::class, 'dest
 
 
 // ========== 5. FITUR HARGA PAKET ==========
+
+// --- 5A. RUTE KHUSUS SUPERADMIN ---
+
+// Tampilan Utama Tabel
 Route::get('/superadmin/harga-paket', function () {
     return view('dashboard.shared.harga-paket.harga-paket', ['role' => 'superadmin']);
 })->name('superadmin.harga-paket');
+
+// Form Tambah Paket
+Route::get('/superadmin/harga-paket/create', function () {
+    return view('dashboard.shared.harga-paket.create-paket', ['role' => 'superadmin']);
+})->name('superadmin.harga-paket.create');
+
+// Proses Simpan Data Baru
+Route::post('/superadmin/harga-paket/store', function () {
+    return redirect()->route('superadmin.harga-paket')->with('success', 'Paket berhasil ditambah');
+})->name('superadmin.harga-paket.store');
+
+// Form Edit Paket (Mengarahkan ke edit-paket.blade.php)
+Route::get('/superadmin/harga-paket/edit/{id}', function ($id) {
+    return view('dashboard.shared.harga-paket.edit-paket', ['role' => 'superadmin', 'id' => $id]);
+})->name('superadmin.harga-paket.edit');
+
+// Proses Update Data
+Route::put('/superadmin/harga-paket/update/{id}', function ($id) {
+    return redirect()->route('superadmin.harga-paket')->with('success', 'Paket berhasil diperbarui');
+})->name('superadmin.harga-paket.update');
+
+// Proses Hapus Data
+Route::delete('/superadmin/harga-paket/destroy/{id}', function ($id) {
+    return redirect()->route('superadmin.harga-paket')->with('success', 'Paket berhasil dihapus');
+})->name('superadmin.harga-paket.destroy');
+
+
+// --- 5B. RUTE KHUSUS ADMIN ---
+
+// Tampilan Utama Tabel
 Route::get('/admin/harga-paket', function () {
     return view('dashboard.shared.harga-paket.harga-paket', ['role' => 'admin']);
 })->name('admin.harga-paket');
 
-Route::get('/superadmin/harga-paket/create', function () {
-    return view('dashboard.shared.harga-paket.create-paket', ['role' => 'superadmin']);
-})->name('superadmin.harga-paket.create');
+// Form Tambah Paket
 Route::get('/admin/harga-paket/create', function () {
     return view('dashboard.shared.harga-paket.create-paket', ['role' => 'admin']);
 })->name('admin.harga-paket.create');
 
-Route::post('/superadmin/harga-paket/store', function () {
-    return redirect()->route('superadmin.harga-paket')->with('success', 'Paket berhasil ditambah');
-})->name('superadmin.harga-paket.store');
+// Proses Simpan Data Baru
 Route::post('/admin/harga-paket/store', function () {
     return redirect()->route('admin.harga-paket')->with('success', 'Paket berhasil ditambah');
 })->name('admin.harga-paket.store');
 
+// Form Edit Paket (Mengarahkan ke edit-paket.blade.php)
+Route::get('/admin/harga-paket/edit/{id}', function ($id) {
+    return view('dashboard.shared.harga-paket.edit-paket', ['role' => 'admin', 'id' => $id]);
+})->name('admin.harga-paket.edit');
 
+// Proses Update Data
+Route::put('/admin/harga-paket/update/{id}', function ($id) {
+    return redirect()->route('admin.harga-paket')->with('success', 'Paket berhasil diperbarui');
+})->name('admin.harga-paket.update');
+
+// Proses Hapus Data
+Route::delete('/admin/harga-paket/destroy/{id}', function ($id) {
+    return redirect()->route('admin.harga-paket')->with('success', 'Paket berhasil dihapus');
+})->name('admin.harga-paket.destroy');
 // ========== 6. FITUR PEMBAYARAN ==========
 Route::get('/superadmin/pembayaran', function () {
     return view('dashboard.shared.pembayaran.pembayaran', ['role' => 'superadmin']);

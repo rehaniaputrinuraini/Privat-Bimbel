@@ -44,6 +44,7 @@
             </thead>
             <tbody>
                 @php
+                    // Catatan: Di aplikasi asli, gunakan data dari Controller (misal: $pakets)
                     $pakets = [
                         (object)['kode' => 'PK0001', 'harga' => '120.000', 'tingkat' => 'SD'],
                         (object)['kode' => 'PK0002', 'harga' => '150.000', 'tingkat' => 'SMP'],
@@ -57,23 +58,25 @@
                     <td style="padding: 15px; text-align: center; color: #6B7280; vertical-align: middle;">{{ $index + 1 }}</td>
                     <td style="padding: 15px; font-weight: 600; color: #4D0B87; vertical-align: middle;">{{ $p->kode }}</td>
                     <td style="padding: 15px; font-weight: 600; color: #111827; vertical-align: middle;">Rp {{ $p->harga }}</td>
-                    {{-- Teks Tingkat Biasa --}}
                     <td style="padding: 15px; color: #111827; vertical-align: middle;">{{ $p->tingkat }}</td>
                     <td style="padding: 15px; vertical-align: middle;">
                         <div style="display: flex; gap: 8px; justify-content: center;">
-                            {{-- Tombol Edit Hijau --}}
-                            <a href="#" style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; display: flex; align-items: center; gap: 5px; font-size: 12px;">
+                            
+                            {{-- TOMBOL EDIT: Dihubungkan ke Route Edit --}}
+                            <a href="{{ route($role . '.harga-paket.edit', $p->kode) }}" 
+                               style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; display: flex; align-items: center; gap: 5px; font-size: 12px; transition: 0.2s;">
                                 <i class="far fa-edit"></i> Edit
                             </a>
                             
-                            {{-- Tombol Hapus Merah --}}
-                            <form action="#" method="POST" style="margin: 0;">
+                            {{-- TOMBOL HAPUS --}}
+                            <form action="{{ route($role . '.harga-paket.destroy', $p->kode) }}" method="POST" style="margin: 0;">
                                 @csrf @method('DELETE')
-                                <button type="submit" onclick="return confirm('Hapus data?')" 
-                                        style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 12px;">
+                                <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus data paket {{ $p->kode }}?')" 
+                                        style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 12px; transition: 0.2s;">
                                     <i class="fas fa-trash"></i> Hapus
                                 </button>
                             </form>
+
                         </div>
                     </td>
                 </tr>
@@ -83,8 +86,14 @@
     </div>
 </div>
 
-{{-- ── 4. PAGINATION ── --}}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; padding: 0 5px;">
+{{-- ── 4. INDIKATOR GESER (Opsional) ── --}}
+<div style="margin-top: 10px; display: flex; align-items: center; justify-content: flex-end; gap: 8px; color: #9CA3AF; font-size: 12px; padding-right: 5px;">
+    <i class="fas fa-info-circle"></i>
+    <span>Geser tabel untuk detail lebih lanjut</span>
+</div>
+
+{{-- ── 5. PAGINATION ── --}}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
     <div style="color: #6B7280; font-size: 13px;">
         Menampilkan {{ count($pakets) }} baris per halaman
     </div>

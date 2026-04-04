@@ -1,5 +1,5 @@
 {{-- =============================================
-     Dashboard Shared - Data Tentor
+     Dashboard Shared - Data Tentor (FIXED)
      File: resources/views/dashboard/shared/data-tentor/index.blade.php
 ============================================= --}}
 
@@ -10,7 +10,7 @@
 @section('content')
 <div style="width: 100%;">
 
-    {{-- ── 1. HEADER HALAMAN (Sesuai Standar 26px) ── --}}
+    {{-- ── 1. HEADER HALAMAN ── --}}
     <div style="margin-bottom: 25px;">
         <p style="color: #6B7280; font-size: 13px; margin-bottom: 4px;">
             {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
@@ -39,17 +39,20 @@
             </select>
         </div>
 
-        {{-- Tombol Tambah (Menyesuaikan konteks Data Tentor) --}}
-        <button style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: 0.3s; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
-            <i class="fas fa-plus"></i> Tambah Tentor
-        </button>
+        {{-- Tombol Tambah --}}
+        <a href="{{ route($role . '.data-tentor.create') }}" style="text-decoration: none;">
+            <button style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: 0.3s; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
+                <i class="fas fa-plus"></i> Tambah Tentor
+            </button>
+        </a>
     </div>
 
-    {{-- ── 3. TABLE AREA (Shadow 0.08 halus & Font 12px) ── --}}
+    {{-- ── 3. TABLE AREA ── --}}
     <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; white-space: nowrap;">
                 <thead>
+                    {{-- Header dikembalikan ke bentuk kotak (tanpa radius di th) --}}
                     <tr style="background: #F3E8FF; color: #111827;">
                         <th style="padding: 18px 15px; text-align: center; font-weight: 700;">No</th>
                         <th style="padding: 18px 15px; font-weight: 700;">ID</th>
@@ -98,8 +101,18 @@
                         </td>
                         <td style="padding: 15px; text-align: center;">
                             <div style="display: flex; gap: 8px; justify-content: center;">
-                                <button title="Edit" style="background: #F3E8FF; color: #4D0B87; border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; transition: 0.3s;"><i class="fas fa-edit"></i></button>
-                                <button title="Hapus" style="background: #FEE2E2; color: #EF4444; border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; transition: 0.3s;"><i class="fas fa-trash"></i></button>
+                                <a href="{{ route($role . '.data-tentor.edit', $t['id']) }}" title="Edit">
+                                    <button style="background: #F3E8FF; color: #4D0B87; border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; transition: 0.3s;">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </a>
+                                <form action="{{ route($role . '.data-tentor.destroy', $t['id']) }}" method="POST" style="margin: 0;">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" onclick="return confirm('Hapus data tentor {{ $t['nama'] }}?')"
+                                            style="background: #FEE2E2; color: #EF4444; border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; transition: 0.3s;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -112,12 +125,7 @@
     {{-- ── 4. PAGINATION AREA ── --}}
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="color: #6B7280; font-size: 13px;">
-            Menampilkan 
-            <select style="padding: 5px 10px; border-radius: 8px; border: 1px solid #E5E7EB; outline: none; margin: 0 5px;">
-                <option>10</option>
-                <option>25</option>
-            </select>
-            baris per halaman
+            Menampilkan 10 baris per halaman
         </div>
         <div style="display: flex; gap: 5px;">
             <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #6B7280; cursor: pointer;"><i class="fas fa-angle-left"></i></button>
