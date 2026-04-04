@@ -28,9 +28,9 @@
         $stats = [
             ['title' => 'Total Murid',  'val' => '307',        'bg' => '#3A3AA7', 'icon' => 'icon_orang.png',       'size' => '30px'],
             ['title' => 'Total Tentor', 'val' => '20',         'bg' => '#BE7E5E', 'icon' => 'icon_orang.png',       'size' => '30px'],
-            ['title' => 'Pemasukan',    'val' => 'Rp 500k',    'bg' => '#0CCC0C', 'icon' => 'icon_pemasukan.png',   'size' => '25px'],
-            ['title' => 'Pengeluaran',  'val' => 'Rp 200k',    'bg' => '#F14D4D', 'icon' => 'icon_pengeluaran.png', 'size' => '25px'],
-            ['title' => 'Laba Bersih',  'val' => 'Rp 300k',    'bg' => '#E7C255', 'icon' => 'icon_lababersih.png',  'size' => '25px'],
+            ['title' => 'Pemasukan',    'val' => 'Rp 500.000',    'bg' => '#0CCC0C', 'icon' => 'icon_pemasukan.png',   'size' => '25px'],
+            ['title' => 'Pengeluaran',  'val' => 'Rp 200.000',    'bg' => '#F14D4D', 'icon' => 'icon_pengeluaran.png', 'size' => '25px'],
+            ['title' => 'Laba Bersih',  'val' => 'Rp 300.000',    'bg' => '#E7C255', 'icon' => 'icon_lababersih.png',  'size' => '25px'],
         ];
 
         $role = Auth::user()->peran ?? 'admin';

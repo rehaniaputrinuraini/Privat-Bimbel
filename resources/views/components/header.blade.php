@@ -9,7 +9,7 @@
     <div class="header-right">
         <a href="{{ route('profile.index') }}" class="profile-link">
             <div class="user-avatar-top">
-                <img src="{{ asset('images/icon_orang.png') }}" alt="Avatar">
+                <img src="{{ asset('images/dashboard/icons/icon_orang.png') }}" alt="Avatar">
             </div>
         </a>
     </div>

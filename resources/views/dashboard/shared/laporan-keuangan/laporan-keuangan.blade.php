@@ -25,8 +25,8 @@
         </div>
         
         <a href="{{ route($role . '.laporan-keuangan.create') }}" style="text-decoration: none;">
-            <button style="background: #4D0B87; color: white; padding: 10px 24px; border-radius: 12px; border: none; font-weight: 600; display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(77, 11, 135, 0.2);">
-                <i class="fas fa-plus"></i> Tambah Transaksi
+            <button style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: 0.3s; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
+            <i class="fas fa-plus"></i> Tambah Transaksi
             </button>
         </a>
     </div>
