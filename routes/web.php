@@ -34,6 +34,31 @@ Route::get('/register', function () {
     return view('auth.register');
 })->name('register');
 
+// ========== LUPA PASSWORD & RESET PASSWORD ==========
+Route::get('/forgot-password', function () {
+    return view('auth.forgot-password');
+})->name('password.request');
+
+Route::post('/forgot-password', function () {
+    return redirect('/verify-email');
+})->name('password.email');
+
+Route::get('/verify-email', function () {
+    return view('auth.verify-email');
+})->name('verification.notice');
+
+Route::post('/verify-email', function () {
+    return redirect('/reset-password/123');
+})->name('verification.verify');
+
+Route::get('/reset-password/{token}', function ($token) {
+    return view('auth.reset-password', ['token' => $token]);
+})->name('password.reset');
+
+Route::post('/reset-password', function () {
+    return redirect('/login')->with('status', 'Password berhasil direset!');
+})->name('password.update');
+
 Route::post('/logout', function () {
     Auth::logout();
     return redirect('/login');
@@ -70,69 +95,57 @@ Route::delete('/admin/kelola-murid/destroy/{id}', [MuridController::class, 'dest
 // ========== 5. FITUR HARGA PAKET ==========
 
 // --- 5A. RUTE KHUSUS SUPERADMIN ---
-
-// Tampilan Utama Tabel
 Route::get('/superadmin/harga-paket', function () {
     return view('dashboard.shared.harga-paket.harga-paket', ['role' => 'superadmin']);
 })->name('superadmin.harga-paket');
 
-// Form Tambah Paket
 Route::get('/superadmin/harga-paket/create', function () {
     return view('dashboard.shared.harga-paket.create-paket', ['role' => 'superadmin']);
 })->name('superadmin.harga-paket.create');
 
-// Proses Simpan Data Baru
 Route::post('/superadmin/harga-paket/store', function () {
     return redirect()->route('superadmin.harga-paket')->with('success', 'Paket berhasil ditambah');
 })->name('superadmin.harga-paket.store');
 
-// Form Edit Paket (Mengarahkan ke edit-paket.blade.php)
 Route::get('/superadmin/harga-paket/edit/{id}', function ($id) {
     return view('dashboard.shared.harga-paket.edit-paket', ['role' => 'superadmin', 'id' => $id]);
 })->name('superadmin.harga-paket.edit');
 
-// Proses Update Data
 Route::put('/superadmin/harga-paket/update/{id}', function ($id) {
     return redirect()->route('superadmin.harga-paket')->with('success', 'Paket berhasil diperbarui');
 })->name('superadmin.harga-paket.update');
 
-// Proses Hapus Data
 Route::delete('/superadmin/harga-paket/destroy/{id}', function ($id) {
     return redirect()->route('superadmin.harga-paket')->with('success', 'Paket berhasil dihapus');
 })->name('superadmin.harga-paket.destroy');
 
 
 // --- 5B. RUTE KHUSUS ADMIN ---
-
-// Tampilan Utama Tabel
 Route::get('/admin/harga-paket', function () {
     return view('dashboard.shared.harga-paket.harga-paket', ['role' => 'admin']);
 })->name('admin.harga-paket');
 
-// Form Tambah Paket
 Route::get('/admin/harga-paket/create', function () {
     return view('dashboard.shared.harga-paket.create-paket', ['role' => 'admin']);
 })->name('admin.harga-paket.create');
 
-// Proses Simpan Data Baru
 Route::post('/admin/harga-paket/store', function () {
     return redirect()->route('admin.harga-paket')->with('success', 'Paket berhasil ditambah');
 })->name('admin.harga-paket.store');
 
-// Form Edit Paket (Mengarahkan ke edit-paket.blade.php)
 Route::get('/admin/harga-paket/edit/{id}', function ($id) {
     return view('dashboard.shared.harga-paket.edit-paket', ['role' => 'admin', 'id' => $id]);
 })->name('admin.harga-paket.edit');
 
-// Proses Update Data
 Route::put('/admin/harga-paket/update/{id}', function ($id) {
     return redirect()->route('admin.harga-paket')->with('success', 'Paket berhasil diperbarui');
 })->name('admin.harga-paket.update');
 
-// Proses Hapus Data
 Route::delete('/admin/harga-paket/destroy/{id}', function ($id) {
     return redirect()->route('admin.harga-paket')->with('success', 'Paket berhasil dihapus');
 })->name('admin.harga-paket.destroy');
+
+
 // ========== 6. FITUR PEMBAYARAN ==========
 Route::get('/superadmin/pembayaran', function () {
     return view('dashboard.shared.pembayaran.pembayaran', ['role' => 'superadmin']);
@@ -179,35 +192,121 @@ Route::put('/profil/password-update', function (Request $request) {
 
 
 // ========== 8. KHUSUS KELOLA TENTOR (SUPERADMIN & ADMIN) ==========
+
+// --- SUPERADMIN KELOLA TENTOR ---
 Route::get('/superadmin/kelola-tentor', function () {
-    return view('dashboard.superadmin.kelola-tentor.kelola-tentor');
+    return view('dashboard.superadmin.kelola-tentor.kelola-tentor', ['role' => 'superadmin']);
 })->name('superadmin.kelola-tentor');
 
 Route::get('/superadmin/kelola-tentor/create', function () {
-    return view('dashboard.superadmin.kelola-tentor.create-tentor');
+    return view('dashboard.superadmin.kelola-tentor.create-tentor', ['role' => 'superadmin']);
 })->name('superadmin.kelola-tentor.create');
 
 Route::post('/superadmin/kelola-tentor/store', function (Request $request) {
     return redirect()->route('superadmin.kelola-tentor')->with('success', 'Akun Tentor berhasil dibuat');
 })->name('superadmin.kelola-tentor.store');
 
+Route::get('/superadmin/kelola-tentor/edit/{id}', function ($id) {
+    $tentor = [
+        'id' => $id,
+        'nama' => 'Rati Maria',
+        'alamat' => 'Madiun, Jawa Timur',
+        'no_hp' => '0881999999',
+        'mapel' => 'Matematika',
+        'grade' => 'A',
+        'hr_sd' => '50.000',
+        'hr_smp' => '50.000',
+        'hr_sma' => '50.000',
+        'uang_makan' => '10.000',
+        'uang_transport' => '10.000',
+        'email' => 'rati@email.com',
+        'username' => 'rati_maria',
+        'status_akun' => 'Aktif',
+        'status_gaji' => 'Sudah',
+    ];
+    return view('dashboard.superadmin.kelola-tentor.edit-tentor', ['tentor' => $tentor, 'role' => 'superadmin']);
+})->name('superadmin.kelola-tentor.edit');
+
+Route::put('/superadmin/kelola-tentor/update/{id}', function ($id) {
+    return redirect()->route('superadmin.kelola-tentor')->with('success', 'Data tentor berhasil diperbarui');
+})->name('superadmin.kelola-tentor.update');
+
+Route::delete('/superadmin/kelola-tentor/destroy/{id}', function ($id) {
+    return redirect()->route('superadmin.kelola-tentor')->with('success', 'Data tentor berhasil dihapus');
+})->name('superadmin.kelola-tentor.destroy');
+
+// --- ADMIN DATA TENTOR ---
 Route::get('/admin/data-tentor', function () {
-    return view('dashboard.admin.kelola-tentor.kelola-tentor');
+    return view('dashboard.admin.kelola-tentor.kelola-tentor', ['role' => 'admin']);
 })->name('admin.data-tentor');
+
+Route::get('/admin/data-tentor/create', function () {
+    return view('dashboard.admin.kelola-tentor.create-tentor', ['role' => 'admin']);
+})->name('admin.data-tentor.create');
+
+Route::post('/admin/data-tentor/store', function (Request $request) {
+    return redirect()->route('admin.data-tentor')->with('success', 'Data tentor berhasil ditambahkan');
+})->name('admin.data-tentor.store');
+
+Route::get('/admin/data-tentor/edit/{id}', function ($id) {
+    $tentor = [
+        'id' => $id,
+        'nama' => 'Rati Maria',
+        'alamat' => 'Madiun, Jawa Timur',
+        'no_hp' => '0881999999',
+        'mapel' => 'Matematika',
+        'grade' => 'A',
+        'hr_sd' => '50.000',
+        'hr_smp' => '50.000',
+        'hr_sma' => '50.000',
+        'uang_makan' => '10.000',
+        'uang_transport' => '10.000',
+    ];
+    return view('dashboard.admin.kelola-tentor.edit-tentor', ['tentor' => $tentor, 'role' => 'admin']);
+})->name('admin.data-tentor.edit');
+
+Route::put('/admin/data-tentor/update/{id}', function ($id) {
+    return redirect()->route('admin.data-tentor')->with('success', 'Data tentor berhasil diperbarui');
+})->name('admin.data-tentor.update');
+
+Route::delete('/admin/data-tentor/destroy/{id}', function ($id) {
+    return redirect()->route('admin.data-tentor')->with('success', 'Data tentor berhasil dihapus');
+})->name('admin.data-tentor.destroy');
 
 
 // ========== 9. KHUSUS KELOLA ADMIN (SUPERADMIN ONLY) ==========
 Route::get('/superadmin/kelola-admin', function () {
-    return view('dashboard.superadmin.kelola-admin.kelola-admin');
+    return view('dashboard.superadmin.kelola-admin.kelola-admin', ['role' => 'superadmin']);
 })->name('superadmin.kelola-admin');
 
 Route::get('/superadmin/kelola-admin/create', function () {
-    return view('dashboard.superadmin.kelola-admin.create-admin');
+    return view('dashboard.superadmin.kelola-admin.create-admin', ['role' => 'superadmin']);
 })->name('superadmin.kelola-admin.create');
 
 Route::post('/superadmin/kelola-admin/store', function (Request $request) {
     return redirect()->route('superadmin.kelola-admin')->with('success', 'Admin berhasil ditambah');
 })->name('superadmin.kelola-admin.store');
+
+Route::get('/superadmin/kelola-admin/edit/{id}', function ($id) {
+    $admin = [
+        'id' => $id,
+        'nama' => 'Wella',
+        'alamat' => 'Madiun, Jawa Timur',
+        'no_hp' => '08812345678',
+        'gaji' => '1.200.000',
+        'email' => 'wella@email.com',
+        'username' => 'wella_adm',
+    ];
+    return view('dashboard.superadmin.kelola-admin.edit-admin', ['admin' => $admin, 'role' => 'superadmin']);
+})->name('superadmin.kelola-admin.edit');
+
+Route::put('/superadmin/kelola-admin/update/{id}', function ($id) {
+    return redirect()->route('superadmin.kelola-admin')->with('success', 'Admin berhasil diperbarui');
+})->name('superadmin.kelola-admin.update');
+
+Route::delete('/superadmin/kelola-admin/destroy/{id}', function ($id) {
+    return redirect()->route('superadmin.kelola-admin')->with('success', 'Admin berhasil dihapus');
+})->name('superadmin.kelola-admin.destroy');
 
 
 // ========== 10. FITUR LAPORAN KEUANGAN (SHARED ADMIN & SUPERADMIN) ==========
@@ -237,13 +336,12 @@ Route::post('/admin/laporan-keuangan/store', function () {
 
 
 // ========== 11. FITUR RIWAYAT PRESENSI (SUPERADMIN & ADMIN) ==========
-// REVISI: Menggunakan spasi pada nama folder sesuai deteksi sistem Anda
 Route::get('/superadmin/riwayat-presensi', function () {
-    return view('dashboard.shared.riwayat presensi.riwayat-presensi', ['role' => 'superadmin']);
+    return view('dashboard.shared.riwayat-presensi.riwayat-presensi', ['role' => 'superadmin']);
 })->name('superadmin.riwayat-presensi');
 
 Route::get('/admin/riwayat-presensi', function () {
-    return view('dashboard.shared.riwayat presensi.riwayat-presensi', ['role' => 'admin']);
+    return view('dashboard.shared.riwayat-presensi.riwayat-presensi', ['role' => 'admin']);
 })->name('admin.riwayat-presensi');
 
 
@@ -252,7 +350,6 @@ Route::get('/tentor/presensi', function () {
     return view('dashboard.tentor.presensi');
 })->name('tentor.presensi');
 
-// REVISI: Route POST untuk menangani pengiriman data presensi
 Route::post('/tentor/presensi/masuk', function (Request $request) {
     return redirect()->route('tentor.presensi')->with('success', 'Berhasil melakukan presensi masuk!');
 })->name('tentor.presensi.masuk');

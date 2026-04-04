@@ -7,7 +7,7 @@
     
     {{-- Logo dan Nama Bimbel --}}
     <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
-        <img src="{{ asset('images/logo-privat.png') }}" alt="Logo" style="width: 80px;">
+        <img src="{{ asset('images/logo/logo.png') }}" alt="Logo" style="width: 80px;">
         <h1 style="font-size: 32px; font-weight: 800; color: #4D0B87; margin: 0;">Bimbel Privat</h1>
     </div>
 

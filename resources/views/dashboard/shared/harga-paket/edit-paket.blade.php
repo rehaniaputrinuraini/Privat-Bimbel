@@ -3,45 +3,57 @@
 @section('title', 'Edit Harga Paket')
 
 @section('content')
-<div style="margin-bottom: 25px;">
-    <h1 style="font-size: 28px; font-weight: 700; color: #111827; margin: 0;">Edit Harga Paket</h1>
-    <p style="color: #6B7280;">Perbarui data paket yang sudah ada ({{ ucfirst($role) }})</p>
-</div>
+<div style="padding: 10px; font-family: 'Poppins', sans-serif;">
+    
+    {{-- Header Judul --}}
+    <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Edit Harga Paket</h1>
 
-{{-- Border warna Orange untuk menandakan mode EDIT --}}
-<div style="background: white; border: 4px solid #f39c12; border-radius: 20px; padding: 45px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
-    <form action="#" method="POST">
-        @csrf
-        @method('PUT')
+    {{-- Container Form Utama --}}
+    <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
         
-        <div style="margin-bottom: 30px;">
-            <label style="display: block; font-weight: 700; margin-bottom: 12px; color: #111827; font-size: 16px;">ID Paket</label>
-            <input type="text" name="kode" value="PK0001" disabled style="width: 100%; padding: 18px; border: 1px solid #D1D5DB; border-radius: 12px; background-color: #EEEEEE; font-size: 14px; color: #6B7280;">
-        </div>
+        <form action="{{ route($role . '.harga-paket.update', $id) }}" method="POST">
+            @csrf
+            @method('PUT')
+            
+            {{-- ID Paket (Readonly) --}}
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">ID Paket</label>
+                <input type="text" name="kode" value="PK0001" readonly 
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; color: #6B7280;">
+            </div>
 
-        <div style="margin-bottom: 30px;">
-            <label style="display: block; font-weight: 700; margin-bottom: 12px; color: #111827; font-size: 16px;">Harga Paket</label>
-            <input type="number" name="harga" value="120000" style="width: 100%; padding: 18px; border: 1px solid #D1D5DB; border-radius: 12px; background-color: #F9FAFB; font-size: 14px; outline: none;">
-        </div>
+            {{-- Harga Paket --}}
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Harga Paket</label>
+                <input type="text" name="harga" value="120.000" placeholder="Masukkan Harga Paket" required
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+            </div>
 
-        <div style="margin-bottom: 45px;">
-            <label style="display: block; font-weight: 700; margin-bottom: 12px; color: #111827; font-size: 16px;">Tingkat</label>
-            <select name="tingkat" style="width: 100%; padding: 18px; border: 1px solid #D1D5DB; border-radius: 12px; background-color: #F9FAFB; font-size: 14px; outline: none;">
-                <option value="SD" selected>SD</option>
-                <option value="SMP">SMP</option>
-                <option value="SMA">SMA</option>
-                <option value="Biaya Pendaftaran">Biaya Pendaftaran</option>
-            </select>
-        </div>
+            {{-- Tingkat --}}
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tingkat</label>
+                <select name="tingkat" required
+                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; color: #374151;">
+                    <option value="SD" selected>SD</option>
+                    <option value="SMP">SMP</option>
+                    <option value="SMA">SMA</option>
+                    <option value="Biaya Pendaftaran">Biaya Pendaftaran</option>
+                </select>
+            </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 20px;">
-            <a href="{{ route($role . '.harga-paket') }}" style="text-decoration: none; padding: 14px 45px; border: 2px solid #5D10A2; color: #5D10A2; border-radius: 15px; font-weight: 700; text-align: center; font-size: 16px;">
-                Batal
-            </a>
-            <button type="submit" style="padding: 14px 55px; background-color: #5D10A2; color: white; border: none; border-radius: 15px; font-weight: 700; cursor: pointer; font-size: 16px;">
-                Update Data
-            </button>
-        </div>
-    </form>
+            {{-- Tombol Aksi --}}
+            <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">
+                <a href="{{ route($role . '.harga-paket') }}" 
+                   style="text-decoration: none; padding: 12px 65px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 12px; font-weight: 600; font-size: 18px; background: #FFFFFF; text-align: center;">
+                    Keluar
+                </a>
+                <button type="submit" 
+                        style="padding: 12px 65px; border: none; background: #4D0B87; color: white; border-radius: 12px; font-weight: 600; font-size: 18px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
+                    Simpan
+                </button>
+            </div>
+
+        </form>
+    </div>
 </div>
 @endsection

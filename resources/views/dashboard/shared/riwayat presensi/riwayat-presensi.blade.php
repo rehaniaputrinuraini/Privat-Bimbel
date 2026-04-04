@@ -1,107 +1,120 @@
-{{-- =============================================
-     Dashboard Shared - Riwayat Presensi (FINAL REVISI)
-     File: resources/views/dashboard/shared/riwayat-presensi/index.blade.php
-============================================= --}}
-
 @extends('layouts.app')
 
 @section('title', 'Riwayat Presensi')
 
 @section('content')
-{{-- 
-    INFO: Jarak kiri dan atas sudah otomatis 25px dari .content-wrapper (dashboard.css).
-    Jangan gunakan div pembungkus dengan padding lagi agar tetap sejajar.
---}}
 <div style="width: 100%;">
-
-    {{-- ── 1. HEADER HALAMAN (26px - Konsisten) ── --}}
+    
+    {{-- HEADER HALAMAN --}}
     <div style="margin-bottom: 25px;">
-        <p style="color: #6B7280; font-size: 13px; margin: 0 0 4px 0;">
+        <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
             {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
         </p>
         <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
             Riwayat Presensi
         </h1>
-        <p style="color: #6B7280; font-size: 14px; margin: 4px 0 0 0;">Lihat Riwayat Presensi Semua Tentor</p>
+        <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Lihat Riwayat Presensi Semua Tentor</p>
     </div>
 
-    {{-- ── 2. FILTER AREA (Search & Dropdown) ── --}}
-    <div style="display: flex; gap: 15px; align-items: flex-end; margin-bottom: 25px;">
-        {{-- Dropdown Filter Bulan --}}
-        <div style="flex: 1; max-width: 300px;">
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 6px; text-transform: uppercase;">Filter Bulan</label>
-            <div style="position: relative;">
-                <select style="width: 100%; padding: 10px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: white; color: #4B5563; font-size: 14px; outline: none; appearance: none; cursor: pointer;">
-                    <option value="Maret">Maret 2026</option>
-                    <option value="Februari">Februari 2026</option>
-                </select>
-                <i class="fas fa-chevron-down" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF; pointer-events: none; font-size: 12px;"></i>
+    {{-- ACTIONS BAR --}}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
+        <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+            {{-- Search Bar --}}
+            <div style="position: relative; width: 300px;">
+                <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
+                <input type="text" placeholder="Cari Nama Tentor..." 
+                       style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
             </div>
-        </div>
-        
-        {{-- Search Bar --}}
-        <div style="position: relative; flex: 1; max-width: 300px;">
-            <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
-            <input type="text" placeholder="Cari Nama Tentor..." 
-                   style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px;">
+
+            {{-- Filter Bulan --}}
+            <select style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 140px; background: white; outline: none; cursor: pointer;">
+                <option value="">--- Pilih Bulan ---</option>
+                <option value="1">Januari</option>
+                <option value="2">Februari</option>
+                <option value="3" selected>Maret</option>
+                <option value="4">April</option>
+                <option value="5">Mei</option>
+                <option value="6">Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">Agustus</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+            </select>
+
+            {{-- Filter Tahun --}}
+            <select style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 100px; background: white; outline: none; cursor: pointer;">
+                <option value="">--- Tahun ---</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026" selected>2026</option>
+            </select>
         </div>
     </div>
 
-    {{-- ── 3. TABLE AREA (Shadow & Master Style) ── --}}
+    {{-- TABEL UTAMA --}}
     <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
         <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; white-space: nowrap;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
                 <thead>
                     <tr style="background: #F3E8FF; color: #111827;">
-                        <th style="padding: 18px 15px; font-weight: 700; width: 60px;">No</th>
-                        <th style="padding: 18px 15px; font-weight: 700; text-align: left;">Nama Tentor</th>
-                        <th style="padding: 18px 15px; font-weight: 700;">Tanggal</th>
-                        <th style="padding: 18px 15px; font-weight: 700;">Jam</th>
-                        <th style="padding: 18px 15px; font-weight: 700;">Kelas</th>
-                        <th style="padding: 18px 15px; font-weight: 700;">Status</th>
-                        <th style="padding: 18px 15px; font-weight: 700;">Honor</th>
-                        <th style="padding: 18px 15px; font-weight: 700;">Makan</th>
-                        <th style="padding: 18px 15px; font-weight: 700;">Trans</th>
-                        <th style="padding: 18px 15px; font-weight: 700;">Bukti</th>
-                        <th style="padding: 18px 15px; font-weight: 700; width: 80px;">Verif</th>
+                        <th style="padding: 15px; font-weight: 700; width: 50px;">No</th>
+                        <th style="padding: 15px; font-weight: 700;">Nama Tentor</th>
+                        <th style="padding: 15px; font-weight: 700;">Tanggal</th>
+                        <th style="padding: 15px; font-weight: 700;">Jam Masuk</th>
+                        <th style="padding: 15px; font-weight: 700;">Jam Keluar</th>
+                        <th style="padding: 15px; font-weight: 700;">Kelas</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: center;">Status</th>
+                        <th style="padding: 15px; font-weight: 700;">Honor</th>
+                        <th style="padding: 15px; font-weight: 700;">Makan</th>
+                        <th style="padding: 15px; font-weight: 700;">Transport</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: center;">Bukti</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: center;">Verifikasi</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: center;">Aksi</th>
                     </tr>
                 </thead>
-                <tbody style="color: #4B5563;">
+                <tbody style="color: #374151;">
                     @php
                         $presensi = [
-                            ['no' => 1, 'nama' => 'Sari Putri', 'tgl' => '09 Feb 2026', 'jam' => '14:00 - 17:00', 'kelas' => '9A', 'status' => 'Hadir', 'honor' => '30.000', 'makan' => '10.000', 'trans' => '10.000', 'verif' => false],
-                            ['no' => 2, 'nama' => 'Sari Putri', 'tgl' => '10 Feb 2026', 'jam' => '14:00 - 17:00', 'kelas' => '9A', 'status' => 'Tidak Hadir', 'honor' => '15.000', 'makan' => '-', 'trans' => '10.000', 'verif' => true],
-                            ['no' => 3, 'nama' => 'Sari Putri', 'tgl' => '11 Feb 2026', 'jam' => '14:00 - 17:00', 'kelas' => '9A', 'status' => 'Hadir', 'honor' => '30.000', 'makan' => '10.000', 'trans' => '-', 'verif' => true],
+                            ['no' => 1, 'nama' => 'Sari Putri', 'tgl' => '09 Mar 2026', 'jam_masuk' => '14:00', 'jam_keluar' => '17:00', 'kelas' => '9A', 'status' => 'Hadir', 'honor' => '30.000', 'makan' => '10.000', 'transport' => '10.000', 'verif' => false],
+                            ['no' => 2, 'nama' => 'Dwi Rahayu', 'tgl' => '10 Mar 2026', 'jam_masuk' => '14:00', 'jam_keluar' => '-', 'kelas' => '9A', 'status' => 'Tidak Hadir', 'honor' => '15.000', 'makan' => '-', 'transport' => '10.000', 'verif' => true],
+                            ['no' => 3, 'nama' => 'Rahma Tyas', 'tgl' => '11 Mar 2026', 'jam_masuk' => '14:00', 'jam_keluar' => '17:00', 'kelas' => '9A', 'status' => 'Hadir', 'honor' => '30.000', 'makan' => '10.000', 'transport' => '-', 'verif' => true],
                         ];
                     @endphp
 
-                    @foreach($presensi as $p)
+                    @foreach($presensi as $index => $p)
                     <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 15px; color: #6B7280;">{{ $p['no'] }}</td>
-                        <td style="padding: 15px; text-align: left; font-weight: 700; color: #111827;">{{ $p['nama'] }}</td>
+                        <td style="padding: 15px;">{{ $p['no'] }}</td>
+                        <td style="padding: 15px;">{{ $p['nama'] }}</td>   {{-- HAPUS font-weight: 600 dan color --}}
                         <td style="padding: 15px;">{{ $p['tgl'] }}</td>
-                        <td style="padding: 15px; font-weight: 500;">{{ $p['jam'] }}</td>
-                        <td style="padding: 15px;">
-                            <span style="background: #E0E7FF; color: #4338CA; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 11px;">{{ $p['kelas'] }}</span>
-                        </td>
-                        <td style="padding: 15px;">
-                            <span style="background: {{ $p['status'] == 'Hadir' ? '#DCFCE7' : '#FEE2E2' }}; 
-                                         color: {{ $p['status'] == 'Hadir' ? '#166534' : '#991B1B' }}; 
-                                         padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 700;">
+                        <td style="padding: 15px;">{{ $p['jam_masuk'] }}</td>
+                        <td style="padding: 15px;">{{ $p['jam_keluar'] }}</td>
+                        <td style="padding: 15px;">{{ $p['kelas'] }}</td>
+                        <td style="padding: 15px; text-align: center;">
+                            <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; 
+                                background: {{ $p['status'] == 'Hadir' ? '#E1F7E3' : '#FEE2E2' }}; 
+                                color: {{ $p['status'] == 'Hadir' ? '#0E7490' : '#EF4444' }};">
                                 {{ $p['status'] }}
                             </span>
                         </td>
-                        <td style="padding: 15px; font-weight: 700; color: #111827;">Rp {{ $p['honor'] }}</td>
+                        <td style="padding: 15px;">Rp {{ $p['honor'] }}</td>
                         <td style="padding: 15px;">{{ $p['makan'] == '-' ? '-' : 'Rp '.$p['makan'] }}</td>
-                        <td style="padding: 15px;">{{ $p['trans'] == '-' ? '-' : 'Rp '.$p['trans'] }}</td>
-                        <td style="padding: 15px;">
-                            <button title="Download Bukti" style="background: #F3E8FF; border: none; color: #4D0B87; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; transition: 0.3s;">
+                        <td style="padding: 15px;">{{ $p['transport'] == '-' ? '-' : 'Rp '.$p['transport'] }}</td>
+                        <td style="padding: 15px; text-align: center;">
+                            <button title="Download Bukti" style="background: #F3E8FF; border: none; color: #4D0B87; width: 32px; height: 32px; border-radius: 8px; cursor: pointer;">
                                 <i class="fas fa-file-download"></i>
                             </button>
                         </td>
-                        <td style="padding: 15px;">
+                        <td style="padding: 15px; text-align: center;">
                             <input type="checkbox" {{ $p['verif'] ? 'checked' : '' }} 
                                    style="accent-color: #4D0B87; width: 18px; height: 18px; cursor: pointer;">
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <button type="button" onclick="return confirm('Hapus data presensi {{ $p['nama'] }} tanggal {{ $p['tgl'] }}?')" 
+                                    style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 12px;">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
                         </td>
                     </tr>
                     @endforeach
@@ -109,17 +122,25 @@
             </table>
         </div>
     </div>
-
-    {{-- ── 4. PAGINATION ── --}}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px;">
-        <div style="color: #6B7280; font-size: 13px;">
-            Menampilkan {{ count($presensi) }} baris per halaman
+    
+    {{-- PAGINATION & SHOW ENTRIES --}}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <select style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
+                <option value="10">10 baris</option>
+                <option value="25">25 baris</option>
+                <option value="50">50 baris</option>
+            </select>
+            <span style="color: #374151; font-size: 13px;">Menampilkan {{ count($presensi) }} data</span>
         </div>
+
         <div style="display: flex; gap: 5px;">
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #6B7280; cursor: pointer;"><i class="fas fa-angle-left"></i></button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600;">1</button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #6B7280; cursor: pointer;"><i class="fas fa-angle-right"></i></button>
+            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-double-left"></i></button>
+            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-left"></i></button>
+            <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">1</button>
+            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-right"></i></button>
         </div>
     </div>
+
 </div>
 @endsection
