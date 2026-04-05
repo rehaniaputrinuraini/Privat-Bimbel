@@ -3,99 +3,138 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Murid;
+use App\Models\HargaPaket;
 
 class MuridController extends Controller
 {
-    public function index()
+    // Menampilkan semua data murid
+    public function index(Request $request)
     {
-        $role = Auth::user()->peran;
-
-        $murids = [
-            (object)[
-                'id_murid' => 1, 
-                'nama_lengkap_murid' => 'Rizky Pratama', 
-                'kelas' => '12 SMA',
-                'asal_sekolah' => 'SMAN 1 Madiun', 
-                'alamat_murid' => 'Jl. Pahlawan No. 10, Madiun',
-                'no_hp_murid' => '0812345678', 
-                'nama_orang_tua' => 'Bambang',
-                'no_hp_orang_tua' => '0812999000', 
-                'paket_awal' => '2500000', 
-                'pilihan_paket' => 'SMA', 
-                'tahun_masuk' => '2023'
-            ],
-            (object)[
-                'id_murid' => 2, 
-                'nama_lengkap_murid' => 'Aisyah Putri', 
-                'kelas' => '9 SMP',
-                'asal_sekolah' => 'SMPN 2 Madiun', 
-                'alamat_murid' => 'Jl. Kartini No. 5, Madiun',
-                'no_hp_murid' => '0856777888', 
-                'nama_orang_tua' => 'Agus',
-                'no_hp_orang_tua' => '0856111222', 
-                'paket_awal' => '1800000', 
-                'pilihan_paket' => 'SMP', 
-                'tahun_masuk' => '2024'
-            ],
-        ];
-
-        $filter_kelas = ['7 SMP', '8 SMP', '9 SMP', '10 SMA', '11 SMA', '12 SMA'];
-        $filter_tahun = ['2023', '2024', '2025'];
-
-        return view('dashboard.shared.kelola-murid.kelola-murid', compact('murids', 'filter_kelas', 'filter_tahun', 'role'));
+        $role = $request->route()->getPrefix() == '/superadmin' ? 'superadmin' : 'admin';
+        $murids = Murid::orderBy('id_murid', 'asc')->get();
+        
+        return view('dashboard.shared.kelola-murid.kelola-murid', [
+            'role' => $role,
+            'murids' => $murids
+        ]);
     }
 
-    public function create()
+    // Form tambah data
+    public function create(Request $request)
     {
-        $role = Auth::user()->peran;
-        return view('dashboard.shared.kelola-murid.create-murid', compact('role'));
+        $role = $request->route()->getPrefix() == '/superadmin' ? 'superadmin' : 'admin';
+        
+        // Ambil data paket untuk dropdown
+        $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
+        
+        return view('dashboard.shared.kelola-murid.create-murid', [
+            'role' => $role,
+            'paketList' => $paketList
+        ]);
     }
 
-    // --- TAMBAHKAN FUNGSI STORE INI ---
+    // Simpan data
     public function store(Request $request)
     {
-        $role = Auth::user()->peran;
+        $request->validate([
+            'nama_lengkap_murid' => 'required|string|max:35',
+            'kelas' => 'nullable|string|max:10',
+            'asal_sekolah' => 'nullable|string|max:35',
+            'alamat_murid' => 'nullable|string',
+            'no_hp_murid' => 'nullable|string|max:15',
+            'nama_orang_tua' => 'nullable|string|max:35',
+            'no_hp_orang_tua' => 'nullable|string|max:15',
+            'paket_awal' => 'nullable|numeric|min:0',
+            'pilihan_paket' => 'nullable|string|max:25',
+            'tahun_masuk' => 'nullable|integer|min:1900|max:' . date('Y')
+        ]);
+
+        // Pastikan paket_awal selalu 100000 jika tidak diisi
+        $data = $request->all();
+        if (empty($data['paket_awal'])) {
+            $data['paket_awal'] = 100000;
+        }
         
-        // Logika simpan ke database nanti di sini
-        // Untuk sekarang, kita redirect balik ke halaman index
-        return redirect()->route($role.'.kelola-murid')->with('success', 'Data murid berhasil ditambahkan!');
+        Murid::create($data);
+
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        
+        return redirect()->route($role . '.kelola-murid')->with('success', 'Data murid berhasil ditambahkan');
     }
 
-    public function edit($id)
+    // Form edit data
+    public function edit(Request $request, $id)
     {
-        $role = Auth::user()->peran;
-
-        $murid = (object)[
-            'id_murid' => $id,
-            'nama_lengkap_murid' => 'Rizky Pratama',
-            'kelas' => '12 SMA',
-            'asal_sekolah' => 'SMAN 1 Madiun',
-            'alamat_murid' => 'Jl. Pahlawan No. 10, Madiun',
-            'no_hp_murid' => '0812345678',
-            'nama_orang_tua' => 'Bambang',
-            'no_hp_orang_tua' => '0812999000',
-            'paket_awal' => '2500000',
-            'pilihan_paket' => 'SMA',
-            'tahun_masuk' => '2023'
-        ];
-
-        return view('dashboard.shared.kelola-murid.edit-murid', compact('role', 'id', 'murid'));
+        $role = $request->route()->getPrefix() == '/superadmin' ? 'superadmin' : 'admin';
+        $murid = Murid::findOrFail($id);
+        
+        // Ambil data paket untuk dropdown
+        $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
+        
+        return view('dashboard.shared.kelola-murid.edit-murid', [
+            'role' => $role,
+            'murid' => $murid,
+            'paketList' => $paketList
+        ]);
     }
 
-    // --- TAMBAHKAN FUNGSI UPDATE INI ---
+    // Update data
     public function update(Request $request, $id)
     {
-        $role = Auth::user()->peran;
+        $request->validate([
+            'nama_lengkap_murid' => 'required|string|max:35',
+            'kelas' => 'nullable|string|max:10',
+            'asal_sekolah' => 'nullable|string|max:35',
+            'alamat_murid' => 'nullable|string',
+            'no_hp_murid' => 'nullable|string|max:15',
+            'nama_orang_tua' => 'nullable|string|max:35',
+            'no_hp_orang_tua' => 'nullable|string|max:15',
+            'paket_awal' => 'nullable|numeric|min:0',
+            'pilihan_paket' => 'nullable|string|max:25',
+            'tahun_masuk' => 'nullable|integer|min:1900|max:' . date('Y')
+        ]);
+
+        $murid = Murid::findOrFail($id);
         
-        // Logika update ke database nanti di sini
-        return redirect()->route($role.'.kelola-murid')->with('success', 'Data murid berhasil diperbarui!');
+        // Pastikan paket_awal tetap 100000 jika tidak diubah
+        $data = $request->all();
+        if (empty($data['paket_awal'])) {
+            $data['paket_awal'] = 100000;
+        }
+        
+        $murid->update($data);
+
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        
+        return redirect()->route($role . '.kelola-murid')->with('success', 'Data murid berhasil diperbarui');
     }
 
-    // --- TAMBAHKAN FUNGSI DESTROY INI ---
+    // Hapus data
     public function destroy($id)
     {
-        $role = Auth::user()->peran;
-        return redirect()->route($role.'.kelola-murid')->with('success', 'Data murid berhasil dihapus!');
+        $murid = Murid::findOrFail($id);
+        $murid->delete();
+        
+        $referer = request()->headers->get('referer');
+        $role = str_contains($referer, 'superadmin') ? 'superadmin' : 'admin';
+        
+        return redirect()->route($role . '.kelola-murid')->with('success', 'Data murid berhasil dihapus');
     }
-}   
+
+    // Search murid untuk live search (digunakan di form pembayaran)
+    public function search(Request $request)
+    {
+        $query = $request->get('q');
+        
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+        
+        $murids = Murid::where('nama_lengkap_murid', 'like', "%{$query}%")
+            ->limit(10)
+            ->get(['id_murid', 'nama_lengkap_murid', 'kelas', 'pilihan_paket']);
+        
+        return response()->json($murids);
+    }
+}

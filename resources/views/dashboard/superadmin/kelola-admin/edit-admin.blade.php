@@ -11,55 +11,69 @@
     {{-- Container Form Utama --}}
     <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);" data-aos="fade-up">
         
-        <form action="{{ route('superadmin.kelola-admin.update', $admin['id']) }}" method="POST">
+        <form action="{{ route('superadmin.kelola-admin.update', $admin->id_user) }}" method="POST">
             @csrf
             @method('PUT')
             
-            {{-- ID (Readonly) --}}
+            {{-- ID Admin (Readonly) --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">ID</label>
-                <input type="text" name="id" value="{{ $admin['id'] }}" readonly 
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; color: #6B7280;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">ID Admin</label>
+                <input type="text" value="AD{{ str_pad($admin->id_user, 4, '0', STR_PAD_LEFT) }}" readonly 
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280;">
             </div>
 
             {{-- Nama Lengkap --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Lengkap</label>
-                <input type="text" name="name" value="{{ $admin['nama'] }}" placeholder="Masukkan Nama Lengkap" required
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Lengkap <span style="color: red;">*</span></label>
+                <input type="text" name="nama_lengkap_admin" value="{{ old('nama_lengkap_admin', $admin->admin->nama_lengkap_admin ?? '') }}" placeholder="Masukkan Nama Lengkap" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                @error('nama_lengkap_admin') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
             {{-- Alamat --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Alamat</label>
-                <input type="text" name="alamat" value="{{ $admin['alamat'] }}" placeholder="Masukkan Alamat" required
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                <textarea name="alamat_admin" rows="2" placeholder="Masukkan Alamat"
+                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">{{ old('alamat_admin', $admin->admin->alamat_admin ?? '') }}</textarea>
+                @error('alamat_admin') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
-            {{-- Grid 2 Kolom --}}
+            {{-- Grid 2 Kolom (Baris 1: No HP dan Email) --}}
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px;">
                 <div>
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No Hp</label>
-                        <input type="text" name="kontak" value="{{ $admin['no_hp'] }}" placeholder="Masukkan No HP"
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No HP</label>
+                        <input type="text" name="no_hp_admin" value="{{ old('no_hp_admin', $admin->admin->no_hp_admin ?? '') }}" placeholder="Masukkan No HP"
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Gaji</label>
-                        <input type="text" name="gaji" value="{{ $admin['gaji'] }}" placeholder="Masukkan Gaji"
-                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                        @error('no_hp_admin') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
                 </div>
                 <div>
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Username</label>
-                        <input type="text" name="username" value="{{ $admin['username'] }}" placeholder="Masukkan Username"
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Email <span style="color: red;">*</span></label>
+                        <input type="email" name="email" value="{{ old('email', $admin->email) }}" placeholder="Masukkan Email" required
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                        @error('email') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
+                </div>
+            </div>
+
+            {{-- Grid 2 Kolom (Baris 2: Gaji Pokok dan Username) --}}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px;">
+                <div>
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Password</label>
-                        <input type="password" name="password" placeholder="Kosongkan jika tidak diubah"
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Gaji Pokok (Rp)</label>
+                        <input type="number" name="gaji_pokok" value="{{ old('gaji_pokok', $admin->admin->gaji_pokok ?? 0) }}" placeholder="Masukkan Gaji Pokok"
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                        @error('gaji_pokok') <small style="color: red;">{{ $message }}</small> @enderror
+                    </div>
+                </div>
+                <div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Username <span style="color: red;">*</span></label>
+                        <input type="text" name="username" value="{{ old('username', $admin->username) }}" placeholder="Masukkan Username" required
+                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                        @error('username') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
                 </div>
             </div>
@@ -80,9 +94,7 @@
     </div>
 </div>
 
-{{-- =============================================
-     MODAL KECIL (SMALL POP-UP)
-============================================= --}}
+{{-- MODAL KONFIRMASI KELUAR --}}
 <div id="modalBatal" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         
@@ -96,12 +108,10 @@
         </p>
 
         <div style="display: flex; gap: 10px; justify-content: center;">
-            {{-- Tombol Batal --}}
             <button onclick="tutupModalBatal()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; color: #374151; font-weight: 600; font-size: 13px; cursor: pointer;">
                 Tidak
             </button>
 
-            {{-- Tombol Iya --}}
             <a href="{{ route('superadmin.kelola-admin') }}" style="flex: 1; text-decoration: none;">
                 <button type="button" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">
                     Ya, Keluar

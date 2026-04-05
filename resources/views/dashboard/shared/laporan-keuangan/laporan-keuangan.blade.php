@@ -9,29 +9,15 @@
 
 @push('styles')
 <style>
-    /* Styling khusus untuk membuat custom dropdown icon */
     .filter-select {
         -webkit-appearance: none;
         -moz-appearance: none;
         appearance: none;
-        /* Menggunakan SVG panah bawah yang bersih */
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 12px center;
-        background-size: 14px 14px;
-        padding-right: 38px !important;
-        background-color: white;
-        transition: all 0.2s ease;
-    }
-
-    .filter-select:hover {
-        border-color: #4D0B87 !important;
-    }
-
-    .filter-select:focus {
-        border-color: #4D0B87 !important;
-        box-shadow: 0 0 0 2px rgba(77, 11, 135, 0.1);
-        outline: none;
+        background-size: 12px 12px;
+        padding-right: 36px !important;
     }
 </style>
 @endpush
@@ -41,7 +27,7 @@
 
     @php $role = $role ?? (Auth::user()->peran); @endphp
 
-    {{-- ── 1. HEADER HALAMAN ── --}}
+    {{-- ── 1. HEADER HALAMAN (sama style Kelola Admin) ── --}}
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
             {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
@@ -92,23 +78,33 @@
             </div>
 
             {{-- Filter Bulan --}}
-            <select class="filter-select" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 140px; cursor: pointer;">
-                <option value="">Bulan</option>
-                @foreach(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] as $k => $b)
-                    <option value="{{ $k+1 }}" {{ $k+1 == 3 ? 'selected' : '' }}>{{ $b }}</option>
-                @endforeach
+            <select class="filter-select" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 140px; background: white; outline: none; cursor: pointer;">
+                <option value="">--- Pilih Bulan ---</option>
+                <option value="1">Januari</option>
+                <option value="2">Februari</option>
+                <option value="3" selected>Maret</option>
+                <option value="4">April</option>
+                <option value="5">Mei</option>
+                <option value="6">Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">Agustus</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
             </select>
 
             {{-- Filter Tahun --}}
-            <select class="filter-select" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 110px; cursor: pointer;">
-                <option value="">Tahun</option>
+            <select class="filter-select" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 120px; background: white; outline: none; cursor: pointer;">
+                <option value="">--- Tahun ---</option>
+                <option value="2024">2024</option>
                 <option value="2025">2025</option>
                 <option value="2026" selected>2026</option>
             </select>
 
             {{-- Filter Kategori --}}
-            <select class="filter-select" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 150px; cursor: pointer;">
-                <option value="">Kategori</option>
+            <select class="filter-select" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 150px; background: white; outline: none; cursor: pointer;">
+                <option value="">--- Kategori ---</option>
                 <option value="pemasukan">Pemasukan</option>
                 <option value="pengeluaran">Pengeluaran</option>
                 <option value="piutang">Piutang</option>
@@ -124,6 +120,8 @@
     </div>
 
     {{-- ── 4. TABEL-TABEL LAPORAN ── --}}
+
+    {{-- TABEL 1: PEMASUKAN --}}
     @php
         $pemasukan = [
             ['no' => 1, 'tanggal' => '9 Feb 2026', 'rincian' => 'Pembayaran Murid Paket SD',  'jumlah' => 'Rp 5.000.000'],
@@ -136,14 +134,14 @@
             ['no' => 3, 'tanggal' => '9 Feb 2026', 'rincian' => 'Bayar Wifi',   'jumlah' => 'Rp 100.000'],
         ];
         $piutang = [
-            ['no' => 1, 'tanggal' => '9 Feb 2026', 'nama' => 'Satoru Goju', 'bulan' => 'Jan 2026, Feb 2026', 'jumlah' => 'Rp 150.000'],
-            ['no' => 2, 'tanggal' => '9 Feb 2026', 'nama' => 'Jaden', 'bulan' => 'Februari 2026', 'jumlah' => 'Rp 100.000'],
-            ['no' => 3, 'tanggal' => '9 Feb 2026', 'nama' => 'Marselino', 'bulan' => 'Maret 2026', 'jumlah' => 'Rp 150.000'],
+            ['no' => 1, 'tanggal' => '9 Feb 2026', 'nama' => 'Satoru Goju', 'bulan' => 'Januari 2026, Februari 2026', 'jumlah' => 'Rp 150.000'],
+            ['no' => 2, 'tanggal' => '9 Feb 2026', 'nama' => 'Jaden',       'bulan' => 'Februari 2026',               'jumlah' => 'Rp 100.000'],
+            ['no' => 3, 'tanggal' => '9 Feb 2026', 'nama' => 'Marselino',   'bulan' => 'Maret 2026',                  'jumlah' => 'Rp 150.000'],
         ];
         $uang_muka = [
-            ['no' => 1, 'tanggal' => '9 Feb 2026', 'nama' => 'Satoru Goju', 'periode' => 'Jan-Feb 2026', 'jumlah' => 'Rp 240.000'],
-            ['no' => 2, 'tanggal' => '9 Feb 2026', 'nama' => 'Jaden', 'periode' => 'Jan-Mar 2026', 'jumlah' => 'Rp 360.000'],
-            ['no' => 3, 'tanggal' => '9 Feb 2026', 'nama' => 'Marselino', 'periode' => 'Jan-Apr 2026', 'jumlah' => 'Rp 480.000'],
+            ['no' => 1, 'tanggal' => '9 Feb 2026', 'nama' => 'Satoru Goju', 'periode' => 'Jan-Feb 2026',  'jumlah' => 'Rp 240.000'],
+            ['no' => 2, 'tanggal' => '9 Feb 2026', 'nama' => 'Jaden',       'periode' => 'Jan-Mar 2026',  'jumlah' => 'Rp 360.000'],
+            ['no' => 3, 'tanggal' => '9 Feb 2026', 'nama' => 'Marselino',   'periode' => 'Jan-Apr 2026',  'jumlah' => 'Rp 480.000'],
         ];
     @endphp
 
@@ -164,7 +162,9 @@
                 </thead>
                 <tbody style="color: #374151;">
                     @foreach($pemasukan as $p)
-                    <tr style="border-bottom: 1px solid #F3F4F6; background: #F0F4FF;">
+                    <tr style="border-bottom: 1px solid #F3F4F6; background: #F0F4FF; transition: 0.2s;"
+                        onmouseover="this.style.background='#E0EAFF'"
+                        onmouseout="this.style.background='#F0F4FF'">
                         <td style="padding: 15px; text-align: center;">{{ $p['no'] }}</td>
                         <td style="padding: 15px;">{{ $p['tanggal'] }}</td>
                         <td style="padding: 15px;">{{ $p['rincian'] }}</td>
@@ -173,6 +173,19 @@
                     @endforeach
                 </tbody>
             </table>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-top: 2px solid #F3F4F6;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <select class="filter-select" style="padding: 7px 10px; border-radius: 8px; border: 1px solid #E5E7EB; color: #374151; font-size: 12px; background: white; outline: none; cursor: pointer;">
+                    <option>10 baris</option><option>25 baris</option><option>50 baris</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 4px;">
+                <button style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; font-size: 11px;"><i class="fas fa-angle-double-left"></i></button>
+                <button style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; font-size: 11px;"><i class="fas fa-angle-left"></i></button>
+                <button style="width: 30px; height: 30px; border-radius: 6px; background: #4472DF; color: white; border: none; font-weight: 600; cursor: pointer; font-size: 12px;">1</button>
+                <button style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; font-size: 11px;"><i class="fas fa-angle-right"></i></button>
+            </div>
         </div>
         <div style="display: flex; justify-content: space-between; padding: 15px 20px; background: #F9FAFB; border-top: 1px solid #F3F4F6;">
             <span style="font-size: 14px; font-weight: 700; color: #111827;">Total Pemasukan Periode Berjalan</span>
@@ -197,7 +210,9 @@
                 </thead>
                 <tbody style="color: #374151;">
                     @foreach($pengeluaran as $p)
-                    <tr style="border-bottom: 1px solid #F3F4F6; background: #FFF0F0;">
+                    <tr style="border-bottom: 1px solid #F3F4F6; background: #FFF0F0; transition: 0.2s;"
+                        onmouseover="this.style.background='#FFE0E0'"
+                        onmouseout="this.style.background='#FFF0F0'">
                         <td style="padding: 15px; text-align: center;">{{ $p['no'] }}</td>
                         <td style="padding: 15px;">{{ $p['tanggal'] }}</td>
                         <td style="padding: 15px;">{{ $p['rincian'] }}</td>
@@ -207,9 +222,122 @@
                 </tbody>
             </table>
         </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-top: 2px solid #F3F4F6;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <select class="filter-select" style="padding: 7px 10px; border-radius: 8px; border: 1px solid #E5E7EB; color: #374151; font-size: 12px; background: white; outline: none; cursor: pointer;">
+                    <option>10 baris</option><option>25 baris</option><option>50 baris</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 4px;">
+                <button style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; font-size: 11px;"><i class="fas fa-angle-double-left"></i></button>
+                <button style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; font-size: 11px;"><i class="fas fa-angle-left"></i></button>
+                <button style="width: 30px; height: 30px; border-radius: 6px; background: #D74E4E; color: white; border: none; font-weight: 600; cursor: pointer; font-size: 12px;">1</button>
+                <button style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; font-size: 11px;"><i class="fas fa-angle-right"></i></button>
+            </div>
+        </div>
         <div style="display: flex; justify-content: space-between; padding: 15px 20px; background: #F9FAFB; border-top: 1px solid #F3F4F6;">
             <span style="font-size: 14px; font-weight: 700; color: #111827;">Total Pengeluaran Periode Berjalan</span>
             <span style="font-size: 15px; font-weight: 800; color: #D74E4E;">Rp 3.000.000</span>
+        </div>
+    </div>
+
+    {{-- TABEL PIUTANG --}}
+    <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
+        <div style="padding: 20px 20px 15px;">
+            <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #111827;">Riwayat Pelunasan Piutang (Tunggakan)</h4>
+        </div>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
+                <thead>
+                    <tr style="background: #EEDCA2; color: #111827;">
+                        <th style="padding: 15px; font-weight: 700; text-align: center; width: 50px;">No</th>
+                        <th style="padding: 15px; font-weight: 700;">Tanggal</th>
+                        <th style="padding: 15px; font-weight: 700;">Nama Murid</th>
+                        <th style="padding: 15px; font-weight: 700;">Bulan Tagihan</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: right;">Jumlah</th>
+                    </tr>
+                </thead>
+                <tbody style="color: #374151;">
+                    @foreach($piutang as $p)
+                    <tr style="border-bottom: 1px solid #F3F4F6; background: #FFFDF0; transition: 0.2s;"
+                        onmouseover="this.style.background='#FFF8D0'"
+                        onmouseout="this.style.background='#FFFDF0'">
+                        <td style="padding: 15px; text-align: center;">{{ $p['no'] }}</td>
+                        <td style="padding: 15px;">{{ $p['tanggal'] }}</td>
+                        <td style="padding: 15px;">{{ $p['nama'] }}</td>
+                        <td style="padding: 15px;">{{ $p['bulan'] }}</td>
+                        <td style="padding: 15px; text-align: right; font-weight: 700; color: #E7C255;">{{ $p['jumlah'] }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-top: 2px solid #F3F4F6;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <select class="filter-select" style="padding: 7px 10px; border-radius: 8px; border: 1px solid #E5E7EB; color: #374151; font-size: 12px; background: white; outline: none; cursor: pointer;">
+                    <option>10 baris</option><option>25 baris</option><option>50 baris</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 4px;">
+                <button style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; font-size: 11px;"><i class="fas fa-angle-double-left"></i></button>
+                <button style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; font-size: 11px;"><i class="fas fa-angle-left"></i></button>
+                <button style="width: 30px; height: 30px; border-radius: 6px; background: #E7C255; color: white; border: none; font-weight: 600; cursor: pointer; font-size: 12px;">1</button>
+                <button style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; font-size: 11px;"><i class="fas fa-angle-right"></i></button>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 15px 20px; background: #F9FAFB; border-top: 1px solid #F3F4F6;">
+            <span style="font-size: 14px; font-weight: 700; color: #111827;">Total Pemasukan Piutang (Tunggakan)</span>
+            <span style="font-size: 15px; font-weight: 800; color: #E7C255;">Rp 400.000</span>
+        </div>
+    </div>
+
+    {{-- TABEL UANG MUKA --}}
+    <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
+        <div style="padding: 20px 20px 15px;">
+            <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #111827;">Riwayat Pendapatan Uang Dimuka</h4>
+        </div>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
+                <thead>
+                    <tr style="background: #A2EEB9; color: #111827;">
+                        <th style="padding: 15px; font-weight: 700; text-align: center; width: 50px;">No</th>
+                        <th style="padding: 15px; font-weight: 700;">Tanggal</th>
+                        <th style="padding: 15px; font-weight: 700;">Nama Murid</th>
+                        <th style="padding: 15px; font-weight: 700;">Periode Pembayaran</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: right;">Jumlah</th>
+                    </tr>
+                </thead>
+                <tbody style="color: #374151;">
+                    @foreach($uang_muka as $u)
+                    <tr style="border-bottom: 1px solid #F3F4F6; background: #F0FFF4; transition: 0.2s;"
+                        onmouseover="this.style.background='#DCFCE7'"
+                        onmouseout="this.style.background='#F0FFF4'">
+                        <td style="padding: 15px; text-align: center;">{{ $u['no'] }}</td>
+                        <td style="padding: 15px;">{{ $u['tanggal'] }}</td>
+                        <td style="padding: 15px;">{{ $u['nama'] }}</td>
+                        <td style="padding: 15px;">{{ $u['periode'] }}</td>
+                        <td style="padding: 15px; text-align: right; font-weight: 700; color: #4AB462;">{{ $u['jumlah'] }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-top: 2px solid #F3F4F6;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <select class="filter-select" style="padding: 7px 10px; border-radius: 8px; border: 1px solid #E5E7EB; color: #374151; font-size: 12px; background: white; outline: none; cursor: pointer;">
+                    <option>10 baris</option><option>25 baris</option><option>50 baris</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 4px;">
+                <button style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; font-size: 11px;"><i class="fas fa-angle-double-left"></i></button>
+                <button style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; font-size: 11px;"><i class="fas fa-angle-left"></i></button>
+                <button style="width: 30px; height: 30px; border-radius: 6px; background: #4AB462; color: white; border: none; font-weight: 600; cursor: pointer; font-size: 12px;">1</button>
+                <button style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; font-size: 11px;"><i class="fas fa-angle-right"></i></button>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 15px 20px; background: #F9FAFB; border-top: 1px solid #F3F4F6;">
+            <span style="font-size: 14px; font-weight: 700; color: #111827;">Total Pendapatan Uang Dimuka</span>
+            <span style="font-size: 15px; font-weight: 800; color: #4AB462;">Rp 1.080.000</span>
         </div>
     </div>
 

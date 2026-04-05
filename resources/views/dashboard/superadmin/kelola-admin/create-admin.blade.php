@@ -14,60 +14,58 @@
         <form action="{{ route('superadmin.kelola-admin.store') }}" method="POST">
             @csrf
             
-            {{-- ID (Readonly) --}}
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">ID</label>
-                <input type="text" name="id" value="AD0009" readonly 
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); color: #6B7280;">
-            </div>
-
             {{-- Nama Lengkap --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Lengkap</label>
-                <input type="text" name="name" placeholder="Masukkan Nama Lengkap" required
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Lengkap <span style="color: red;">*</span></label>
+                <input type="text" name="nama_lengkap_admin" placeholder="Masukkan Nama Lengkap" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                @error('nama_lengkap_admin') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
             {{-- Alamat --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Alamat</label>
-                <input type="text" name="alamat" placeholder="Masukkan Alamat" required
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                <textarea name="alamat_admin" rows="2" placeholder="Masukkan Alamat"
+                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;"></textarea>
+                @error('alamat_admin') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
-            {{-- Grid 2 Kolom --}}
+            {{-- Grid 2 Kolom (Baris 1: No HP dan Email) --}}
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px;">
-                
-                {{-- Kolom Kiri --}}
                 <div>
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No Hp</label>
-                        <input type="text" name="kontak" placeholder="Masukkan No HP"
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No HP</label>
+                        <input type="text" name="no_hp_admin" placeholder="Masukkan No HP"
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Gaji</label>
-                        <input type="text" name="gaji" placeholder="Masukkan Gaji"
-                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Email</label>
-                        <input type="email" name="email" placeholder="Masukkan Email"
-                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                        @error('no_hp_admin') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
                 </div>
-
-                {{-- Kolom Kanan --}}
                 <div>
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Username</label>
-                        <input type="text" name="username" placeholder="Masukkan Username"
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Email <span style="color: red;">*</span></label>
+                        <input type="email" name="email" placeholder="Masukkan Email" required
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                        @error('email') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
+                </div>
+            </div>
+
+            {{-- Grid 2 Kolom (Baris 2: Gaji Pokok dan Username) --}}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px;">
+                <div>
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Password</label>
-                        <input type="password" name="password" placeholder="Masukkan Password"
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Gaji Pokok (Rp)</label>
+                        <input type="number" name="gaji_pokok" placeholder="Masukkan Gaji Pokok"
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                        @error('gaji_pokok') <small style="color: red;">{{ $message }}</small> @enderror
+                    </div>
+                </div>
+                <div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Username <span style="color: red;">*</span></label>
+                        <input type="text" name="username" placeholder="Masukkan Username" required
+                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                        @error('username') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
                 </div>
             </div>
@@ -88,9 +86,7 @@
     </div>
 </div>
 
-{{-- =============================================
-     MODAL KONFIRMASI KECIL (POP-UP)
-============================================= --}}
+{{-- MODAL KONFIRMASI KELUAR --}}
 <div id="modalBatal" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         
@@ -104,14 +100,12 @@
         </p>
 
         <div style="display: flex; gap: 10px; justify-content: center;">
-            {{-- Tombol Tidak --}}
-            <button onclick="tutupModalBatal()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; color: #374151; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s;">
+            <button onclick="tutupModalBatal()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; color: #374151; font-weight: 600; font-size: 13px; cursor: pointer;">
                 Tidak
             </button>
 
-            {{-- Tombol Iya --}}
             <a href="{{ route('superadmin.kelola-admin') }}" style="flex: 1; text-decoration: none;">
-                <button type="button" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s;">
+                <button type="button" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">
                     Ya, Keluar
                 </button>
             </a>
@@ -119,7 +113,6 @@
     </div>
 </div>
 
-{{-- JAVASCRIPT MODAL --}}
 <script>
     function bukaModalBatal() {
         document.getElementById('modalBatal').style.display = 'flex';
@@ -129,7 +122,6 @@
         document.getElementById('modalBatal').style.display = 'none';
     }
 
-    // Menutup modal jika klik di area luar kotak
     window.onclick = function(event) {
         let modal = document.getElementById('modalBatal');
         if (event.target == modal) {

@@ -6,26 +6,24 @@
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
     <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Input Harga Paket</h1>
 
-    <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);" data-aos="fade-up">
+    <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
         <form action="{{ route($role . '.harga-paket.store') }}" method="POST">
             @csrf
+
+            {{-- HAPUS FIELD ID (Karena auto increment) --}}
+            
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">ID</label>
-                <input type="text" name="kode" placeholder="Masukkan ID" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Harga Paket <span style="color: red;">*</span></label>
+                <input type="number" name="harga" placeholder="Masukkan Harga Paket (contoh: 120000)" required 
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                @error('harga') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
+
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Harga Paket</label>
-                <input type="text" name="harga" placeholder="Masukkan Harga Paket" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tingkat</label>
-                <select name="tingkat" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; color: #374151;">
-                    <option value="">Pilih Tingkat</option>
-                    <option value="SD">SD</option>
-                    <option value="SMP">SMP</option>
-                    <option value="SMA">SMA</option>
-                    <option value="Biaya Pendaftaran">Biaya Pendaftaran</option>
-                </select>
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tingkat <span style="color: red;">*</span></label>
+                <input type="text" name="tingkat" placeholder="Contoh: SD, SMP, SMA, atau lainnya" required 
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                @error('tingkat') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">

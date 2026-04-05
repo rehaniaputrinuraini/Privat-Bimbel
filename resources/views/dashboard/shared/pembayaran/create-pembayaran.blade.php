@@ -3,50 +3,144 @@
 @section('title', 'Input Pembayaran')
 
 @section('content')
+<style>
+    .autocomplete-items {
+        position: absolute;
+        z-index: 1000;
+        background: white;
+        border: 1px solid #E5E7EB;
+        border-radius: 12px;
+        width: calc(100% - 30px);
+        max-height: 250px;
+        overflow-y: auto;
+        margin-top: 5px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .autocomplete-item {
+        padding: 12px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #F3F4F6;
+        transition: 0.2s;
+    }
+    .autocomplete-item:hover {
+        background-color: #F3E8FF;
+    }
+    .autocomplete-item strong {
+        color: #111827;
+    }
+    .autocomplete-item small {
+        color: #6B7280;
+        font-size: 12px;
+    }
+</style>
+
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
     <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Input Pembayaran</h1>
 
-    <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);" data-aos="fade-up">
-        <form action="{{ route($role . '.pembayaran.store') }}" method="POST">
+    {{-- SESSION ERROR --}}
+    @if($errors->any())
+        <div style="background: #FEE2E2; color: #EF4444; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+            <i class="fas fa-exclamation-circle"></i> {{ $errors->first() }}
+        </div>
+    @endif
+
+    {{-- SESSION SUCCESS --}}
+    @if(session('success'))
+        <div style="background: #E1F7E3; color: #0E7490; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+            <i class="fas fa-check-circle"></i> {{ session('success') }}
+        </div>
+    @endif
+
+    <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+        <form action="{{ route($role . '.pembayaran.store') }}" method="POST" id="formPembayaran">
             @csrf
+
+            {{-- Tanggal --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tanggal</label>
-                <input type="date" name="tanggal" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tanggal <span style="color: red;">*</span></label>
+                <input type="date" name="tanggal" id="tanggal" required 
+                       value="{{ date('Y-m-d') }}"
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                @error('tanggal') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Murid</label>
-                <input type="text" name="nama_murid" placeholder="Masukkan Nama Murid" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+
+            {{-- Nama Murid dengan Live Search --}}
+            <div style="margin-bottom: 15px; position: relative;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Murid <span style="color: red;">*</span></label>
+                <input type="text" id="searchMurid" name="search_murid" 
+                       placeholder="Ketik nama murid..." autocomplete="off" required
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                <div id="autocompleteResult" class="autocomplete-items" style="display: none;"></div>
+                <input type="hidden" name="id_murid" id="id_murid" required>
+                <small style="color: #9CA3AF;">Ketik minimal 2 huruf untuk mencari murid</small>
+                @error('id_murid') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
+
+            {{-- Paket Awal (READONLY - Auto fill) --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Paket Awal</label>
-                <input type="text" name="paket_awal" placeholder="Masukkan Paket Awal" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Paket Awal <span style="color: #9CA3AF;">(Otomatis)</span></label>
+                <input type="text" name="paket_awal" id="paket_awal" readonly 
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280;">
+                <small style="color: #9CA3AF;">Akan terisi otomatis setelah memilih murid</small>
             </div>
+
+            {{-- Paket Selanjutnya --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Paket Selanjutnya</label>
-                <select name="paket_selanjutnya" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; color: #374151;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Paket Selanjutnya <span style="color: red;">*</span></label>
+                <select name="paket_selanjutnya" id="paket_selanjutnya" required 
+                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; color: #374151;">
                     <option value="">Pilih Paket</option>
                     <option value="SD">SD</option>
                     <option value="SMP">SMP</option>
                     <option value="SMA">SMA</option>
                 </select>
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Total Pembayaran</label>
-                <input type="text" name="total_pembayaran" placeholder="Masukkan Total Pembayaran" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Keterangan</label>
-                <textarea name="keterangan" rows="3" placeholder="Masukkan Keterangan" style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; resize: vertical;"></textarea>
+                @error('paket_selanjutnya') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
+            {{-- Informasi Harga Paket (Dinamis) --}}
+            <div id="infoHarga" style="margin-bottom: 15px; padding: 10px 15px; background: #E0E7FF; border-radius: 10px; display: none;">
+                <i class="fas fa-info-circle"></i> 
+                Harga paket <span id="hargaPaketNama">-</span>: 
+                <strong id="hargaPaketValue">Rp 0</strong> / bulan
+            </div>
+
+            {{-- Total Pembayaran --}}
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Total Pembayaran <span style="color: red;">*</span></label>
+                <input type="number" name="total_pembayaran" id="total_pembayaran" placeholder="Masukkan Total Pembayaran" required 
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                @error('total_pembayaran') <small style="color: red;">{{ $message }}</small> @enderror
+            </div>
+
+            {{-- Preview Status Pembayaran --}}
+            <div id="previewStatus" style="margin-bottom: 15px; padding: 12px 15px; border-radius: 10px; display: none;">
+                <!-- Akan diisi JavaScript -->
+            </div>
+
+            {{-- Keterangan --}}
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Keterangan</label>
+                <textarea name="keterangan" id="keterangan" rows="3" placeholder="Masukkan Keterangan (contoh: Pembayaran bulan Januari)" 
+                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; resize: vertical;"></textarea>
+                @error('keterangan') <small style="color: red;">{{ $message }}</small> @enderror
+            </div>
+
+            {{-- Tombol Aksi --}}
             <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">
-                <button type="button" onclick="bukaModalBatal()" style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 16px; background: #FFFFFF; cursor: pointer;">Keluar</button>
-                <button type="submit" style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">Simpan</button>
+                <button type="button" onclick="bukaModalBatal()" 
+                        style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 16px; background: #FFFFFF; cursor: pointer;">
+                    Keluar
+                </button>
+                <button type="submit" 
+                        style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
+                    Simpan
+                </button>
             </div>
         </form>
     </div>
 </div>
 
+{{-- MODAL KONFIRMASI KELUAR --}}
 <div id="modalBatal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -62,7 +156,153 @@
 </div>
 
 <script>
-    function bukaModalBatal() { document.getElementById('modalBatal').style.display = 'flex'; }
-    function tutupModalBatal() { document.getElementById('modalBatal').style.display = 'none'; }
+    // Data harga paket dari database
+    const hargaPaketData = @json($pakets->pluck('harga', 'nama_paket'));
+    
+    // Fungsi untuk mendapatkan harga paket
+    function getHargaPaket(namaPaket) {
+        return hargaPaketData[namaPaket] || 0;
+    }
+    
+    // Fungsi untuk update preview status pembayaran
+    function updatePreviewStatus() {
+        const paketSelanjutnya = document.getElementById('paket_selanjutnya').value;
+        const totalBayar = parseInt(document.getElementById('total_pembayaran').value) || 0;
+        const previewDiv = document.getElementById('previewStatus');
+        const infoHargaDiv = document.getElementById('infoHarga');
+        
+        if (!paketSelanjutnya || !totalBayar || totalBayar <= 0) {
+            previewDiv.style.display = 'none';
+            infoHargaDiv.style.display = 'none';
+            return;
+        }
+        
+        const hargaPerBulan = getHargaPaket(paketSelanjutnya);
+        
+        if (hargaPerBulan > 0) {
+            document.getElementById('hargaPaketNama').innerText = paketSelanjutnya;
+            document.getElementById('hargaPaketValue').innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(hargaPerBulan);
+            infoHargaDiv.style.display = 'block';
+            
+            let statusText = '';
+            let statusColor = '';
+            let statusBg = '';
+            
+            if (totalBayar >= hargaPerBulan) {
+                statusText = '✅ Lunas - Pembayaran mencukupi untuk 1 bulan penuh';
+                statusColor = '#0E7490';
+                statusBg = '#E1F7E3';
+            } else {
+                const sisa = hargaPerBulan - totalBayar;
+                statusText = `⚠️ Uang Muka - Masih kurang Rp ${new Intl.NumberFormat('id-ID').format(sisa)} untuk lunas 1 bulan`;
+                statusColor = '#92400E';
+                statusBg = '#FEF3C7';
+            }
+            
+            previewDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-calculator"></i>
+                    <div>
+                        <strong>Preview Status:</strong><br>
+                        <span style="color: ${statusColor};">${statusText}</span>
+                    </div>
+                </div>
+            `;
+            previewDiv.style.background = statusBg;
+            previewDiv.style.display = 'block';
+        } else {
+            infoHargaDiv.style.display = 'none';
+            previewDiv.style.display = 'none';
+        }
+    }
+    
+    // ========== LIVE SEARCH MURID ==========
+    const searchInput = document.getElementById('searchMurid');
+    const autocompleteDiv = document.getElementById('autocompleteResult');
+    const idHidden = document.getElementById('id_murid');
+    const paketAwalInput = document.getElementById('paket_awal');
+    
+    let typingTimer = null;
+    
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        if (typingTimer) clearTimeout(typingTimer);
+        
+        if (query.length < 2) {
+            autocompleteDiv.style.display = 'none';
+            idHidden.value = '';
+            paketAwalInput.value = '';
+            return;
+        }
+        
+        typingTimer = setTimeout(() => {
+            fetch(`/search-murid?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        autocompleteDiv.innerHTML = data.map(murid => `
+                            <div class="autocomplete-item" 
+                                 data-id="${murid.id_murid}" 
+                                 data-paket="${murid.pilihan_paket}">
+                                <strong>${murid.nama_lengkap_murid}</strong><br>
+                                <small>Kelas: ${murid.kelas} | Paket: ${murid.pilihan_paket}</small>
+                            </div>
+                        `).join('');
+                        autocompleteDiv.style.display = 'block';
+                        
+                        // Tambah event click ke setiap item
+                        document.querySelectorAll('.autocomplete-item').forEach(item => {
+                            item.addEventListener('click', function() {
+                                searchInput.value = this.querySelector('strong').innerText;
+                                idHidden.value = this.dataset.id;
+                                paketAwalInput.value = this.dataset.paket;
+                                autocompleteDiv.style.display = 'none';
+                                updatePreviewStatus();
+                            });
+                        });
+                    } else {
+                        autocompleteDiv.innerHTML = '<div class="autocomplete-item" style="color: #9CA3AF;">Murid tidak ditemukan</div>';
+                        autocompleteDiv.style.display = 'block';
+                        idHidden.value = '';
+                        paketAwalInput.value = '';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }, 300);
+    });
+    
+    // Sembunyikan autocomplete saat klik di luar
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !autocompleteDiv.contains(e.target)) {
+            autocompleteDiv.style.display = 'none';
+        }
+    });
+    
+    // Event listener untuk paket selanjutnya
+    document.getElementById('paket_selanjutnya').addEventListener('change', function() {
+        updatePreviewStatus();
+    });
+    
+    // Event listener untuk total pembayaran
+    document.getElementById('total_pembayaran').addEventListener('input', function() {
+        updatePreviewStatus();
+    });
+    
+    // Set tanggal default ke hari ini
+    if (!document.getElementById('tanggal').value) {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('tanggal').value = today;
+    }
+    
+    function bukaModalBatal() { 
+        document.getElementById('modalBatal').style.display = 'flex'; 
+    }
+    
+    function tutupModalBatal() { 
+        document.getElementById('modalBatal').style.display = 'none'; 
+    }
 </script>
 @endsection

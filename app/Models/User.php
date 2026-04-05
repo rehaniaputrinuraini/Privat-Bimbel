@@ -24,4 +24,10 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    // Relasi ke ms_admin
+    public function admin()
+    {
+        return $this->hasOne(Admin::class, 'id_user', 'id_user');
+    }
 }

@@ -245,7 +245,6 @@
                             <li>• Matematika</li>
                             <li>• IPS</li>
                             <li>• Kimia</li>
-                            <li>• Kimia</li>
                         </ul>
                         <ul>
                             <li>• IPA</li>

@@ -1,8 +1,3 @@
-{{-- =============================================
-     Dashboard Shared - Kelola Admin (REVISI: ADD SHOW ENTRIES)
-     File: resources/views/dashboard/superadmin/kelola-admin/index.blade.php
-============================================= --}}
-
 @extends('layouts.app')
 
 @section('title', 'Kelola Admin')
@@ -26,15 +21,9 @@
         <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
             <div style="position: relative; width: 300px;">
                 <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
-                <input type="text" placeholder="Cari Nama atau ID Admin..." 
+                <input type="text" id="searchInput" placeholder="Cari Nama atau ID Admin..." 
                        style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
             </div>
-
-            <select style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;">
-                <option value="">--- Status Gaji ---</option>
-                <option value="Sudah">Sudah</option>
-                <option value="Belum">Belum</option>
-            </select>
         </div>
         
         <a href="{{ route('superadmin.kelola-admin.create') }}" style="text-decoration: none;">
@@ -43,6 +32,13 @@
             </button>
         </a>
     </div>
+
+    {{-- SESSION SUCCESS --}}
+    @if(session('success'))
+        <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+            {{ session('success') }}
+        </div>
+    @endif
 
     {{-- ── 3. TABEL UTAMA ── --}}
     <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
@@ -56,52 +52,44 @@
                         <th style="padding: 15px; font-weight: 700;">Alamat</th>
                         <th style="padding: 15px; font-weight: 700;">No HP</th>
                         <th style="padding: 15px; font-weight: 700;">Gaji</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Status Gaji</th>
                         <th style="padding: 15px; font-weight: 700;">Email</th>
                         <th style="padding: 15px; font-weight: 700;">Username</th>
-                        <th style="padding: 15px; font-weight: 700;">Password</th>
                         <th style="padding: 15px; font-weight: 700; text-align: center;">Aksi</th>
                     </tr>
                 </thead>
-                <tbody style="color: #374151;">
-                    @php
-                        $admins = [
-                            (object)['id_admin' => 'AD0001', 'nama' => 'Wella', 'gaji' => '1.200.000', 'status' => 'Sudah', 'email' => 'wella@email.com', 'user' => 'wella_adm'],
-                            (object)['id_admin' => 'AD0002', 'nama' => 'Nindy Sari', 'gaji' => '1.500.000', 'status' => 'Belum', 'email' => 'nindy@email.com', 'user' => 'nindy_sari'],
-                            (object)['id_admin' => 'AD0003', 'nama' => 'Riska Amelia', 'gaji' => '1.350.000', 'status' => 'Sudah', 'email' => 'riska@email.com', 'user' => 'riska_am'],
-                        ];
-                    @endphp
-
-                    @foreach($admins as $index => $a)
+                <tbody id="tableBody" style="color: #374151;">
+                    @forelse($admin as $index => $item)
                     <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 15px; text-align: center;">{{ $index + 1 }}</td>
-                        <td style="padding: 15px;">{{ $a->id_admin }}</td>
-                        <td style="padding: 15px;">{{ $a->nama }}</td>
-                        <td style="padding: 15px;">Madiun, Jawa Timur</td>
-                        <td style="padding: 15px;">08812345678</td>
-                        <td style="padding: 15px;">Rp {{ $a->gaji }}</td>
-                        <td style="padding: 15px; text-align: center;">
-                            <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; 
-                                background: {{ $a->status == 'Sudah' ? '#E1F7E3' : '#FEE2E2' }}; 
-                                color: {{ $a->status == 'Sudah' ? '#0E7490' : '#EF4444' }};">
-                                {{ $a->status }}
-                            </span>
-                        </td>
-                        <td style="padding: 15px;">{{ $a->email }}</td>
-                        <td style="padding: 15px;">{{ $a->user }}</td>
-                        <td style="padding: 15px;">********</td>
+                        <td style="padding: 15px; text-align: center;">{{ $loop->iteration }}</td>
+                        <td style="padding: 15px;">AD{{ str_pad($item->id_user, 4, '0', STR_PAD_LEFT) }}</td>
+                        <td style="padding: 15px;">{{ $item->admin->nama_lengkap_admin ?? '-' }}</td>
+                        <td style="padding: 15px;">{{ $item->admin->alamat_admin ?? '-' }}</td>
+                        <td style="padding: 15px;">{{ $item->admin->no_hp_admin ?? '-' }}</td>
+                        <td style="padding: 15px;">Rp {{ number_format($item->admin->gaji_pokok ?? 0, 0, ',', '.') }}</td>
+                        <td style="padding: 15px;">{{ $item->email }}</td>
+                        <td style="padding: 15px;">{{ $item->username }}</td>
                         <td style="padding: 15px;">
                             <div style="display: flex; gap: 8px; justify-content: center;">
-                                <a href="{{ route('superadmin.kelola-admin.edit', $a->id_admin) }}" style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; display: flex; align-items: center; gap: 5px; font-size: 12px;">
+                                <a href="{{ route('superadmin.kelola-admin.edit', $item->id_user) }}" 
+                                   style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; display: flex; align-items: center; gap: 5px; font-size: 12px;">
                                     <i class="far fa-edit"></i> Edit
                                 </a>
-                                <button type="button" style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 12px;">
+                                <button type="button" 
+                                        onclick="bukaModalHapus('{{ $item->id_user }}', '{{ $item->admin->nama_lengkap_admin ?? $item->username }}')" 
+                                        style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 12px;">
                                     <i class="fas fa-trash"></i> Hapus
                                 </button>
                             </div>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="9" style="padding: 40px; text-align: center; color: #9CA3AF;">
+                            <i class="fas fa-database" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
+                            Belum ada data admin. Silakan tambah data baru.
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -109,17 +97,15 @@
     
     {{-- ── 4. PAGINATION & SHOW ENTRIES ── --}}
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
-        {{-- BAGIAN KIRI: SHOW ENTRIES (SEPERTI DI GAMBAR) --}}
         <div style="display: flex; align-items: center; gap: 10px;">
-            <select style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                 <option value="10">10 baris</option>
                 <option value="25">25 baris</option>
                 <option value="50">50 baris</option>
             </select>
-            <span style="color: #374151; font-size: 13px;">Menampilkan {{ count($admins) }} data</span>
+            <span style="color: #374151; font-size: 13px;">Menampilkan {{ $admin->count() }} data</span>
         </div>
 
-        {{-- BAGIAN KANAN: NAVIGASI HALAMAN --}}
         <div style="display: flex; gap: 5px;">
             <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-double-left"></i></button>
             <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-left"></i></button>
@@ -129,4 +115,57 @@
     </div>
 
 </div>
+
+{{-- MODAL HAPUS (dengan efek BLUR) --}}
+<div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
+        <div style="color: #E35D5D; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-trash-alt"></i></div>
+        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Hapus Admin?</h2>
+        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;" id="pesanHapus">Apakah Anda yakin ingin menghapus data admin ini?</p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button onclick="tutupModalHapus()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
+            <form id="formHapus" method="POST" style="flex: 1;">
+                @csrf
+                @method('DELETE')
+                <button type="submit" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #E35D5D; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Hapus</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Live search
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        let searchValue = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#tableBody tr');
+        rows.forEach(row => {
+            if(row.cells && row.cells.length >= 3) {
+                let id = row.cells[1]?.innerText.toLowerCase() || '';
+                let nama = row.cells[2]?.innerText.toLowerCase() || '';
+                if(id.includes(searchValue) || nama.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    });
+
+    // Modal Hapus dengan efek blur
+    function bukaModalHapus(id, nama) {
+        let form = document.getElementById('formHapus');
+        let url = "{{ route('superadmin.kelola-admin.destroy', ':id') }}";
+        url = url.replace(':id', id);
+        form.action = url;
+        
+        let pesan = document.getElementById('pesanHapus');
+        pesan.innerHTML = `Apakah Anda yakin ingin menghapus data admin <strong>${nama}</strong>? Data yang dihapus tidak dapat dikembalikan.`;
+        
+        document.getElementById('modalHapus').style.display = 'flex';
+    }
+
+    function tutupModalHapus() {
+        document.getElementById('modalHapus').style.display = 'none';
+    }
+</script>
 @endsection

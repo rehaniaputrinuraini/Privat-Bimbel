@@ -16,23 +16,30 @@
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Manajemen Data Murid</p>
     </div>
 
+    {{-- SESSION SUCCESS --}}
+    @if(session('success'))
+        <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+            <i class="fas fa-check-circle"></i> {{ session('success') }}
+        </div>
+    @endif
+
     {{-- ACTIONS BAR --}}
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
         <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
             <div style="position: relative; width: 300px;">
                 <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
-                <input type="text" placeholder="Cari Nama Murid..." 
+                <input type="text" id="searchInput" placeholder="Cari Nama Murid..." 
                        style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
             </div>
 
-            <select style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;">
+            <select id="filterPaket" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;">
                 <option value="">--- Pilihan Paket ---</option>
-                <option value="Reguler">SMA</option>
-                <option value="Privat">SMP</option>
-                <option value="Intensif">SD</option>
+                <option value="SD">SD</option>
+                <option value="SMP">SMP</option>
+                <option value="SMA">SMA</option>
             </select>
 
-            <select style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;">
+            <select id="filterTahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;">
                 <option value="">--- Tahun Masuk ---</option>
                 <option value="2023">2023</option>
                 <option value="2024">2024</option>
@@ -67,30 +74,11 @@
                         <th style="padding: 15px; font-weight: 700; text-align: center;">Aksi</th>
                     </tr>
                 </thead>
-                <tbody style="color: #374151;">
-                    @php
-                        if(empty($murids)) {
-                            $murids = [
-                                (object)[
-                                    'id_murid' => 1,
-                                    'nama_lengkap_murid' => 'Budi Santoso',
-                                    'kelas' => '12 SMA',
-                                    'asal_sekolah' => 'SMAN 1 Madiun',
-                                    'alamat_murid' => 'Madiun, Jawa Timur',
-                                    'no_hp_murid' => '08123456789',
-                                    'nama_orang_tua' => 'Sutrisno',
-                                    'no_hp_orang_tua' => '08123456700',
-                                    'pilihan_paket' => 'Reguler',
-                                    'tahun_masuk' => '2024'
-                                ]
-                            ];
-                        }
-                    @endphp
-
-                    @foreach($murids as $index => $m)
+                <tbody id="tableBody" style="color: #374151;">
+                    @forelse($murids as $index => $m)
                     <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 15px;">{{ $index + 1 }}</td>
-                        <td style="padding: 15px;">{{ $m->nama_lengkap_murid }}</td>   {{-- HAPUS font-weight: 600 --}}
+                        <td style="padding: 15px;">{{ $loop->iteration }}</td>
+                        <td style="padding: 15px;">{{ $m->nama_lengkap_murid }}</td>
                         <td style="padding: 15px;">{{ $m->kelas }}</td>
                         <td style="padding: 15px;">{{ $m->asal_sekolah }}</td>
                         <td style="padding: 15px; color: #6B7280;">{{ $m->alamat_murid }}</td>
@@ -98,7 +86,7 @@
                         <td style="padding: 15px;">{{ $m->nama_orang_tua }}</td>
                         <td style="padding: 15px;">{{ $m->no_hp_orang_tua }}</td>
                         <td style="padding: 15px; text-align: center;">
-                            <input type="checkbox" checked disabled style="accent-color: #4D0B87; width: 16px; height: 16px;">
+                            Rp {{ number_format($m->paket_awal, 0, ',', '.') }}
                         </td>
                         <td style="padding: 15px;">{{ $m->pilihan_paket }}</td>
                         <td style="padding: 15px; text-align: center;">{{ $m->tahun_masuk }}</td>
@@ -108,17 +96,22 @@
                                    style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-size: 12px;">
                                     <i class="far fa-edit"></i> Edit
                                 </a>
-                                <form action="{{ route($role . '.murid.destroy', $m->id_murid) }}" method="POST" style="margin: 0;">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" onclick="return confirm('Hapus data murid {{ $m->nama_lengkap_murid }}?')" 
-                                            style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 12px;">
-                                        <i class="fas fa-trash"></i> Hapus
-                                    </button>
-                                </form>
+                                <button type="button" 
+                                        onclick="bukaModalHapus('{{ $m->id_murid }}', '{{ $m->nama_lengkap_murid }}')" 
+                                        style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 12px;">
+                                    <i class="fas fa-trash"></i> Hapus
+                                </button>
                             </div>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="12" style="padding: 40px; text-align: center; color: #9CA3AF;">
+                            <i class="fas fa-database" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
+                            Belum ada data murid. Silakan tambah data baru.
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -127,12 +120,12 @@
     {{-- PAGINATION & SHOW ENTRIES --}}
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <select style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
+            <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
                 <option value="10">10 baris</option>
                 <option value="25">25 baris</option>
                 <option value="50">50 baris</option>
             </select>
-            <span style="color: #374151; font-size: 13px;">Menampilkan {{ count($murids) }} data</span>
+            <span style="color: #374151; font-size: 13px;">Menampilkan {{ $murids->count() }} data</span>
         </div>
 
         <div style="display: flex; gap: 5px;">
@@ -144,4 +137,91 @@
     </div>
 
 </div>
+
+{{-- MODAL KONFIRMASI HAPUS --}}
+<div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
+        <div style="color: #E35D5D; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-trash-alt"></i></div>
+        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Hapus Data?</h2>
+        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;" id="pesanHapus">Apakah Anda yakin ingin menghapus data murid ini?</p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button onclick="tutupModalHapus()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
+            <form id="formHapus" method="POST" style="flex: 1;">
+                @csrf
+                @method('DELETE')
+                <button type="submit" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #E35D5D; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Hapus</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Live search
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        let searchValue = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#tableBody tr');
+        
+        rows.forEach(row => {
+            if(row.cells && row.cells.length >= 2) {
+                let nama = row.cells[1]?.innerText.toLowerCase() || '';
+                if(nama.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    });
+
+    // Filter Paket
+    document.getElementById('filterPaket').addEventListener('change', function() {
+        let filterValue = this.value;
+        let rows = document.querySelectorAll('#tableBody tr');
+        
+        rows.forEach(row => {
+            if(row.cells && row.cells.length >= 10) {
+                let paket = row.cells[9]?.innerText || '';
+                if(filterValue === '' || paket === filterValue) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    });
+
+    // Filter Tahun
+    document.getElementById('filterTahun').addEventListener('change', function() {
+        let filterValue = this.value;
+        let rows = document.querySelectorAll('#tableBody tr');
+        
+        rows.forEach(row => {
+            if(row.cells && row.cells.length >= 11) {
+                let tahun = row.cells[10]?.innerText || '';
+                if(filterValue === '' || tahun === filterValue) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    });
+
+    // Modal Hapus
+    function bukaModalHapus(id, nama) {
+        let form = document.getElementById('formHapus');
+        let url = "{{ route($role . '.murid.destroy', ':id') }}";
+        url = url.replace(':id', id);
+        form.action = url;
+        
+        let pesan = document.getElementById('pesanHapus');
+        pesan.innerHTML = `Apakah Anda yakin ingin menghapus data murid <strong>${nama}</strong>? Data yang dihapus tidak dapat dikembalikan.`;
+        
+        document.getElementById('modalHapus').style.display = 'flex';
+    }
+
+    function tutupModalHapus() {
+        document.getElementById('modalHapus').style.display = 'none';
+    }
+</script>
 @endsection
