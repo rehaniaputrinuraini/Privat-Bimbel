@@ -14,6 +14,9 @@
         <form action="{{ route('superadmin.kelola-tentor.store') }}" method="POST">
             @csrf
             
+            {{-- Hidden untuk peran --}}
+            <input type="hidden" name="peran" value="tentor">
+            
             {{-- ID (Readonly) --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">ID</label>
@@ -24,21 +27,21 @@
             {{-- Nama Lengkap --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Lengkap</label>
-                <input type="text" name="nama" placeholder="Masukkan Nama Lengkap" required
+                <input type="text" name="nama_lengkap_tentor" placeholder="Masukkan Nama Lengkap" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
             </div>
 
             {{-- Alamat --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Alamat</label>
-                <input type="text" name="alamat" placeholder="Masukkan Alamat" required
+                <input type="text" name="alamat_tentor" placeholder="Masukkan Alamat" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
             </div>
 
             {{-- No HP --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No HP</label>
-                <input type="text" name="no_hp" placeholder="Masukkan No HP" required
+                <input type="text" name="no_hp_tentor" placeholder="Masukkan No HP" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
             </div>
 

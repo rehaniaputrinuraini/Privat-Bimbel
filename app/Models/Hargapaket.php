@@ -9,7 +9,7 @@ class HargaPaket extends Model
 {
     use HasFactory;
 
-    protected $table = 'ms_paket';  // Nama tabel di database
+    protected $table = 'ms_paket';
     protected $primaryKey = 'id_paket';
 
     protected $fillable = [
@@ -17,9 +17,15 @@ class HargaPaket extends Model
         'harga'
     ];
 
-    // Optional: Jika ingin format harga otomatis
+    // Accessor untuk format harga
     public function getHargaFormattedAttribute()
     {
-        return number_format($this->harga, 0, ',', '.');
+        return 'Rp ' . number_format($this->harga, 0, ',', '.');
     }
-}   
+    
+    // Accessor untuk memudahkan panggilan (opsional)
+    public function getNamaPaketAttribute()
+    {
+        return $this->tingkat;
+    }
+}

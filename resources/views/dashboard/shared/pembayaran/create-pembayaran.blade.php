@@ -32,6 +32,27 @@
         color: #6B7280;
         font-size: 12px;
     }
+    .info-box {
+        padding: 12px 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+    .info-pendaftaran {
+        background: #FEF3C7;
+        color: #92400E;
+        border-left: 4px solid #F59E0B;
+    }
+    .info-bulanan {
+        background: #E0E7FF;
+        color: #1E40AF;
+        border-left: 4px solid #4D0B87;
+    }
+    .info-error {
+        background: #FEE2E2;
+        color: #EF4444;
+        border-left: 4px solid #EF4444;
+    }
 </style>
 
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
@@ -76,17 +97,21 @@
                 @error('id_murid') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
+            {{-- Info Status Pembayaran Murid --}}
+            <div id="infoStatusMurid" style="display: none;"></div>
+
             {{-- Paket Awal (READONLY - Auto fill) --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Paket Awal <span style="color: #9CA3AF;">(Otomatis)</span></label>
-                <input type="text" name="paket_awal" id="paket_awal" readonly 
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Paket Awal (Pendaftaran) <span style="color: #9CA3AF;">(Otomatis)</span></label>
+                <input type="text" name="paket_awal_display" id="paket_awal_display" readonly 
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280;">
-                <small style="color: #9CA3AF;">Akan terisi otomatis setelah memilih murid</small>
+                <input type="hidden" name="paket_awal" id="paket_awal">
+                <small style="color: #9CA3AF;">Biaya pendaftaran awal (hanya sekali)</small>
             </div>
 
-            {{-- Paket Selanjutnya --}}
+            {{-- Paket Belajar --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Paket Selanjutnya <span style="color: red;">*</span></label>
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Paket Belajar <span style="color: red;">*</span></label>
                 <select name="paket_selanjutnya" id="paket_selanjutnya" required 
                         style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; color: #374151;">
                     <option value="">Pilih Paket</option>
@@ -94,6 +119,7 @@
                     <option value="SMP">SMP</option>
                     <option value="SMA">SMA</option>
                 </select>
+                <small style="color: #9CA3AF;">Pilih paket belajar bulanan (SD/SMP/SMA)</small>
                 @error('paket_selanjutnya') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
@@ -157,7 +183,10 @@
 
 <script>
     // Data harga paket dari database
-    const hargaPaketData = @json($pakets->pluck('harga', 'nama_paket'));
+    const hargaPaketData = @json($pakets->pluck('harga', 'tingkat'));
+    
+    // Simpan ke window agar bisa diakses di fungsi lain
+    window.hargaPaketData = hargaPaketData;
     
     // Fungsi untuk mendapatkan harga paket
     function getHargaPaket(namaPaket) {
@@ -216,11 +245,108 @@
         }
     }
     
+    // Fungsi untuk mengecek apakah murid sudah bayar pendaftaran
+    function cekStatusPembayaran(idMurid) {
+        fetch(`/cek-status-pembayaran/${idMurid}`)
+            .then(response => response.json())
+            .then(data => {
+                const infoDiv = document.getElementById('infoStatusMurid');
+                const paketSelanjutnya = document.getElementById('paket_selanjutnya');
+                const totalBayarInput = document.getElementById('total_pembayaran');
+                const paketAwalDisplay = document.getElementById('paket_awal_display');
+                const paketAwalHidden = document.getElementById('paket_awal');
+                
+                if (!data.sudah_bayar_pendaftaran) {
+                    // ========== BELUM BAYAR PENDAFTARAN ==========
+                    const paketAwalValue = data.paket_awal || 100000;
+                    
+                    infoDiv.innerHTML = `
+                        <div class="info-box info-pendaftaran">
+                            <i class="fas fa-exclamation-triangle"></i> 
+                            <strong>Pendaftaran Baru!</strong><br>
+                            Murid ini WAJIB membayar biaya pendaftaran sebesar Rp ${new Intl.NumberFormat('id-ID').format(paketAwalValue)} terlebih dahulu.
+                        </div>
+                    `;
+                    infoDiv.style.display = 'block';
+                    
+                    // Tampilkan paket awal
+                    paketAwalDisplay.value = 'Rp ' + new Intl.NumberFormat('id-ID').format(paketAwalValue);
+                    paketAwalHidden.value = paketAwalValue;
+                    
+                    // Disable paket selanjutnya
+                    paketSelanjutnya.disabled = true;
+                    paketSelanjutnya.value = '';
+                    
+                    // Set total bayar = paket_awal
+                    totalBayarInput.value = paketAwalValue;
+                    totalBayarInput.placeholder = `Harus Rp ${new Intl.NumberFormat('id-ID').format(paketAwalValue)} (Pendaftaran)`;
+                    
+                    // Sembunyikan info harga
+                    document.getElementById('infoHarga').style.display = 'none';
+                    document.getElementById('previewStatus').style.display = 'none';
+                    
+                } else {
+                    // ========== SUDAH BAYAR PENDAFTARAN ==========
+                    const pilihanPaket = data.pilihan_paket;
+                    const hargaPaket = hargaPaketData[pilihanPaket] || 0;
+                    
+                    // Tampilkan paket awal (untuk info)
+                    paketAwalDisplay.value = 'Rp ' + new Intl.NumberFormat('id-ID').format(data.paket_awal || 100000);
+                    paketAwalHidden.value = data.paket_awal || 100000;
+                    
+                    infoDiv.innerHTML = `
+                        <div class="info-box info-bulanan">
+                            <i class="fas fa-check-circle"></i> 
+                            <strong>Sudah Terdaftar!</strong><br>
+                            Murid ini sudah membayar pendaftaran. Silakan lanjutkan pembayaran bulanan.
+                        </div>
+                    `;
+                    infoDiv.style.display = 'block';
+                    
+                    // Enable paket selanjutnya
+                    paketSelanjutnya.disabled = false;
+                    
+                    if (pilihanPaket) {
+                        // Set paket selanjutnya otomatis
+                        paketSelanjutnya.value = pilihanPaket;
+                        
+                        if (hargaPaket > 0) {
+                            // Set total bayar otomatis sesuai harga paket
+                            totalBayarInput.value = hargaPaket;
+                            totalBayarInput.placeholder = `Total bayar: Rp ${new Intl.NumberFormat('id-ID').format(hargaPaket)} (${pilihanPaket})`;
+                            
+                            // Trigger update preview status
+                            updatePreviewStatus();
+                        } else {
+                            // Harga paket belum di-setup
+                            totalBayarInput.value = '';
+                            totalBayarInput.placeholder = `⚠️ Harga paket ${pilihanPaket} belum di-setup! Hubungi admin.`;
+                            totalBayarInput.style.borderColor = '#EF4444';
+                            
+                            infoDiv.innerHTML = `
+                                <div class="info-box info-error">
+                                    <i class="fas fa-exclamation-triangle"></i> 
+                                    <strong>Error!</strong><br>
+                                    Harga paket ${pilihanPaket} belum di-setup. Silakan hubungi admin untuk mengisi harga paket terlebih dahulu.
+                                </div>
+                            `;
+                        }
+                    } else {
+                        paketSelanjutnya.value = '';
+                        totalBayarInput.value = '';
+                        totalBayarInput.placeholder = 'Pilih paket terlebih dahulu';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+    
     // ========== LIVE SEARCH MURID ==========
     const searchInput = document.getElementById('searchMurid');
     const autocompleteDiv = document.getElementById('autocompleteResult');
     const idHidden = document.getElementById('id_murid');
-    const paketAwalInput = document.getElementById('paket_awal');
     
     let typingTimer = null;
     
@@ -232,7 +358,6 @@
         if (query.length < 2) {
             autocompleteDiv.style.display = 'none';
             idHidden.value = '';
-            paketAwalInput.value = '';
             return;
         }
         
@@ -244,28 +369,30 @@
                         autocompleteDiv.innerHTML = data.map(murid => `
                             <div class="autocomplete-item" 
                                  data-id="${murid.id_murid}" 
-                                 data-paket="${murid.pilihan_paket}">
+                                 data-paket-awal="${murid.paket_awal}"
+                                 data-pilihan-paket="${murid.pilihan_paket || ''}">
                                 <strong>${murid.nama_lengkap_murid}</strong><br>
-                                <small>Kelas: ${murid.kelas} | Paket: ${murid.pilihan_paket}</small>
+                                <small>Kelas: ${murid.kelas} | Biaya Daftar: Rp ${new Intl.NumberFormat('id-ID').format(murid.paket_awal)}</small>
                             </div>
                         `).join('');
                         autocompleteDiv.style.display = 'block';
                         
-                        // Tambah event click ke setiap item
                         document.querySelectorAll('.autocomplete-item').forEach(item => {
                             item.addEventListener('click', function() {
+                                const muridId = this.dataset.id;
+                                
                                 searchInput.value = this.querySelector('strong').innerText;
-                                idHidden.value = this.dataset.id;
-                                paketAwalInput.value = this.dataset.paket;
+                                idHidden.value = muridId;
                                 autocompleteDiv.style.display = 'none';
-                                updatePreviewStatus();
+                                
+                                // Cek status pembayaran murid
+                                cekStatusPembayaran(muridId);
                             });
                         });
                     } else {
                         autocompleteDiv.innerHTML = '<div class="autocomplete-item" style="color: #9CA3AF;">Murid tidak ditemukan</div>';
                         autocompleteDiv.style.display = 'block';
                         idHidden.value = '';
-                        paketAwalInput.value = '';
                     }
                 })
                 .catch(error => {
@@ -283,6 +410,13 @@
     
     // Event listener untuk paket selanjutnya
     document.getElementById('paket_selanjutnya').addEventListener('change', function() {
+        const hargaPaket = getHargaPaket(this.value);
+        const totalBayarInput = document.getElementById('total_pembayaran');
+        
+        if (hargaPaket > 0) {
+            totalBayarInput.placeholder = `Minimal Rp ${new Intl.NumberFormat('id-ID').format(hargaPaket)}`;
+        }
+        
         updatePreviewStatus();
     });
     

@@ -26,8 +26,7 @@ class PembayaranController extends Controller
                 $piutang = $murid->pembayaran->sum('total_piutang');
                 if ($piutang > 0) {
                     $total_piutang = 'Rp ' . number_format($piutang, 0, ',', '.');
-                    // Ambil harga paket dinamis
-                    $hargaPaket = HargaPaket::where('nama_paket', $murid->pilihan_paket)->first();
+                    $hargaPaket = HargaPaket::where('tingkat', $murid->pilihan_paket)->first();
                     $hargaPerBulan = $hargaPaket ? $hargaPaket->harga : 120000;
                     $total_bulan = round($piutang / $hargaPerBulan);
                 }
@@ -43,7 +42,7 @@ class PembayaranController extends Controller
                 
                 $status_tagihan = 'Lunas';
                 if ($piutang > 0) {
-                    $hargaPaket = HargaPaket::where('nama_paket', $murid->pilihan_paket)->first();
+                    $hargaPaket = HargaPaket::where('tingkat', $murid->pilihan_paket)->first();
                     $hargaPerBulan = $hargaPaket ? $hargaPaket->harga : 120000;
                     $bulan = round($piutang / $hargaPerBulan);
                     if ($bulan >= 3) {
@@ -105,13 +104,36 @@ class PembayaranController extends Controller
         ]);
     }
     
-    // ✅ PERBAIKAN: Proses simpan pembayaran dengan logika yang benar
+    /**
+     * Cek status pembayaran murid
+     */
+    public function cekStatusPembayaran($id)
+    {
+        $murid = Murid::find($id);
+        
+        if (!$murid) {
+            return response()->json(['error' => 'Murid tidak ditemukan'], 404);
+        }
+        
+        $sudahBayarPendaftaran = Pembayaran::where('id_murid', $id)
+            ->whereNull('paket_selanjutnya')
+            ->exists();
+        
+        return response()->json([
+            'sudah_bayar_pendaftaran' => $sudahBayarPendaftaran,
+            'paket_awal' => $murid->paket_awal ?? 100000,
+            'pilihan_paket' => $murid->pilihan_paket,
+            'nama_murid' => $murid->nama_lengkap_murid,
+            'kelas' => $murid->kelas,
+        ]);
+    }
+    
+    // Proses simpan pembayaran
     public function store(Request $request)
     {
         $request->validate([
             'id_murid' => 'required|exists:ms_murid,id_murid',
             'tanggal' => 'required|date',
-            'paket_selanjutnya' => 'required|in:SD,SMP,SMA',
             'total_pembayaran' => 'required|numeric|min:1000',
             'keterangan' => 'nullable|string|max:255',
         ]);
@@ -122,55 +144,75 @@ class PembayaranController extends Controller
             return redirect()->back()->withErrors(['error' => 'Data murid tidak ditemukan']);
         }
         
-        // Ambil harga paket berdasarkan paket_selanjutnya
-        $hargaPaket = HargaPaket::where('nama_paket', $request->paket_selanjutnya)->first();
+        // Cek apakah sudah pernah bayar pendaftaran
+        $sudahBayarPendaftaran = Pembayaran::where('id_murid', $request->id_murid)
+            ->whereNull('paket_selanjutnya')
+            ->exists();
+        
+        // KASUS 1: BELUM BAYAR PENDAFTARAN
+        if (!$sudahBayarPendaftaran) {
+            if ($request->total_pembayaran != $murid->paket_awal) {
+                return redirect()->back()->withErrors([
+                    'error' => 'Total pembayaran untuk pendaftaran harus Rp ' . number_format($murid->paket_awal, 0, ',', '.')
+                ]);
+            }
+            
+            try {
+                Pembayaran::create([
+                    'id_murid' => $request->id_murid,
+                    'id_paket' => null,
+                    'tanggal' => $request->tanggal,
+                    'paket_awal' => $murid->paket_awal,
+                    'paket_selanjutnya' => null,
+                    'status_tagihan' => 'Lunas',
+                    'total_piutang' => 0,
+                    'total_uang_muka' => 0,
+                    'total_pembayaran' => $request->total_pembayaran,
+                    'keterangan' => $request->keterangan ?: 'Pembayaran pendaftaran',
+                ]);
+                
+                $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+                
+                return redirect()->route($role . '.pembayaran')
+                    ->with('success', 'Pembayaran pendaftaran berhasil disimpan');
+                    
+            } catch (\Exception $e) {
+                return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+            }
+        }
+        
+        // KASUS 2: SUDAH BAYAR PENDAFTARAN
+        $request->validate([
+            'paket_selanjutnya' => 'required|in:SD,SMP,SMA',
+        ]);
+        
+        $hargaPaket = HargaPaket::where('tingkat', $request->paket_selanjutnya)->first();
         
         if (!$hargaPaket) {
-            return redirect()->back()->withErrors(['error' => 'Harga paket tidak ditemukan. Silakan setup harga paket terlebih dahulu.']);
+            return redirect()->back()->withErrors(['error' => 'Harga paket tidak ditemukan']);
         }
         
         $hargaPerBulan = $hargaPaket->harga;
         
-        // Hitung total pembayaran sebelumnya untuk murid ini
-        $totalPembayaranSebelumnya = Pembayaran::where('id_murid', $request->id_murid)->sum('total_pembayaran');
         $totalPiutangSebelumnya = Pembayaran::where('id_murid', $request->id_murid)->sum('total_piutang');
+        $sisa_piutang = $totalPiutangSebelumnya - $request->total_pembayaran;
+        $total_piutang = max(0, $sisa_piutang);
+        $status_tagihan = $total_piutang > 0 ? 'Belum Lunas' : 'Lunas';
         
-        // Logika perhitungan piutang dan uang muka
-        if ($totalPembayaranSebelumnya == 0) {
-            // Pembayaran pertama
-            if ($request->total_pembayaran >= $hargaPerBulan) {
-                $total_piutang = 0;
-                $total_uang_muka = 0;
-                $status_tagihan = 'Lunas';
-            } else {
-                $total_piutang = $hargaPerBulan - $request->total_pembayaran;
-                $total_uang_muka = $request->total_pembayaran;
-                $status_tagihan = 'Uang Muka';
-            }
-        } else {
-            // Pembayaran selanjutnya
-            $sisa_piutang = $totalPiutangSebelumnya - $request->total_pembayaran;
-            $total_piutang = max(0, $sisa_piutang);
-            $total_uang_muka = 0;
-            $status_tagihan = $total_piutang > 0 ? 'Belum Lunas' : 'Lunas';
-        }
-        
-        // Simpan pembayaran
         try {
-            $pembayaran = Pembayaran::create([
+            Pembayaran::create([
                 'id_murid' => $request->id_murid,
                 'id_paket' => $hargaPaket->id_paket,
                 'tanggal' => $request->tanggal,
-                'paket_awal' => $murid->pilihan_paket ?? $request->paket_selanjutnya,
+                'paket_awal' => null,
                 'paket_selanjutnya' => $request->paket_selanjutnya,
                 'status_tagihan' => $status_tagihan,
                 'total_piutang' => $total_piutang,
-                'total_uang_muka' => $total_uang_muka,
+                'total_uang_muka' => 0,
                 'total_pembayaran' => $request->total_pembayaran,
                 'keterangan' => $request->keterangan,
             ]);
             
-            // Update paket murid jika pembayaran lunas atau lebih dari harga per bulan
             if ($request->total_pembayaran >= $hargaPerBulan && $murid->pilihan_paket != $request->paket_selanjutnya) {
                 $murid->update(['pilihan_paket' => $request->paket_selanjutnya]);
             }
@@ -185,7 +227,6 @@ class PembayaranController extends Controller
         }
     }
     
-    // ✅ TAMBAHAN: API untuk mengambil paket murid (untuk auto-fill di form)
     public function getMuridPaket($id)
     {
         $murid = Murid::find($id);
@@ -193,7 +234,8 @@ class PembayaranController extends Controller
             return response()->json([
                 'pilihan_paket' => $murid->pilihan_paket,
                 'kelas' => $murid->kelas,
-                'nama_lengkap_murid' => $murid->nama_lengkap_murid
+                'nama_lengkap_murid' => $murid->nama_lengkap_murid,
+                'paket_awal' => $murid->paket_awal,
             ]);
         }
         return response()->json(['pilihan_paket' => ''], 404);
@@ -214,7 +256,6 @@ class PembayaranController extends Controller
         ]);
     }
     
-    // ✅ PERBAIKAN: Update data pembayaran
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -228,11 +269,9 @@ class PembayaranController extends Controller
         $pembayaran = Pembayaran::findOrFail($id);
         $murid = Murid::find($request->id_murid);
         
-        // Ambil harga paket
-        $hargaPaket = HargaPaket::where('nama_paket', $request->paket_selanjutnya)->first();
+        $hargaPaket = HargaPaket::where('tingkat', $request->paket_selanjutnya)->first();
         $hargaPerBulan = $hargaPaket ? $hargaPaket->harga : 120000;
         
-        // Recalculate piutang berdasarkan semua pembayaran kecuali yang sedang diedit
         $pembayaranLain = Pembayaran::where('id_murid', $request->id_murid)
             ->where('id_pembayaran', '!=', $id)
             ->get();

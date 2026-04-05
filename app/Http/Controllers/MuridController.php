@@ -25,7 +25,6 @@ class MuridController extends Controller
     {
         $role = $request->route()->getPrefix() == '/superadmin' ? 'superadmin' : 'admin';
         
-        // Ambil data paket untuk dropdown
         $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
         
         return view('dashboard.shared.kelola-murid.create-murid', [
@@ -50,7 +49,6 @@ class MuridController extends Controller
             'tahun_masuk' => 'nullable|integer|min:1900|max:' . date('Y')
         ]);
 
-        // Pastikan paket_awal selalu 100000 jika tidak diisi
         $data = $request->all();
         if (empty($data['paket_awal'])) {
             $data['paket_awal'] = 100000;
@@ -69,7 +67,6 @@ class MuridController extends Controller
         $role = $request->route()->getPrefix() == '/superadmin' ? 'superadmin' : 'admin';
         $murid = Murid::findOrFail($id);
         
-        // Ambil data paket untuk dropdown
         $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
         
         return view('dashboard.shared.kelola-murid.edit-murid', [
@@ -97,7 +94,6 @@ class MuridController extends Controller
 
         $murid = Murid::findOrFail($id);
         
-        // Pastikan paket_awal tetap 100000 jika tidak diubah
         $data = $request->all();
         if (empty($data['paket_awal'])) {
             $data['paket_awal'] = 100000;
@@ -122,7 +118,7 @@ class MuridController extends Controller
         return redirect()->route($role . '.kelola-murid')->with('success', 'Data murid berhasil dihapus');
     }
 
-    // Search murid untuk live search (digunakan di form pembayaran)
+        // Search murid untuk live search
     public function search(Request $request)
     {
         $query = $request->get('q');
@@ -133,7 +129,7 @@ class MuridController extends Controller
         
         $murids = Murid::where('nama_lengkap_murid', 'like', "%{$query}%")
             ->limit(10)
-            ->get(['id_murid', 'nama_lengkap_murid', 'kelas', 'pilihan_paket']);
+            ->get(['id_murid', 'nama_lengkap_murid', 'kelas', 'paket_awal', 'pilihan_paket']);
         
         return response()->json($murids);
     }
