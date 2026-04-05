@@ -76,7 +76,7 @@
 
     {{-- Link Ubah Kata Sandi (Ungu) --}}
     <div style="margin-top: 30px;">
-        <a href="#" style="text-decoration: none; display: flex; align-items: center; gap: 10px; color: #4D0B87; font-weight: 700; font-size: 18px;">
+        <a href="{{ route('password.edit') }}" style="text-decoration: none; display: flex; align-items: center; gap: 10px; color: #4D0B87; font-weight: 700; font-size: 18px;">
             Ubah Kata Sandi <i class="fas fa-arrow-right"></i>
         </a>
     </div>

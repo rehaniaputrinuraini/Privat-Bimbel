@@ -9,10 +9,10 @@
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
         <div>
             {{-- OTOMATIS: Profil Superadmin / Profil Admin --}}
-            <h1 style="font-size: 28px; font-weight: 800; color: #111827; margin: 0;">
+           <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
                 Profil {{ ucfirst(Auth::user()->peran ?? 'Admin') }}
             </h1>
-            <p style="color: #6B7280; font-size: 16px; margin-top: 5px;">Informasi Profil</p>
+            <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Informasi Profil</p>
         </div>
         {{-- Tombol Edit Profil --}}
         <a href="{{ route('profile.edit') }}" style="text-decoration: none;">

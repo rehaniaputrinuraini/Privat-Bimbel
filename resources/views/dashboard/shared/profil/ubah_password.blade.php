@@ -1,55 +1,84 @@
-@extends('layouts.app')
+{{-- =============================================
+     Dashboard Shared - Ubah Kata Sandi
+     File: resources/views/dashboard/shared/ubah-kata-sandi.blade.php
+============================================= --}}
 
-@section('title', 'Ubah Kata Sandi')
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubah Kata Sandi - Bimbel Privat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body style="background-color: white;">
+    <div class="h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-lg">
+            
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <img src="/images/logo/foto_logo.png" alt="Logo Bimbel Privat" class="h-10 w-auto">
+                <h2 class="text-2xl font-bold" style="color: #4D0B87;">Bimbel Privat</h2>
+            </div>
 
-@section('content')
-<div style="min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; background-color: #f3f4f6; padding: 20px;">
-    
-    {{-- Logo dan Nama Bimbel --}}
-    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
-        <img src="{{ asset('images/logo/logo.png') }}" alt="Logo" style="width: 80px;">
-        <h1 style="font-size: 32px; font-weight: 800; color: #4D0B87; margin: 0;">Bimbel Privat</h1>
+            <div class="bg-white rounded-2xl shadow-lg p-6 w-full border border-gray-200">
+                
+                <div class="text-center mb-5">
+                    <h3 class="text-xl font-semibold text-gray-900">Ubah Kata Sandi</h3>
+                    <p class="text-gray-500 text-sm">Masukkan Password Lama dan Password Baru Anda</p>
+                </div>
+
+                <form method="POST" action="{{ route('password.update') }}">
+                    @csrf
+
+                    @if ($errors->any())
+                        <div class="bg-red-100 text-red-700 p-2 rounded-lg mb-3 text-xs">
+                            {{ $errors->first() }}
+                        </div>
+                    @endif
+
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password Lama</label>
+                        <input type="password" name="current_password" 
+                               placeholder="Masukkan Password Lama"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4D0B87] focus:border-[#4D0B87] outline-none text-sm"
+                               required autofocus>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password Baru</label>
+                        <input type="password" name="new_password" 
+                               placeholder="Masukkan Password Baru"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4D0B87] focus:border-[#4D0B87] outline-none text-sm"
+                               required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password Baru</label>
+                        <input type="password" name="new_password_confirmation" 
+                               placeholder="Konfirmasi Password Baru"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4D0B87] focus:border-[#4D0B87] outline-none text-sm"
+                               required>
+                    </div>
+
+                    <button type="submit" 
+                            class="w-full text-white py-2 rounded-lg font-semibold hover:opacity-90 transition flex items-center justify-center gap-2 text-sm"
+                            style="background-color: #4D0B87;">
+                        Ubah Password
+                    </button>
+                </form>
+
+                <div class="mt-4 text-center">
+                    <a href="{{ route('profile.index') }}" class="text-xs text-[#4D0B87] hover:underline">
+                        Kembali ke Profil
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-
-    {{-- Kartu Form Ubah Kata Sandi --}}
-    <div style="background: white; width: 100%; max-width: 500px; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center;">
-        
-        <h2 style="font-size: 24px; font-weight: 700; color: #111827; margin: 0;">Ubah Kata Sandi</h2>
-        <p style="color: #6B7280; font-size: 14px; margin: 10px 0 30px;">Masukkan Password Lama dan Password Baru Anda</p>
-
-        <form action="#" method="POST">
-            @csrf
-            {{-- Input Password Lama --}}
-            <div style="text-align: left; margin-bottom: 20px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Password Lama</label>
-                <input type="password" name="current_password" placeholder="Masukkan Password Lama" required
-                       style="width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid #E5E7EB; outline: none; transition: 0.3s; box-sizing: border-box;">
-            </div>
-
-            {{-- Input Password Baru --}}
-            <div style="text-align: left; margin-bottom: 20px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Password Baru</label>
-                <input type="password" name="new_password" placeholder="Masukkan Password Baru" required
-                       style="width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid #E5E7EB; outline: none; transition: 0.3s; box-sizing: border-box;">
-            </div>
-
-            {{-- Konfirmasi Password Baru --}}
-            <div style="text-align: left; margin-bottom: 30px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Konfirmasi Password Baru</label>
-                <input type="password" name="new_password_confirmation" placeholder="Konfirmasi Password Baru" required
-                       style="width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid #E5E7EB; outline: none; transition: 0.3s; box-sizing: border-box;">
-            </div>
-
-            {{-- Tombol Ubah Password --}}
-            <button type="submit" style="width: 100%; background: #4D0B87; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.3s; margin-bottom: 20px;">
-                Ubah Password
-            </button>
-        </form>
-
-        {{-- Link Kembali --}}
-        <a href="{{ route('profile.index') }}" style="color: #4D0B87; text-decoration: underline; font-weight: 600; font-size: 14px;">
-            Kembali ke Profil
-        </a>
-    </div>
-</div>
-@endsection
+</body>
+</html>
