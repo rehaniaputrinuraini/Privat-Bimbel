@@ -27,9 +27,9 @@
 
             <select style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;">
                 <option value="">--- Pilihan Paket ---</option>
-                <option value="Reguler">Reguler</option>
-                <option value="Privat">Privat</option>
-                <option value="Intensif">Intensif</option>
+                <option value="Reguler">SMA</option>
+                <option value="Privat">SMP</option>
+                <option value="Intensif">SD</option>
             </select>
 
             <select style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;">

@@ -3,7 +3,7 @@
      File: resources/views/components/sidebar.blade.php
 ============================================= --}}
 
-<aside class="sidebar" id="sidebar">
+<aside class="sidebar" id="sidebar" style="overflow-y: auto; scroll-behavior: smooth;">
     @php
         $user = Auth::user();
         $role = $user->peran ?? 'guest';
@@ -141,12 +141,9 @@
 
     {{-- ── LOGOUT ── --}}
     <div class="sidebar-footer">
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="logout-btn">
-                <img src="{{ asset('images/dashboard/icons/icon_logout.png') }}" class="sidebar-icon"> Logout
-            </button>
-        </form>
+        <button type="button" class="logout-btn" onclick="bukaModalLogout()">
+            <img src="{{ asset('images/dashboard/icons/icon_logout.png') }}" class="sidebar-icon"> Logout
+        </button>
     </div>
 
 </aside>

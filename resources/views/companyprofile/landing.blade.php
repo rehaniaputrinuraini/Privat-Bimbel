@@ -23,6 +23,23 @@
             100% { transform: scale(1); }
         }
         .btn-primary { animation: pulse-purple 2s infinite; }
+
+        /* REVISI: UKURAN IKON SOSIAL FOOTER 30PX BERDAMPINGAN */
+        .social-icons-img {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            align-items: center;
+        }
+        .social-icons-img img {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+        .social-icons-img img:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -52,7 +69,7 @@
                 <h1>Bimbel Privat</h1>
                 <h2 class="text-purple">Prestasi Lebih Baik</h2>
                 <p>Bimbingan belajar untuk SD, SMP, SMA dengan tentor berpengalaman untuk meningkatkan prestasi akademik Anda.</p>
-                <a href="https://wa.me/6283845797999?text=Halo%20Admin,%20saya%20tertarik%20dengan%20Bimbel%20Privat" 
+                <a href="https://wa.me/628986368457?text=Halo%20Admin%20Bimbel%20Privat,%20saya%20tertarik%20dengan%20Bimbel%20Privat" 
                 class="btn-primary" target="_blank">
                 <i class="fas fa-phone-alt"></i> 
                 <span>Daftar atau Hubungi Kami</span></a> 
@@ -194,6 +211,8 @@
                             <li><i class="fas fa-check"></i> Kelas kelompok (maks 10 siswa)</li>
                             <li><i class="fas fa-check"></i> Modul belajar</li>
                             <li><i class="fas fa-check"></i> Konsultasi gratis</li>
+                            <li><i class="fas fa-check"></i> Free Merchandise</li>
+                            
                         </ul>
                     </div>
                 </div>
@@ -364,6 +383,15 @@
                 <div class="footer-section">
                     <h4><i class="fas fa-book-open"></i> Bimbel Privat</h4>
                     <p>Prestasi lebih baik.</p>
+                    {{-- REVISI: Ikon Berdampingan 30px --}}
+                    <div class="social-icons-img">
+                        <a href="https://www.instagram.com/bimbelprivatmadiun_" target="_blank" title="Instagram">
+                            <img src="{{ asset('images/companyprofile/instagram.png') }}" alt="Instagram">
+                        </a>
+                        <a href="https://www.tiktok.com/@bimbelprivatmadiun_" target="_blank" title="TikTok">
+                            <img src="{{ asset('images/companyprofile/tiktok.png') }}" alt="TikTok">
+                        </a>
+                    </div>
                 </div>
                 <div class="footer-section">
                     <h4><i class="fas fa-map-marker-alt"></i> Alamat</h4>
@@ -371,13 +399,12 @@
                 </div>
                 <div class="footer-section">
                     <h4><i class="fas fa-phone-alt"></i> Kontak</h4>
-                    <p>WhatsApp: 0838-4579-7999</p>
+                    <p>WhatsApp: 0822-4555-2901</p>
                     <p>Email: info@bimbelprivat.com</p>
                 </div>
                 <div class="footer-section">
                     <h4><i class="fas fa-clock"></i> Jam Operasional</h4>
-                    <p>Senin - Jumat: 08.00 - 20.00 WIB</p>
-                    <p>Sabtu: 09.00 - 15.00 WIB</p>
+                    <p>Senin - Jumat: 14.00 - 20.00 WIB</p>
                 </div>
             </div>
             <div class="footer-bottom">

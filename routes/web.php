@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\MuridController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -33,31 +34,6 @@ Route::post('/login', function (Request $request) {
 Route::get('/register', function () {
     return view('auth.register');
 })->name('register');
-
-// ========== LUPA PASSWORD & RESET PASSWORD ==========
-Route::get('/forgot-password', function () {
-    return view('auth.forgot-password');
-})->name('password.request');
-
-Route::post('/forgot-password', function () {
-    return redirect('/verify-email');
-})->name('password.email');
-
-Route::get('/verify-email', function () {
-    return view('auth.verify-email');
-})->name('verification.notice');
-
-Route::post('/verify-email', function () {
-    return redirect('/reset-password/123');
-})->name('verification.verify');
-
-Route::get('/reset-password/{token}', function ($token) {
-    return view('auth.reset-password', ['token' => $token]);
-})->name('password.reset');
-
-Route::post('/reset-password', function () {
-    return redirect('/login')->with('status', 'Password berhasil direset!');
-})->name('password.update');
 
 Route::post('/logout', function () {
     Auth::logout();
@@ -186,9 +162,10 @@ Route::get('/profil/ubah-password', function () {
     return view('dashboard.shared.profil.ubah_password');
 })->name('password.edit');
 
+// REVISI: Nama route diubah jadi unik agar tidak bertabrakan dengan sistem reset password
 Route::put('/profil/password-update', function (Request $request) {
     return redirect()->route('profile.index')->with('success', 'Password berhasil diubah!');
-})->name('password.update');
+})->name('password.update.profile');
 
 
 // ========== 8. KHUSUS KELOLA TENTOR (SUPERADMIN & ADMIN) ==========
@@ -237,16 +214,8 @@ Route::delete('/superadmin/kelola-tentor/destroy/{id}', function ($id) {
 
 // --- ADMIN DATA TENTOR ---
 Route::get('/admin/data-tentor', function () {
-    return view('dashboard.admin.kelola-tentor.kelola-tentor', ['role' => 'admin']);
+    return view('dashboard.admin.data-tentor.data-tentor', ['role' => 'admin']);
 })->name('admin.data-tentor');
-
-Route::get('/admin/data-tentor/create', function () {
-    return view('dashboard.admin.kelola-tentor.create-tentor', ['role' => 'admin']);
-})->name('admin.data-tentor.create');
-
-Route::post('/admin/data-tentor/store', function (Request $request) {
-    return redirect()->route('admin.data-tentor')->with('success', 'Data tentor berhasil ditambahkan');
-})->name('admin.data-tentor.store');
 
 Route::get('/admin/data-tentor/edit/{id}', function ($id) {
     $tentor = [
@@ -342,7 +311,7 @@ Route::get('/superadmin/riwayat-presensi', function () {
 
 Route::get('/admin/riwayat-presensi', function () {
     return view('dashboard.shared.riwayat-presensi.riwayat-presensi', ['role' => 'admin']);
-})->name('admin.riwayat-presensi');
+})->name('admin.riwayat-presensi'); 
 
 
 // ========== 12. KHUSUS TENTOR ==========
@@ -373,3 +342,15 @@ Route::get('/admin/rekap-gaji', function () {
 Route::get('/companyprofile', function () {
     return view('companyprofile.landing');
 })->name('companyprofile');
+
+// ========== 15. LUPA PASSWORD (REVISI FINAL) ==========
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showForgotForm'])->name('password.request');
+Route::post('/forgot-password/send', [ForgotPasswordController::class, 'sendOtp'])->name('otp.send');
+
+Route::get('/verify-otp', [ForgotPasswordController::class, 'showVerifyForm'])->name('otp.verify.page');
+// REVISI: Samakan dengan route('otp.check') yang dipanggil di Blade
+Route::post('/verify-otp', [ForgotPasswordController::class, 'verifyOtp'])->name('otp.check');
+
+Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+// REVISI: Nama route unik untuk reset password via OTP
+Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('password.update.forgot');

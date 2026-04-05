@@ -88,10 +88,11 @@
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">
-                <a href="{{ route($role . '.kelola-murid') }}" 
-                   style="text-decoration: none; padding: 12px 65px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 12px; font-weight: 600; font-size: 18px; background: #FFFFFF; text-align: center;">
+                {{-- TOMBOL KELUAR: Diubah menjadi Button agar bisa memanggil modal --}}
+                <button type="button" onclick="bukaModalBatal()" 
+                        style="padding: 12px 65px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 12px; font-weight: 600; font-size: 18px; background: #FFFFFF; cursor: pointer;">
                     Keluar
-                </a>
+                </button>
                 <button type="submit" 
                         style="padding: 12px 65px; border: none; background: #4D0B87; color: white; border-radius: 12px; font-weight: 600; font-size: 18px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
                     Simpan
@@ -101,4 +102,37 @@
         </form>
     </div>
 </div>
+
+{{-- MODAL KONFIRMASI BATAL --}}
+<div id="modalBatal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
+        <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
+        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Batalkan?</h2>
+        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Data yang Anda masukkan tidak akan disimpan. Yakin ingin keluar?</p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button onclick="tutupModalBatal()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Tidak</button>
+            <a href="{{ route($role . '.kelola-murid') }}" style="flex: 1; text-decoration: none;">
+                <button type="button" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Keluar</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function bukaModalBatal() { 
+        document.getElementById('modalBatal').style.display = 'flex'; 
+    }
+    
+    function tutupModalBatal() { 
+        document.getElementById('modalBatal').style.display = 'none'; 
+    }
+
+    // Menutup modal jika area luar kotak putih diklik
+    window.onclick = function(event) {
+        let modal = document.getElementById('modalBatal');
+        if (event.target == modal) {
+            tutupModalBatal();
+        }
+    }
+</script>
 @endsection

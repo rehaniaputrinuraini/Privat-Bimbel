@@ -32,11 +32,7 @@
             </select>
         </div>
         
-        <a href="{{ route($role . '.data-tentor.create') }}" style="text-decoration: none;">
-            <button style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: 0.3s; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
-                <i class="fas fa-plus"></i> Tambah
-            </button>
-        </a>
+
     </div>
 
     {{-- TABEL UTAMA --}}
@@ -57,7 +53,7 @@
                         <th style="padding: 15px; font-weight: 700;">HR SMA</th>
                         <th style="padding: 15px; font-weight: 700;">Makan</th>
                         <th style="padding: 15px; font-weight: 700; text-align: center;">Status Gaji</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Aksi</th>
+                    
                     </tr>
                 </thead>
                 <tbody style="color: #374151;">
@@ -89,21 +85,7 @@
                                 {{ $t['status'] == 'Sudah' ? 'Sudah' : 'Belum' }}
                             </span>
                         </td>
-                        <td style="padding: 15px; text-align: center;">
-                            <div style="display: flex; gap: 8px; justify-content: center;">
-                                <a href="{{ route($role . '.data-tentor.edit', $t['id']) }}" 
-                                   style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-size: 12px;">
-                                    <i class="far fa-edit"></i> Edit
-                                </a>
-                                <form action="{{ route($role . '.data-tentor.destroy', $t['id']) }}" method="POST" style="margin: 0;">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" onclick="return confirm('Hapus data tentor {{ $t['nama'] }}?')" 
-                                            style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 12px;">
-                                        <i class="fas fa-trash"></i> Hapus
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
+                        
                     </tr>
                     @endforeach
                 </tbody>

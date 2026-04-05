@@ -5,62 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lupa Kata Sandi - Bimbel Privat</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    {{-- Font Awesome untuk icon panah --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body style="background-color: white;">
+<body style="background-color: #F9FAFB;">
     <div class="min-h-screen flex items-center justify-center p-4">
         <div class="w-full max-w-2xl">
             
-            <!-- Header: Logo + Bimbel Privat 1 baris (di luar kontainer) -->
             <div class="flex items-center justify-center gap-3 mb-8">
-                <img src="/images/logo/foto_logo.png" alt="Logo Bimbel Privat" class="h-12 w-auto">
+                <img src="{{ asset('images/logo/foto_logo.png') }}" alt="Logo Bimbel Privat" class="h-12 w-auto">
                 <h2 class="text-3xl font-bold" style="color: #4D0B87;">Bimbel Privat</h2>
             </div>
 
-            <!-- Kontainer Form (lebih lebar) -->
-            <div class="bg-white rounded-2xl shadow-lg p-8 md:p-10 w-full border border-gray-200">
+            <div class="bg-white rounded-2xl shadow-xl p-8 md:p-12 w-full border border-gray-100">
                 
-                <!-- Header Form -->
                 <div class="text-center mb-8">
-                    <h3 class="text-2xl font-semibold text-gray-900">Pemulihan Akun</h3>
-                    <p class="text-gray-500 mt-2">
-                        Masukkan email akun Anda yang sudah terdaftar kemudian ikuti langkah pada email yang Kami kirimkan.
+                    <h3 class="text-2xl font-bold text-gray-900">Pemulihan Akun</h3>
+                    <p class="text-gray-500 mt-3 leading-relaxed">
+                        Masukkan email Anda untuk menerima <span class="font-semibold text-[#4D0B87]">6 digit kode OTP</span>. 
+                        Pastikan email Anda aktif untuk memulihkan kata sandi.
                     </p>
                 </div>
 
-                <!-- Form -->
-                <form method="POST" action="{{ route('password.email') }}">
+                {{-- Pastikan action mengarah ke route buatan kita nanti, misal: otp.send --}}
+                <form method="POST" action="{{ route('otp.send') }}">
                     @csrf
 
                     @if ($errors->any())
-                        <div class="bg-red-100 text-red-700 p-3 rounded-lg mb-4 text-sm">
-                            {{ $errors->first() }}
+                        <div class="bg-red-50 text-red-700 p-4 rounded-xl mb-6 text-sm border border-red-100">
+                            <i class="fas fa-exclamation-circle mr-2"></i> {{ $errors->first() }}
                         </div>
                     @endif
 
                     @if (session('status'))
-                        <div class="bg-green-100 text-green-700 p-3 rounded-lg mb-4 text-sm">
-                            {{ session('status') }}
+                        <div class="bg-green-50 text-green-700 p-4 rounded-xl mb-6 text-sm border border-green-100">
+                            <i class="fas fa-check-circle mr-2"></i> {{ session('status') }}
                         </div>
                     @endif
 
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <div class="mb-8">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Alamat Email</label>
                         <input type="email" name="email" value="{{ old('email') }}" 
-                               placeholder="Masukkan email yang sudah terdaftar"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4D0B87] focus:border-[#4D0B87] outline-none"
+                               placeholder="contoh: user@gmail.com"
+                               class="w-full px-4 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4D0B87] focus:border-[#4D0B87] outline-none transition-all"
                                required autofocus>
                     </div>
 
                     <button type="submit" 
-                            class="w-full text-white py-3 rounded-lg font-semibold hover:opacity-90 transition"
-                            style="background-color: #4D0B87;">
+                            class="w-full text-white py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all shadow-lg active:scale-[0.98]"
+                            style="background-color: #4D0B87; box-shadow: 0 10px 15px -3px rgba(77, 11, 135, 0.3);">
                         KIRIM
                     </button>
                 </form>
 
-                <div class="mt-6 text-center">
-                    <a href="{{ route('login') }}" class="text-sm text-[#4D0B87] hover:underline">
-                        Kembali ke Halaman Login
+                <div class="mt-8 text-center">
+                    <a href="{{ route('login') }}" class="text-sm font-semibold text-[#4D0B87] hover:text-purple-800 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i> Kembali ke Halaman Login
                     </a>
                 </div>
             </div>

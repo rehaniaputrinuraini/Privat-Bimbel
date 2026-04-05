@@ -98,4 +98,4 @@ class MuridController extends Controller
         $role = Auth::user()->peran;
         return redirect()->route($role.'.kelola-murid')->with('success', 'Data murid berhasil dihapus!');
     }
-}
+}   
