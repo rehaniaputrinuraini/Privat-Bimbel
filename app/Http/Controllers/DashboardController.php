@@ -7,132 +7,123 @@ use App\Models\Murid;
 use App\Models\Tentor;
 use App\Models\Pembayaran;
 use App\Models\PresensiTentor;
+use App\Models\LaporanKeuangan;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
+    // Dashboard Superadmin
     public function superadmin()
     {
         // Data dari database
         $totalMurid = Murid::count();
         $totalTentor = Tentor::count();
         
-        // Hitung pemasukan dari pembayaran
-        $pemasukan = Pembayaran::sum('total_pembayaran');
+        // Hitung pemasukan dari tabel laporan keuangan (tr_keuangan)
+        $totalPemasukan = LaporanKeuangan::where('kategori', 'pemasukan')->sum('jumlah');
         
-        // TODO: Hitung pengeluaran dari gaji tentor, dll (jika ada tabel pengeluaran)
-        $pengeluaran = 0; // Sementara 0, nanti diisi sesuai kebutuhan
+        // Hitung pengeluaran dari tabel laporan keuangan (tr_keuangan)
+        $totalPengeluaran = LaporanKeuangan::where('kategori', 'pengeluaran')->sum('jumlah');
         
-        $labaBersih = $pemasukan - $pengeluaran;
+        // Laba bersih = pemasukan - pengeluaran
+        $labaBersih = $totalPemasukan - $totalPengeluaran;
         
         $stats = [
             'total_murid' => $totalMurid,
             'total_tentor' => $totalTentor,
-            'pemasukan' => $pemasukan,
-            'pengeluaran' => $pengeluaran,
+            'pemasukan' => $totalPemasukan,
+            'pengeluaran' => $totalPengeluaran,
             'laba_bersih' => $labaBersih,
         ];
         
-        // Data keuangan berdasarkan jenis paket
-        $keuangan = [
-            [
-                'label' => 'Pembayaran Murid SD', 
-                'jumlah' => Pembayaran::where('paket_selanjutnya', 'SD')->sum('total_pembayaran'),
-                'tipe' => 'pemasukan'
-            ],
-            [
-                'label' => 'Pembayaran Murid SMP', 
-                'jumlah' => Pembayaran::where('paket_selanjutnya', 'SMP')->sum('total_pembayaran'),
-                'tipe' => 'pemasukan'
-            ],
-            [
-                'label' => 'Pembayaran Murid SMA', 
-                'jumlah' => Pembayaran::where('paket_selanjutnya', 'SMA')->sum('total_pembayaran'),
-                'tipe' => 'pemasukan'
-            ],
-        ];
+        // Ambil 5 data keuangan terakhir untuk ditampilkan di dashboard
+        $riwayatKeuangan = LaporanKeuangan::orderBy('tanggal', 'desc')
+            ->limit(5)
+            ->get();
         
         return view('dashboard.shared.halaman-utama.index', [
             'role' => 'superadmin',
             'stats' => $stats,
-            'keuangan' => $keuangan,
+            'riwayatKeuangan' => $riwayatKeuangan,
         ]);
     }
 
+    // Dashboard Admin
     public function admin()
     {
-        // Data dari database (sama seperti superadmin)
+        // Data dari database
         $totalMurid = Murid::count();
         $totalTentor = Tentor::count();
         
-        $pemasukan = Pembayaran::sum('total_pembayaran');
-        $pengeluaran = 0; // Sementara 0
+        // Hitung pemasukan dari tabel laporan keuangan (tr_keuangan)
+        $totalPemasukan = LaporanKeuangan::where('kategori', 'pemasukan')->sum('jumlah');
         
-        $labaBersih = $pemasukan - $pengeluaran;
+        // Hitung pengeluaran dari tabel laporan keuangan (tr_keuangan)
+        $totalPengeluaran = LaporanKeuangan::where('kategori', 'pengeluaran')->sum('jumlah');
+        
+        // Laba bersih = pemasukan - pengeluaran
+        $labaBersih = $totalPemasukan - $totalPengeluaran;
         
         $stats = [
             'total_murid' => $totalMurid,
             'total_tentor' => $totalTentor,
-            'pemasukan' => $pemasukan,
-            'pengeluaran' => $pengeluaran,
+            'pemasukan' => $totalPemasukan,
+            'pengeluaran' => $totalPengeluaran,
             'laba_bersih' => $labaBersih,
         ];
         
-        $keuangan = [
-            [
-                'label' => 'Pembayaran Murid SD', 
-                'jumlah' => Pembayaran::where('paket_selanjutnya', 'SD')->sum('total_pembayaran'),
-                'tipe' => 'pemasukan'
-            ],
-            [
-                'label' => 'Pembayaran Murid SMP', 
-                'jumlah' => Pembayaran::where('paket_selanjutnya', 'SMP')->sum('total_pembayaran'),
-                'tipe' => 'pemasukan'
-            ],
-            [
-                'label' => 'Pembayaran Murid SMA', 
-                'jumlah' => Pembayaran::where('paket_selanjutnya', 'SMA')->sum('total_pembayaran'),
-                'tipe' => 'pemasukan'
-            ],
-        ];
+        // Ambil 5 data keuangan terakhir untuk ditampilkan di dashboard
+        $riwayatKeuangan = LaporanKeuangan::orderBy('tanggal', 'desc')
+            ->limit(5)
+            ->get();
         
         return view('dashboard.shared.halaman-utama.index', [
             'role' => 'admin',
             'stats' => $stats,
-            'keuangan' => $keuangan,
+            'riwayatKeuangan' => $riwayatKeuangan,
         ]);
     }
     
-    // Dashboard Tentor (ditambahkan di sini juga)
+    // Dashboard Tentor (TIDAK DIUBAH - tetap seperti kode Anda)
     public function tentor()
     {
-        // Ambil tentor berdasarkan email yang login
-        $tentor = Tentor::where('email', Auth::user()->email)->first();
+        // Ambil user yang sedang login
+        $user = Auth::user();
+        
+        // Cari tentor berdasarkan id_user (relasi)
+        $tentor = Tentor::where('id_user', $user->id_user)->first();
         
         if (!$tentor) {
-            $tentor = Tentor::where('username', Auth::user()->email)->first();
+            // Jika belum ada data tentor, tampilkan data kosong
+            return view('dashboard.tentor.index', [
+                'total_hadir' => 0,
+                'total_jam' => 0,
+                'status_hari_ini' => 'belum',
+                'nama_tentor' => $user->username,
+            ]);
         }
         
-        $tentorId = $tentor->id_tentor ?? null;
-        
-        // Hitung total hadir bulan ini
-        $totalHadir = PresensiTentor::where('id_tentor', $tentorId)
+        // Hitung total hadir bulan ini (status_murid = 'Hadir')
+        $totalHadir = PresensiTentor::where('id_tentor', $tentor->id_tentor)
             ->whereMonth('tanggal', date('m'))
             ->whereYear('tanggal', date('Y'))
-            ->where('status', 'Hadir')
+            ->where('status_murid', 'Hadir')
             ->count();
         
-        // Hitung total jam mengajar (asumsi 1x hadir = 2 jam)
-        $totalJam = $totalHadir * 2;
+        // Hitung total jam mengajar (ambil dari kolom jam_mengajar)
+        $totalJam = PresensiTentor::where('id_tentor', $tentor->id_tentor)
+            ->whereMonth('tanggal', date('m'))
+            ->whereYear('tanggal', date('Y'))
+            ->sum('jam_mengajar');
         
         // Cek status presensi hari ini
-        $presensiHariIni = PresensiTentor::where('id_tentor', $tentorId)
+        $presensiHariIni = PresensiTentor::where('id_tentor', $tentor->id_tentor)
             ->whereDate('tanggal', date('Y-m-d'))
             ->first();
         
         if (!$presensiHariIni) {
             $statusHariIni = 'belum';
-        } elseif ($presensiHariIni->jam_keluar) {
+        } elseif ($presensiHariIni->verifikasi_kehadiran) {
             $statusHariIni = 'selesai';
         } else {
             $statusHariIni = 'sedang';
@@ -142,7 +133,7 @@ class DashboardController extends Controller
             'total_hadir' => $totalHadir,
             'total_jam' => $totalJam,
             'status_hari_ini' => $statusHariIni,
-            'nama_tentor' => $tentor->nama_lengkap ?? Auth::user()->name ?? 'Tentor',
+            'nama_tentor' => $tentor->nama_lengkap_tentor ?? $user->username,
         ]);
     }
 }

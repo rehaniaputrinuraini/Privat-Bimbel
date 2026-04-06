@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Bimbel Privat</title>
-    {{-- Font Awesome untuk Icon --}}
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -14,8 +14,8 @@
 </head>
 <body style="background-color: #F3E8FF;">
 
-    {{-- TOMBOL KEMBALI KE COMPANY PROFILE --}}
-    <a href="{{ route('companyprofile') }}" 
+    
+    <a href="<?php echo e(route('companyprofile')); ?>" 
        class="fixed top-6 left-6 z-[100] flex items-center justify-center w-12 h-12 bg-white/80 backdrop-blur-md rounded-full shadow-lg text-[#4D0B87] transition-all duration-300 hover:scale-110 hover:bg-white group"
        title="Kembali ke Company Profile">
         <i class="fas fa-arrow-left text-xl transition-transform group-hover:-translate-x-1"></i>
@@ -24,8 +24,8 @@
     <div class="min-h-screen flex items-center justify-center p-4">
         <div class="flex flex-col md:flex-row bg-white rounded-2xl shadow-lg overflow-hidden max-w-5xl w-full">
             
-            {{-- LEFT SIDE - GAMBAR --}}
-            <div class="w-full md:w-1/2 relative bg-cover bg-center" style="background-image: url('{{ asset('images/auth/foto_login.png') }}'); min-height: 500px;">
+            
+            <div class="w-full md:w-1/2 relative bg-cover bg-center" style="background-image: url('<?php echo e(asset('images/auth/foto_login.png')); ?>'); min-height: 500px;">
                 <div class="absolute inset-0 bg-black bg-opacity-40"></div>
                 <div class="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-8">
                     <h2 class="text-3xl md:text-4xl font-bold mb-4">Selamat Datang</h2>
@@ -34,25 +34,26 @@
                 </div>
             </div>
 
-            {{-- RIGHT SIDE - FORM LOGIN --}}
+            
             <div class="w-full md:w-1/2 p-8 md:p-10">
                 <div class="mb-6">
                     <h3 class="text-2xl md:text-3xl font-bold mb-2" style="color: #4D0B87;">Masuk</h3>
                     <p class="text-sm text-gray-500">Silahkan masuk ke akun Anda</p>
                 </div>
 
-                <form method="POST" action="{{ route('login.post') }}">
-                    @csrf
+                <form method="POST" action="<?php echo e(route('login.post')); ?>">
+                    <?php echo csrf_field(); ?>
 
-                    @if ($errors->any())
+                    <?php if($errors->any()): ?>
                         <div class="bg-red-100 text-red-700 p-3 rounded-lg mb-4 text-sm border-l-4 border-red-500">
-                            {{ $errors->first() }}
+                            <?php echo e($errors->first()); ?>
+
                         </div>
-                    @endif
+                    <?php endif; ?>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Email / Username</label>
-                        <input type="text" name="email" value="{{ old('email') }}" placeholder="Masukkan Email atau Username"
+                        <input type="text" name="email" value="<?php echo e(old('email')); ?>" placeholder="Masukkan Email atau Username"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4D0B87] focus:border-[#4D0B87] outline-none transition-all" required autofocus>
                     </div>
 
@@ -63,7 +64,7 @@
                     </div>
 
                     <div class="flex justify-end items-center mb-6">
-                        <a href="{{ route('password.request') }}" class="text-sm font-semibold text-[#4D0B87] hover:underline decoration-2">Lupa Kata Sandi?</a>
+                        <a href="<?php echo e(route('password.request')); ?>" class="text-sm font-semibold text-[#4D0B87] hover:underline decoration-2">Lupa Kata Sandi?</a>
                     </div>
 
                     <button type="submit" class="w-full text-white py-3 rounded-lg font-bold hover:opacity-90 shadow-md transition-all active:scale-95"
@@ -72,7 +73,7 @@
                     </button>
                 </form>
 
-                {{-- DIVIDER --}}
+                
                 <div class="mt-8 text-center">
                     <div class="relative">
                         <div class="absolute inset-0 flex items-center">
@@ -83,8 +84,8 @@
                         </div>
                     </div>
                     
-                    {{-- TOMBOL GOOGLE LOGIN --}}
-                    <a href="{{ route('google.login') }}" 
+                    
+                    <a href="<?php echo e(route('google.login')); ?>" 
                        class="mt-6 w-full border rounded-lg py-2.5 flex items-center justify-center gap-2 transition hover:bg-gray-50 border-gray-300 shadow-sm"
                        style="background-color: #4953A4; border-color: #4953A4; text-decoration: none;">
                         <svg class="w-5 h-5" viewBox="0 0 24 24">
@@ -100,4 +101,4 @@
         </div>
     </div>
 </body>
-</html>
+</html><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/auth/login.blade.php ENDPATH**/ ?>

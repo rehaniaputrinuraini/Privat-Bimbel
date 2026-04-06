@@ -12,19 +12,16 @@ class User extends Authenticatable
     protected $table = 'ms_user';
     protected $primaryKey = 'id_user';
 
-    // Jika tidak ada kolom created_at dan updated_at
     public $timestamps = false;
-    
-    // Atau jika pakai kolom 'created' saja
-    // const CREATED_AT = 'created';
-    // const UPDATED_AT = null;
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = 'updated_at';
 
     protected $fillable = [
         'username',
         'email',
         'password',
         'peran',
-        'status_akun',  // ← perhatikan: di database kamu kolomnya 'status_akun' bukan 'status'
+        'status',  // ← PASTIKAN 'status' (bukan 'status_akun')
     ];
 
     protected $hidden = [

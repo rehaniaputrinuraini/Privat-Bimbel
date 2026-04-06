@@ -9,23 +9,30 @@ use Illuminate\Support\Facades\Hash;
 
 class KelolaTentorController extends Controller
 {
-    // Menampilkan semua data tentor (join dengan user)
+    // Menampilkan semua data tentor
     public function index(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
         $query = Tentor::with('user');
         
-        if ($request->has('status_gaji') && $request->status_gaji != '') {
-            $query->where('status_gaji', $request->status_gaji);
+        // Filter berdasarkan status akun
+        if ($request->has('status_akun') && $request->status_akun != '') {
+            $query->whereHas('user', function($q) use ($request) {
+                $q->where('status_akun', $request->status_akun);
+            });
         }
         
+        // Pencarian
         if ($request->has('search') && $request->search != '') {
-            $query->where('nama_lengkap_tentor', 'like', '%' . $request->search . '%')
-                  ->orWhereHas('user', function($q) use ($request) {
-                      $q->where('username', 'like', '%' . $request->search . '%')
-                        ->orWhere('email', 'like', '%' . $request->search . '%');
+            $query->where(function($q) use ($request) {
+                $q->where('nama_lengkap_tentor', 'like', '%' . $request->search . '%')
+                  ->orWhere('id_tentor', 'like', '%' . $request->search . '%')
+                  ->orWhereHas('user', function($u) use ($request) {
+                      $u->where('email', 'like', '%' . $request->search . '%')
+                        ->orWhere('username', 'like', '%' . $request->search . '%');
                   });
+            });
         }
         
         $tentors = $query->orderBy('id_tentor', 'asc')->paginate(10);
@@ -44,7 +51,7 @@ class KelolaTentorController extends Controller
         ]);
     }
     
-    // Simpan tentor baru (buat user dulu, baru tentor)
+    // Simpan tentor baru
     public function store(Request $request)
     {
         $request->validate([
@@ -58,31 +65,44 @@ class KelolaTentorController extends Controller
             'hr_sma' => 'nullable|numeric|min:0',
             'uang_makan' => 'nullable|numeric|min:0',
             'uang_transport' => 'nullable|numeric|min:0',
-            'status_gaji' => 'nullable|in:Sudah,Belum',
-            // Data user
             'email' => 'required|email|unique:ms_user,email',
             'username' => 'required|string|unique:ms_user,username',
             'password' => 'required|string|min:6',
         ]);
         
-        // 1. Buat user dulu
-        $user = User::create([
-            'email' => $request->email,
-            'username' => $request->username,
-            'password' => Hash::make($request->password),
-            'status_akun' => 'Aktif',
-            'peran' => 'tentor',
-        ]);
-        
-        // 2. Buat tentor dengan id_user
-        $data = $request->except(['email', 'username', 'password']);
-        $data['id_user'] = $user->id_user;
-        $data['status_gaji'] = $request->status_gaji ?? 'Belum';
-        
-        Tentor::create($data);
-        
-        return redirect()->route('superadmin.kelola-tentor')
-            ->with('success', 'Data tentor berhasil ditambahkan');
+        try {
+            // Buat user
+            $user = User::create([
+                'email' => $request->email,
+                'username' => $request->username,
+                'password' => Hash::make($request->password),
+                'status_akun' => 'Aktif',
+                'peran' => 'tentor',
+            ]);
+            
+            // Buat tentor (tanpa status_gaji)
+            Tentor::create([
+                'id_user' => $user->id_user,
+                'nama_lengkap_tentor' => $request->nama_lengkap_tentor,
+                'alamat_tentor' => $request->alamat_tentor,
+                'no_hp_tentor' => $request->no_hp_tentor,
+                'mapel' => $request->mapel,
+                'grade' => $request->grade,
+                'hr_sd' => $request->hr_sd ?? 0,
+                'hr_smp' => $request->hr_smp ?? 0,
+                'hr_sma' => $request->hr_sma ?? 0,
+                'uang_makan' => $request->uang_makan ?? 0,
+                'uang_transport' => $request->uang_transport ?? 0,
+            ]);
+            
+            return redirect()->route('superadmin.kelola-tentor')
+                ->with('success', 'Data tentor berhasil ditambahkan');
+                
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()])
+                ->withInput();
+        }
     }
     
     // Form edit tentor
@@ -112,56 +132,84 @@ class KelolaTentorController extends Controller
             'hr_sma' => 'nullable|numeric|min:0',
             'uang_makan' => 'nullable|numeric|min:0',
             'uang_transport' => 'nullable|numeric|min:0',
-            'status_gaji' => 'nullable|in:Sudah,Belum',
-            // Data user
             'email' => 'required|email|unique:ms_user,email,' . $tentor->id_user . ',id_user',
             'username' => 'required|string|unique:ms_user,username,' . $tentor->id_user . ',id_user',
             'password' => 'nullable|string|min:6',
         ]);
         
-        // Update user
-        $userData = [
-            'email' => $request->email,
-            'username' => $request->username,
-        ];
-        if ($request->filled('password')) {
-            $userData['password'] = Hash::make($request->password);
+        try {
+            // Update user
+            $userData = [
+                'email' => $request->email,
+                'username' => $request->username,
+            ];
+            if ($request->filled('password')) {
+                $userData['password'] = Hash::make($request->password);
+            }
+            $tentor->user->update($userData);
+            
+            // Update tentor (tanpa status_gaji)
+            $tentor->update([
+                'nama_lengkap_tentor' => $request->nama_lengkap_tentor,
+                'alamat_tentor' => $request->alamat_tentor,
+                'no_hp_tentor' => $request->no_hp_tentor,
+                'mapel' => $request->mapel,
+                'grade' => $request->grade,
+                'hr_sd' => $request->hr_sd ?? 0,
+                'hr_smp' => $request->hr_smp ?? 0,
+                'hr_sma' => $request->hr_sma ?? 0,
+                'uang_makan' => $request->uang_makan ?? 0,
+                'uang_transport' => $request->uang_transport ?? 0,
+            ]);
+            
+            return redirect()->route('superadmin.kelola-tentor')
+                ->with('success', 'Data tentor berhasil diperbarui');
+                
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()])
+                ->withInput();
         }
-        $tentor->user->update($userData);
-        
-        // Update tentor
-        $tentor->update($request->except(['email', 'username', 'password']));
-        
-        return redirect()->route('superadmin.kelola-tentor')
-            ->with('success', 'Data tentor berhasil diperbarui');
     }
     
-    // Hapus tentor (beserta user-nya)
+    // Hapus tentor
     public function destroy($id)
     {
-        $tentor = Tentor::findOrFail($id);
-        $userId = $tentor->id_user;
-        $tentor->delete();
-        
-        // Hapus user juga
-        if ($userId) {
-            User::where('id_user', $userId)->delete();
+        try {
+            $tentor = Tentor::findOrFail($id);
+            $userId = $tentor->id_user;
+            $tentor->delete();
+            
+            if ($userId) {
+                User::where('id_user', $userId)->delete();
+            }
+            
+            return redirect()->route('superadmin.kelola-tentor')
+                ->with('success', 'Data tentor berhasil dihapus');
+                
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
-        
-        return redirect()->route('superadmin.kelola-tentor')
-            ->with('success', 'Data tentor berhasil dihapus');
     }
     
     // Aktifkan/Nonaktifkan tentor
     public function toggleStatus($id)
     {
-        $tentor = Tentor::findOrFail($id);
-        $user = User::findOrFail($tentor->id_user);
-        
-        $newStatus = $user->status_akun == 'Aktif' ? 'Nonaktif' : 'Aktif';
-        $user->update(['status_akun' => $newStatus]);
-        
-        return redirect()->route('superadmin.kelola-tentor')
-            ->with('success', 'Status tentor berhasil diubah menjadi ' . $newStatus);
+        try {
+            $tentor = Tentor::findOrFail($id);
+            $user = User::findOrFail($tentor->id_user);
+            
+            $newStatus = $user->status_akun == 'Aktif' ? 'Nonaktif' : 'Aktif';
+            $user->update(['status_akun' => $newStatus]);
+            
+            $message = $newStatus == 'Aktif' ? 'diaktifkan' : 'dinonaktifkan';
+            return redirect()->route('superadmin.kelola-tentor')
+                ->with('success', 'Status tentor berhasil ' . $message);
+                
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
     }
 }

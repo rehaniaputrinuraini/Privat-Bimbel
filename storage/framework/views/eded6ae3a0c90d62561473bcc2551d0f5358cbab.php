@@ -1,223 +1,146 @@
-<?php
 
-namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Tentor;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+<?php $__env->startSection('title', 'Kelola Tentor'); ?>
 
-class KelolaTentorController extends Controller
-{
-    // Menampilkan semua data tentor
-    public function index(Request $request)
-    {
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        
-        $query = Tentor::with('user');
-        
-        // Filter berdasarkan status gaji
-        if ($request->has('status_gaji') && $request->status_gaji != '') {
-            $query->where('status_gaji', $request->status_gaji);
-        }
-        
-        // Filter berdasarkan status akun
-        if ($request->has('status_akun') && $request->status_akun != '') {
-            $query->whereHas('user', function($q) use ($request) {
-                $q->where('status_akun', $request->status_akun);
-            });
-        }
-        
-        // Pencarian
-        if ($request->has('search') && $request->search != '') {
-            $query->where(function($q) use ($request) {
-                $q->where('nama_lengkap_tentor', 'like', '%' . $request->search . '%')
-                  ->orWhere('id_tentor', 'like', '%' . $request->search . '%')
-                  ->orWhereHas('user', function($u) use ($request) {
-                      $u->where('email', 'like', '%' . $request->search . '%')
-                        ->orWhere('username', 'like', '%' . $request->search . '%');
-                  });
-            });
-        }
-        
-        $tentors = $query->orderBy('id_tentor', 'asc')->paginate(10);
-        
-        return view('dashboard.superadmin.kelola-tentor.kelola-tentor', [
-            'role' => $role,
-            'tentors' => $tentors,
-        ]);
-    }
+<?php $__env->startSection('content'); ?>
+<div style="width: 100%;">
     
-    // Form tambah tentor
-    public function create()
-    {
-        return view('dashboard.superadmin.kelola-tentor.create-tentor', [
-            'role' => 'superadmin'
-        ]);
-    }
     
-    // Simpan tentor baru (ke ms_user dan ms_tentor)
-    public function store(Request $request)
-    {
-        // Validasi input
-        $request->validate([
-            'nama_lengkap_tentor' => 'required|string|max:100',
-            'alamat_tentor' => 'nullable|string',
-            'no_hp_tentor' => 'nullable|string|max:15',
-            'mapel' => 'nullable|string|max:50',
-            'grade' => 'nullable|string|max:10',
-            'hr_sd' => 'nullable|numeric|min:0',
-            'hr_smp' => 'nullable|numeric|min:0',
-            'hr_sma' => 'nullable|numeric|min:0',
-            'uang_makan' => 'nullable|numeric|min:0',
-            'uang_transport' => 'nullable|numeric|min:0',
-            'email' => 'required|email|unique:ms_user,email',
-            'username' => 'required|string|unique:ms_user,username',
-            'password' => 'required|string|min:6',
-        ]);
-        
-        try {
-            // 1. Buat user di tabel ms_user
-            $user = User::create([
-                'email' => $request->email,
-                'username' => $request->username,
-                'password' => Hash::make($request->password),
-                'status_akun' => 'Aktif',
-                'peran' => $request->peran ?? 'tentor',
-            ]);
-            
-            // 2. Buat tentor di tabel ms_tentor dengan id_user
-            $tentor = Tentor::create([
-                'id_user' => $user->id_user,
-                'nama_lengkap_tentor' => $request->nama_lengkap_tentor,
-                'alamat_tentor' => $request->alamat_tentor,
-                'no_hp_tentor' => $request->no_hp_tentor,
-                'mapel' => $request->mapel,
-                'grade' => $request->grade,
-                'hr_sd' => $request->hr_sd ?? 0,
-                'hr_smp' => $request->hr_smp ?? 0,
-                'hr_sma' => $request->hr_sma ?? 0,
-                'uang_makan' => $request->uang_makan ?? 0,
-                'uang_transport' => $request->uang_transport ?? 0,
-                'status_gaji' => 'Belum',
-            ]);
-            
-            return redirect()->route('superadmin.kelola-tentor')
-                ->with('success', 'Data tentor berhasil ditambahkan');
-                
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()])
-                ->withInput();
-        }
-    }
+    <div style="margin-bottom: 25px;">
+        <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
+            <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?>
+
+        </p>
+        <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0;">Kelola Tentor</h1>
+        <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Manajemen Data Tentor</p>
+    </div>
+
     
-    // Form edit tentor
-    public function edit($id)
-    {
-        $tentor = Tentor::with('user')->findOrFail($id);
-        
-        return view('dashboard.superadmin.kelola-tentor.edit-tentor', [
-            'role' => 'superadmin',
-            'tentor' => $tentor,
-        ]);
-    }
+    <?php if(session('success')): ?>
+        <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+            <?php echo e(session('success')); ?>
+
+        </div>
+    <?php endif; ?>
+
     
-    // Update tentor
-    public function update(Request $request, $id)
-    {
-        $tentor = Tentor::with('user')->findOrFail($id);
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <div style="position: relative; width: 300px;">
+            <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
+            <input type="text" id="searchInput" placeholder="Cari Nama atau ID Tentor..." 
+                   style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none;">
+        </div>
         
-        $request->validate([
-            'nama_lengkap_tentor' => 'required|string|max:100',
-            'alamat_tentor' => 'nullable|string',
-            'no_hp_tentor' => 'nullable|string|max:15',
-            'mapel' => 'nullable|string|max:50',
-            'grade' => 'nullable|string|max:10',
-            'hr_sd' => 'nullable|numeric|min:0',
-            'hr_smp' => 'nullable|numeric|min:0',
-            'hr_sma' => 'nullable|numeric|min:0',
-            'uang_makan' => 'nullable|numeric|min:0',
-            'uang_transport' => 'nullable|numeric|min:0',
-            'email' => 'required|email|unique:ms_user,email,' . $tentor->id_user . ',id_user',
-            'username' => 'required|string|unique:ms_user,username,' . $tentor->id_user . ',id_user',
-            'password' => 'nullable|string|min:6',
-        ]);
+        <a href="<?php echo e(route('superadmin.kelola-tentor.create')); ?>">
+            <button type="button" style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer;">
+                <i class="fas fa-plus"></i> Tambah
+            </button>
+        </a>
+    </div>
+
+    
+    <div style="background: white; border-radius: 20px; overflow-x: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 1200px;">
+            <thead>
+                <tr style="background: #F3E8FF;">
+                    <th style="padding: 12px; text-align: center;">No</th>
+                    <th style="padding: 12px; text-align: center;">ID</th>
+                    <th style="padding: 12px;">Nama Lengkap</th>
+                    <th style="padding: 12px;">Alamat</th>
+                    <th style="padding: 12px;">No HP</th>
+                    <th style="padding: 12px;">Mapel</th>
+                    <th style="padding: 12px; text-align: center;">Grade</th>
+                    <th style="padding: 12px;">HR SD</th>
+                    <th style="padding: 12px;">HR SMP</th>
+                    <th style="padding: 12px;">HR SMA</th>
+                    <th style="padding: 12px;">Uang Makan</th>
+                    <th style="padding: 12px;">Transport</th>
+                    <th style="padding: 12px;">Email</th>
+                    <th style="padding: 12px;">Username</th>
+                    <th style="padding: 12px; text-align: center;">Status Akun</th>
+                    <th style="padding: 12px; text-align: center;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <?php $__empty_1 = true; $__currentLoopData = $tentors; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <tr style="border-bottom: 1px solid #E5E7EB;">
+                    <td style="padding: 12px; text-align: center;"><?php echo e($tentors->firstItem() + $index); ?></td>
+                    <td style="padding: 12px; text-align: center;">TE<?php echo e(str_pad($t->id_tentor, 4, '0', STR_PAD_LEFT)); ?></td>
+                    <td style="padding: 12px;"><?php echo e($t->nama_lengkap_tentor); ?></td>
+                    <td style="padding: 12px;"><?php echo e($t->alamat_tentor ?? '-'); ?></td>
+                    <td style="padding: 12px;"><?php echo e($t->no_hp_tentor ?? '-'); ?></td>
+                    <td style="padding: 12px;"><?php echo e($t->mapel ?? '-'); ?></td>
+                    <td style="padding: 12px; text-align: center;"><?php echo e($t->grade ?? '-'); ?></td>
+                    <td style="padding: 12px;">Rp <?php echo e(number_format($t->hr_sd ?? 0, 0, ',', '.')); ?></td>
+                    <td style="padding: 12px;">Rp <?php echo e(number_format($t->hr_smp ?? 0, 0, ',', '.')); ?></td>
+                    <td style="padding: 12px;">Rp <?php echo e(number_format($t->hr_sma ?? 0, 0, ',', '.')); ?></td>
+                    <td style="padding: 12px;">Rp <?php echo e(number_format($t->uang_makan ?? 0, 0, ',', '.')); ?></td>
+                    <td style="padding: 12px;">Rp <?php echo e(number_format($t->uang_transport ?? 0, 0, ',', '.')); ?></td>
+                    <td style="padding: 12px;"><?php echo e($t->user->email ?? '-'); ?></td>
+                    <td style="padding: 12px;"><?php echo e($t->user->username ?? '-'); ?></td>
+                    <td style="padding: 12px; text-align: center;">
+                        <span style="padding: 4px 12px; border-radius: 20px; font-size: 11px; 
+                            <?php echo e(($t->user->status ?? 0) == 1 ? 'background: #D1FAE5; color: #065F46;' : 'background: #FEE2E2; color: #991B1B;'); ?>">
+                            <?php echo e(($t->user->status ?? 0) == 1 ? 'Aktif' : 'Nonaktif'); ?>
+
+                        </span>
+                    </td>
+                    <td style="padding: 12px; text-align: center;">
+                        <div style="display: flex; gap: 8px; justify-content: center;">
+                            <a href="<?php echo e(route('superadmin.kelola-tentor.edit', $t->id_tentor)); ?>" 
+                               style="background: #5EB37E; color: white; padding: 5px 12px; border-radius: 6px; text-decoration: none; font-size: 12px;">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <form method="POST" action="<?php echo e(route('superadmin.kelola-tentor.destroy', $t->id_tentor)); ?>" style="display:inline;" onsubmit="return confirm('Yakin hapus data tentor ini?')">
+                                <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
+                                <button type="submit" style="background: #E35D5D; color: white; padding: 5px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px;">
+                                    <i class="fas fa-trash"></i> Hapus
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                <tr>
+                    <td colspan="16" style="padding: 40px; text-align: center; color: #9CA3AF;">
+                        <i class="fas fa-database" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
+                        Belum ada data tentor.
+                    </td>
+                </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+    
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+        <span style="color: #374151; font-size: 13px;">Menampilkan <?php echo e($tentors->firstItem() ?? 0); ?>–<?php echo e($tentors->lastItem() ?? 0); ?> dari <?php echo e($tentors->total()); ?> data</span>
+        <div>
+            <?php echo e($tentors->links()); ?>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Live search
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        let searchValue = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#tableBody tr');
         
-        try {
-            // Update user
-            $userData = [
-                'email' => $request->email,
-                'username' => $request->username,
-            ];
-            if ($request->filled('password')) {
-                $userData['password'] = Hash::make($request->password);
+        rows.forEach(row => {
+            if(row.cells && row.cells.length >= 3) {
+                let id = row.cells[1]?.innerText.toLowerCase() || '';
+                let nama = row.cells[2]?.innerText.toLowerCase() || '';
+                if(id.includes(searchValue) || nama.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
             }
-            $tentor->user->update($userData);
-            
-            // Update tentor
-            $tentor->update([
-                'nama_lengkap_tentor' => $request->nama_lengkap_tentor,
-                'alamat_tentor' => $request->alamat_tentor,
-                'no_hp_tentor' => $request->no_hp_tentor,
-                'mapel' => $request->mapel,
-                'grade' => $request->grade,
-                'hr_sd' => $request->hr_sd ?? 0,
-                'hr_smp' => $request->hr_smp ?? 0,
-                'hr_sma' => $request->hr_sma ?? 0,
-                'uang_makan' => $request->uang_makan ?? 0,
-                'uang_transport' => $request->uang_transport ?? 0,
-                'status_gaji' => $request->status_gaji ?? $tentor->status_gaji,
-            ]);
-            
-            return redirect()->route('superadmin.kelola-tentor')
-                ->with('success', 'Data tentor berhasil diperbarui');
-                
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()])
-                ->withInput();
-        }
-    }
-    
-    // Hapus tentor (beserta user-nya)
-    public function destroy($id)
-    {
-        try {
-            $tentor = Tentor::findOrFail($id);
-            $userId = $tentor->id_user;
-            $tentor->delete();
-            
-            if ($userId) {
-                User::where('id_user', $userId)->delete();
-            }
-            
-            return redirect()->route('superadmin.kelola-tentor')
-                ->with('success', 'Data tentor berhasil dihapus');
-                
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
-        }
-    }
-    
-    // Aktifkan/Nonaktifkan tentor
-    public function toggleStatus($id)
-    {
-        try {
-            $tentor = Tentor::findOrFail($id);
-            $user = User::findOrFail($tentor->id_user);
-            
-            $newStatus = $user->status_akun == 'Aktif' ? 'Nonaktif' : 'Aktif';
-            $user->update(['status_akun' => $newStatus]);
-            
-            $message = $newStatus == 'Aktif' ? 'diaktifkan' : 'dinonaktifkan';
-            return redirect()->route('superadmin.kelola-tentor')
-                ->with('success', 'Status tentor berhasil ' . $message);
-                
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
-        }
-    }
-} ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/superadmin/kelola-tentor/kelola-tentor.blade.php ENDPATH**/ ?>
+        });
+    });
+</script>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/superadmin/kelola-tentor/kelola-tentor.blade.php ENDPATH**/ ?>

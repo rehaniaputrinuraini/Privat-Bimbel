@@ -1,46 +1,81 @@
-@extends('layouts.app')
 
-@section('title', 'Input Data Admin')
 
-@section('content')
+<?php $__env->startSection('title', 'Edit Data Admin'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
     
-    <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Input Data Admin</h1>
+    <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Edit Data Admin</h1>
 
     <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);" data-aos="fade-up">
         
-        <form action="{{ route('superadmin.kelola-admin.store') }}" method="POST" id="mainForm">
-            @csrf
+        <form action="<?php echo e(route('superadmin.kelola-admin.update', $admin->id_user)); ?>" method="POST" id="mainForm">
+            <?php echo csrf_field(); ?>
+            <?php echo method_field('PUT'); ?>
             
             <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">ID Admin</label>
+                <input type="text" value="AD<?php echo e(str_pad($admin->id_user, 4, '0', STR_PAD_LEFT)); ?>" readonly 
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280;">
+            </div>
+
+            <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Lengkap <span style="color: red;">*</span></label>
-                <input type="text" name="nama_lengkap_admin" placeholder="Masukkan Nama Lengkap" required
+                <input type="text" name="nama_lengkap_admin" value="<?php echo e(old('nama_lengkap_admin', $admin->admin->nama_lengkap_admin ?? '')); ?>" placeholder="Masukkan Nama Lengkap" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
-                @error('nama_lengkap_admin') <small style="color: red;">{{ $message }}</small> @enderror
+                <?php $__errorArgs = ['nama_lengkap_admin'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             </div>
 
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Alamat</label>
                 <textarea name="alamat_admin" rows="2" placeholder="Masukkan Alamat"
-                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;"></textarea>
-                @error('alamat_admin') <small style="color: red;">{{ $message }}</small> @enderror
+                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;"><?php echo e(old('alamat_admin', $admin->admin->alamat_admin ?? '')); ?></textarea>
+                <?php $__errorArgs = ['alamat_admin'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px;">
                 <div>
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No HP</label>
-                        <input type="text" name="no_hp_admin" placeholder="Masukkan No HP"
+                        <input type="text" name="no_hp_admin" value="<?php echo e(old('no_hp_admin', $admin->admin->no_hp_admin ?? '')); ?>" placeholder="Masukkan No HP"
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
-                        @error('no_hp_admin') <small style="color: red;">{{ $message }}</small> @enderror
+                        <?php $__errorArgs = ['no_hp_admin'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
                 <div>
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Email <span style="color: red;">*</span></label>
-                        <input type="email" name="email" placeholder="Masukkan Email" required
+                        <input type="email" name="email" value="<?php echo e(old('email', $admin->email)); ?>" placeholder="Masukkan Email" required
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
-                        @error('email') <small style="color: red;">{{ $message }}</small> @enderror
+                        <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
             </div>
@@ -49,32 +84,45 @@
                 <div>
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Gaji Pokok (Rp)</label>
-                        <input type="number" name="gaji_pokok" placeholder="Masukkan Gaji Pokok"
+                        <input type="number" name="gaji_pokok" value="<?php echo e(old('gaji_pokok', $admin->admin->gaji_pokok ?? 0)); ?>" placeholder="Masukkan Gaji Pokok"
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
-                        @error('gaji_pokok') <small style="color: red;">{{ $message }}</small> @enderror
+                        <?php $__errorArgs = ['gaji_pokok'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
                 <div>
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Username <span style="color: red;">*</span></label>
-                        <input type="text" name="username" placeholder="Masukkan Username" required
+                        <input type="text" name="username" value="<?php echo e(old('username', $admin->username)); ?>" placeholder="Masukkan Username" required
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
-                        @error('username') <small style="color: red;">{{ $message }}</small> @enderror
+                        <?php $__errorArgs = ['username'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">
                 <button type="button" onclick="bukaModalBatal()" 
-                        style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 16px; background: #FFFFFF; cursor: pointer; transition: 0.3s;">
+                        style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 16px; background: #FFFFFF; cursor: pointer;">
                     Keluar
                 </button>
                 <button type="submit" 
-                        style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2); transition: 0.3s;">
+                        style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
                     Simpan
                 </button>
             </div>
-
         </form>
     </div>
 </div>
@@ -83,7 +131,7 @@
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
         <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Batalkan?</h2>
-        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Data yang Anda masukkan tidak akan disimpan. Yakin ingin keluar?</p>
+        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Perubahan Anda tidak akan disimpan. Yakin ingin keluar?</p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalBatal()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; color: #374151; font-weight: 600; font-size: 13px; cursor: pointer;">Tidak</button>
             <a href="#" id="confirmKeluarLink" style="flex: 1; text-decoration: none;">
@@ -111,7 +159,7 @@
     const form = document.getElementById('mainForm');
     
     if (form) {
-        const inputs = form.querySelectorAll('input, select, textarea');
+        const inputs = form.querySelectorAll('input:not([readonly]), select, textarea');
         inputs.forEach(input => {
             input.addEventListener('change', () => formChanged = true);
             input.addEventListener('keyup', () => formChanged = true);
@@ -124,11 +172,11 @@
             document.getElementById('modalPindahHalaman').style.display = 'flex';
             document.getElementById('confirmPindahBtn').onclick = function() {
                 formChanged = false;
-                window.location.href = "{{ route('superadmin.kelola-admin') }}";
+                window.location.href = "<?php echo e(route('superadmin.kelola-admin')); ?>";
             };
         } else {
             document.getElementById('modalBatal').style.display = 'flex';
-            document.getElementById('confirmKeluarLink').href = "{{ route('superadmin.kelola-admin') }}";
+            document.getElementById('confirmKeluarLink').href = "<?php echo e(route('superadmin.kelola-admin')); ?>";
         }
     }
     
@@ -150,7 +198,7 @@
                             window.location.href = pendingUrl;
                         };
                     } else if (this.classList.contains('logout-btn')) {
-                        pendingUrl = "{{ route('logout') }}";
+                        pendingUrl = "<?php echo e(route('logout')); ?>";
                         document.getElementById('modalPindahHalaman').style.display = 'flex';
                         document.getElementById('confirmPindahBtn').onclick = function() {
                             formChanged = false;
@@ -163,4 +211,5 @@
         });
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/superadmin/kelola-admin/edit-admin.blade.php ENDPATH**/ ?>

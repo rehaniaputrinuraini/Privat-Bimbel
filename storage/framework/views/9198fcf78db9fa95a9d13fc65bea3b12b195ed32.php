@@ -1,27 +1,49 @@
-@extends('layouts.app')
 
-@section('title', 'Input Harga Paket')
 
-@section('content')
+<?php $__env->startSection('title', 'Edit Harga Paket'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
-    <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Input Harga Paket</h1>
+    <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Edit Harga Paket</h1>
 
     <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
-        <form action="{{ route($role . '.harga-paket.store') }}" method="POST" id="mainForm">
-            @csrf
+        <form action="<?php echo e(route($role . '.harga-paket.update', $paket->id_paket)); ?>" method="POST" id="mainForm">
+            <?php echo csrf_field(); ?>
+            <?php echo method_field('PUT'); ?>
             
             <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">ID Paket</label>
+                <input type="text" value="PK<?php echo e(str_pad($paket->id_paket, 4, '0', STR_PAD_LEFT)); ?>" readonly 
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280;">
+            </div>
+
+            <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Harga Paket <span style="color: red;">*</span></label>
-                <input type="number" name="harga" placeholder="Masukkan Harga Paket (contoh: 120000)" required 
+                <input type="number" name="harga" value="<?php echo e($paket->harga); ?>" required 
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
-                @error('harga') <small style="color: red;">{{ $message }}</small> @enderror
+                <?php $__errorArgs = ['harga'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             </div>
 
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tingkat <span style="color: red;">*</span></label>
-                <input type="text" name="tingkat" placeholder="Contoh: SD, SMP, SMA, atau lainnya" required 
+                <input type="text" name="tingkat" value="<?php echo e($paket->tingkat); ?>" required 
+                       placeholder="Contoh: SD, SMP, SMA, atau lainnya"
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
-                @error('tingkat') <small style="color: red;">{{ $message }}</small> @enderror
+                <?php $__errorArgs = ['tingkat'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">
@@ -64,7 +86,7 @@
     const form = document.getElementById('mainForm');
     
     if (form) {
-        const inputs = form.querySelectorAll('input, select, textarea');
+        const inputs = form.querySelectorAll('input:not([readonly]), select, textarea');
         inputs.forEach(input => {
             input.addEventListener('change', () => formChanged = true);
             input.addEventListener('keyup', () => formChanged = true);
@@ -77,11 +99,11 @@
             document.getElementById('modalPindahHalaman').style.display = 'flex';
             document.getElementById('confirmPindahBtn').onclick = function() {
                 formChanged = false;
-                window.location.href = "{{ route($role . '.harga-paket') }}";
+                window.location.href = "<?php echo e(route($role . '.harga-paket')); ?>";
             };
         } else {
             document.getElementById('modalBatal').style.display = 'flex';
-            document.getElementById('confirmKeluarLink').href = "{{ route($role . '.harga-paket') }}";
+            document.getElementById('confirmKeluarLink').href = "<?php echo e(route($role . '.harga-paket')); ?>";
         }
     }
     
@@ -103,7 +125,7 @@
                             window.location.href = pendingUrl;
                         };
                     } else if (this.classList.contains('logout-btn')) {
-                        pendingUrl = "{{ route('logout') }}";
+                        pendingUrl = "<?php echo e(route('logout')); ?>";
                         document.getElementById('modalPindahHalaman').style.display = 'flex';
                         document.getElementById('confirmPindahBtn').onclick = function() {
                             formChanged = false;
@@ -116,4 +138,5 @@
         });
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/harga-paket/edit-paket.blade.php ENDPATH**/ ?>

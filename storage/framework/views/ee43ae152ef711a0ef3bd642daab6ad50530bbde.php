@@ -23,18 +23,18 @@
 <div class="stats-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-bottom: 30px;">
 
     <?php
-        $stats = [
-            ['title' => 'Total Murid',  'val' => '307',         'bg' => '#3A3AA7', 'icon' => 'icon_orang.png',       'size' => '30px'],
-            ['title' => 'Total Tentor', 'val' => '20',          'bg' => '#BE7E5E', 'icon' => 'icon_orang.png',       'size' => '30px'],
-            ['title' => 'Pemasukan',    'val' => 'Rp 500.000',    'bg' => '#0CCC0C', 'icon' => 'icon_pemasukan.png',   'size' => '25px'],
-            ['title' => 'Pengeluaran',  'val' => 'Rp 200.000',    'bg' => '#F14D4D', 'icon' => 'icon_pengeluaran.png', 'size' => '25px'],
-            ['title' => 'Laba Bersih',  'val' => 'Rp 300.000',    'bg' => '#E7C255', 'icon' => 'icon_lababersih.png',  'size' => '25px'],
+        $statsList = [
+            ['title' => 'Total Murid',  'val' => number_format($stats['total_murid'], 0, ',', '.'),         'bg' => '#3A3AA7', 'icon' => 'icon_orang.png',       'size' => '30px'],
+            ['title' => 'Total Tentor', 'val' => number_format($stats['total_tentor'], 0, ',', '.'),        'bg' => '#BE7E5E', 'icon' => 'icon_orang.png',       'size' => '30px'],
+            ['title' => 'Pemasukan',    'val' => 'Rp ' . number_format($stats['pemasukan'], 0, ',', '.'),    'bg' => '#0CCC0C', 'icon' => 'icon_pemasukan.png',   'size' => '25px'],
+            ['title' => 'Pengeluaran',  'val' => 'Rp ' . number_format($stats['pengeluaran'], 0, ',', '.'),  'bg' => '#F14D4D', 'icon' => 'icon_pengeluaran.png', 'size' => '25px'],
+            ['title' => 'Laba Bersih',  'val' => 'Rp ' . number_format($stats['laba_bersih'], 0, ',', '.'),    'bg' => '#E7C255', 'icon' => 'icon_lababersih.png',  'size' => '25px'],
         ];
 
         $role = Auth::user()->peran ?? 'admin';
     ?>
 
-    <?php $__currentLoopData = $stats; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $s): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+    <?php $__currentLoopData = $statsList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $s): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
     <div class="stat-box" style="background: white; height: 160px; border-radius: 20px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 20px;">
         <div style="position: absolute; top: 15px; left: 15px; background: <?php echo e($s['bg']); ?>; width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
             <img src="<?php echo e(asset('images/dashboard/icons/' . $s['icon'])); ?>"
@@ -68,20 +68,28 @@
     
     <div style="padding: 20px; display: flex; flex-direction: column; gap: 10px;">
         
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: #60A060; color: white; border-radius: 12px; transition: 0.2s;">
-            <span style="font-weight: 600; font-size: 14px;">Pembayaran Murid SD</span>
-            <span style="font-weight: 700; font-size: 14px;">Rp. 5.000.000</span>
-        </div>
+        <?php $__empty_1 = true; $__currentLoopData = $riwayatKeuangan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <?php
+                $isPemasukan = $item->kategori == 'pemasukan';
+                $bgColor = $isPemasukan ? '#60A060' : '#D74E4E';
+                $icon = $isPemasukan ? '📥' : '📤';
+            ?>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: <?php echo e($bgColor); ?>; color: white; border-radius: 12px; transition: 0.2s;">
+                <span style="font-weight: 600; font-size: 14px;">
+                    <?php echo e($icon); ?> <?php echo e($item->rincian); ?>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: #D74E4E; color: white; border-radius: 12px; transition: 0.2s;">
-            <span style="font-weight: 600; font-size: 14px;">Bayar WiFi</span>
-            <span style="font-weight: 700; font-size: 14px;">Rp. 100.000</span>
-        </div>
+                    <small style="opacity: 0.8; font-weight: normal;">(<?php echo e(\Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y')); ?>)</small>
+                </span>
+                <span style="font-weight: 700; font-size: 14px;">
+                    Rp <?php echo e(number_format($item->jumlah, 0, ',', '.')); ?>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: #60A060; color: white; border-radius: 12px; transition: 0.2s;">
-            <span style="font-weight: 600; font-size: 14px;">Pembayaran Murid SMA</span>
-            <span style="font-weight: 700; font-size: 14px;">Rp. 5.000.000</span>
-        </div>
+                </span>
+            </div>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+            <div style="padding: 20px; text-align: center; color: #9CA3AF;">
+                Belum ada data keuangan
+            </div>
+        <?php endif; ?>
 
     </div>
 

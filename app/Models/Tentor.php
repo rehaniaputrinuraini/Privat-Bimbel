@@ -35,4 +35,10 @@ class Tentor extends Model
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
     }
+
+    // ✅ TAMBAHKAN RELASI INI
+    public function presensi()
+    {
+        return $this->hasMany(PresensiTentor::class, 'id_tentor', 'id_tentor');
+    }
 }

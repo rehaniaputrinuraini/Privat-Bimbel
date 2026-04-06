@@ -1,8 +1,8 @@
-@extends('layouts.app')
 
-@section('title', 'Pembayaran')
 
-@push('styles')
+<?php $__env->startSection('title', 'Pembayaran'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <style>
     .filter-select {
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
@@ -24,15 +24,16 @@
         color: #9CA3AF;
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div x-data="{ tab: 'tagihan' }" style="width: 100%;">
 
-    {{-- HEADER HALAMAN --}}
+    
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
-            {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+            <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?>
+
         </p>
         <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
             Pembayaran
@@ -40,16 +41,16 @@
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Kelola Pembayaran Murid dan Riwayat Pembayaran</p>
     </div>
 
-    {{-- ACTIONS BAR --}}
+    
     <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 25px;">
-        <a href="{{ route($role . '.pembayaran.create') }}" style="text-decoration: none;">
+        <a href="<?php echo e(route($role . '.pembayaran.create')); ?>" style="text-decoration: none;">
             <button style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: 0.3s; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
                 <i class="fas fa-plus"></i> Input Pembayaran Murid
             </button>
         </a>
     </div>
 
-    {{-- NAVIGASI TAB --}}
+    
     <div style="display: flex; width: 100%; border-bottom: 2px solid #E5E7EB; margin-bottom: 25px;">
         <div class="tab-item"
              @click="tab = 'tagihan'"
@@ -63,10 +64,10 @@
         </div>
     </div>
 
-    {{-- TAB 1: TAGIHAN MURID --}}
+    
     <div x-show="tab === 'tagihan'" x-transition:enter.duration.300ms>
 
-        {{-- Filter Card --}}
+        
         <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border: 1px solid #F3F4F6; margin-bottom: 20px;">
             <div style="position: relative; margin-bottom: 12px;">
                 <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
@@ -94,7 +95,7 @@
             </div>
         </div>
 
-        {{-- Tabel Tagihan --}}
+        
         <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
             <div style="overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
@@ -112,45 +113,45 @@
                         </tr>
                     </thead>
                     <tbody id="tagihanTableBody" style="color: #374151;">
-                        @forelse($tagihan as $index => $t)
+                        <?php $__empty_1 = true; $__currentLoopData = $tagihan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;"
                             onmouseover="this.style.background='#F9FAFB'"
                             onmouseout="this.style.background='transparent'">
-                            <td style="padding: 15px;">{{ $index + 1 }}</td>
-                            <td style="padding: 15px;">{{ $t->nama }}</td>
-                            <td style="padding: 15px;">{{ $t->kelas }}</td>
-                            <td style="padding: 15px;">{{ $t->paket }}</td>
+                            <td style="padding: 15px;"><?php echo e($index + 1); ?></td>
+                            <td style="padding: 15px;"><?php echo e($t->nama); ?></td>
+                            <td style="padding: 15px;"><?php echo e($t->kelas); ?></td>
+                            <td style="padding: 15px;"><?php echo e($t->paket); ?></td>
                             <td style="padding: 15px; text-align: center;">
-                                @if($t->status_pembayaran == 'Lunas')
+                                <?php if($t->status_pembayaran == 'Lunas'): ?>
                                     <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #E1F7E3; color: #0E7490;">Lunas</span>
-                                @else
+                                <?php else: ?>
                                     <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #FEE2E2; color: #EF4444;">Belum</span>
-                                @endif
+                                <?php endif; ?>
                             </td>
                             <td style="padding: 15px; text-align: center;">
-                                @if($t->status_tagihan == 'Lunas')
+                                <?php if($t->status_tagihan == 'Lunas'): ?>
                                     <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #E1F7E3; color: #0E7490;">Lunas</span>
-                                @elseif(str_contains($t->status_tagihan, 'Tunggak'))
-                                    <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #FEF3C7; color: #92400E;">{{ $t->status_tagihan }}</span>
-                                @else
-                                    <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #E0E7FF; color: #4338CA;">{{ $t->status_tagihan }}</span>
-                                @endif
+                                <?php elseif(str_contains($t->status_tagihan, 'Tunggak')): ?>
+                                    <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #FEF3C7; color: #92400E;"><?php echo e($t->status_tagihan); ?></span>
+                                <?php else: ?>
+                                    <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #E0E7FF; color: #4338CA;"><?php echo e($t->status_tagihan); ?></span>
+                                <?php endif; ?>
                             </td>
-                            <td style="padding: 15px; text-align: center;">{{ $t->total_bulan }}</td>
-                            <td style="padding: 15px; text-align: center; {{ $t->total_piutang != '-' ? 'font-weight: 700; color: #EF4444;' : '' }}">{{ $t->total_piutang }}</td>
-                            <td style="padding: 15px; text-align: center;">{{ $t->uang_muka }}</td>
+                            <td style="padding: 15px; text-align: center;"><?php echo e($t->total_bulan); ?></td>
+                            <td style="padding: 15px; text-align: center; <?php echo e($t->total_piutang != '-' ? 'font-weight: 700; color: #EF4444;' : ''); ?>"><?php echo e($t->total_piutang); ?></td>
+                            <td style="padding: 15px; text-align: center;"><?php echo e($t->uang_muka); ?></td>
                         </tr>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
                             <td colspan="9" style="padding: 30px; text-align: center; color: #6B7280;">Belum ada data tagihan</td>
                         </tr>
-                        @endforelse
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        {{-- Pagination Tagihan --}}
+        
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <select id="perPageTagihan" class="filter-select" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
@@ -158,7 +159,7 @@
                     <option value="25">25 baris</option>
                     <option value="50">50 baris</option>
                 </select>
-                <span style="color: #374151; font-size: 13px;" id="tagihanCountInfo">Menampilkan {{ count($tagihan) }} data</span>
+                <span style="color: #374151; font-size: 13px;" id="tagihanCountInfo">Menampilkan <?php echo e(count($tagihan)); ?> data</span>
             </div>
             <div style="display: flex; gap: 5px;">
                 <button class="page-btn" data-page="first"><i class="fas fa-angle-double-left"></i></button>
@@ -170,10 +171,10 @@
 
     </div>
 
-    {{-- TAB 2: RIWAYAT PEMBAYARAN --}}
+    
     <div x-show="tab === 'riwayat'" x-transition:enter.duration.300ms>
 
-        {{-- Filter Card --}}
+        
         <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border: 1px solid #F3F4F6; margin-bottom: 20px;">
             <div style="position: relative; margin-bottom: 12px;">
                 <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
@@ -211,7 +212,7 @@
             </div>
         </div>
 
-        {{-- Tabel Riwayat --}}
+        
         <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
             <div style="overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
@@ -227,29 +228,29 @@
                         </tr>
                     </thead>
                     <tbody id="riwayatTableBody" style="color: #374151;">
-                        @forelse($riwayat as $index => $r)
+                        <?php $__empty_1 = true; $__currentLoopData = $riwayat; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;"
                             onmouseover="this.style.background='#F9FAFB'"
                             onmouseout="this.style.background='transparent'">
-                            <td style="padding: 15px;">{{ $index + 1 }}</td>
-                            <td style="padding: 15px;">{{ $r->tanggal }}</td>
-                            <td style="padding: 15px;">{{ $r->nama_murid }}</td>
-                            <td style="padding: 15px;">Rp {{ $r->paket_awal }}</td>
-                            <td style="padding: 15px;">{{ $r->paket_selanjutnya }}</td>
-                            <td style="padding: 15px; text-align: center; font-weight: 700; color: #4D0B87;">{{ $r->total_bayar }}</td>
-                            <td style="padding: 15px;">{{ $r->keterangan }}</td>
+                            <td style="padding: 15px;"><?php echo e($index + 1); ?></td>
+                            <td style="padding: 15px;"><?php echo e($r->tanggal); ?></td>
+                            <td style="padding: 15px;"><?php echo e($r->nama_murid); ?></td>
+                            <td style="padding: 15px;">Rp <?php echo e($r->paket_awal); ?></td>
+                            <td style="padding: 15px;"><?php echo e($r->paket_selanjutnya); ?></td>
+                            <td style="padding: 15px; text-align: center; font-weight: 700; color: #4D0B87;"><?php echo e($r->total_bayar); ?></td>
+                            <td style="padding: 15px;"><?php echo e($r->keterangan); ?></td>
                         </tr>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
                             <td colspan="7" style="padding: 30px; text-align: center; color: #6B7280;">Belum ada data riwayat pembayaran</td>
                         </tr>
-                        @endforelse
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        {{-- Pagination Riwayat --}}
+        
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <select id="perPageRiwayat" class="filter-select" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
@@ -257,7 +258,7 @@
                     <option value="25">25 baris</option>
                     <option value="50">50 baris</option>
                 </select>
-                <span style="color: #374151; font-size: 13px;" id="riwayatCountInfo">Menampilkan {{ count($riwayat) }} data</span>
+                <span style="color: #374151; font-size: 13px;" id="riwayatCountInfo">Menampilkan <?php echo e(count($riwayat)); ?> data</span>
             </div>
             <div style="display: flex; gap: 5px;">
                 <button class="page-btn-riwayat" data-page="first"><i class="fas fa-angle-double-left"></i></button>
@@ -418,4 +419,5 @@
     });
 </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/pembayaran/pembayaran.blade.php ENDPATH**/ ?>

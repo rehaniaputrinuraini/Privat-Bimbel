@@ -16,10 +16,18 @@ class PresensiTentor extends Model
         'id_tentor',
         'tanggal',
         'jam_masuk',
-        'jam_keluar',
-        'status',
-        'keterangan',
+        'jam_mengajar',
+        'kelas',
+        'status_murid',
+        'total_honor',
+        'uang_makan',
+        'transport',
+        'bukti_foto',
+        'verifikasi_kehadiran',
     ];
+
+    // Nonaktifkan timestamps jika tidak ada kolom created_at/updated_at
+    public $timestamps = false;
 
     // Relasi ke tentor
     public function tentor()
@@ -33,8 +41,17 @@ class PresensiTentor extends Model
         return $this->jam_masuk ? date('H:i', strtotime($this->jam_masuk)) : '-';
     }
 
-    public function getJamKeluarFormattedAttribute()
+    public function getJamMengajarFormattedAttribute()
     {
-        return $this->jam_keluar ? date('H:i', strtotime($this->jam_keluar)) : '-';
+        return $this->jam_mengajar ? $this->jam_mengajar . ' Jam' : '-';
+    }
+
+    // Accessor status badge
+    public function getStatusBadgeAttribute()
+    {
+        if ($this->verifikasi_kehadiran) {
+            return '<span class="badge badge-success">Terverifikasi</span>';
+        }
+        return '<span class="badge badge-warning">Belum Verifikasi</span>';
     }
 }

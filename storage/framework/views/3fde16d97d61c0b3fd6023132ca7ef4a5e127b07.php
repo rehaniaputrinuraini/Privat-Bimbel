@@ -1,8 +1,8 @@
-@extends('layouts.app')
 
-@section('title', 'Input Pembayaran')
 
-@section('content')
+<?php $__env->startSection('title', 'Input Pembayaran'); ?>
+
+<?php $__env->startSection('content'); ?>
 <style>
     .autocomplete-items {
         position: absolute;
@@ -58,28 +58,37 @@
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
     <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Input Pembayaran</h1>
 
-    @if($errors->any())
+    <?php if($errors->any()): ?>
         <div style="background: #FEE2E2; color: #EF4444; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
-            <i class="fas fa-exclamation-circle"></i> {{ $errors->first() }}
-        </div>
-    @endif
+            <i class="fas fa-exclamation-circle"></i> <?php echo e($errors->first()); ?>
 
-    @if(session('success'))
-        <div style="background: #E1F7E3; color: #0E7490; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
         </div>
-    @endif
+    <?php endif; ?>
+
+    <?php if(session('success')): ?>
+        <div style="background: #E1F7E3; color: #0E7490; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+            <i class="fas fa-check-circle"></i> <?php echo e(session('success')); ?>
+
+        </div>
+    <?php endif; ?>
 
     <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
-        <form action="{{ route($role . '.pembayaran.store') }}" method="POST" id="mainForm">
-            @csrf
+        <form action="<?php echo e(route($role . '.pembayaran.store')); ?>" method="POST" id="mainForm">
+            <?php echo csrf_field(); ?>
 
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tanggal <span style="color: red;">*</span></label>
                 <input type="date" name="tanggal" id="tanggal" required 
-                       value="{{ date('Y-m-d') }}"
+                       value="<?php echo e(date('Y-m-d')); ?>"
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
-                @error('tanggal') <small style="color: red;">{{ $message }}</small> @enderror
+                <?php $__errorArgs = ['tanggal'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             </div>
 
             <div style="margin-bottom: 15px; position: relative;">
@@ -90,7 +99,14 @@
                 <div id="autocompleteResult" class="autocomplete-items" style="display: none;"></div>
                 <input type="hidden" name="id_murid" id="id_murid" required>
                 <small style="color: #9CA3AF;">Ketik minimal 2 huruf untuk mencari murid</small>
-                @error('id_murid') <small style="color: red;">{{ $message }}</small> @enderror
+                <?php $__errorArgs = ['id_murid'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             </div>
 
             <div id="infoStatusMurid" style="display: none;"></div>
@@ -113,7 +129,14 @@
                     <option value="SMA">SMA</option>
                 </select>
                 <small style="color: #9CA3AF;">Pilih paket belajar bulanan (SD/SMP/SMA)</small>
-                @error('paket_selanjutnya') <small style="color: red;">{{ $message }}</small> @enderror
+                <?php $__errorArgs = ['paket_selanjutnya'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             </div>
 
             <div id="infoHarga" style="margin-bottom: 15px; padding: 10px 15px; background: #E0E7FF; border-radius: 10px; display: none;">
@@ -126,7 +149,14 @@
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Total Pembayaran <span style="color: red;">*</span></label>
                 <input type="number" name="total_pembayaran" id="total_pembayaran" placeholder="Masukkan Total Pembayaran" required 
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
-                @error('total_pembayaran') <small style="color: red;">{{ $message }}</small> @enderror
+                <?php $__errorArgs = ['total_pembayaran'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             </div>
 
             <div id="previewStatus" style="margin-bottom: 15px; padding: 12px 15px; border-radius: 10px; display: none;"></div>
@@ -135,7 +165,14 @@
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Keterangan</label>
                 <textarea name="keterangan" id="keterangan" rows="3" placeholder="Masukkan Keterangan (contoh: Pembayaran bulan Januari)" 
                           style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; resize: vertical;"></textarea>
-                @error('keterangan') <small style="color: red;">{{ $message }}</small> @enderror
+                <?php $__errorArgs = ['keterangan'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">
@@ -198,11 +235,11 @@
             document.getElementById('modalPindahHalaman').style.display = 'flex';
             document.getElementById('confirmPindahBtn').onclick = function() {
                 formChanged = false;
-                window.location.href = "{{ route($role . '.pembayaran') }}";
+                window.location.href = "<?php echo e(route($role . '.pembayaran')); ?>";
             };
         } else {
             document.getElementById('modalBatal').style.display = 'flex';
-            document.getElementById('confirmKeluarLink').href = "{{ route($role . '.pembayaran') }}";
+            document.getElementById('confirmKeluarLink').href = "<?php echo e(route($role . '.pembayaran')); ?>";
         }
     }
     
@@ -224,7 +261,7 @@
                             window.location.href = pendingUrl;
                         };
                     } else if (this.classList.contains('logout-btn')) {
-                        pendingUrl = "{{ route('logout') }}";
+                        pendingUrl = "<?php echo e(route('logout')); ?>";
                         document.getElementById('modalPindahHalaman').style.display = 'flex';
                         document.getElementById('confirmPindahBtn').onclick = function() {
                             formChanged = false;
@@ -238,7 +275,7 @@
     });
     
     // Data harga paket dari database
-    const hargaPaketData = @json($pakets->pluck('harga', 'tingkat'));
+    const hargaPaketData = <?php echo json_encode($pakets->pluck('harga', 'tingkat'), 512) ?>;
     window.hargaPaketData = hargaPaketData;
     
     function getHargaPaket(namaPaket) { return hargaPaketData[namaPaket] || 0; }
@@ -393,4 +430,5 @@
         document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
     }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/pembayaran/create-pembayaran.blade.php ENDPATH**/ ?>

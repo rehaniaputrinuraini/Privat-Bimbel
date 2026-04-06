@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Murid;
 use App\Models\Pembayaran;
 use App\Models\HargaPaket;
+use App\Models\LaporanKeuangan; // TAMBAHKAN INI
 use Illuminate\Support\Facades\Auth;
 
 class PembayaranController extends Controller
@@ -171,6 +172,16 @@ class PembayaranController extends Controller
                     'keterangan' => $request->keterangan ?: 'Pembayaran pendaftaran',
                 ]);
                 
+                // ========== TAMBAHKAN KE LAPORAN KEUANGAN ==========
+                LaporanKeuangan::create([
+                    'tanggal' => $request->tanggal,
+                    'kategori' => 'pemasukan',
+                    'rincian' => 'Pembayaran Pendaftaran - ' . $murid->nama_lengkap_murid,
+                    'jumlah' => $request->total_pembayaran,
+                    'nama_murid' => $murid->nama_lengkap_murid,
+                    'bulan_periode' => null
+                ]);
+                
                 $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
                 
                 return redirect()->route($role . '.pembayaran')
@@ -211,6 +222,17 @@ class PembayaranController extends Controller
                 'total_uang_muka' => 0,
                 'total_pembayaran' => $request->total_pembayaran,
                 'keterangan' => $request->keterangan,
+            ]);
+            
+            // ========== TAMBAHKAN KE LAPORAN KEUANGAN ==========
+            $rincianLaporan = 'Pembayaran Bulanan ' . $murid->nama_lengkap_murid . ' - Paket ' . $request->paket_selanjutnya;
+            LaporanKeuangan::create([
+                'tanggal' => $request->tanggal,
+                'kategori' => 'pemasukan',
+                'rincian' => $rincianLaporan,
+                'jumlah' => $request->total_pembayaran,
+                'nama_murid' => $murid->nama_lengkap_murid,
+                'bulan_periode' => date('F Y', strtotime($request->tanggal))
             ]);
             
             if ($request->total_pembayaran >= $hargaPerBulan && $murid->pilihan_paket != $request->paket_selanjutnya) {

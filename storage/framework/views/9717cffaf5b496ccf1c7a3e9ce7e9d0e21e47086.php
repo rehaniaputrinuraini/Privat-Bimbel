@@ -1,11 +1,11 @@
-@extends('layouts.app')
 
-@section('title', 'Edit Profil Admin')
 
-@section('content')
+<?php $__env->startSection('title', 'Edit Profil Admin'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
     
-    {{-- MODAL KONFIRMASI KELUAR (TANPA PERUBAHAN) --}}
+    
     <div id="modalBatal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
         <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
             <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -20,7 +20,7 @@
         </div>
     </div>
 
-    {{-- MODAL PERINGATAN PERUBAHAN BELUM DISIMPAN --}}
+    
     <div id="modalPindahHalaman" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
         <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
             <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -33,20 +33,20 @@
         </div>
     </div>
 
-    {{-- Header Halaman --}}
+    
     <div style="margin-bottom: 30px;">
         <h1 style="font-size: 28px; font-weight: 800; color: #111827; margin: 0;">Edit Profil Admin</h1>
         <p style="color: #6B7280; font-size: 16px; margin-top: 5px;">Perbarui Informasi Profil Anda</p>
     </div>
 
-    {{-- Form Utama --}}
-    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" id="mainForm">
-        @csrf
-        @method('PUT')
+    
+    <form action="<?php echo e(route('profile.update')); ?>" method="POST" enctype="multipart/form-data" id="mainForm">
+        <?php echo csrf_field(); ?>
+        <?php echo method_field('PUT'); ?>
 
         <div style="display: flex; gap: 30px; align-items: flex-start;">
             
-            {{-- KARTU FOTO PROFIL (KIRI) --}}
+            
             <div style="flex: 1; background: white; padding: 40px 20px; border-radius: 20px; border: 1px solid #E5E7EB; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center;">
                 <div style="width: 180px; height: 180px; background: #4D0B87; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; position: relative;">
                     <span style="color: white; font-size: 70px; font-weight: 800;">SA</span>
@@ -64,12 +64,12 @@
                 <p style="color: #6B7280; font-size: 14px; margin: 0;">Format: PNG, JPG (Max. 2MB)</p>
             </div>
 
-            {{-- FORM INFORMASI PROFIL (KANAN) --}}
+            
             <div style="flex: 2; background: white; padding: 35px; border-radius: 20px; border: 1px solid #E5E7EB; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
                 
-                {{-- HEADER INFORMASI PROFIL DENGAN TOMBOL PANAH --}}
+                
                 <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
-                    {{-- TOMBOL PANAH (Background Ungu Tua, Panah Putih) --}}
+                    
                     <button type="button" onclick="bukaModalBatal()"
                             style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; background-color: #4D0B87; border-radius: 50%; border: none; cursor: pointer; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s ease;"
                             onmouseover="this.style.transform='scale(1.1)'; this.style.backgroundColor='#3a0866';" 
@@ -79,7 +79,7 @@
                     <h2 style="font-size: 22px; font-weight: 800; color: #111827; margin: 0;">Informasi Profil</h2>
                 </div>
                 
-                {{-- Input Fields --}}
+                
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">Nama Lengkap</label>
                     <input type="text" name="name" value="Sari Putri" placeholder="Masukkan Nama Lengkap"
@@ -98,7 +98,7 @@
                            style="width: 100%; padding: 14px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: white; color: #111827; font-size: 15px; outline: none; box-sizing: border-box;">
                 </div>
 
-                {{-- TOMBOL SIMPAN --}}
+                
                 <div style="display: flex; justify-content: flex-end; margin-top: 30px;">
                     <button type="submit" style="background: #4D0B87; color: white; border: none; padding: 12px 65px; border-radius: 12px; font-weight: 600; font-size: 18px; cursor: pointer; box-shadow: 0 4px 10px rgba(77, 11, 135, 0.3); transition: 0.3s;"
                             onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-2px)';"
@@ -111,9 +111,9 @@
         </div>
     </form>
 
-    {{-- Link Ubah Kata Sandi --}}
+    
     <div style="margin-top: 30px;">
-        <a href="{{ route('password.edit') }}" id="ubahPasswordLink" style="text-decoration: none; display: inline-flex; align-items: center; gap: 10px; color: #4D0B87; font-weight: 700; font-size: 18px; transition: 0.3s;" onmouseover="this.style.gap='15px'" onmouseout="this.style.gap='10px'">
+        <a href="<?php echo e(route('password.edit')); ?>" id="ubahPasswordLink" style="text-decoration: none; display: inline-flex; align-items: center; gap: 10px; color: #4D0B87; font-weight: 700; font-size: 18px; transition: 0.3s;" onmouseover="this.style.gap='15px'" onmouseout="this.style.gap='10px'">
             Ubah Kata Sandi <i class="fas fa-arrow-right"></i>
         </a>
     </div>
@@ -145,12 +145,12 @@
             document.getElementById('modalPindahHalaman').style.display = 'flex';
             document.getElementById('confirmPindahBtn').onclick = function() {
                 formChanged = false;
-                window.location.href = "{{ route('profile.index') }}";
+                window.location.href = "<?php echo e(route('profile.index')); ?>";
             };
         } else {
             // Jika tidak ada perubahan, buka modal konfirmasi biasa
             document.getElementById('modalBatal').style.display = 'flex';
-            document.getElementById('confirmKeluarLink').href = "{{ route('profile.index') }}";
+            document.getElementById('confirmKeluarLink').href = "<?php echo e(route('profile.index')); ?>";
         }
     }
     
@@ -192,7 +192,7 @@
                             window.location.href = pendingUrl;
                         };
                     } else if (this.classList.contains('logout-btn')) {
-                        pendingUrl = "{{ route('logout') }}";
+                        pendingUrl = "<?php echo e(route('logout')); ?>";
                         document.getElementById('modalPindahHalaman').style.display = 'flex';
                         document.getElementById('confirmPindahBtn').onclick = function() {
                             formChanged = false;
@@ -221,4 +221,5 @@
         }
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/profil/edit.blade.php ENDPATH**/ ?>
