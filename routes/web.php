@@ -62,7 +62,7 @@ Route::get('/reset-password', [ForgotPasswordController::class, 'showResetForm']
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('password.update');
 
 // ========== 4. ROUTE YANG DILINDUNGI MIDDLEWARE ==========
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'sidebar'])->group(function () {
     
     // ========== DASHBOARD ==========
     Route::get('/superadmin/dashboard', [DashboardController::class, 'superadmin'])->name('superadmin.dashboard');

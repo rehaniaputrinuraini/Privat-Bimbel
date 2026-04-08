@@ -21,7 +21,7 @@
         <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
             <div style="position: relative; width: 300px;">
                 <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
-                <input type="text" id="searchInput" placeholder="Cari Nama atau ID Admin..." 
+                <input type="text" id="searchInput" placeholder="Cari Nama Admin..." 
                        style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
             </div>
         </div>
@@ -134,15 +134,14 @@
 </div>
 
 <script>
-    // Live search
+    // Live search (hanya berdasarkan NAMA, tidak termasuk ID)
     document.getElementById('searchInput').addEventListener('keyup', function() {
         let searchValue = this.value.toLowerCase();
         let rows = document.querySelectorAll('#tableBody tr');
         rows.forEach(row => {
             if(row.cells && row.cells.length >= 3) {
-                let id = row.cells[1]?.innerText.toLowerCase() || '';
                 let nama = row.cells[2]?.innerText.toLowerCase() || '';
-                if(id.includes(searchValue) || nama.includes(searchValue)) {
+                if(nama.includes(searchValue)) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';

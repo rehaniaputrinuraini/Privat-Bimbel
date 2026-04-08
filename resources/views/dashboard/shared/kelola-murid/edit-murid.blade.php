@@ -11,66 +11,95 @@
             @csrf
             @method('PUT')
 
+            {{-- ID Murid (READONLY) --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">ID Murid</label>
                 <input type="text" value="{{ $murid->id_murid }}" readonly 
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280;">
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px;">
             </div>
 
+            {{-- Nama Lengkap (WAJIB) --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Lengkap <span style="color: red;">*</span></label>
-                <input type="text" name="nama_lengkap_murid" value="{{ $murid->nama_lengkap_murid }}" required 
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                <input type="text" name="nama_lengkap_murid" value="{{ $murid->nama_lengkap_murid }}" placeholder="Masukkan Nama Lengkap" required 
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                 @error('nama_lengkap_murid') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
+            {{-- Kelas (WAJIB) --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Kelas</label>
-                <input type="text" name="kelas" value="{{ $murid->kelas }}" 
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Kelas <span style="color: red;">*</span></label>
+                <input type="text" name="kelas" value="{{ $murid->kelas }}" placeholder="Masukkan Kelas" required 
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
+                @error('kelas') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
+            {{-- Asal Sekolah (WAJIB) --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Asal Sekolah</label>
-                <input type="text" name="asal_sekolah" value="{{ $murid->asal_sekolah }}" 
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Asal Sekolah <span style="color: red;">*</span></label>
+                <input type="text" name="asal_sekolah" value="{{ $murid->asal_sekolah }}" placeholder="Masukkan Asal Sekolah" required 
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
+                @error('asal_sekolah') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
+            {{-- Alamat (WAJIB) --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Alamat</label>
-                <textarea name="alamat_murid" rows="3" style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">{{ $murid->alamat_murid }}</textarea>
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Alamat <span style="color: red;">*</span></label>
+                <textarea name="alamat_murid" rows="3" placeholder="Masukkan Alamat Lengkap" required 
+                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-family: 'Poppins', sans-serif; font-size: 14px; resize: vertical;">{{ $murid->alamat_murid }}</textarea>
+                @error('alamat_murid') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
             <hr style="border: 0; border-top: 1px solid #E5E7EB; margin-bottom: 25px;">
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px;">
+            {{-- GRID 2 KOLOM --}}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; align-items: start;">
+                {{-- KOLOM KIRI --}}
                 <div>
+                    {{-- No HP Siswa (WAJIB & HANYA ANGKA) --}}
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No HP Siswa</label>
-                        <input type="text" name="no_hp_murid" value="{{ $murid->no_hp_murid }}" 
-                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No HP Siswa <span style="color: red;">*</span></label>
+                        <input type="tel" inputmode="numeric" name="no_hp_murid" value="{{ $murid->no_hp_murid }}" placeholder="Masukkan No HP Siswa" required
+                               onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
+                        @error('no_hp_murid') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
+
+                    {{-- Nama Orang Tua (WAJIB) --}}
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Orang Tua</label>
-                        <input type="text" name="nama_orang_tua" value="{{ $murid->nama_orang_tua }}" 
-                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Orang Tua <span style="color: red;">*</span></label>
+                        <input type="text" name="nama_orang_tua" value="{{ $murid->nama_orang_tua }}" placeholder="Masukkan Nama Orang Tua" required 
+                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
+                        @error('nama_orang_tua') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
+
+                    {{-- No HP Orang Tua (WAJIB & HANYA ANGKA) --}}
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No HP Orang Tua</label>
-                        <input type="text" name="no_hp_orang_tua" value="{{ $murid->no_hp_orang_tua }}" 
-                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No HP Orang Tua <span style="color: red;">*</span></label>
+                        <input type="tel" inputmode="numeric" name="no_hp_orang_tua" value="{{ $murid->no_hp_orang_tua }}" placeholder="Masukkan No HP Orang Tua" required
+                               onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
+                        @error('no_hp_orang_tua') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
                 </div>
+
+                {{-- KOLOM KANAN --}}
                 <div>
+                    {{-- Paket Awal (READONLY) --}}
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Paket Awal (Rp)</label>
-                        <input type="number" name="paket_awal" id="paket_awal" value="100000" readonly
-                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280;">
+                        <input type="text" name="paket_awal" id="paket_awal" value="100000" readonly 
+                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px;">
                         <small style="color: #6B7280;">Biaya pendaftaran tetap Rp 100.000</small>
                     </div>
+
+                    {{-- Pilihan Paket (WAJIB) --}}
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Pilihan Paket</label>
-                        <select name="pilihan_paket" id="pilihan_paket" style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Pilihan Paket <span style="color: red;">*</span></label>
+                        <select name="pilihan_paket" id="pilihan_paket" required 
+                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                             <option value="">Pilih Paket</option>
                             @foreach($paketList as $paket)
                                 <option value="{{ $paket->tingkat }}" {{ $murid->pilihan_paket == $paket->tingkat ? 'selected' : '' }}>
@@ -78,20 +107,28 @@
                                 </option>
                             @endforeach
                         </select>
+                        @error('pilihan_paket') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
+
+                    {{-- Tahun Masuk (WAJIB & HANYA ANGKA) --}}
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tahun Masuk</label>
-                        <input type="number" name="tahun_masuk" value="{{ $murid->tahun_masuk }}" min="2000" max="{{ date('Y') }}" 
-                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tahun Masuk <span style="color: red;">*</span></label>
+                        <input type="tel" inputmode="numeric" name="tahun_masuk" value="{{ $murid->tahun_masuk }}" placeholder="Masukkan Tahun Masuk" required
+                               min="2000" max="{{ date('Y') }}"
+                               onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
+                        @error('tahun_masuk') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
                 </div>
             </div>
 
+            {{-- TOMBOL AKSI --}}
             <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">
                 <button type="button" onclick="bukaModalBatal()" 
-                        style="padding: 12px 65px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 12px; font-weight: 600; font-size: 18px; background: #FFFFFF; cursor: pointer;">Keluar</button>
+                        style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 16px; background: #FFFFFF; cursor: pointer;">Keluar</button>
                 <button type="submit" 
-                        style="padding: 12px 65px; border: none; background: #4D0B87; color: white; border-radius: 12px; font-weight: 600; font-size: 18px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">Simpan</button>
+                        style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">Simpan</button>
             </div>
         </form>
     </div>

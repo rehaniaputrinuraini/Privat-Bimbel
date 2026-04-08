@@ -11,16 +11,20 @@
             <?php echo csrf_field(); ?>
             <?php echo method_field('PUT'); ?>
             
+            
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">ID Paket</label>
                 <input type="text" value="PK<?php echo e(str_pad($paket->id_paket, 4, '0', STR_PAD_LEFT)); ?>" readonly 
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280;">
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px;">
             </div>
 
+            
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Harga Paket <span style="color: red;">*</span></label>
-                <input type="number" name="harga" value="<?php echo e($paket->harga); ?>" required 
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                <input type="tel" inputmode="numeric" name="harga" value="<?php echo e($paket->harga); ?>" placeholder="Masukkan Harga Paket" required
+                       onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                 <?php $__errorArgs = ['harga'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -31,11 +35,11 @@ endif;
 unset($__errorArgs, $__bag); ?>
             </div>
 
+            
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tingkat <span style="color: red;">*</span></label>
-                <input type="text" name="tingkat" value="<?php echo e($paket->tingkat); ?>" required 
-                       placeholder="Contoh: SD, SMP, SMA, atau lainnya"
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                <input type="text" name="tingkat" value="<?php echo e($paket->tingkat); ?>" placeholder="Masukkan Tingkat" required 
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                 <?php $__errorArgs = ['tingkat'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -46,13 +50,17 @@ endif;
 unset($__errorArgs, $__bag); ?>
             </div>
 
+            
             <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">
-                <button type="button" onclick="bukaModalBatal()" style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 16px; background: #FFFFFF; cursor: pointer;">Keluar</button>
-                <button type="submit" style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">Simpan</button>
+                <button type="button" onclick="bukaModalBatal()" 
+                        style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 16px; background: #FFFFFF; cursor: pointer;">Keluar</button>
+                <button type="submit" 
+                        style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">Simpan</button>
             </div>
         </form>
     </div>
 </div>
+
 
 <div id="modalBatal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
@@ -68,6 +76,7 @@ unset($__errorArgs, $__bag); ?>
     </div>
 </div>
 
+
 <div id="modalPindahHalaman" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -81,37 +90,52 @@ unset($__errorArgs, $__bag); ?>
 </div>
 
 <script>
+    // ========== UNSAVED CHANGES WARNING ==========
     let formChanged = false;
     let pendingUrl = null;
     const form = document.getElementById('mainForm');
     
+    // Deteksi perubahan pada semua input, select, textarea (abaikan readonly)
     if (form) {
         const inputs = form.querySelectorAll('input:not([readonly]), select, textarea');
         inputs.forEach(input => {
             input.addEventListener('change', () => formChanged = true);
             input.addEventListener('keyup', () => formChanged = true);
         });
+        
+        // Reset saat form disubmit
         form.addEventListener('submit', () => formChanged = false);
     }
     
+    // Fungsi untuk modal keluar (tombol keluar)
     function bukaModalBatal() { 
         if (formChanged) {
+            // Jika ada perubahan, buka modal peringatan
             document.getElementById('modalPindahHalaman').style.display = 'flex';
             document.getElementById('confirmPindahBtn').onclick = function() {
                 formChanged = false;
                 window.location.href = "<?php echo e(route($role . '.harga-paket')); ?>";
             };
         } else {
+            // Jika tidak ada perubahan, buka modal konfirmasi biasa
             document.getElementById('modalBatal').style.display = 'flex';
             document.getElementById('confirmKeluarLink').href = "<?php echo e(route($role . '.harga-paket')); ?>";
         }
     }
     
-    function tutupModalBatal() { document.getElementById('modalBatal').style.display = 'none'; }
-    function tutupModalPindah() { document.getElementById('modalPindahHalaman').style.display = 'none'; pendingUrl = null; }
+    function tutupModalBatal() { 
+        document.getElementById('modalBatal').style.display = 'none'; 
+    }
     
+    function tutupModalPindah() {
+        document.getElementById('modalPindahHalaman').style.display = 'none';
+        pendingUrl = null;
+    }
+    
+    // Cegah klik link sidebar jika form berubah
     document.addEventListener('DOMContentLoaded', function() {
         const sidebarLinks = document.querySelectorAll('.sidebar-nav a, .sidebar-footer a, .logout-btn');
+        
         sidebarLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 if (formChanged) {

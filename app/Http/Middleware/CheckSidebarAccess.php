@@ -4,23 +4,61 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CheckSidebarAccess
 {
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
     public function handle(Request $request, Closure $next)
     {
-        // Daftar route yang DIizinkan (tidak perlu cek referer)
+        // Jika user belum login, biarkan lanjut (akan di-handle oleh auth middleware)
+        if (!Auth::check()) {
+            return $next($request);
+        }
+
+        $user = Auth::user();
+        $userRole = $user->peran;
+        
+        // Daftar route yang DIizinkan tanpa cek referer
         $allowedRoutes = [
+            // Auth & Landing
             'login',
             'logout',
+            'register',
+            'password.request',
+            'otp.send',
+            'otp.verify',
+            'otp.check',
+            'password.reset',
+            'password.update',
+            'google.login',
+            'google.callback',
+            'landing',
+            'companyprofile',
+            
+            // Dashboard
             'superadmin.dashboard',
             'admin.dashboard',
             'tentor.dashboard',
+            
+            // Profile (semua role)
             'profile.index',
             'profile.edit',
             'profile.update',
             'password.edit',
             'password.update.profile',
+            
+            // API routes
+            'search.murid',
+            'get.harga.paket',
+            'get.murid.paket',
+            'cek.status.pembayaran',
         ];
         
         $currentRoute = $request->route()->getName();
@@ -35,13 +73,8 @@ class CheckSidebarAccess
         
         // Jika tidak ada referer (akses langsung via URL)
         if (!$referer) {
-            $user = auth()->user();
-            if ($user) {
-                return redirect()->route($user->peran . '.dashboard')
-                    ->with('error', 'Akses tidak diizinkan! Silakan gunakan menu sidebar.');
-            }
-            return redirect()->route('login')
-                ->with('error', 'Silakan login terlebih dahulu.');
+            return redirect()->route($userRole . '.dashboard')
+                ->with('error', 'Akses tidak diizinkan! Silakan gunakan menu sidebar.');
         }
         
         // Cek apakah referer berasal dari domain yang sama
@@ -49,13 +82,8 @@ class CheckSidebarAccess
         $refererHost = parse_url($referer, PHP_URL_HOST);
         
         if ($currentHost !== $refererHost) {
-            $user = auth()->user();
-            if ($user) {
-                return redirect()->route($user->peran . '.dashboard')
-                    ->with('error', 'Akses tidak diizinkan!');
-            }
-            return redirect()->route('login')
-                ->with('error', 'Silakan login terlebih dahulu.');
+            return redirect()->route($userRole . '.dashboard')
+                ->with('error', 'Akses tidak diizinkan! Akses hanya melalui halaman internal.');
         }
         
         return $next($request);
