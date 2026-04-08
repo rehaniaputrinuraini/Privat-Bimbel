@@ -150,21 +150,22 @@
             </div>
         </div>
 
-        {{-- Pagination Tagihan --}}
+        {{-- Pagination Tagihan (SAMA PERSIS DENGAN KELOLA ADMIN) --}}
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
             <div style="display: flex; align-items: center; gap: 10px;">
-                <select id="perPageTagihan" class="filter-select" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
+                <select id="perPageTagihan" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                     <option value="10">10 baris</option>
                     <option value="25">25 baris</option>
                     <option value="50">50 baris</option>
                 </select>
-                <span style="color: #374151; font-size: 13px;" id="tagihanCountInfo">Menampilkan {{ count($tagihan) }} data</span>
+                <span style="color: #374151; font-size: 13px;">Menampilkan {{ $tagihan->count() }} data</span>
             </div>
+
             <div style="display: flex; gap: 5px;">
-                <button class="page-btn" data-page="first"><i class="fas fa-angle-double-left"></i></button>
-                <button class="page-btn" data-page="prev"><i class="fas fa-angle-left"></i></button>
-                <button class="page-btn active" data-page="1">1</button>
-                <button class="page-btn" data-page="next"><i class="fas fa-angle-right"></i></button>
+                <button class="page-btn-tagihan" data-page="first" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-double-left"></i></button>
+                <button class="page-btn-tagihan" data-page="prev" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-left"></i></button>
+                <button class="page-btn-tagihan active" data-page="1" style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">1</button>
+                <button class="page-btn-tagihan" data-page="next" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-right"></i></button>
             </div>
         </div>
 
@@ -204,9 +205,14 @@
                 </select>
                 <select id="filterTahun" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: #F9FAFB; outline: none; cursor: pointer; min-width: 150px;">
                     <option value="">Pilih Tahun</option>
-                    <option value="2024">2024</option>
-                    <option value="2025">2025</option>
-                    <option value="2026" selected>2026</option>
+                    @php
+                        $tahunList = $riwayat->pluck('tanggal')->map(function($date) {
+                            return explode('/', $date)[2] ?? null;
+                        })->filter()->unique()->sort()->values();
+                    @endphp
+                    @foreach($tahunList as $tahun)
+                        <option value="{{ $tahun }}">{{ $tahun }}</option>
+                    @endforeach
                 </select>
             </div>
         </div>
@@ -249,21 +255,22 @@
             </div>
         </div>
 
-        {{-- Pagination Riwayat --}}
+        {{-- Pagination Riwayat (SAMA PERSIS DENGAN KELOLA ADMIN) --}}
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
             <div style="display: flex; align-items: center; gap: 10px;">
-                <select id="perPageRiwayat" class="filter-select" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
+                <select id="perPageRiwayat" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                     <option value="10">10 baris</option>
                     <option value="25">25 baris</option>
                     <option value="50">50 baris</option>
                 </select>
-                <span style="color: #374151; font-size: 13px;" id="riwayatCountInfo">Menampilkan {{ count($riwayat) }} data</span>
+                <span style="color: #374151; font-size: 13px;">Menampilkan {{ $riwayat->count() }} data</span>
             </div>
+
             <div style="display: flex; gap: 5px;">
-                <button class="page-btn-riwayat" data-page="first"><i class="fas fa-angle-double-left"></i></button>
-                <button class="page-btn-riwayat" data-page="prev"><i class="fas fa-angle-left"></i></button>
-                <button class="page-btn-riwayat active" data-page="1">1</button>
-                <button class="page-btn-riwayat" data-page="next"><i class="fas fa-angle-right"></i></button>
+                <button class="page-btn-riwayat" data-page="first" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-double-left"></i></button>
+                <button class="page-btn-riwayat" data-page="prev" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-left"></i></button>
+                <button class="page-btn-riwayat active" data-page="1" style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">1</button>
+                <button class="page-btn-riwayat" data-page="next" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-right"></i></button>
             </div>
         </div>
 
@@ -294,16 +301,9 @@
             
             let show = true;
             
-            // Filter search
             if (searchValue && !nama.includes(searchValue)) show = false;
-            
-            // Filter paket
             if (filterPaket && paket !== filterPaket) show = false;
-            
-            // Filter status pembayaran
             if (filterPembayaran && statusPembayaran !== filterPembayaran) show = false;
-            
-            // Filter status tagihan
             if (filterTagihanStatus) {
                 if (filterTagihanStatus === 'Tunggak' && !statusTagihan.includes('Tunggak')) show = false;
                 else if (filterTagihanStatus === 'Uang Muka' && statusTagihan !== 'Uang Muka 1 Bln') show = false;
@@ -314,8 +314,8 @@
             if (show) visibleCount++;
         });
         
-        // Update info jumlah data
-        const infoSpan = document.getElementById('tagihanCountInfo');
+        const infoSpan = document.querySelector('#tagihanTableBody').closest('.tab-item') ? 
+            document.querySelector('#tagihanCountInfo') : null;
         if (infoSpan) infoSpan.innerText = `Menampilkan ${visibleCount} data`;
     }
     
@@ -336,32 +336,100 @@
             const paket = row.cells[4]?.innerText || '';
             const tanggal = row.cells[1]?.innerText || '';
             
-            // Parse tanggal (format: dd/mm/yyyy)
             const parts = tanggal.split('/');
             const bulan = parts[1] ? parseInt(parts[1]) : 0;
             const tahun = parts[2] ? parseInt(parts[2]) : 0;
             
             let show = true;
             
-            // Filter search
             if (searchValue && !nama.includes(searchValue)) show = false;
-            
-            // Filter paket
             if (filterPaket && paket !== filterPaket) show = false;
-            
-            // Filter bulan
             if (filterBulan && bulan !== parseInt(filterBulan)) show = false;
-            
-            // Filter tahun
             if (filterTahun && tahun !== parseInt(filterTahun)) show = false;
             
             row.style.display = show ? '' : 'none';
             if (show) visibleCount++;
         });
         
-        // Update info jumlah data
         const infoSpan = document.getElementById('riwayatCountInfo');
         if (infoSpan) infoSpan.innerText = `Menampilkan ${visibleCount} data`;
+    }
+    
+    // ========== PAGINATION CLIENT SIDE (SEDERHANA) ==========
+    let tagihanCurrentPage = 1;
+    let tagihanPerPage = 10;
+    let riwayatCurrentPage = 1;
+    let riwayatPerPage = 10;
+    
+    function updateTagihanPagination() {
+        const rows = document.querySelectorAll('#tagihanTableBody tr');
+        const totalRows = rows.length;
+        const totalPages = Math.ceil(totalRows / tagihanPerPage);
+        
+        // Sembunyikan semua row dulu
+        rows.forEach((row, index) => {
+            const start = (tagihanCurrentPage - 1) * tagihanPerPage;
+            const end = start + tagihanPerPage;
+            if (index >= start && index < end) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Update tombol pagination
+        const btns = document.querySelectorAll('.page-btn-tagihan');
+        btns.forEach(btn => {
+            btn.style.background = 'white';
+            btn.style.color = '#374151';
+            btn.style.border = '1px solid #E5E7EB';
+        });
+        
+        const activeBtn = document.querySelector(`.page-btn-tagihan[data-page="${tagihanCurrentPage}"]`);
+        if (activeBtn) {
+            activeBtn.style.background = '#4D0B87';
+            activeBtn.style.color = 'white';
+            activeBtn.style.border = 'none';
+        }
+        
+        // Update info jumlah data yang ditampilkan
+        let visibleCount = 0;
+        rows.forEach(row => {
+            if (row.style.display !== 'none') visibleCount++;
+        });
+        const infoSpan = document.querySelector('#tagihanTableBody').closest('div').querySelector('.page-btn-tagihan')?.closest('.page-btn-tagihan') ?
+            null : document.getElementById('tagihanCountInfo');
+        if (infoSpan) infoSpan.innerText = `Menampilkan ${visibleCount} data`;
+    }
+    
+    function updateRiwayatPagination() {
+        const rows = document.querySelectorAll('#riwayatTableBody tr');
+        const totalRows = rows.length;
+        const totalPages = Math.ceil(totalRows / riwayatPerPage);
+        
+        rows.forEach((row, index) => {
+            const start = (riwayatCurrentPage - 1) * riwayatPerPage;
+            const end = start + riwayatPerPage;
+            if (index >= start && index < end) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        const btns = document.querySelectorAll('.page-btn-riwayat');
+        btns.forEach(btn => {
+            btn.style.background = 'white';
+            btn.style.color = '#374151';
+            btn.style.border = '1px solid #E5E7EB';
+        });
+        
+        const activeBtn = document.querySelector(`.page-btn-riwayat[data-page="${riwayatCurrentPage}"]`);
+        if (activeBtn) {
+            activeBtn.style.background = '#4D0B87';
+            activeBtn.style.color = 'white';
+            activeBtn.style.border = 'none';
+        }
     }
     
     // ========== EVENT LISTENERS ==========
@@ -371,49 +439,91 @@
         const filterPaket = document.getElementById('filterPaket');
         const filterPembayaran = document.getElementById('filterPembayaran');
         const filterTagihanStatus = document.getElementById('filterTagihan');
+        const perPageTagihan = document.getElementById('perPageTagihan');
         
         if (searchTagihan) searchTagihan.addEventListener('keyup', filterTagihan);
         if (filterPaket) filterPaket.addEventListener('change', filterTagihan);
         if (filterPembayaran) filterPembayaran.addEventListener('change', filterTagihan);
         if (filterTagihanStatus) filterTagihanStatus.addEventListener('change', filterTagihan);
         
+        if (perPageTagihan) {
+            perPageTagihan.addEventListener('change', function() {
+                tagihanPerPage = parseInt(this.value);
+                tagihanCurrentPage = 1;
+                updateTagihanPagination();
+            });
+        }
+        
         // Riwayat filters
         const searchRiwayat = document.getElementById('searchRiwayat');
         const filterPaketRiwayat = document.getElementById('filterPaketRiwayat');
         const filterBulan = document.getElementById('filterBulan');
         const filterTahun = document.getElementById('filterTahun');
+        const perPageRiwayat = document.getElementById('perPageRiwayat');
         
         if (searchRiwayat) searchRiwayat.addEventListener('keyup', filterRiwayat);
         if (filterPaketRiwayat) filterPaketRiwayat.addEventListener('change', filterRiwayat);
         if (filterBulan) filterBulan.addEventListener('change', filterRiwayat);
         if (filterTahun) filterTahun.addEventListener('change', filterRiwayat);
         
-        // Pagination buttons (sementara hanya untuk UI, backend perlu diimplementasikan)
-        const pageBtns = document.querySelectorAll('.page-btn, .page-btn-riwayat');
-        pageBtns.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                // Untuk pagination backend, perlu implementasi lebih lanjut
-                console.log('Pagination clicked - perlu implementasi server-side');
-            });
-        });
-        
-        // Per page change
-        const perPageTagihan = document.getElementById('perPageTagihan');
-        const perPageRiwayat = document.getElementById('perPageRiwayat');
-        
-        if (perPageTagihan) {
-            perPageTagihan.addEventListener('change', function() {
-                console.log('Per page tagihan changed to:', this.value);
-                // Implementasi reload dengan parameter per_page
+        if (perPageRiwayat) {
+            perPageRiwayat.addEventListener('change', function() {
+                riwayatPerPage = parseInt(this.value);
+                riwayatCurrentPage = 1;
+                updateRiwayatPagination();
             });
         }
         
-        if (perPageRiwayat) {
-            perPageRiwayat.addEventListener('change', function() {
-                console.log('Per page riwayat changed to:', this.value);
-                // Implementasi reload dengan parameter per_page
+        // Pagination button handlers
+        document.querySelectorAll('.page-btn-tagihan').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const page = this.dataset.page;
+                const rows = document.querySelectorAll('#tagihanTableBody tr');
+                const totalPages = Math.ceil(rows.length / tagihanPerPage);
+                
+                if (page === 'first') tagihanCurrentPage = 1;
+                else if (page === 'prev') tagihanCurrentPage = Math.max(1, tagihanCurrentPage - 1);
+                else if (page === 'next') tagihanCurrentPage = Math.min(totalPages, tagihanCurrentPage + 1);
+                else tagihanCurrentPage = parseInt(page);
+                
+                updateTagihanPagination();
             });
+        });
+        
+        document.querySelectorAll('.page-btn-riwayat').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const page = this.dataset.page;
+                const rows = document.querySelectorAll('#riwayatTableBody tr');
+                const totalPages = Math.ceil(rows.length / riwayatPerPage);
+                
+                if (page === 'first') riwayatCurrentPage = 1;
+                else if (page === 'prev') riwayatCurrentPage = Math.max(1, riwayatCurrentPage - 1);
+                else if (page === 'next') riwayatCurrentPage = Math.min(totalPages, riwayatCurrentPage + 1);
+                else riwayatCurrentPage = parseInt(page);
+                
+                updateRiwayatPagination();
+            });
+        });
+        
+        // Initial pagination
+        updateTagihanPagination();
+        updateRiwayatPagination();
+        
+        // Fix untuk count info
+        const tagihanInfo = document.querySelector('#tagihanTableBody').closest('.tab-item') ? 
+            document.querySelector('#tagihanCountInfo') : null;
+        if (!tagihanInfo) {
+            const newSpan = document.createElement('span');
+            newSpan.id = 'tagihanCountInfo';
+            newSpan.style.color = '#374151';
+            newSpan.style.fontSize = '13px';
+            newSpan.innerText = 'Menampilkan data';
+            document.querySelector('#tagihanTableBody').closest('div').querySelector('.page-btn-tagihan')?.parentNode?.parentNode?.querySelector('div:first-child')?.appendChild(newSpan);
+        }
+        
+        const riwayatInfo = document.getElementById('riwayatCountInfo');
+        if (riwayatInfo) {
+            riwayatInfo.innerText = `Menampilkan ${document.querySelectorAll('#riwayatTableBody tr:not([style*="display: none"])').length} data`;
         }
     });
 </script>

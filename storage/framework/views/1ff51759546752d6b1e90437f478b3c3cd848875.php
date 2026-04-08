@@ -121,66 +121,8 @@
         </div>
 
         <div class="pagination-container" style="display: flex; gap: 5px;">
-            <?php if($tentors->onFirstPage()): ?>
-                <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F9FAFB; color: #D1D5DB; cursor: not-allowed;">
-                    <i class="fas fa-angle-double-left"></i>
-                </button>
-                <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F9FAFB; color: #D1D5DB; cursor: not-allowed;">
-                    <i class="fas fa-angle-left"></i>
-                </button>
-            <?php else: ?>
-                <a href="<?php echo e($tentors->url(1)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none;">
-                    <i class="fas fa-angle-double-left"></i>
-                </a>
-                <a href="<?php echo e($tentors->previousPageUrl()); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none;">
-                    <i class="fas fa-angle-left"></i>
-                </a>
-            <?php endif; ?>
+            <?php echo e($tentors->appends(request()->query())->links()); ?>
 
-            <?php
-                $currentPage = $tentors->currentPage();
-                $lastPage = $tentors->lastPage();
-                $start = max(1, $currentPage - 1);
-                $end = min($lastPage, $currentPage + 1);
-                
-                if ($start > 1) {
-                    echo '<a href="'.$tentors->url(1).'" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none;">1</a>';
-                    if ($start > 2) {
-                        echo '<span style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">...</span>';
-                    }
-                }
-                
-                for ($i = $start; $i <= $end; $i++) {
-                    if ($i == $currentPage) {
-                        echo '<button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">'.$i.'</button>';
-                    } else {
-                        echo '<a href="'.$tentors->url($i).'" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none;">'.$i.'</a>';
-                    }
-                }
-                
-                if ($end < $lastPage) {
-                    if ($end < $lastPage - 1) {
-                        echo '<span style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">...</span>';
-                    }
-                    echo '<a href="'.$tentors->url($lastPage).'" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none;">'.$lastPage.'</a>';
-                }
-            ?>
-
-            <?php if($tentors->hasMorePages()): ?>
-                <a href="<?php echo e($tentors->nextPageUrl()); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none;">
-                    <i class="fas fa-angle-right"></i>
-                </a>
-                <a href="<?php echo e($tentors->url($lastPage)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none;">
-                    <i class="fas fa-angle-double-right"></i>
-                </a>
-            <?php else: ?>
-                <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F9FAFB; color: #D1D5DB; cursor: not-allowed;">
-                    <i class="fas fa-angle-right"></i>
-                </button>
-                <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F9FAFB; color: #D1D5DB; cursor: not-allowed;">
-                    <i class="fas fa-angle-double-right"></i>
-                </button>
-            <?php endif; ?>
         </div>
     </div>
 
@@ -204,7 +146,7 @@
 </div>
 
 <script>
-    // Live search (hanya berdasarkan NAMA)
+    // Live search
     document.getElementById('searchInput').addEventListener('keyup', function() {
         let searchValue = this.value.toLowerCase();
         let rows = document.querySelectorAll('#tableBody tr');
@@ -221,7 +163,7 @@
         });
     });
 
-    // Modal Hapus dengan efek blur
+    // Modal Hapus
     function bukaModalHapus(id, nama) {
         let form = document.getElementById('formHapus');
         let url = "<?php echo e(route('superadmin.kelola-tentor.destroy', ':id')); ?>";
@@ -238,7 +180,7 @@
         document.getElementById('modalHapus').style.display = 'none';
     }
 
-    // Page Select (show entries)
+    // Page Select
     document.getElementById('pageSelect').addEventListener('change', function() {
         let perPage = this.value;
         let url = new URL(window.location.href);
@@ -256,4 +198,4 @@
     });
 </script>
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/superadmin/kelola-tentor/kelola-tentor.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\privat-bimbel\resources\views/dashboard/superadmin/kelola-tentor/kelola-tentor.blade.php ENDPATH**/ ?>

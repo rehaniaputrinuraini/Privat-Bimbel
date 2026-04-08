@@ -41,9 +41,12 @@
 
             <select id="filterTahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;">
                 <option value="">--- Tahun Masuk ---</option>
-                <option value="2023">2023</option>
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
+                @php
+                    $tahunList = $murids->pluck('tahun_masuk')->unique()->sort()->filter();
+                @endphp
+                @foreach($tahunList as $tahun)
+                    <option value="{{ $tahun }}">{{ $tahun }}</option>
+                @endforeach
             </select>
         </div>
         
@@ -190,7 +193,7 @@
         });
     });
 
-    // Filter Tahun
+    // Filter Tahun (sudah otomatis dari data yang ada)
     document.getElementById('filterTahun').addEventListener('change', function() {
         let filterValue = this.value;
         let rows = document.querySelectorAll('#tableBody tr');

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Tentor;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\PresensiTentor;
@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Storage;
 
 class PresensiController extends Controller
 {
-    // Tampilkan halaman presensi
+    /**
+     * Tampilkan halaman presensi
+     */
     public function index()
     {
         // Cari tentor berdasarkan user yang login
@@ -34,7 +36,9 @@ class PresensiController extends Controller
         return view('dashboard.tentor.presensi', compact('presensiHariIni', 'tentor'));
     }
 
-    // Proses presensi masuk
+    /**
+     * Proses presensi masuk
+     */
     public function masuk(Request $request)
     {
         try {
@@ -88,7 +92,9 @@ class PresensiController extends Controller
         }
     }
     
-    // Simpan laporan kegiatan
+    /**
+     * Simpan laporan kegiatan
+     */
     public function simpanLaporan(Request $request)
     {
         try {
@@ -169,11 +175,20 @@ class PresensiController extends Controller
         }
     }
     
-    // Proses presensi keluar
+    /**
+     * Proses presensi keluar
+     */
     public function keluar(Request $request)
     {
         try {
             $tentor = Tentor::where('id_user', Auth::id())->first();
+            
+            if (!$tentor) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tentor tidak ditemukan'
+                ], 404);
+            }
             
             $presensi = PresensiTentor::where('id_tentor', $tentor->id_tentor)
                                       ->whereDate('tanggal', today())
@@ -206,7 +221,9 @@ class PresensiController extends Controller
         }
     }
     
-    // Cek status presensi
+    /**
+     * Cek status presensi untuk UI
+     */
     public function cekStatus()
     {
         $tentor = Tentor::where('id_user', Auth::id())->first();
@@ -231,7 +248,9 @@ class PresensiController extends Controller
         ]);
     }
     
-    // Riwayat presensi
+    /**
+     * Riwayat presensi tentor
+     */
     public function riwayat()
     {
         $tentor = Tentor::where('id_user', Auth::id())->first();

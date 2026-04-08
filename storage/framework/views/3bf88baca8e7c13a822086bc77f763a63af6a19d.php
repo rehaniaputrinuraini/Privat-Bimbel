@@ -13,4 +13,4 @@
             </div>
         </a>
     </div>
-</header><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/components/header.blade.php ENDPATH**/ ?>
+</header><?php /**PATH C:\xampp\htdocs\privat-bimbel\resources\views/components/header.blade.php ENDPATH**/ ?>

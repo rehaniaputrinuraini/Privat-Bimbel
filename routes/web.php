@@ -11,6 +11,7 @@ use App\Http\Controllers\HargaPaketController;
 use App\Http\Controllers\KelolaAdminController;
 use App\Http\Controllers\KelolaTentorController;
 use App\Http\Controllers\LaporanKeuanganController;
+use App\Http\Controllers\PresensiController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -61,7 +62,15 @@ Route::post('/verify-otp', [ForgotPasswordController::class, 'verifyOtp'])->name
 Route::get('/reset-password', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('password.update');
 
-// ========== 4. ROUTE YANG DILINDUNGI MIDDLEWARE ==========
+// ========== 4. ROUTE UNTUK MENYIMPAN URL TERAKHIR ==========
+Route::post('/store-last-url', function (Request $request) {
+    if (Auth::check()) {
+        session(['last_valid_url' => $request->url]);
+    }
+    return response()->json(['success' => true]);
+})->name('store.last.url')->middleware('auth');
+
+// ========== 5. ROUTE YANG DILINDUNGI MIDDLEWARE ==========
 Route::middleware(['auth', 'sidebar'])->group(function () {
     
     // ========== DASHBOARD ==========
@@ -91,132 +100,126 @@ Route::middleware(['auth', 'sidebar'])->group(function () {
     })->name('password.update.profile');
     
     // ========== SUPERADMIN ONLY ==========
-    Route::middleware(['role:superadmin'])->prefix('superadmin')->group(function () {
+    Route::middleware(['role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
         
         // KELOLA MURID
-        Route::get('/kelola-murid', [MuridController::class, 'index'])->name('superadmin.kelola-murid');
-        Route::get('/kelola-murid/create', [MuridController::class, 'create'])->name('superadmin.murid.create');
-        Route::post('/kelola-murid/store', [MuridController::class, 'store'])->name('superadmin.murid.store');
-        Route::get('/kelola-murid/edit/{id}', [MuridController::class, 'edit'])->name('superadmin.murid.edit');
-        Route::put('/kelola-murid/update/{id}', [MuridController::class, 'update'])->name('superadmin.murid.update');
-        Route::delete('/kelola-murid/destroy/{id}', [MuridController::class, 'destroy'])->name('superadmin.murid.destroy');
+        Route::get('/kelola-murid', [MuridController::class, 'index'])->name('kelola-murid');
+        Route::get('/kelola-murid/create', [MuridController::class, 'create'])->name('murid.create');
+        Route::post('/kelola-murid/store', [MuridController::class, 'store'])->name('murid.store');
+        Route::get('/kelola-murid/edit/{id}', [MuridController::class, 'edit'])->name('murid.edit');
+        Route::put('/kelola-murid/update/{id}', [MuridController::class, 'update'])->name('murid.update');
+        Route::delete('/kelola-murid/destroy/{id}', [MuridController::class, 'destroy'])->name('murid.destroy');
         
         // HARGA PAKET
-        Route::get('/harga-paket', [HargaPaketController::class, 'index'])->name('superadmin.harga-paket');
-        Route::get('/harga-paket/create', [HargaPaketController::class, 'create'])->name('superadmin.harga-paket.create');
-        Route::post('/harga-paket/store', [HargaPaketController::class, 'store'])->name('superadmin.harga-paket.store');
-        Route::get('/harga-paket/edit/{id}', [HargaPaketController::class, 'edit'])->name('superadmin.harga-paket.edit');
-        Route::put('/harga-paket/update/{id}', [HargaPaketController::class, 'update'])->name('superadmin.harga-paket.update');
-        Route::delete('/harga-paket/destroy/{id}', [HargaPaketController::class, 'destroy'])->name('superadmin.harga-paket.destroy');
+        Route::get('/harga-paket', [HargaPaketController::class, 'index'])->name('harga-paket');
+        Route::get('/harga-paket/create', [HargaPaketController::class, 'create'])->name('harga-paket.create');
+        Route::post('/harga-paket/store', [HargaPaketController::class, 'store'])->name('harga-paket.store');
+        Route::get('/harga-paket/edit/{id}', [HargaPaketController::class, 'edit'])->name('harga-paket.edit');
+        Route::put('/harga-paket/update/{id}', [HargaPaketController::class, 'update'])->name('harga-paket.update');
+        Route::delete('/harga-paket/destroy/{id}', [HargaPaketController::class, 'destroy'])->name('harga-paket.destroy');
         
         // PEMBAYARAN
-        Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('superadmin.pembayaran');
-        Route::get('/pembayaran/create', [PembayaranController::class, 'create'])->name('superadmin.pembayaran.create');
-        Route::post('/pembayaran/store', [PembayaranController::class, 'store'])->name('superadmin.pembayaran.store');
-        Route::get('/pembayaran/edit/{id}', [PembayaranController::class, 'edit'])->name('superadmin.pembayaran.edit');
-        Route::put('/pembayaran/update/{id}', [PembayaranController::class, 'update'])->name('superadmin.pembayaran.update');
-        Route::delete('/pembayaran/destroy/{id}', [PembayaranController::class, 'destroy'])->name('superadmin.pembayaran.destroy');
+        Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran');
+        Route::get('/pembayaran/create', [PembayaranController::class, 'create'])->name('pembayaran.create');
+        Route::post('/pembayaran/store', [PembayaranController::class, 'store'])->name('pembayaran.store');
+        Route::get('/pembayaran/edit/{id}', [PembayaranController::class, 'edit'])->name('pembayaran.edit');
+        Route::put('/pembayaran/update/{id}', [PembayaranController::class, 'update'])->name('pembayaran.update');
+        Route::delete('/pembayaran/destroy/{id}', [PembayaranController::class, 'destroy'])->name('pembayaran.destroy');
         
-        // KELOLA TENTOR
-        Route::get('/kelola-tentor', [KelolaTentorController::class, 'index'])->name('superadmin.kelola-tentor');
-        Route::get('/kelola-tentor/create', [KelolaTentorController::class, 'create'])->name('superadmin.kelola-tentor.create');
-        Route::post('/kelola-tentor/store', [KelolaTentorController::class, 'store'])->name('superadmin.kelola-tentor.store');
-        Route::get('/kelola-tentor/edit/{id}', [KelolaTentorController::class, 'edit'])->name('superadmin.kelola-tentor.edit');
-        Route::put('/kelola-tentor/update/{id}', [KelolaTentorController::class, 'update'])->name('superadmin.kelola-tentor.update');
-        Route::delete('/kelola-tentor/destroy/{id}', [KelolaTentorController::class, 'destroy'])->name('superadmin.kelola-tentor.destroy');
-        Route::patch('/kelola-tentor/toggle-status/{id}', [KelolaTentorController::class, 'toggleStatus'])->name('superadmin.kelola-tentor.toggle-status');
+        // KELOLA TENTOR (FULL AKSES: TAMBAH, EDIT, HAPUS)
+        Route::get('/kelola-tentor', [KelolaTentorController::class, 'index'])->name('kelola-tentor');
+        Route::get('/kelola-tentor/create', [KelolaTentorController::class, 'create'])->name('kelola-tentor.create');
+        Route::post('/kelola-tentor/store', [KelolaTentorController::class, 'store'])->name('kelola-tentor.store');
+        Route::get('/kelola-tentor/edit/{id}', [KelolaTentorController::class, 'edit'])->name('kelola-tentor.edit');
+        Route::put('/kelola-tentor/update/{id}', [KelolaTentorController::class, 'update'])->name('kelola-tentor.update');
+        Route::delete('/kelola-tentor/destroy/{id}', [KelolaTentorController::class, 'destroy'])->name('kelola-tentor.destroy');
+        Route::patch('/kelola-tentor/toggle-status/{id}', [KelolaTentorController::class, 'toggleStatus'])->name('kelola-tentor.toggle-status');
         
         // KELOLA ADMIN
-        Route::get('/kelola-admin', [KelolaAdminController::class, 'index'])->name('superadmin.kelola-admin');
-        Route::get('/kelola-admin/create', [KelolaAdminController::class, 'create'])->name('superadmin.kelola-admin.create');
-        Route::post('/kelola-admin/store', [KelolaAdminController::class, 'store'])->name('superadmin.kelola-admin.store');
-        Route::get('/kelola-admin/edit/{id}', [KelolaAdminController::class, 'edit'])->name('superadmin.kelola-admin.edit');
-        Route::put('/kelola-admin/update/{id}', [KelolaAdminController::class, 'update'])->name('superadmin.kelola-admin.update');
-        Route::delete('/kelola-admin/destroy/{id}', [KelolaAdminController::class, 'destroy'])->name('superadmin.kelola-admin.destroy');
+        Route::get('/kelola-admin', [KelolaAdminController::class, 'index'])->name('kelola-admin');
+        Route::get('/kelola-admin/create', [KelolaAdminController::class, 'create'])->name('kelola-admin.create');
+        Route::post('/kelola-admin/store', [KelolaAdminController::class, 'store'])->name('kelola-admin.store');
+        Route::get('/kelola-admin/edit/{id}', [KelolaAdminController::class, 'edit'])->name('kelola-admin.edit');
+        Route::put('/kelola-admin/update/{id}', [KelolaAdminController::class, 'update'])->name('kelola-admin.update');
+        Route::delete('/kelola-admin/destroy/{id}', [KelolaAdminController::class, 'destroy'])->name('kelola-admin.destroy');
         
         // LAPORAN KEUANGAN
-        Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('superadmin.laporan-keuangan');
-        Route::get('/laporan-keuangan/create', [LaporanKeuanganController::class, 'create'])->name('superadmin.laporan-keuangan.create');
-        Route::post('/laporan-keuangan/store', [LaporanKeuanganController::class, 'store'])->name('superadmin.laporan-keuangan.store');
-        Route::delete('/laporan-keuangan/destroy/{id}', [LaporanKeuanganController::class, 'destroy'])->name('superadmin.laporan-keuangan.destroy');
+        Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan-keuangan');
+        Route::get('/laporan-keuangan/create', [LaporanKeuanganController::class, 'create'])->name('laporan-keuangan.create');
+        Route::post('/laporan-keuangan/store', [LaporanKeuanganController::class, 'store'])->name('laporan-keuangan.store');
+        Route::delete('/laporan-keuangan/destroy/{id}', [LaporanKeuanganController::class, 'destroy'])->name('laporan-keuangan.destroy');
         
         // RIWAYAT PRESENSI
         Route::get('/riwayat-presensi', function () {
             return view('dashboard.shared.riwayat presensi.riwayat-presensi', ['role' => 'superadmin']);
-        })->name('superadmin.riwayat-presensi');
+        })->name('riwayat-presensi');
         
         // REKAP GAJI
         Route::get('/rekap-gaji', function () {
             return view('dashboard.shared.rekap-gaji.rekap-gaji', ['role' => 'superadmin']);
-        })->name('superadmin.rekap-gaji');
+        })->name('rekap-gaji');
     });
     
-    // ========== ADMIN ONLY ==========
-    Route::middleware(['role:admin'])->prefix('admin')->group(function () {
+    // ========== ADMIN ONLY (READ ONLY, TANPA EDIT/TAMBAH/HAPUS) ==========
+    Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
         
         // KELOLA MURID
-        Route::get('/kelola-murid', [MuridController::class, 'index'])->name('admin.kelola-murid');
-        Route::get('/kelola-murid/create', [MuridController::class, 'create'])->name('admin.murid.create');
-        Route::post('/kelola-murid/store', [MuridController::class, 'store'])->name('admin.murid.store');
-        Route::get('/kelola-murid/edit/{id}', [MuridController::class, 'edit'])->name('admin.murid.edit');
-        Route::put('/kelola-murid/update/{id}', [MuridController::class, 'update'])->name('admin.murid.update');
-        Route::delete('/kelola-murid/destroy/{id}', [MuridController::class, 'destroy'])->name('admin.murid.destroy');
+        Route::get('/kelola-murid', [MuridController::class, 'index'])->name('kelola-murid');
+        Route::get('/kelola-murid/create', [MuridController::class, 'create'])->name('murid.create');
+        Route::post('/kelola-murid/store', [MuridController::class, 'store'])->name('murid.store');
+        Route::get('/kelola-murid/edit/{id}', [MuridController::class, 'edit'])->name('murid.edit');
+        Route::put('/kelola-murid/update/{id}', [MuridController::class, 'update'])->name('murid.update');
+        Route::delete('/kelola-murid/destroy/{id}', [MuridController::class, 'destroy'])->name('murid.destroy');
         
         // HARGA PAKET
-        Route::get('/harga-paket', [HargaPaketController::class, 'index'])->name('admin.harga-paket');
-        Route::get('/harga-paket/create', [HargaPaketController::class, 'create'])->name('admin.harga-paket.create');
-        Route::post('/harga-paket/store', [HargaPaketController::class, 'store'])->name('admin.harga-paket.store');
-        Route::get('/harga-paket/edit/{id}', [HargaPaketController::class, 'edit'])->name('admin.harga-paket.edit');
-        Route::put('/harga-paket/update/{id}', [HargaPaketController::class, 'update'])->name('admin.harga-paket.update');
-        Route::delete('/harga-paket/destroy/{id}', [HargaPaketController::class, 'destroy'])->name('admin.harga-paket.destroy');
+        Route::get('/harga-paket', [HargaPaketController::class, 'index'])->name('harga-paket');
+        Route::get('/harga-paket/create', [HargaPaketController::class, 'create'])->name('harga-paket.create');
+        Route::post('/harga-paket/store', [HargaPaketController::class, 'store'])->name('harga-paket.store');
+        Route::get('/harga-paket/edit/{id}', [HargaPaketController::class, 'edit'])->name('harga-paket.edit');
+        Route::put('/harga-paket/update/{id}', [HargaPaketController::class, 'update'])->name('harga-paket.update');
+        Route::delete('/harga-paket/destroy/{id}', [HargaPaketController::class, 'destroy'])->name('harga-paket.destroy');
         
         // PEMBAYARAN
-        Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('admin.pembayaran');
-        Route::get('/pembayaran/create', [PembayaranController::class, 'create'])->name('admin.pembayaran.create');
-        Route::post('/pembayaran/store', [PembayaranController::class, 'store'])->name('admin.pembayaran.store');
-        Route::get('/pembayaran/edit/{id}', [PembayaranController::class, 'edit'])->name('admin.pembayaran.edit');
-        Route::put('/pembayaran/update/{id}', [PembayaranController::class, 'update'])->name('admin.pembayaran.update');
-        Route::delete('/pembayaran/destroy/{id}', [PembayaranController::class, 'destroy'])->name('admin.pembayaran.destroy');
+        Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran');
+        Route::get('/pembayaran/create', [PembayaranController::class, 'create'])->name('pembayaran.create');
+        Route::post('/pembayaran/store', [PembayaranController::class, 'store'])->name('pembayaran.store');
+        Route::get('/pembayaran/edit/{id}', [PembayaranController::class, 'edit'])->name('pembayaran.edit');
+        Route::put('/pembayaran/update/{id}', [PembayaranController::class, 'update'])->name('pembayaran.update');
+        Route::delete('/pembayaran/destroy/{id}', [PembayaranController::class, 'destroy'])->name('pembayaran.destroy');
         
-        // DATA TENTOR (Hanya Lihat & Edit)
-        Route::get('/data-tentor', [KelolaTentorController::class, 'index'])->name('admin.data-tentor');
-        Route::get('/data-tentor/edit/{id}', [KelolaTentorController::class, 'edit'])->name('admin.data-tentor.edit');
-        Route::put('/data-tentor/update/{id}', [KelolaTentorController::class, 'update'])->name('admin.data-tentor.update');
-        Route::delete('/data-tentor/destroy/{id}', [KelolaTentorController::class, 'destroy'])->name('admin.data-tentor.destroy');
+        // DATA TENTOR (READ ONLY - TANPA EDIT, TANPA TAMBAH, TANPA HAPUS)
+        Route::get('/data-tentor', [KelolaTentorController::class, 'index'])->name('data-tentor');
+        // TIDAK ADA route create, edit, update, delete untuk data tentor di admin
         
         // LAPORAN KEUANGAN
-        Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('admin.laporan-keuangan');
-        Route::get('/laporan-keuangan/create', [LaporanKeuanganController::class, 'create'])->name('admin.laporan-keuangan.create');
-        Route::post('/laporan-keuangan/store', [LaporanKeuanganController::class, 'store'])->name('admin.laporan-keuangan.store');
-        Route::delete('/laporan-keuangan/destroy/{id}', [LaporanKeuanganController::class, 'destroy'])->name('admin.laporan-keuangan.destroy');
+        Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan-keuangan');
+        Route::get('/laporan-keuangan/create', [LaporanKeuanganController::class, 'create'])->name('laporan-keuangan.create');
+        Route::post('/laporan-keuangan/store', [LaporanKeuanganController::class, 'store'])->name('laporan-keuangan.store');
+        Route::delete('/laporan-keuangan/destroy/{id}', [LaporanKeuanganController::class, 'destroy'])->name('laporan-keuangan.destroy');
         
         // RIWAYAT PRESENSI
         Route::get('/riwayat-presensi', function () {
             return view('dashboard.shared.riwayat presensi.riwayat-presensi', ['role' => 'admin']);
-        })->name('admin.riwayat-presensi');
+        })->name('riwayat-presensi');
         
         // REKAP GAJI
         Route::get('/rekap-gaji', function () {
             return view('dashboard.shared.rekap-gaji.rekap-gaji', ['role' => 'admin']);
-        })->name('admin.rekap-gaji');
+        })->name('rekap-gaji');
     });
     
     // ========== TENTOR ONLY ==========
-    Route::middleware(['role:tentor'])->prefix('tentor')->group(function () {
+    Route::middleware(['role:tentor'])->prefix('tentor')->name('tentor.')->group(function () {
         
         // PRESENSI
-        Route::get('/presensi', function () {
-            return view('dashboard.tentor.presensi');
-        })->name('tentor.presensi');
-        
-        Route::post('/presensi/masuk', function (Request $request) {
-            return redirect()->route('tentor.presensi')->with('success', 'Berhasil melakukan presensi masuk!');
-        })->name('tentor.presensi.masuk');
+        Route::get('/presensi', [PresensiController::class, 'index'])->name('presensi');
+        Route::post('/presensi/masuk', [PresensiController::class, 'masuk'])->name('presensi.masuk');
+        Route::post('/presensi/simpan-laporan', [PresensiController::class, 'simpanLaporan'])->name('presensi.simpanLaporan');
+        Route::post('/presensi/keluar', [PresensiController::class, 'keluar'])->name('presensi.keluar');
+        Route::get('/presensi/cek-status', [PresensiController::class, 'cekStatus'])->name('presensi.cekStatus');
         
         // RIWAYAT PRESENSI
-        Route::get('/riwayat-presensi', function () {
-            return view('dashboard.tentor.riwayat-presensi');
-        })->name('tentor.riwayat-presensi');
+        Route::get('/riwayat-presensi', [PresensiController::class, 'riwayat'])->name('riwayat-presensi');
     });
 });
 

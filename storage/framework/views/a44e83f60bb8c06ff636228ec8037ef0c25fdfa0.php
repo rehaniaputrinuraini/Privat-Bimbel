@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Bimbel Privat')</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title><?php echo $__env->yieldContent('title', 'Bimbel Privat'); ?></title>
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 
-    {{-- Font Awesome & Google Fonts --}}
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
     
-    {{-- CSS Utama Dashboard --}}
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    
+    <link rel="stylesheet" href="<?php echo e(asset('css/dashboard.css')); ?>">
 
-    {{-- Library AOS untuk Animasi --}}
+    
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
-    {{-- Custom CSS untuk Alert --}}
+    
     <style>
         /* Alert Toast Notification */
         .alert-toast {
@@ -92,39 +92,37 @@
         }
     </style>
 
-    @stack('styles')
+    <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
 <body>
-    @include('components.header')
+    <?php echo $__env->make('components.header', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
     <div class="main-container">
-        @include('components.sidebar')
+        <?php echo $__env->make('components.sidebar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
         <main class="content-wrapper">
-            {{-- Alert Notifikasi --}}
-            @if(session('error'))
+            
+            <?php if(session('error')): ?>
                 <div class="alert-toast alert-danger" id="alertToast">
                     <i class="fas fa-exclamation-circle"></i>
-                    <span>{{ session('error') }}</span>
+                    <span><?php echo e(session('error')); ?></span>
                     <i class="fas fa-times close-toast" onclick="closeToast(this)"></i>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            @if(session('success'))
+            <?php if(session('success')): ?>
                 <div class="alert-toast alert-success" id="alertToast">
                     <i class="fas fa-check-circle"></i>
-                    <span>{{ session('success') }}</span>
+                    <span><?php echo e(session('success')); ?></span>
                     <i class="fas fa-times close-toast" onclick="closeToast(this)"></i>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            @yield('content')
+            <?php echo $__env->yieldContent('content'); ?>
         </main>
     </div>
 
-    {{-- =============================================
-         MODAL LOGOUT GLOBAL
-    ============================================= --}}
+    
     <div id="modalLogout" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); align-items: center; justify-content: center;">
         <div style="background: white; padding: 40px; border-radius: 25px; width: 450px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); font-family: 'Poppins', sans-serif;">
             
@@ -140,8 +138,8 @@
                     Tidak
                 </button>
 
-                <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
-                    @csrf
+                <form method="POST" action="<?php echo e(route('logout')); ?>" style="margin: 0;">
+                    <?php echo csrf_field(); ?>
                     <button type="submit" style="width: 100%; padding: 15px; border-radius: 15px; border: none; background: #4D0B87; color: white; font-weight: 600; cursor: pointer; font-size: 16px; transition: 0.3s;">
                         Iya, Keluar
                     </button>
@@ -150,7 +148,7 @@
         </div>
     </div>
 
-    {{-- SCRIPTS UTAMA --}}
+    
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
         // 1. Inisialisasi Animasi AOS
@@ -256,17 +254,17 @@
 
         // 7. SIMPAN URL SAAT INI KE SESSION (untuk redirect balik)
         document.addEventListener('DOMContentLoaded', function() {
-            fetch('{{ route("store.last.url") }}', {
+            fetch('<?php echo e(route("store.last.url")); ?>', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                 },
                 body: JSON.stringify({ url: window.location.href })
             }).catch(err => console.log('Error saving URL:', err));
         });
     </script>
 
-    @stack('scripts')
+    <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
-</html>
+</html><?php /**PATH C:\xampp\htdocs\privat-bimbel\resources\views/layouts/app.blade.php ENDPATH**/ ?>

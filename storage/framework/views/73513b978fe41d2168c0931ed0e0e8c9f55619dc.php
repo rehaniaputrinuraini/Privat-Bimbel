@@ -59,8 +59,14 @@
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                        <input type="password" name="password" placeholder="Masukkan Password"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4D0B87] focus:border-[#4D0B87] outline-none transition-all" required>
+                        <div class="relative">
+                            <input type="password" name="password" id="password" placeholder="Masukkan Password"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4D0B87] focus:border-[#4D0B87] outline-none transition-all pr-12" required>
+                            <button type="button" id="togglePassword" 
+                                    class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500 hover:text-[#4D0B87] transition-colors">
+                                <i class="fas fa-eye-slash" id="eyeIcon"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="flex justify-end items-center mb-6">
@@ -100,5 +106,27 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Toggle Password Visibility
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        togglePassword.addEventListener('click', function() {
+            // Toggle tipe input
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Toggle icon mata
+            if (type === 'password') {
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        });
+    </script>
 </body>
-</html><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/auth/login.blade.php ENDPATH**/ ?>
+</html><?php /**PATH C:\xampp\htdocs\privat-bimbel\resources\views/auth/login.blade.php ENDPATH**/ ?>

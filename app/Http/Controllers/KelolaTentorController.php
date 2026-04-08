@@ -27,33 +27,48 @@ class KelolaTentorController extends Controller
         if ($request->has('search') && $request->search != '') {
             $query->where(function($q) use ($request) {
                 $q->where('nama_lengkap_tentor', 'like', '%' . $request->search . '%')
-                  ->orWhere('id_tentor', 'like', '%' . $request->search . '%')
-                  ->orWhereHas('user', function($u) use ($request) {
-                      $u->where('email', 'like', '%' . $request->search . '%')
-                        ->orWhere('username', 'like', '%' . $request->search . '%');
-                  });
+                  ->orWhere('id_tentor', 'like', '%' . $request->search . '%');
             });
         }
         
-        $tentors = $query->orderBy('id_tentor', 'asc')->paginate(10);
+        $perPage = $request->get('per_page', 10);
+        $tentors = $query->orderBy('id_tentor', 'asc')->paginate($perPage);
         
-        return view('dashboard.superadmin.kelola-tentor.kelola-tentor', [
-            'role' => $role,
-            'tentors' => $tentors,
-        ]);
+        // Pilih view berdasarkan role
+        if ($role == 'superadmin') {
+            return view('dashboard.superadmin.kelola-tentor.kelola-tentor', [
+                'role' => $role,
+                'tentors' => $tentors,
+            ]);
+        } else {
+            return view('dashboard.admin.data-tentor.data-tentor', [
+                'role' => $role,
+                'tentors' => $tentors,
+            ]);
+        }
     }
     
-    // Form tambah tentor
+    // Form tambah tentor (HANYA UNTUK SUPERADMIN)
     public function create()
     {
+        // Cegah admin mengakses
+        if (auth()->user()->peran != 'superadmin') {
+            abort(403, 'Unauthorized action.');
+        }
+        
         return view('dashboard.superadmin.kelola-tentor.create-tentor', [
             'role' => 'superadmin'
         ]);
     }
     
-    // Simpan tentor baru
+    // Simpan tentor baru (HANYA UNTUK SUPERADMIN)
     public function store(Request $request)
     {
+        // Cegah admin mengakses
+        if (auth()->user()->peran != 'superadmin') {
+            abort(403, 'Unauthorized action.');
+        }
+        
         $request->validate([
             'nama_lengkap_tentor' => 'required|string|max:100',
             'alamat_tentor' => 'nullable|string',
@@ -71,7 +86,6 @@ class KelolaTentorController extends Controller
         ]);
         
         try {
-            // Buat user
             $user = User::create([
                 'email' => $request->email,
                 'username' => $request->username,
@@ -80,7 +94,6 @@ class KelolaTentorController extends Controller
                 'peran' => 'tentor',
             ]);
             
-            // Buat tentor (tanpa status_gaji)
             Tentor::create([
                 'id_user' => $user->id_user,
                 'nama_lengkap_tentor' => $request->nama_lengkap_tentor,
@@ -105,9 +118,14 @@ class KelolaTentorController extends Controller
         }
     }
     
-    // Form edit tentor
+    // Form edit tentor (HANYA UNTUK SUPERADMIN)
     public function edit($id)
     {
+        // Cegah admin mengakses
+        if (auth()->user()->peran != 'superadmin') {
+            abort(403, 'Unauthorized action.');
+        }
+        
         $tentor = Tentor::with('user')->findOrFail($id);
         
         return view('dashboard.superadmin.kelola-tentor.edit-tentor', [
@@ -116,9 +134,14 @@ class KelolaTentorController extends Controller
         ]);
     }
     
-    // Update tentor
+    // Update tentor (HANYA UNTUK SUPERADMIN)
     public function update(Request $request, $id)
     {
+        // Cegah admin mengakses
+        if (auth()->user()->peran != 'superadmin') {
+            abort(403, 'Unauthorized action.');
+        }
+        
         $tentor = Tentor::with('user')->findOrFail($id);
         
         $request->validate([
@@ -138,7 +161,6 @@ class KelolaTentorController extends Controller
         ]);
         
         try {
-            // Update user
             $userData = [
                 'email' => $request->email,
                 'username' => $request->username,
@@ -148,7 +170,6 @@ class KelolaTentorController extends Controller
             }
             $tentor->user->update($userData);
             
-            // Update tentor (tanpa status_gaji)
             $tentor->update([
                 'nama_lengkap_tentor' => $request->nama_lengkap_tentor,
                 'alamat_tentor' => $request->alamat_tentor,
@@ -172,9 +193,14 @@ class KelolaTentorController extends Controller
         }
     }
     
-    // Hapus tentor
+    // Hapus tentor (HANYA UNTUK SUPERADMIN)
     public function destroy($id)
     {
+        // Cegah admin mengakses
+        if (auth()->user()->peran != 'superadmin') {
+            abort(403, 'Unauthorized action.');
+        }
+        
         try {
             $tentor = Tentor::findOrFail($id);
             $userId = $tentor->id_user;
@@ -193,9 +219,14 @@ class KelolaTentorController extends Controller
         }
     }
     
-    // Aktifkan/Nonaktifkan tentor
+    // Aktifkan/Nonaktifkan tentor (HANYA UNTUK SUPERADMIN)
     public function toggleStatus($id)
     {
+        // Cegah admin mengakses
+        if (auth()->user()->peran != 'superadmin') {
+            abort(403, 'Unauthorized action.');
+        }
+        
         try {
             $tentor = Tentor::findOrFail($id);
             $user = User::findOrFail($tentor->id_user);

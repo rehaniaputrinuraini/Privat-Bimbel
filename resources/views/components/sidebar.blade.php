@@ -147,3 +147,33 @@
     </div>
 
 </aside>
+
+{{-- SCRIPT UNTUK LOCK SIDEBAR SCROLL POSITION --}}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const sidebarElement = document.getElementById('sidebar');
+        
+        if (sidebarElement) {
+            // Ambil posisi scroll terakhir dari localStorage
+            const sidebarScrollPos = localStorage.getItem('sidebar_scroll');
+            if (sidebarScrollPos) {
+                setTimeout(() => {
+                    sidebarElement.scrollTop = parseInt(sidebarScrollPos);
+                }, 50);
+            }
+
+            // Simpan posisi scroll saat user scroll
+            sidebarElement.addEventListener('scroll', function() {
+                localStorage.setItem('sidebar_scroll', sidebarElement.scrollTop);
+            });
+
+            // Simpan posisi scroll saat user klik link
+            const sidebarLinks = sidebarElement.querySelectorAll('a');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    localStorage.setItem('sidebar_scroll', sidebarElement.scrollTop);
+                });
+            });
+        }
+    });
+</script>

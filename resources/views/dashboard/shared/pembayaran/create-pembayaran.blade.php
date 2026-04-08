@@ -65,86 +65,97 @@
     @endif
 
     @if(session('success'))
-        <div style="background: #E1F7E3; color: #0E7490; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+        <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
             <i class="fas fa-check-circle"></i> {{ session('success') }}
         </div>
     @endif
 
-    <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+    <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);" data-aos="fade-up">
         <form action="{{ route($role . '.pembayaran.store') }}" method="POST" id="mainForm">
             @csrf
 
+            {{-- Tanggal --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tanggal <span style="color: red;">*</span></label>
                 <input type="date" name="tanggal" id="tanggal" required 
                        value="{{ date('Y-m-d') }}"
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                 @error('tanggal') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
+            {{-- Nama Murid (dengan autocomplete) --}}
             <div style="margin-bottom: 15px; position: relative;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Murid <span style="color: red;">*</span></label>
                 <input type="text" id="searchMurid" name="search_murid" 
                        placeholder="Ketik nama murid..." autocomplete="off" required
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                 <div id="autocompleteResult" class="autocomplete-items" style="display: none;"></div>
                 <input type="hidden" name="id_murid" id="id_murid" required>
-                <small style="color: #9CA3AF;">Ketik minimal 2 huruf untuk mencari murid</small>
+                <small style="color: #9CA3AF; font-size: 12px;">Ketik minimal 2 huruf untuk mencari murid</small>
                 @error('id_murid') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
             <div id="infoStatusMurid" style="display: none;"></div>
 
+            {{-- Paket Awal (Pendaftaran) --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Paket Awal (Pendaftaran) <span style="color: #9CA3AF;">(Otomatis)</span></label>
                 <input type="text" name="paket_awal_display" id="paket_awal_display" readonly 
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280;">
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px;">
                 <input type="hidden" name="paket_awal" id="paket_awal">
-                <small style="color: #9CA3AF;">Biaya pendaftaran awal (hanya sekali)</small>
+                <small style="color: #9CA3AF; font-size: 12px;">Biaya pendaftaran awal (hanya sekali)</small>
             </div>
 
+            {{-- Paket Belajar --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Paket Belajar <span style="color: red;">*</span></label>
                 <select name="paket_selanjutnya" id="paket_selanjutnya" required 
-                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; color: #374151;">
+                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; color: #374151; font-size: 14px;">
                     <option value="">Pilih Paket</option>
                     <option value="SD">SD</option>
                     <option value="SMP">SMP</option>
                     <option value="SMA">SMA</option>
                 </select>
-                <small style="color: #9CA3AF;">Pilih paket belajar bulanan (SD/SMP/SMA)</small>
+                <small style="color: #9CA3AF; font-size: 12px;">Pilih paket belajar bulanan (SD/SMP/SMA)</small>
                 @error('paket_selanjutnya') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
-            <div id="infoHarga" style="margin-bottom: 15px; padding: 10px 15px; background: #E0E7FF; border-radius: 10px; display: none;">
+            {{-- Info Harga --}}
+            <div id="infoHarga" style="margin-bottom: 15px; padding: 12px 15px; background: #E0E7FF; border-radius: 10px; display: none;">
                 <i class="fas fa-info-circle"></i> 
                 Harga paket <span id="hargaPaketNama">-</span>: 
                 <strong id="hargaPaketValue">Rp 0</strong> / bulan
             </div>
 
+            {{-- Total Pembayaran (tanpa panah, hanya angka) --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Total Pembayaran <span style="color: red;">*</span></label>
-                <input type="number" name="total_pembayaran" id="total_pembayaran" placeholder="Masukkan Total Pembayaran" required 
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                <input type="text" inputmode="numeric" name="total_pembayaran" id="total_pembayaran" placeholder="Masukkan Total Pembayaran" required 
+                       onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                 @error('total_pembayaran') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
+            {{-- Preview Status --}}
             <div id="previewStatus" style="margin-bottom: 15px; padding: 12px 15px; border-radius: 10px; display: none;"></div>
 
+            {{-- Keterangan --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Keterangan</label>
-                <textarea name="keterangan" id="keterangan" rows="3" placeholder="Masukkan Keterangan (contoh: Pembayaran bulan Januari)" 
-                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; resize: vertical;"></textarea>
+                <textarea name="keterangan" id="keterangan" rows="3" placeholder="Masukkan Keterangan" 
+                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-family: 'Poppins', sans-serif; font-size: 14px; resize: vertical;"></textarea>
                 @error('keterangan') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
+            {{-- Tombol Aksi --}}
             <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">
                 <button type="button" onclick="bukaModalBatal()" 
-                        style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 16px; background: #FFFFFF; cursor: pointer;">
+                        style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 16px; background: #FFFFFF; cursor: pointer; transition: 0.3s;">
                     Keluar
                 </button>
                 <button type="submit" 
-                        style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
+                        style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2); transition: 0.3s;">
                     Simpan
                 </button>
             </div>
@@ -152,13 +163,14 @@
     </div>
 </div>
 
-<div id="modalBatal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
+{{-- MODAL KONFIRMASI BATAL --}}
+<div id="modalBatal" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
         <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Batalkan?</h2>
         <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Data yang Anda masukkan tidak akan disimpan. Yakin ingin keluar?</p>
         <div style="display: flex; gap: 10px; justify-content: center;">
-            <button onclick="tutupModalBatal()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Tidak</button>
+            <button onclick="tutupModalBatal()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; color: #374151; font-weight: 600; font-size: 13px; cursor: pointer;">Tidak</button>
             <a href="#" id="confirmKeluarLink" style="flex: 1; text-decoration: none;">
                 <button type="button" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Keluar</button>
             </a>
@@ -166,6 +178,7 @@
     </div>
 </div>
 
+{{-- MODAL PERINGATAN PERUBAHAN BELUM DISIMPAN --}}
 <div id="modalPindahHalaman" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -229,7 +242,6 @@
                         document.getElementById('confirmPindahBtn').onclick = function() {
                             formChanged = false;
                             document.getElementById('modalPindahHalaman').style.display = 'none';
-                            bukaModalLogout();
                         };
                     }
                 }

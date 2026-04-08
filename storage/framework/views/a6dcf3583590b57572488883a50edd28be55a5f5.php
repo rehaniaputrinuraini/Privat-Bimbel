@@ -249,4 +249,4 @@ class PresensiController extends Controller
         
         return view('dashboard.tentor.riwayat-presensi', compact('riwayat'));
     }
-}
+} ?><?php /**PATH C:\xampp\htdocs\privat-bimbel\resources\views/dashboard/tentor/presensi.blade.php ENDPATH**/ ?>

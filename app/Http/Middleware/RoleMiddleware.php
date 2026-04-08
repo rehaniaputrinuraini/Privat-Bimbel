@@ -20,7 +20,7 @@ class RoleMiddleware
     {
         // Cek apakah user sudah login
         if (!Auth::check()) {
-            return redirect()->route('login');
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
         $user = Auth::user();
@@ -32,15 +32,7 @@ class RoleMiddleware
         }
 
         // Jika tidak memiliki akses, redirect ke dashboard masing-masing
-        switch ($userRole) {
-            case 'superadmin':
-                return redirect()->route('superadmin.dashboard')->with('error', 'Anda tidak memiliki akses ke halaman tersebut.');
-            case 'admin':
-                return redirect()->route('admin.dashboard')->with('error', 'Anda tidak memiliki akses ke halaman tersebut.');
-            case 'tentor':
-                return redirect()->route('tentor.dashboard')->with('error', 'Anda tidak memiliki akses ke halaman tersebut.');
-            default:
-                abort(403, 'Unauthorized access.');
-        }
+        return redirect()->route($userRole . '.dashboard')
+            ->with('error', '❌ Akses ditolak! Anda tidak memiliki izin untuk mengakses halaman ini.');
     }
 }

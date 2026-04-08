@@ -74,11 +74,11 @@
     </div>
 
     {{-- ── 3. FILTER & TOMBOL TAMBAH ── --}}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 15px;">
-        <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 15px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 12px; flex: 1; flex-wrap: wrap;">
             <div style="position: relative; width: 280px;">
                 <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
-                <input type="text" id="searchInput" placeholder="Cari..."
+                <input type="text" id="searchInput" placeholder="Cari di semua rincian..."
                        style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
             </div>
 
@@ -100,13 +100,21 @@
 
             <select id="filterTahun" class="filter-select" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 120px; background: white; outline: none; cursor: pointer;">
                 <option value="">--- Tahun ---</option>
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
-                <option value="2026" selected>2026</option>
+                @php
+                    $tahunOptions = collect();
+                    foreach($pemasukan as $item) { $tahunOptions->push(date('Y', strtotime($item->tanggal))); }
+                    foreach($pengeluaran as $item) { $tahunOptions->push(date('Y', strtotime($item->tanggal))); }
+                    foreach($piutang as $item) { $tahunOptions->push(date('Y', strtotime($item->tanggal))); }
+                    foreach($uang_muka as $item) { $tahunOptions->push(date('Y', strtotime($item->tanggal))); }
+                    $tahunOptions = $tahunOptions->unique()->sortDesc();
+                @endphp
+                @foreach($tahunOptions as $tahun)
+                    <option value="{{ $tahun }}" {{ $tahun == date('Y') ? 'selected' : '' }}>{{ $tahun }}</option>
+                @endforeach
             </select>
 
             <select id="filterKategori" class="filter-select" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 150px; background: white; outline: none; cursor: pointer;">
-                <option value="">--- Kategori ---</option>
+                <option value="">--- Semua Kategori ---</option>
                 <option value="pemasukan">Pemasukan</option>
                 <option value="pengeluaran">Pengeluaran</option>
                 <option value="piutang">Piutang</option>
@@ -121,8 +129,8 @@
         </a>
     </div>
 
-    {{-- ── 4. TABEL PEMASUKAN ── --}}
-    <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
+    {{-- ── TABEL PEMASUKAN ── (wrapped with class table-container) --}}
+    <div class="table-container" id="containerPemasukan" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
         <div style="padding: 20px 20px 15px;">
             <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #111827;">Riwayat Pemasukan Periode Berjalan</h4>
         </div>
@@ -143,16 +151,14 @@
                         onmouseover="this.style.background='#E0EAFF'"
                         onmouseout="this.style.background='#F0F4FF'">
                         <td style="padding: 15px; text-align: center;">{{ $loop->iteration }}</td>
-                        <td style="padding: 15px;">{{ \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d M Y') }}</td>
-                        <td style="padding: 15px;">{{ $p->rincian }}</td>
+                        <td style="padding: 15px;" data-tanggal="{{ $p->tanggal }}">{{ \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d M Y') }}</td>
+                        <td style="padding: 15px;" data-rincian="{{ $p->rincian }}">{{ $p->rincian }}</td>
                         <td style="padding: 15px; text-align: right; font-weight: 700; color: #4472DF;">Rp {{ number_format($p->jumlah, 0, ',', '.') }}</td>
                         <td style="padding: 15px; text-align: center;">
-                            <form action="{{ route($role . '.laporan-keuangan.destroy', $p->id_keuangan) }}" method="POST" onsubmit="return confirm('Yakin hapus data ini?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
-                                    <i class="fas fa-trash"></i> Hapus
-                                </button>
-                            </form>
+                            <button type="button" onclick="bukaModalHapus('{{ route($role . '.laporan-keuangan.destroy', $p->id_keuangan) }}', '{{ addslashes($p->rincian) }}')" 
+                                    style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
                         </td>
                     </tr>
                     @empty
@@ -183,7 +189,7 @@
     </div>
 
     {{-- TABEL PENGELUARAN --}}
-    <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
+    <div class="table-container" id="containerPengeluaran" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
         <div style="padding: 20px 20px 15px;">
             <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #111827;">Riwayat Pengeluaran Periode Berjalan</h4>
         </div>
@@ -204,16 +210,14 @@
                         onmouseover="this.style.background='#FFE0E0'"
                         onmouseout="this.style.background='#FFF0F0'">
                         <td style="padding: 15px; text-align: center;">{{ $loop->iteration }}</td>
-                        <td style="padding: 15px;">{{ \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d M Y') }}</td>
-                        <td style="padding: 15px;">{{ $p->rincian }}</td>
+                        <td style="padding: 15px;" data-tanggal="{{ $p->tanggal }}">{{ \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d M Y') }}</td>
+                        <td style="padding: 15px;" data-rincian="{{ $p->rincian }}">{{ $p->rincian }}</td>
                         <td style="padding: 15px; text-align: right; font-weight: 700; color: #D74E4E;">Rp {{ number_format($p->jumlah, 0, ',', '.') }}</td>
                         <td style="padding: 15px; text-align: center;">
-                            <form action="{{ route($role . '.laporan-keuangan.destroy', $p->id_keuangan) }}" method="POST" onsubmit="return confirm('Yakin hapus data ini?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
-                                    <i class="fas fa-trash"></i> Hapus
-                                </button>
-                            </form>
+                            <button type="button" onclick="bukaModalHapus('{{ route($role . '.laporan-keuangan.destroy', $p->id_keuangan) }}', '{{ addslashes($p->rincian) }}')" 
+                                    style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
                         </td>
                     </tr>
                     @empty
@@ -244,7 +248,7 @@
     </div>
 
     {{-- TABEL PIUTANG --}}
-    <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
+    <div class="table-container" id="containerPiutang" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
         <div style="padding: 20px 20px 15px;">
             <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #111827;">Riwayat Pelunasan Piutang (Tunggakan)</h4>
         </div>
@@ -266,17 +270,15 @@
                         onmouseover="this.style.background='#FFF8D0'"
                         onmouseout="this.style.background='#FFFDF0'">
                         <td style="padding: 15px; text-align: center;">{{ $loop->iteration }}</td>
-                        <td style="padding: 15px;">{{ \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d M Y') }}</td>
-                        <td style="padding: 15px;">{{ $p->nama_murid }}</td>
-                        <td style="padding: 15px;">{{ $p->bulan_periode }}</td>
+                        <td style="padding: 15px;" data-tanggal="{{ $p->tanggal }}">{{ \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d M Y') }}</td>
+                        <td style="padding: 15px;" data-rincian="{{ $p->nama_murid }}">{{ $p->nama_murid }}</td>
+                        <td style="padding: 15px;" data-rincian2="{{ $p->bulan_periode }}">{{ $p->bulan_periode }}</td>
                         <td style="padding: 15px; text-align: right; font-weight: 700; color: #E7C255;">Rp {{ number_format($p->jumlah, 0, ',', '.') }}</td>
                         <td style="padding: 15px; text-align: center;">
-                            <form action="{{ route($role . '.laporan-keuangan.destroy', $p->id_keuangan) }}" method="POST" onsubmit="return confirm('Yakin hapus data ini?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
-                                    <i class="fas fa-trash"></i> Hapus
-                                </button>
-                            </form>
+                            <button type="button" onclick="bukaModalHapus('{{ route($role . '.laporan-keuangan.destroy', $p->id_keuangan) }}', '{{ addslashes($p->nama_murid) }} - {{ addslashes($p->bulan_periode) }}')" 
+                                    style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
                         </td>
                     </tr>
                     @empty
@@ -307,7 +309,7 @@
     </div>
 
     {{-- TABEL UANG MUKA --}}
-    <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
+    <div class="table-container" id="containerUangMuka" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
         <div style="padding: 20px 20px 15px;">
             <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #111827;">Riwayat Pendapatan Uang Dimuka</h4>
         </div>
@@ -329,17 +331,15 @@
                         onmouseover="this.style.background='#DCFCE7'"
                         onmouseout="this.style.background='#F0FFF4'">
                         <td style="padding: 15px; text-align: center;">{{ $loop->iteration }}</td>
-                        <td style="padding: 15px;">{{ \Carbon\Carbon::parse($u->tanggal)->translatedFormat('d M Y') }}</td>
-                        <td style="padding: 15px;">{{ $u->nama_murid }}</td>
-                        <td style="padding: 15px;">{{ $u->bulan_periode }}</td>
+                        <td style="padding: 15px;" data-tanggal="{{ $u->tanggal }}">{{ \Carbon\Carbon::parse($u->tanggal)->translatedFormat('d M Y') }}</td>
+                        <td style="padding: 15px;" data-rincian="{{ $u->nama_murid }}">{{ $u->nama_murid }}</td>
+                        <td style="padding: 15px;" data-rincian2="{{ $u->bulan_periode }}">{{ $u->bulan_periode }}</td>
                         <td style="padding: 15px; text-align: right; font-weight: 700; color: #4AB462;">Rp {{ number_format($u->jumlah, 0, ',', '.') }}</td>
                         <td style="padding: 15px; text-align: center;">
-                            <form action="{{ route($role . '.laporan-keuangan.destroy', $u->id_keuangan) }}" method="POST" onsubmit="return confirm('Yakin hapus data ini?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
-                                    <i class="fas fa-trash"></i> Hapus
-                                </button>
-                            </form>
+                            <button type="button" onclick="bukaModalHapus('{{ route($role . '.laporan-keuangan.destroy', $u->id_keuangan) }}', '{{ addslashes($u->nama_murid) }} - {{ addslashes($u->bulan_periode) }}')" 
+                                    style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
                         </td>
                     </tr>
                     @empty
@@ -378,8 +378,25 @@
 
 </div>
 
+{{-- MODAL HAPUS --}}
+<div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
+        <div style="color: #E35D5D; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-trash-alt"></i></div>
+        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Hapus Data?</h2>
+        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;" id="pesanHapus">Apakah Anda yakin ingin menghapus data ini?</p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button onclick="tutupModalHapus()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
+            <form id="formHapus" method="POST" style="flex: 1;">
+                @csrf
+                @method('DELETE')
+                <button type="submit" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #E35D5D; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Hapus</button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-    // Search sederhana
+    // ========== SEARCH SEMUA RINCIAN ==========
     document.getElementById('searchInput').addEventListener('keyup', function() {
         let searchValue = this.value.toLowerCase();
         let tbodyIds = ['tbodyPemasukan', 'tbodyPengeluaran', 'tbodyPiutang', 'tbodyUangMuka'];
@@ -387,13 +404,23 @@
         tbodyIds.forEach(tbodyId => {
             let rows = document.querySelectorAll('#' + tbodyId + ' tr');
             rows.forEach(row => {
-                let text = row.innerText.toLowerCase();
+                // Ambil semua teks dari cell yang relevan
+                let text = '';
+                if (tbodyId === 'tbodyPemasukan' || tbodyId === 'tbodyPengeluaran') {
+                    // Ambil dari kolom rincian (kolom ke-3)
+                    text = row.cells[2]?.innerText.toLowerCase() || '';
+                } else {
+                    // Untuk piutang dan uang muka, ambil dari nama murid dan bulan periode
+                    let namaMurid = row.cells[2]?.innerText.toLowerCase() || '';
+                    let bulanPeriode = row.cells[3]?.innerText.toLowerCase() || '';
+                    text = namaMurid + ' ' + bulanPeriode;
+                }
                 row.style.display = text.includes(searchValue) ? '' : 'none';
             });
         });
     });
 
-    // Filter Bulan
+    // ========== FILTER BULAN, TAHUN, KATEGORI ==========
     document.getElementById('filterBulan').addEventListener('change', filterData);
     document.getElementById('filterTahun').addEventListener('change', filterData);
     document.getElementById('filterKategori').addEventListener('change', filterData);
@@ -403,32 +430,63 @@
         let tahun = document.getElementById('filterTahun').value;
         let kategori = document.getElementById('filterKategori').value;
         
-        // Sembunyikan semua tabel terlebih dahulu
-        let tables = document.querySelectorAll('.table-container');
+        // Filter berdasarkan kategori (show/hide seluruh tabel)
+        let containers = ['containerPemasukan', 'containerPengeluaran', 'containerPiutang', 'containerUangMuka'];
+        let kategoriMap = {
+            'pemasukan': 'containerPemasukan',
+            'pengeluaran': 'containerPengeluaran',
+            'piutang': 'containerPiutang',
+            'uang_muka': 'containerUangMuka'
+        };
         
-        if (kategori === 'pemasukan' || kategori === '') {
-            document.querySelector('#tbodyPemasukan').closest('.table-container')?.style.display = 'block';
+        if (kategori && kategoriMap[kategori]) {
+            containers.forEach(container => {
+                document.getElementById(container).style.display = container === kategoriMap[kategori] ? 'block' : 'none';
+            });
         } else {
-            document.querySelector('#tbodyPemasukan').closest('.table-container')?.style.display = 'none';
+            containers.forEach(container => {
+                document.getElementById(container).style.display = 'block';
+            });
         }
         
-        if (kategori === 'pengeluaran' || kategori === '') {
-            document.querySelector('#tbodyPengeluaran').closest('.table-container')?.style.display = 'block';
-        } else {
-            document.querySelector('#tbodyPengeluaran').closest('.table-container')?.style.display = 'none';
-        }
+        // Filter berdasarkan bulan dan tahun (di dalam setiap tabel)
+        let tbodyIds = ['tbodyPemasukan', 'tbodyPengeluaran', 'tbodyPiutang', 'tbodyUangMuka'];
         
-        if (kategori === 'piutang' || kategori === '') {
-            document.querySelector('#tbodyPiutang').closest('.table-container')?.style.display = 'block';
-        } else {
-            document.querySelector('#tbodyPiutang').closest('.table-container')?.style.display = 'none';
-        }
+        tbodyIds.forEach(tbodyId => {
+            let rows = document.querySelectorAll('#' + tbodyId + ' tr');
+            rows.forEach(row => {
+                let show = true;
+                let tanggalCell = row.cells[1];
+                
+                if (tanggalCell && (bulan || tahun)) {
+                    let tanggalStr = tanggalCell.getAttribute('data-tanggal') || tanggalCell.innerText;
+                    let date = new Date(tanggalStr);
+                    let rowBulan = date.getMonth() + 1;
+                    let rowTahun = date.getFullYear();
+                    
+                    if (bulan && rowBulan != parseInt(bulan)) show = false;
+                    if (tahun && rowTahun != parseInt(tahun)) show = false;
+                }
+                
+                row.style.display = show ? '' : 'none';
+            });
+        });
+    }
+
+    // ========== MODAL HAPUS ==========
+    function bukaModalHapus(url, nama) {
+        let form = document.getElementById('formHapus');
+        form.action = url;
         
-        if (kategori === 'uang_muka' || kategori === '') {
-            document.querySelector('#tbodyUangMuka').closest('.table-container')?.style.display = 'block';
-        } else {
-            document.querySelector('#tbodyUangMuka').closest('.table-container')?.style.display = 'none';
-        }
+        let pesan = document.getElementById('pesanHapus');
+        pesan.innerHTML = `Apakah Anda yakin ingin menghapus data <strong>${nama}</strong>? Data yang dihapus tidak dapat dikembalikan.`;
+        
+        document.getElementById('modalHapus').style.display = 'flex';
+    }
+
+    function tutupModalHapus() {
+        document.getElementById('modalHapus').style.display = 'none';
     }
 </script>
+
 @endsection

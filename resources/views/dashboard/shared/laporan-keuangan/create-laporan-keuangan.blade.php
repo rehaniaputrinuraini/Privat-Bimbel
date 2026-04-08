@@ -12,13 +12,15 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px;">
                 <div>
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tanggal</label>
-                        <input type="date" name="tanggal" value="{{ date('Y-m-d') }}" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tanggal <span style="color: red;">*</span></label>
+                        <input type="date" name="tanggal" value="{{ date('Y-m-d') }}" required 
+                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                         @error('tanggal') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Kategori</label>
-                        <select name="kategori" id="select-kategori" onchange="updateLabel()" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; color: #374151; cursor: pointer;">
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Kategori <span style="color: red;">*</span></label>
+                        <select name="kategori" id="select-kategori" onchange="updateLabel()" required 
+                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; color: #374151; cursor: pointer; font-size: 14px;">
                             <option value="" disabled selected>Pilih (Pemasukan/Pengeluaran)</option>
                             <option value="pemasukan">Pemasukan</option>
                             <option value="pengeluaran">Pengeluaran</option>
@@ -30,13 +32,17 @@
                 </div>
                 <div>
                     <div style="margin-bottom: 15px;">
-                        <label id="label-rincian" style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Rincian Pemasukan</label>
-                        <input type="text" id="input-rincian" name="rincian" placeholder="Masukkan Rincian Pemasukan" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                        <label id="label-rincian" style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Rincian Pemasukan <span style="color: red;">*</span></label>
+                        <input type="text" id="input-rincian" name="rincian" placeholder="Masukkan Rincian Pemasukan" required 
+                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                         @error('rincian') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Jumlah</label>
-                        <input type="text" name="jumlah" placeholder="Masukkan Jumlah" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Jumlah <span style="color: red;">*</span></label>
+                        <input type="tel" inputmode="numeric" name="jumlah" placeholder="Masukkan Jumlah (contoh: 150000)" required 
+                               onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                         @error('jumlah') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
                 </div>
@@ -44,17 +50,21 @@
 
             <div id="field-nama-murid" style="display: none; margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Murid</label>
-                <input type="text" name="nama_murid" placeholder="Masukkan Nama Murid" style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                <input type="text" name="nama_murid" placeholder="Masukkan Nama Murid" 
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
             </div>
 
             <div id="field-bulan-periode" style="display: none; margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Bulan/Periode</label>
-                <input type="text" name="bulan_periode" placeholder="Contoh: Januari 2026" style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none;">
+                <input type="text" name="bulan_periode" placeholder="Contoh: Januari 2026" 
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">
-                <button type="button" onclick="bukaModalBatal()" style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 16px; background: #FFFFFF; cursor: pointer;">Keluar</button>
-                <button type="submit" style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">Simpan</button>
+                <button type="button" onclick="bukaModalBatal()" 
+                        style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 16px; background: #FFFFFF; cursor: pointer;">Keluar</button>
+                <button type="submit" 
+                        style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">Simpan</button>
             </div>
         </form>
     </div>
