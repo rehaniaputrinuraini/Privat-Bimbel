@@ -12,6 +12,7 @@ use App\Http\Controllers\KelolaAdminController;
 use App\Http\Controllers\KelolaTentorController;
 use App\Http\Controllers\LaporanKeuanganController;
 use App\Http\Controllers\Tentor\PresensiController;
+use App\Http\Controllers\KelolaPresensiController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -28,22 +29,24 @@ Route::get('/companyprofile', function () {
 })->name('companyprofile');
 
 // ========== 2. AUTHENTICATION (Tanpa Login) ==========
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+Route::middleware(['guest'])->group(function () {
+    Route::get('/login', function () {
+        return view('auth.login');
+    })->name('login');
 
-Route::post('/login', function (Request $request) {
-    $credentials = $request->only('email', 'password');
-    if (Auth::attempt($credentials)) {
-        $user = Auth::user();
-        return redirect()->route($user->peran . '.dashboard');
-    }
-    return back()->withErrors(['email' => 'Email atau password salah.']);
-})->name('login.post');
+    Route::post('/login', function (Request $request) {
+        $credentials = $request->only('email', 'password');
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            return redirect()->route($user->peran . '.dashboard');
+        }
+        return back()->withErrors(['email' => 'Email atau password salah.']);
+    })->name('login.post');
 
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
+    Route::get('/register', function () {
+        return view('auth.register');
+    })->name('register');
+});
 
 Route::post('/logout', function () {
     Auth::logout();
@@ -71,7 +74,7 @@ Route::post('/store-last-url', function (Request $request) {
 })->name('store.last.url')->middleware('auth');
 
 // ========== 5. ROUTE YANG DILINDUNGI MIDDLEWARE ==========
-Route::middleware(['auth', 'sidebar'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     
     // ========== DASHBOARD ==========
     Route::get('/superadmin/dashboard', [DashboardController::class, 'superadmin'])->name('superadmin.dashboard');
@@ -149,10 +152,13 @@ Route::middleware(['auth', 'sidebar'])->group(function () {
         Route::post('/laporan-keuangan/store', [LaporanKeuanganController::class, 'store'])->name('laporan-keuangan.store');
         Route::delete('/laporan-keuangan/destroy/{id}', [LaporanKeuanganController::class, 'destroy'])->name('laporan-keuangan.destroy');
         
-        // RIWAYAT PRESENSI
-        Route::get('/riwayat-presensi', function () {
-            return view('dashboard.shared.riwayat presensi.riwayat-presensi', ['role' => 'superadmin']);
-        })->name('riwayat-presensi');
+        // KELOLA PRESENSI (RIWAYAT PRESENSI TENTOR)
+        Route::get('/kelola-presensi', [KelolaPresensiController::class, 'index'])->name('kelola-presensi');
+        Route::get('/kelola-presensi/{id}', [KelolaPresensiController::class, 'show'])->name('kelola-presensi.show');
+        Route::post('/kelola-presensi/{id}/verify', [KelolaPresensiController::class, 'verify'])->name('kelola-presensi.verify');
+        Route::post('/kelola-presensi/{id}/unverify', [KelolaPresensiController::class, 'unverify'])->name('kelola-presensi.unverify');
+        Route::delete('/kelola-presensi/{id}', [KelolaPresensiController::class, 'destroy'])->name('kelola-presensi.destroy');
+        Route::get('/kelola-presensi/download/{id}', [KelolaPresensiController::class, 'downloadFoto'])->name('kelola-presensi.download');
         
         // REKAP GAJI
         Route::get('/rekap-gaji', function () {
@@ -196,10 +202,13 @@ Route::middleware(['auth', 'sidebar'])->group(function () {
         Route::post('/laporan-keuangan/store', [LaporanKeuanganController::class, 'store'])->name('laporan-keuangan.store');
         Route::delete('/laporan-keuangan/destroy/{id}', [LaporanKeuanganController::class, 'destroy'])->name('laporan-keuangan.destroy');
         
-        // RIWAYAT PRESENSI
-        Route::get('/riwayat-presensi', function () {
-            return view('dashboard.shared.riwayat presensi.riwayat-presensi', ['role' => 'admin']);
-        })->name('riwayat-presensi');
+        // KELOLA PRESENSI (RIWAYAT PRESENSI TENTOR) - ADMIN TIDAK BISA HAPUS
+        Route::get('/kelola-presensi', [KelolaPresensiController::class, 'index'])->name('kelola-presensi');
+        Route::get('/kelola-presensi/{id}', [KelolaPresensiController::class, 'show'])->name('kelola-presensi.show');
+        Route::post('/kelola-presensi/{id}/verify', [KelolaPresensiController::class, 'verify'])->name('kelola-presensi.verify');
+        Route::post('/kelola-presensi/{id}/unverify', [KelolaPresensiController::class, 'unverify'])->name('kelola-presensi.unverify');
+        Route::get('/kelola-presensi/download/{id}', [KelolaPresensiController::class, 'downloadFoto'])->name('kelola-presensi.download');
+        // PERHATIAN: Tidak ada route destroy untuk admin!
         
         // REKAP GAJI
         Route::get('/rekap-gaji', function () {

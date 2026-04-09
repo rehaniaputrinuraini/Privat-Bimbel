@@ -36,6 +36,7 @@ class PresensiTentor extends Model
         'id_tentor',
         'tanggal',
         'jam_masuk',
+        'jam_keluar',
         'jam_mengajar',
         'kelas',
         'status_murid',
@@ -52,6 +53,7 @@ class PresensiTentor extends Model
     protected $casts = [
         'tanggal' => 'date',
         'jam_masuk' => 'datetime',
+        'jam_keluar'=> 'datetime',
         'jam_mengajar' => 'decimal:2',
         'total_honor' => 'decimal:2',
         'uang_makan' => 'decimal:2',

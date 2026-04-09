@@ -272,6 +272,12 @@
                     </div>
 
                     <div class="form-group">
+                        <label>Jam Mengajar <span style="color: red;">*</span></label>
+                        <input type="number" class="form-control-custom" id="jam_mengajar" name="jam_mengajar" 
+                                placeholder="Jumlah jam mengajar" min="1" max="12" required>
+                    </div>
+
+                    <div class="form-group">
                         <label>Status Kehadiran Murid <span style="color: red;">*</span></label>
                         <div class="radio-group">
                             <label style="cursor: pointer;">
@@ -402,6 +408,7 @@ document.addEventListener("DOMContentLoaded", function() {
         
         const formData = new FormData();
         formData.append('kelas', document.getElementById('kelas').value);
+        formData.append('jam_mengajar', document.getElementById('jam_mengajar').value); 
         formData.append('status_murid', document.querySelector('input[name="status_murid"]:checked').value);
         formData.append('keterangan', document.getElementById('keterangan').value);
         formData.append('foto', fotoInput.files[0]);

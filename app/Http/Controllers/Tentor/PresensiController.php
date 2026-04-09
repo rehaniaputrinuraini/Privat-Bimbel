@@ -67,7 +67,7 @@ class PresensiController extends Controller
             $presensi = PresensiTentor::create([
                 'id_tentor' => $tentor->id_tentor,
                 'tanggal' => today(),
-                'jam_masuk' => Carbon::now(),
+                'jam_masuk' => Carbon::now('Asia/Jakarta'),
                 'jam_keluar' => null,
                 'durasi' => null,
                 'kelas' => null,
@@ -134,6 +134,7 @@ class PresensiController extends Controller
             // Update data laporan
             $presensi->update([
                 'kelas' => $request->kelas,
+                'jam_mengajar' => $request->jam_mengajar,
                 'status_murid' => $request->status_murid,
                 'keterangan' => $request->keterangan,
                 'bukti_foto' => $fotoPath,
@@ -197,7 +198,7 @@ class PresensiController extends Controller
             $durasiText = $jam . ' jam ' . $menit . ' menit';
             
             $presensi->update([
-                'jam_keluar' => $jamKeluar,
+                'jam_keluar' => Carbon::now('Asia/Jakarta'),
                 'durasi' => $durasiMenit
             ]);
             
@@ -244,23 +245,52 @@ class PresensiController extends Controller
     }
     
     /**
-     * Riwayat presensi tentor
+     * Riwayat presensi tentor dengan filter bulan, tahun, dan search
      */
-    public function riwayat()
+    public function riwayat(Request $request)
     {
         $tentor = Tentor::where('id_user', Auth::id())->first();
         
         if (!$tentor) {
             return view('dashboard.tentor.riwayat-presensi', [
                 'riwayat' => collect([]),
+                'bulan' => date('m'),
+                'tahun' => date('Y'),
+                'perPage' => 10,
+                'search' => null,
                 'error' => 'Data tentor tidak ditemukan'
             ]);
         }
         
-        $riwayat = PresensiTentor::where('id_tentor', $tentor->id_tentor)
-                                 ->orderBy('tanggal', 'desc')
-                                 ->paginate(10);
+        // Ambil filter dari request
+        $bulan = $request->get('bulan', date('m'));
+        $tahun = $request->get('tahun', date('Y'));
+        $perPage = $request->get('perPage', 10);
+        $search = $request->get('search');
         
-        return view('dashboard.tentor.riwayat-presensi', compact('riwayat'));
+        // Query dasar
+        $query = PresensiTentor::where('id_tentor', $tentor->id_tentor);
+        
+        // Filter bulan
+        if ($bulan) {
+            $query->whereMonth('tanggal', $bulan);
+        }
+        
+        // Filter tahun
+        if ($tahun) {
+            $query->whereYear('tanggal', $tahun);
+        }
+        
+        // Filter pencarian (kelas)
+        if ($search) {
+            $query->where('kelas', 'like', '%' . $search . '%');
+        }
+        
+        // Urutkan dari tanggal terbaru
+        $riwayat = $query->orderBy('tanggal', 'desc')
+                         ->paginate($perPage)
+                         ->appends($request->all());
+        
+        return view('dashboard.tentor.riwayat-presensi', compact('riwayat', 'bulan', 'tahun', 'perPage', 'search'));
     }
 }

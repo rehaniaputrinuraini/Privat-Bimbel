@@ -8,7 +8,7 @@
     {{-- HEADER HALAMAN --}}
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
-            {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+            {{ isset($bulan) && isset($tahun) ? \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('F Y') : \Carbon\Carbon::now()->translatedFormat('F Y') }}
         </p>
         <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
             Riwayat Presensi
@@ -16,41 +16,53 @@
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Lihat riwayat kehadiran mengajar Anda setiap bulannya</p>
     </div>
 
-    {{-- ACTIONS BAR --}}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
-        <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
-            <div style="position: relative; width: 300px;">
-                <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
-                <input type="text" placeholder="Cari..." 
-                       style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
+    {{-- FORM FILTER & SEARCH --}}
+    <form method="GET" action="{{ route('tentor.riwayat-presensi') }}" id="filterForm">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                {{-- SEARCH --}}
+                <div style="position: relative; width: 300px;">
+                    <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
+                    <input type="text" name="search" placeholder="Cari kelas..." value="{{ $search ?? '' }}"
+                           style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
+                </div>
+
+                {{-- FILTER BULAN --}}
+                <select name="bulan" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 140px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
+                    <option value="">--- Pilih Bulan ---</option>
+                    <option value="1" {{ ($bulan ?? '') == '1' ? 'selected' : '' }}>Januari</option>
+                    <option value="2" {{ ($bulan ?? '') == '2' ? 'selected' : '' }}>Februari</option>
+                    <option value="3" {{ ($bulan ?? '') == '3' ? 'selected' : '' }}>Maret</option>
+                    <option value="4" {{ ($bulan ?? '') == '4' ? 'selected' : '' }}>April</option>
+                    <option value="5" {{ ($bulan ?? '') == '5' ? 'selected' : '' }}>Mei</option>
+                    <option value="6" {{ ($bulan ?? '') == '6' ? 'selected' : '' }}>Juni</option>
+                    <option value="7" {{ ($bulan ?? '') == '7' ? 'selected' : '' }}>Juli</option>
+                    <option value="8" {{ ($bulan ?? '') == '8' ? 'selected' : '' }}>Agustus</option>
+                    <option value="9" {{ ($bulan ?? '') == '9' ? 'selected' : '' }}>September</option>
+                    <option value="10" {{ ($bulan ?? '') == '10' ? 'selected' : '' }}>Oktober</option>
+                    <option value="11" {{ ($bulan ?? '') == '11' ? 'selected' : '' }}>November</option>
+                    <option value="12" {{ ($bulan ?? '') == '12' ? 'selected' : '' }}>Desember</option>
+                </select>
+
+                {{-- FILTER TAHUN --}}
+                <select name="tahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 100px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
+                    <option value="">--- Tahun ---</option>
+                    @php $currentYear = date('Y'); @endphp
+                    @for($year = $currentYear - 2; $year <= $currentYear + 1; $year++)
+                        <option value="{{ $year }}" {{ ($tahun ?? '') == $year ? 'selected' : '' }}>{{ $year }}</option>
+                    @endfor
+                </select>
+                
+                {{-- RESET FILTER --}}
+                @if(($bulan ?? '') || ($tahun ?? '') || ($search ?? ''))
+                    <a href="{{ route('tentor.riwayat-presensi') }}" style="padding: 10px 15px; border-radius: 12px; background: #F3F4F6; color: #374151; text-decoration: none; font-size: 13px;">Reset</a>
+                @endif
             </div>
-
-            {{-- FILTER BULAN --}}
-            <select style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 140px; background: white; outline: none; cursor: pointer;">
-                <option value="">--- Pilih Bulan ---</option>
-                <option value="1">Januari</option>
-                <option value="2">Februari</option>
-                <option value="3">Maret</option>
-                <option value="4" selected>April</option>
-                <option value="5">Mei</option>
-                <option value="6">Juni</option>
-                <option value="7">Juli</option>
-                <option value="8">Agustus</option>
-                <option value="9">September</option>
-                <option value="10">Oktober</option>
-                <option value="11">November</option>
-                <option value="12">Desember</option>
-            </select>
-
-            {{-- FILTER TAHUN --}}
-            <select style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 100px; background: white; outline: none; cursor: pointer;">
-                <option value="">--- Tahun ---</option>
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
-                <option value="2026" selected>2026</option>
-            </select>
         </div>
-    </div>
+        
+        {{-- TERSEMBUNYI: perPage --}}
+        <input type="hidden" name="perPage" id="perPageInput" value="{{ $perPage ?? 10 }}">
+    </form>
 
     {{-- TABEL UTAMA --}}
     <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
@@ -67,49 +79,83 @@
                     </tr>
                 </thead>
                 <tbody style="color: #374151;">
-                    <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 15px;">1</td>
-                        <td style="padding: 15px;">11 April 2026</td>
-                        <td style="padding: 15px;">12-A</td>
-                        <td style="padding: 15px;">19:00</td>
-                        <td style="padding: 15px;">20:30</td>
-                        <td style="padding: 15px; text-align: center;">
-                            <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #E1F7E3; color: #0E7490;">Hadir</span>
-                        </td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 15px;">2</td>
-                        <td style="padding: 15px;">10 April 2026</td>
-                        <td style="padding: 15px;">6-G</td>
-                        <td style="padding: 15px;">19:00</td>
-                        <td style="padding: 15px;">-</td>
-                        <td style="padding: 15px; text-align: center;">
-                            <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #FEE2E2; color: #EF4444;">Tidak Hadir</span>
-                        </td>
-                    </tr>
+                    @forelse($riwayat as $index => $item)
+                        @php
+                            // Tentukan status berdasarkan status_murid
+                            $statusText = $item->status_murid == 'hadir' ? 'Hadir' : 'Tidak Hadir';
+                            $statusClass = $item->status_murid == 'hadir' 
+                                ? 'background: #E1F7E3; color: #0E7490;' 
+                                : 'background: #FEE2E2; color: #EF4444;';
+                            
+                            // Format jam
+                            $jamMasuk = $item->jam_masuk ? \Carbon\Carbon::parse($item->jam_masuk)->format('H:i') : '-';
+                            $jamKeluar = $item->jam_keluar ? \Carbon\Carbon::parse($item->jam_keluar)->format('H:i') : '-';
+                        @endphp
+                        <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                            <td style="padding: 15px;">{{ $loop->iteration + ($riwayat->currentPage() - 1) * $riwayat->perPage() }}</td>
+                            <td style="padding: 15px;">{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}</td>
+                            <td style="padding: 15px;">{{ $item->kelas ?? '-' }}</td>
+                            <td style="padding: 15px;">{{ $jamMasuk }}</td>
+                            <td style="padding: 15px;">{{ $jamKeluar }}</td>
+                            <td style="padding: 15px; text-align: center;">
+                                <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; {{ $statusClass }}">
+                                    {{ $statusText }}
+                                </span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" style="padding: 40px; text-align: center; color: #9CA3AF;">
+                                <i class="fas fa-calendar-alt" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
+                                @if(isset($error) && $error)
+                                    {{ $error }}
+                                @else
+                                    Belum ada data presensi
+                                @endif
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
     </div>
     
     {{-- PAGINATION & SHOW ENTRIES --}}
+    @if($riwayat->count() > 0)
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <select style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
-                <option value="10">10 baris</option>
-                <option value="25">25 baris</option>
-                <option value="50">50 baris</option>
+            <select id="perPageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
+                <option value="10" {{ ($perPage ?? 10) == 10 ? 'selected' : '' }}>10 baris</option>
+                <option value="25" {{ ($perPage ?? 10) == 25 ? 'selected' : '' }}>25 baris</option>
+                <option value="50" {{ ($perPage ?? 10) == 50 ? 'selected' : '' }}>50 baris</option>
             </select>
-            <span style="color: #374151; font-size: 13px;">Menampilkan 2 data</span>
+            <span style="color: #374151; font-size: 13px;">
+                Menampilkan {{ $riwayat->firstItem() }} - {{ $riwayat->lastItem() }} dari {{ $riwayat->total() }} data
+            </span>
         </div>
 
-        <div style="display: flex; gap: 5px;">
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-double-left"></i></button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-left"></i></button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">1</button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-right"></i></button>
+        <div>
+            {{ $riwayat->appends(request()->query())->links('pagination::simple-bootstrap-4') }}
         </div>
     </div>
+    @endif
 
 </div>
+
+<script>
+    // Auto submit ketika perPage berubah
+    document.getElementById('perPageSelect')?.addEventListener('change', function() {
+        document.getElementById('perPageInput').value = this.value;
+        document.getElementById('filterForm').submit();
+    });
+    
+    // Submit ketika search menekan enter
+    document.querySelector('input[name="search"]')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('filterForm').submit();
+        }
+    });
+</script>
+
 @endsection

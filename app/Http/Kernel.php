@@ -46,6 +46,6 @@ class Kernel extends HttpKernel
         
         // MIDDLEWARE CUSTOM
         'role' => \App\Http\Middleware\RoleMiddleware::class,
-        'sidebar' => \App\Http\Middleware\CheckSidebarAccess::class,
+        // 'sidebar' => \App\Http\Middleware\CheckSidebarAccess::class,
     ];
 }

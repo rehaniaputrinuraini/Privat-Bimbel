@@ -66,7 +66,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('admin.riwayat-presensi') }}" class="nav-link-custom {{ request()->routeIs('admin.riwayat-presensi*') ? 'nav-active' : '' }}">
+                    <a href="{{ route('admin.kelola-presensi') }}" class="nav-link-custom {{ request()->routeIs('admin.kelola-presensi*') ? 'nav-active' : '' }}">
                         <img src="{{ asset('images/dashboard/icons/icon_riwayatpresensi.png') }}" class="sidebar-icon"> Riwayat Presensi
                     </a>
                 </li>
@@ -114,10 +114,10 @@
                         <img src="{{ asset('images/dashboard/icons/icon_hargapaket.png') }}" class="sidebar-icon"> Harga Paket
                     </a>
                 </li>
-                <li>
-                    <a href="{{ route('superadmin.riwayat-presensi') }}" class="nav-link-custom {{ request()->routeIs('superadmin.riwayat-presensi*') ? 'nav-active' : '' }}">
-                        <img src="{{ asset('images/dashboard/icons/icon_riwayatpresensi.png') }}" class="sidebar-icon"> Riwayat Presensi
-                    </a>
+               <li>
+                    <a href="{{ route('superadmin.kelola-presensi') }}" class="nav-link-custom {{ request()->routeIs('superadmin.kelola-presensi*') ? 'nav-active' : '' }}">
+                       <img src="{{ asset('images/dashboard/icons/icon_riwayatpresensi.png') }}" class="sidebar-icon"> Riwayat Presensi
+                     </a>
                 </li>
                 <li>
                     <a href="{{ route('superadmin.pembayaran') }}" class="nav-link-custom {{ request()->routeIs('superadmin.pembayaran*') ? 'nav-active' : '' }}">
