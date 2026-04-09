@@ -11,7 +11,7 @@ use App\Http\Controllers\HargaPaketController;
 use App\Http\Controllers\KelolaAdminController;
 use App\Http\Controllers\KelolaTentorController;
 use App\Http\Controllers\LaporanKeuanganController;
-use App\Http\Controllers\PresensiController;
+use App\Http\Controllers\Tentor\PresensiController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -189,7 +189,6 @@ Route::middleware(['auth', 'sidebar'])->group(function () {
         
         // DATA TENTOR (READ ONLY - TANPA EDIT, TANPA TAMBAH, TANPA HAPUS)
         Route::get('/data-tentor', [KelolaTentorController::class, 'index'])->name('data-tentor');
-        // TIDAK ADA route create, edit, update, delete untuk data tentor di admin
         
         // LAPORAN KEUANGAN
         Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan-keuangan');
@@ -214,9 +213,9 @@ Route::middleware(['auth', 'sidebar'])->group(function () {
         // PRESENSI
         Route::get('/presensi', [PresensiController::class, 'index'])->name('presensi');
         Route::post('/presensi/masuk', [PresensiController::class, 'masuk'])->name('presensi.masuk');
-        Route::post('/presensi/simpan-laporan', [PresensiController::class, 'simpanLaporan'])->name('presensi.simpanLaporan');
+        Route::post('/presensi/laporan', [PresensiController::class, 'simpanLaporan'])->name('presensi.laporan');
         Route::post('/presensi/keluar', [PresensiController::class, 'keluar'])->name('presensi.keluar');
-        Route::get('/presensi/cek-status', [PresensiController::class, 'cekStatus'])->name('presensi.cekStatus');
+        Route::get('/presensi/cek-status', [PresensiController::class, 'cekStatus'])->name('presensi.cek-status');
         
         // RIWAYAT PRESENSI
         Route::get('/riwayat-presensi', [PresensiController::class, 'riwayat'])->name('riwayat-presensi');

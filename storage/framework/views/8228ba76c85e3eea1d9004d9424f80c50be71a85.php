@@ -1,8 +1,8 @@
-@extends('layouts.app')
 
-@section('title', 'Presensi Tentor')
 
-@section('content')
+<?php $__env->startSection('title', 'Presensi Tentor'); ?>
+
+<?php $__env->startSection('content'); ?>
 <style>
     /* Layout */
     .presensi-flex { 
@@ -203,10 +203,11 @@
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
     <div style="width: 100%;">
 
-        {{-- ── HEADER HALAMAN ── --}}
+        
         <div style="margin-bottom: 25px;">
             <p style="color: #6B7280; font-size: 13px; margin: 0 0 4px 0;">
-                {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+                <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?>
+
             </p>
             <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
                 Presensi
@@ -214,7 +215,7 @@
             <p style="color: #6B7280; font-size: 14px; margin: 4px 0 0 0;">Silakan kelola kehadiran sesi mengajar Anda di sini.</p>
         </div>
 
-        {{-- ALERT --}}
+        
         <div id="alertSuccess" class="alert-success">
             <i class="fas fa-check-circle"></i> <span id="successMessage"></span>
         </div>
@@ -222,25 +223,26 @@
             <i class="fas fa-exclamation-circle"></i> <span id="errorMessage"></span>
         </div>
 
-        {{-- TAMPILAN ERROR DARI SERVER --}}
-        @if(isset($error))
+        
+        <?php if(isset($error)): ?>
             <div style="background: #FEE2E2; color: #EF4444; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
-                <i class="fas fa-exclamation-circle"></i> {{ $error }}
-            </div>
-        @endif
+                <i class="fas fa-exclamation-circle"></i> <?php echo e($error); ?>
 
-        {{-- ── KONTEN PRESENSI ── --}}
+            </div>
+        <?php endif; ?>
+
+        
         <div class="presensi-flex">
-            {{-- CARD KIRI: TOMBOL MASUK/KELUAR --}}
+            
             <div class="presensi-card">
                 <div class="card-header-custom">
                     <h3>Presensi Hari Ini</h3>
-                    <p>{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</p>
+                    <p><?php echo e(\Carbon\Carbon::now()->translatedFormat('l, d F Y')); ?></p>
                 </div>
 
                 <div class="button-group-presensi">
                     <button type="button" class="btn-presensi btn-masuk" id="btnMasuk" 
-                        {{ $presensiHariIni ? 'disabled' : '' }}>
+                        <?php echo e($presensiHariIni ? 'disabled' : ''); ?>>
                         <i class="fas fa-sign-in-alt"></i> Masuk
                     </button>
 
@@ -255,15 +257,15 @@
                 </div>
             </div>
 
-            {{-- CARD KANAN: FORMULIR LAPORAN --}}
-            <div class="presensi-card" id="formPresensi" style="{{ $presensiHariIni && !$presensiHariIni->kelas ? 'display: block;' : 'display: none;' }}">
+            
+            <div class="presensi-card" id="formPresensi" style="<?php echo e($presensiHariIni && !$presensiHariIni->kelas ? 'display: block;' : 'display: none;'); ?>">
                 <div class="card-header-custom">
                     <h3>Laporan Kegiatan</h3>
                     <p>Input detail pengajaran hari ini</p>
                 </div>
 
                 <form id="formLaporan" enctype="multipart/form-data">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     
                     <div class="form-group">
                         <label>Kelas / Materi <span style="color: red;">*</span></label>
@@ -367,10 +369,10 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // Tombol Masuk
     btnMasuk.addEventListener('click', function() {
-        fetch('{{ route("tentor.presensi.masuk") }}', {
+        fetch('<?php echo e(route("tentor.presensi.masuk")); ?>', {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                 'Content-Type': 'application/json'
             }
         })
@@ -409,10 +411,10 @@ document.addEventListener("DOMContentLoaded", function() {
         btnSubmit.disabled = true;
         btnSubmit.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Mengirim...';
         
-        fetch('{{ route("tentor.presensi.laporan") }}', {
+        fetch('<?php echo e(route("tentor.presensi.laporan")); ?>', {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
             },
             body: formData
         })
@@ -448,10 +450,10 @@ document.addEventListener("DOMContentLoaded", function() {
         btnKeluar.disabled = true;
         btnKeluar.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
         
-        fetch('{{ route("tentor.presensi.keluar") }}', {
+        fetch('<?php echo e(route("tentor.presensi.keluar")); ?>', {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                 'Content-Type': 'application/json'
             }
         })
@@ -511,7 +513,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     
     // Cek status awal
-    fetch('{{ route("tentor.presensi.cek-status") }}')
+    fetch('<?php echo e(route("tentor.presensi.cek-status")); ?>')
         .then(response => response.json())
         .then(data => {
             if (data.has_laporan) {
@@ -545,4 +547,5 @@ document.addEventListener("DOMContentLoaded", function() {
         });
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/tentor/presensi.blade.php ENDPATH**/ ?>

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Tentor;
 
 use App\Http\Controllers\Controller;
 use App\Models\PresensiTentor;
@@ -8,6 +8,7 @@ use App\Models\Tentor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class PresensiController extends Controller
 {
@@ -16,23 +17,21 @@ class PresensiController extends Controller
      */
     public function index()
     {
-        // Cari tentor berdasarkan user yang login
         $tentor = Tentor::where('id_user', Auth::id())->first();
         
         if (!$tentor) {
-            // Jika tentor tidak ditemukan, kirim variabel kosong
             return view('dashboard.tentor.presensi', [
                 'presensiHariIni' => null,
                 'error' => 'Data tentor tidak ditemukan'
             ]);
         }
         
-        // Cari presensi hari ini
+        // Cari presensi hari ini yang BELUM KELUAR
         $presensiHariIni = PresensiTentor::where('id_tentor', $tentor->id_tentor)
                                         ->whereDate('tanggal', today())
+                                        ->whereNull('jam_keluar')
                                         ->first();
         
-        // Kirim data ke view
         return view('dashboard.tentor.presensi', compact('presensiHariIni', 'tentor'));
     }
 
@@ -51,15 +50,16 @@ class PresensiController extends Controller
                 ], 404);
             }
             
-            // Cek apakah sudah presensi hari ini
+            // Cek apakah sudah presensi hari ini dan BELUM KELUAR
             $existing = PresensiTentor::where('id_tentor', $tentor->id_tentor)
                                       ->whereDate('tanggal', today())
+                                      ->whereNull('jam_keluar')
                                       ->first();
             
             if ($existing) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Anda sudah melakukan presensi masuk hari ini!'
+                    'message' => 'Anda sudah melakukan presensi masuk hari ini dan belum keluar!'
                 ], 400);
             }
             
@@ -67,11 +67,12 @@ class PresensiController extends Controller
             $presensi = PresensiTentor::create([
                 'id_tentor' => $tentor->id_tentor,
                 'tanggal' => today(),
-                'jam_masuk' => now(),
-                'jam_mengajar' => null,
+                'jam_masuk' => Carbon::now(),
+                'jam_keluar' => null,
+                'durasi' => null,
                 'kelas' => null,
                 'status_murid' => null,
-                'total_honor' => null,
+                'keterangan' => null,
                 'uang_makan' => $tentor->uang_makan ?? 0,
                 'transport' => $tentor->uang_transport ?? 0,
                 'bukti_foto' => null,
@@ -93,7 +94,7 @@ class PresensiController extends Controller
     }
     
     /**
-     * Simpan laporan kegiatan
+     * Simpan laporan kegiatan (foto WAJIB)
      */
     public function simpanLaporan(Request $request)
     {
@@ -101,8 +102,8 @@ class PresensiController extends Controller
             $request->validate([
                 'kelas' => 'required|string|max:255',
                 'status_murid' => 'required|in:hadir,tidak_hadir',
-                'jam_mengajar' => 'required|numeric|min:0.5|max:12',
-                'foto' => 'nullable|image|max:2048'
+                'keterangan' => 'nullable|string',
+                'foto' => 'required|image|mimes:jpeg,png,jpg|max:2048'
             ]);
             
             $tentor = Tentor::where('id_user', Auth::id())->first();
@@ -114,9 +115,10 @@ class PresensiController extends Controller
                 ], 404);
             }
             
-            // Cari presensi hari ini
+            // Cari presensi hari ini yang BELUM KELUAR
             $presensi = PresensiTentor::where('id_tentor', $tentor->id_tentor)
                                       ->whereDate('tanggal', today())
+                                      ->whereNull('jam_keluar')
                                       ->first();
             
             if (!$presensi) {
@@ -126,45 +128,21 @@ class PresensiController extends Controller
                 ], 400);
             }
             
-            // Hitung total honor berdasarkan grade dan jam mengajar
-            $grade = $tentor->grade;
-            $jamMengajar = $request->jam_mengajar;
-            $honorPerJam = 0;
-            
-            // Tentukan honor per jam berdasarkan grade
-            if ($grade == 'A') {
-                $honorPerJam = 50000;
-            } elseif ($grade == 'B') {
-                $honorPerJam = 40000;
-            } else {
-                $honorPerJam = 35000;
-            }
-            
-            $totalHonor = $honorPerJam * $jamMengajar;
-            
-            // Upload foto jika ada
-            $fotoPath = null;
-            if ($request->hasFile('foto')) {
-                $fotoPath = $request->file('foto')->store('bukti-presensi', 'public');
-            }
+            // Upload foto (WAJIB)
+            $fotoPath = $request->file('foto')->store('bukti-presensi', 'public');
             
             // Update data laporan
             $presensi->update([
                 'kelas' => $request->kelas,
                 'status_murid' => $request->status_murid,
-                'jam_mengajar' => $jamMengajar,
-                'total_honor' => $totalHonor,
+                'keterangan' => $request->keterangan,
                 'bukti_foto' => $fotoPath,
                 'verifikasi_kehadiran' => false
             ]);
             
             return response()->json([
                 'success' => true,
-                'message' => 'Laporan kegiatan berhasil disimpan! Menunggu verifikasi admin.',
-                'data' => [
-                    'total_honor' => 'Rp ' . number_format($totalHonor, 0, ',', '.'),
-                    'jam_mengajar' => $jamMengajar . ' Jam'
-                ]
+                'message' => 'Laporan kegiatan berhasil disimpan! Menunggu verifikasi admin.'
             ]);
             
         } catch (\Exception $e) {
@@ -176,7 +154,7 @@ class PresensiController extends Controller
     }
     
     /**
-     * Proses presensi keluar
+     * Proses presensi keluar (hitung durasi otomatis)
      */
     public function keluar(Request $request)
     {
@@ -192,6 +170,7 @@ class PresensiController extends Controller
             
             $presensi = PresensiTentor::where('id_tentor', $tentor->id_tentor)
                                       ->whereDate('tanggal', today())
+                                      ->whereNull('jam_keluar')
                                       ->first();
             
             if (!$presensi) {
@@ -208,9 +187,23 @@ class PresensiController extends Controller
                 ], 400);
             }
             
+            // Hitung durasi dalam menit
+            $jamMasuk = Carbon::parse($presensi->jam_masuk);
+            $jamKeluar = Carbon::now();
+            $durasiMenit = $jamMasuk->diffInMinutes($jamKeluar);
+            
+            $jam = floor($durasiMenit / 60);
+            $menit = $durasiMenit % 60;
+            $durasiText = $jam . ' jam ' . $menit . ' menit';
+            
+            $presensi->update([
+                'jam_keluar' => $jamKeluar,
+                'durasi' => $durasiMenit
+            ]);
+            
             return response()->json([
                 'success' => true,
-                'message' => 'Sesi mengajar selesai. Terima kasih!'
+                'message' => 'Sesi mengajar selesai! Durasi: ' . $durasiText
             ]);
             
         } catch (\Exception $e) {
@@ -236,8 +229,10 @@ class PresensiController extends Controller
             ]);
         }
         
+        // Cek presensi yang BELUM KELUAR
         $presensi = PresensiTentor::where('id_tentor', $tentor->id_tentor)
                                   ->whereDate('tanggal', today())
+                                  ->whereNull('jam_keluar')
                                   ->first();
         
         return response()->json([

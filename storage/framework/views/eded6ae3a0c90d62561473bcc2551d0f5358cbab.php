@@ -1,14 +1,15 @@
-@extends('layouts.app')
 
-@section('title', 'Kelola Tentor')
 
-@section('content')
+<?php $__env->startSection('title', 'Kelola Tentor'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div style="width: 100%;">
     
-    {{-- HEADER --}}
+    
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
-            {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+            <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?>
+
         </p>
         <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
             Kelola Tentor
@@ -16,7 +17,7 @@
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Manajemen Data Tentor</p>
     </div>
 
-    {{-- ACTIONS BAR --}}
+    
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
         <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
             <div style="position: relative; width: 300px;">
@@ -26,21 +27,22 @@
             </div>
         </div>
         
-        <a href="{{ route('superadmin.kelola-tentor.create') }}" style="text-decoration: none;">
+        <a href="<?php echo e(route('superadmin.kelola-tentor.create')); ?>" style="text-decoration: none;">
             <button style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: 0.3s; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
                 <i class="fas fa-plus"></i> Tambah
             </button>
         </a>
     </div>
 
-    {{-- SESSION SUCCESS --}}
-    @if(session('success'))
+    
+    <?php if(session('success')): ?>
         <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
-            {{ session('success') }}
-        </div>
-    @endif
+            <?php echo e(session('success')); ?>
 
-    {{-- TABEL LENGKAP (ADA EMAIL, USERNAME, AKSI) --}}
+        </div>
+    <?php endif; ?>
+
+    
     <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
@@ -64,50 +66,50 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody" style="color: #374151;">
-                    @forelse($tentors as $index => $t)
+                    <?php $__empty_1 = true; $__currentLoopData = $tentors; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 15px; text-align: center;">{{ $tentors->firstItem() + $index }}</td>
-                        <td style="padding: 15px;">TE{{ str_pad($t->id_tentor, 4, '0', STR_PAD_LEFT) }}</td>
-                        <td style="padding: 15px;">{{ $t->nama_lengkap_tentor }}</td>
-                        <td style="padding: 15px;">{{ $t->alamat_tentor ?? '-' }}</td>
-                        <td style="padding: 15px;">{{ $t->no_hp_tentor ?? '-' }}</td>
-                        <td style="padding: 15px;">{{ $t->mapel ?? '-' }}</td>
-                        <td style="padding: 15px; text-align: center;">{{ $t->grade ?? '-' }}</td>
-                        <td style="padding: 15px;">Rp {{ number_format($t->hr_sd ?? 0, 0, ',', '.') }}</td>
-                        <td style="padding: 15px;">Rp {{ number_format($t->hr_smp ?? 0, 0, ',', '.') }}</td>
-                        <td style="padding: 15px;">Rp {{ number_format($t->hr_sma ?? 0, 0, ',', '.') }}</td>
-                        <td style="padding: 15px;">Rp {{ number_format($t->uang_makan ?? 0, 0, ',', '.') }}</td>
-                        <td style="padding: 15px;">Rp {{ number_format($t->uang_transport ?? 0, 0, ',', '.') }}</td>
-                        <td style="padding: 15px;">{{ $t->user->email ?? '-' }}</td>
-                        <td style="padding: 15px;">{{ $t->user->username ?? '-' }}</td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($tentors->firstItem() + $index); ?></td>
+                        <td style="padding: 15px;">TE<?php echo e(str_pad($t->id_tentor, 4, '0', STR_PAD_LEFT)); ?></td>
+                        <td style="padding: 15px;"><?php echo e($t->nama_lengkap_tentor); ?></td>
+                        <td style="padding: 15px;"><?php echo e($t->alamat_tentor ?? '-'); ?></td>
+                        <td style="padding: 15px;"><?php echo e($t->no_hp_tentor ?? '-'); ?></td>
+                        <td style="padding: 15px;"><?php echo e($t->mapel ?? '-'); ?></td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($t->grade ?? '-'); ?></td>
+                        <td style="padding: 15px;">Rp <?php echo e(number_format($t->hr_sd ?? 0, 0, ',', '.')); ?></td>
+                        <td style="padding: 15px;">Rp <?php echo e(number_format($t->hr_smp ?? 0, 0, ',', '.')); ?></td>
+                        <td style="padding: 15px;">Rp <?php echo e(number_format($t->hr_sma ?? 0, 0, ',', '.')); ?></td>
+                        <td style="padding: 15px;">Rp <?php echo e(number_format($t->uang_makan ?? 0, 0, ',', '.')); ?></td>
+                        <td style="padding: 15px;">Rp <?php echo e(number_format($t->uang_transport ?? 0, 0, ',', '.')); ?></td>
+                        <td style="padding: 15px;"><?php echo e($t->user->email ?? '-'); ?></td>
+                        <td style="padding: 15px;"><?php echo e($t->user->username ?? '-'); ?></td>
                         <td style="padding: 15px;">
                             <div style="display: flex; gap: 8px; justify-content: center;">
-                                <a href="{{ route('superadmin.kelola-tentor.edit', $t->id_tentor) }}" 
+                                <a href="<?php echo e(route('superadmin.kelola-tentor.edit', $t->id_tentor)); ?>" 
                                    style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; display: flex; align-items: center; gap: 5px; font-size: 12px;">
                                     <i class="far fa-edit"></i> Edit
                                 </a>
                                 <button type="button" 
-                                        onclick="bukaModalHapus('{{ $t->id_tentor }}', '{{ $t->nama_lengkap_tentor }}')" 
+                                        onclick="bukaModalHapus('<?php echo e($t->id_tentor); ?>', '<?php echo e($t->nama_lengkap_tentor); ?>')" 
                                         style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 12px;">
                                     <i class="fas fa-trash"></i> Hapus
                                 </button>
                             </div>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="15" style="padding: 40px; text-align: center; color: #9CA3AF;">
                             <i class="fas fa-database" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
                             Belum ada data tentor. Silakan tambah data baru.
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
     
-    {{-- ── 4. PAGINATION & SHOW ENTRIES ── --}}
+    
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
             <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
@@ -115,7 +117,7 @@
                 <option value="25">25 baris</option>
                 <option value="50">50 baris</option>
             </select>
-            <span style="color: #374151; font-size: 13px;">Menampilkan {{ $tentors->count() }} data</span>
+            <span style="color: #374151; font-size: 13px;">Menampilkan <?php echo e($tentors->count()); ?> data</span>
         </div>
 
         <div style="display: flex; gap: 5px;">
@@ -128,7 +130,7 @@
 
 </div>
 
-{{-- MODAL HAPUS --}}
+
 <div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #E35D5D; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-trash-alt"></i></div>
@@ -137,8 +139,8 @@
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalHapus()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
             <form id="formHapus" method="POST" style="flex: 1;">
-                @csrf
-                @method('DELETE')
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('DELETE'); ?>
                 <button type="submit" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #E35D5D; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Hapus</button>
             </form>
         </div>
@@ -166,7 +168,7 @@
     // Modal Hapus
     function bukaModalHapus(id, nama) {
         let form = document.getElementById('formHapus');
-        let url = "{{ route('superadmin.kelola-tentor.destroy', ':id') }}";
+        let url = "<?php echo e(route('superadmin.kelola-tentor.destroy', ':id')); ?>";
         url = url.replace(':id', id);
         form.action = url;
         
@@ -197,4 +199,5 @@
         }
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/superadmin/kelola-tentor/kelola-tentor.blade.php ENDPATH**/ ?>
