@@ -11,7 +11,7 @@ class MuridController extends Controller
     // Menampilkan semua data murid
     public function index(Request $request)
     {
-        $role = $request->route()->getPrefix() == '/superadmin' ? 'superadmin' : 'admin';
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $murids = Murid::orderBy('id_murid', 'asc')->get();
         
         return view('dashboard.shared.kelola-murid.kelola-murid', [
@@ -23,7 +23,7 @@ class MuridController extends Controller
     // Form tambah data
     public function create(Request $request)
     {
-        $role = $request->route()->getPrefix() == '/superadmin' ? 'superadmin' : 'admin';
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
         $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
         
@@ -50,11 +50,40 @@ class MuridController extends Controller
         ]);
 
         $data = $request->all();
+        
         if (empty($data['paket_awal'])) {
             $data['paket_awal'] = 100000;
         }
         
-        Murid::create($data);
+        // Pengecekan jika pilihan_paket kosong
+        if (empty($data['pilihan_paket'])) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['pilihan_paket' => 'Pilihan paket harus dipilih.']);
+        }
+        
+        // ========== DEBUG: Lihat nilai pilihan_paket ==========
+        $nilaiAsli = $data['pilihan_paket'];
+        $panjangAsli = strlen($nilaiAsli);
+        $nilaiBersih = trim($nilaiAsli);
+        $panjangBersih = strlen($nilaiBersih);
+        
+        // Bersihkan data
+        $data['pilihan_paket'] = $nilaiBersih;
+        
+        // Coba simpan dengan try-catch
+        try {
+            Murid::create($data);
+        } catch (\Exception $e) {
+            // Tampilkan error debug
+            return redirect()->back()
+                ->withInput()
+                ->withErrors([
+                    'debug' => "Panjang asli: $panjangAsli | Nilai asli: '$nilaiAsli' | Panjang bersih: $panjangBersih | Nilai bersih: '{$data['pilihan_paket']}'",
+                    'error_sql' => $e->getMessage()
+                ]);
+        }
+        // ========== END DEBUG ==========
 
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
@@ -64,7 +93,7 @@ class MuridController extends Controller
     // Form edit data
     public function edit(Request $request, $id)
     {
-        $role = $request->route()->getPrefix() == '/superadmin' ? 'superadmin' : 'admin';
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $murid = Murid::findOrFail($id);
         
         $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
@@ -99,6 +128,11 @@ class MuridController extends Controller
             $data['paket_awal'] = 100000;
         }
         
+        // Bersihkan pilihan_paket
+        if (isset($data['pilihan_paket'])) {
+            $data['pilihan_paket'] = trim($data['pilihan_paket']);
+        }
+        
         $murid->update($data);
 
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
@@ -118,7 +152,7 @@ class MuridController extends Controller
         return redirect()->route($role . '.kelola-murid')->with('success', 'Data murid berhasil dihapus');
     }
 
-        // Search murid untuk live search
+    // Search murid untuk live search
     public function search(Request $request)
     {
         $query = $request->get('q');

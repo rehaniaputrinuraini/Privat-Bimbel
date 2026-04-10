@@ -1,21 +1,28 @@
-@extends('layouts.app')
 
-@section('title', 'Input Pemasukan/Pengeluaran')
 
-@section('content')
+<?php $__env->startSection('title', 'Input Pemasukan/Pengeluaran'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
     <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Input Pemasukan/Pengeluaran</h1>
 
     <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
-        <form action="{{ route($role . '.laporan-keuangan.store') }}" method="POST" id="mainForm">
-            @csrf
+        <form action="<?php echo e(route($role . '.laporan-keuangan.store')); ?>" method="POST" id="mainForm">
+            <?php echo csrf_field(); ?>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px;">
                 <div>
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tanggal <span style="color: red;">*</span></label>
-                        <input type="date" name="tanggal" value="{{ date('Y-m-d') }}" required 
+                        <input type="date" name="tanggal" value="<?php echo e(date('Y-m-d')); ?>" required 
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-                        @error('tanggal') <small style="color: red;">{{ $message }}</small> @enderror
+                        <?php $__errorArgs = ['tanggal'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Kategori <span style="color: red;">*</span></label>
@@ -27,7 +34,14 @@
                             <option value="piutang">Piutang</option>
                             <option value="uang_muka">Uang Dimuka</option>
                         </select>
-                        @error('kategori') <small style="color: red;">{{ $message }}</small> @enderror
+                        <?php $__errorArgs = ['kategori'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
                 <div>
@@ -35,7 +49,14 @@
                         <label id="label-rincian" style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Rincian Pemasukan <span style="color: red;">*</span></label>
                         <input type="text" id="input-rincian" name="rincian" placeholder="Masukkan Rincian Pemasukan" required 
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-                        @error('rincian') <small style="color: red;">{{ $message }}</small> @enderror
+                        <?php $__errorArgs = ['rincian'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Jumlah <span style="color: red;">*</span></label>
@@ -43,7 +64,14 @@
                                onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-                        @error('jumlah') <small style="color: red;">{{ $message }}</small> @enderror
+                        <?php $__errorArgs = ['jumlah'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
             </div>
@@ -115,11 +143,11 @@
             document.getElementById('modalPindahHalaman').style.display = 'flex';
             document.getElementById('confirmPindahBtn').onclick = function() {
                 formChanged = false;
-                window.location.href = "{{ route($role . '.laporan-keuangan') }}";
+                window.location.href = "<?php echo e(route($role . '.laporan-keuangan')); ?>";
             };
         } else {
             document.getElementById('modalBatal').style.display = 'flex';
-            document.getElementById('confirmKeluarLink').href = "{{ route($role . '.laporan-keuangan') }}";
+            document.getElementById('confirmKeluarLink').href = "<?php echo e(route($role . '.laporan-keuangan')); ?>";
         }
     }
     
@@ -141,7 +169,7 @@
                             window.location.href = pendingUrl;
                         };
                     } else if (this.classList.contains('logout-btn')) {
-                        pendingUrl = "{{ route('logout') }}";
+                        pendingUrl = "<?php echo e(route('logout')); ?>";
                         document.getElementById('modalPindahHalaman').style.display = 'flex';
                         document.getElementById('confirmPindahBtn').onclick = function() {
                             formChanged = false;
@@ -184,4 +212,5 @@
         }
     }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/laporan-keuangan/create-laporan-keuangan.blade.php ENDPATH**/ ?>

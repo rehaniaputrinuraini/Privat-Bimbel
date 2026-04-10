@@ -63,7 +63,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo e(route('admin.riwayat-presensi')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('admin.riwayat-presensi*') ? 'nav-active' : ''); ?>">
+                    <a href="<?php echo e(route('admin.kelola-presensi')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('admin.kelola-presensi*') ? 'nav-active' : ''); ?>">
                         <img src="<?php echo e(asset('images/dashboard/icons/icon_riwayatpresensi.png')); ?>" class="sidebar-icon"> Riwayat Presensi
                     </a>
                 </li>
@@ -111,10 +111,10 @@
                         <img src="<?php echo e(asset('images/dashboard/icons/icon_hargapaket.png')); ?>" class="sidebar-icon"> Harga Paket
                     </a>
                 </li>
-                <li>
-                    <a href="<?php echo e(route('superadmin.riwayat-presensi')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.riwayat-presensi*') ? 'nav-active' : ''); ?>">
-                        <img src="<?php echo e(asset('images/dashboard/icons/icon_riwayatpresensi.png')); ?>" class="sidebar-icon"> Riwayat Presensi
-                    </a>
+               <li>
+                    <a href="<?php echo e(route('superadmin.kelola-presensi')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.kelola-presensi*') ? 'nav-active' : ''); ?>">
+                       <img src="<?php echo e(asset('images/dashboard/icons/icon_riwayatpresensi.png')); ?>" class="sidebar-icon"> Riwayat Presensi
+                     </a>
                 </li>
                 <li>
                     <a href="<?php echo e(route('superadmin.pembayaran')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.pembayaran*') ? 'nav-active' : ''); ?>">

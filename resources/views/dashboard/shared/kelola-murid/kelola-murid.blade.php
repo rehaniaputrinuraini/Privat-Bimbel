@@ -32,11 +32,16 @@
                        style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
             </div>
 
+            {{-- DROPDOWN PILIHAN PAKET - DINAMIS DARI DATABASE --}}
             <select id="filterPaket" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;">
                 <option value="">--- Pilihan Paket ---</option>
-                <option value="SD">SD</option>
-                <option value="SMP">SMP</option>
-                <option value="SMA">SMA</option>
+                @php
+                    // Ambil data unik dari tabel murid
+                    $paketUnik = $murids->pluck('pilihan_paket')->unique()->sort()->filter();
+                @endphp
+                @foreach($paketUnik as $paket)
+                    <option value="{{ $paket }}">{{ $paket }}</option>
+                @endforeach
             </select>
 
             <select id="filterTahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;">
@@ -176,7 +181,7 @@
         });
     });
 
-    // Filter Paket
+    // Filter Paket (dinamis dari data yang ada)
     document.getElementById('filterPaket').addEventListener('change', function() {
         let filterValue = this.value;
         let rows = document.querySelectorAll('#tableBody tr');
@@ -193,7 +198,7 @@
         });
     });
 
-    // Filter Tahun (sudah otomatis dari data yang ada)
+    // Filter Tahun
     document.getElementById('filterTahun').addEventListener('change', function() {
         let filterValue = this.value;
         let rows = document.querySelectorAll('#tableBody tr');

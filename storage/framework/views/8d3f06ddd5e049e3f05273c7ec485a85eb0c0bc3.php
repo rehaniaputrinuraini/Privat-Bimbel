@@ -10,7 +10,6 @@
         background-position: right 14px center;
         padding-right: 38px !important;
     }
-
     .tab-item {
         flex: 1;
         padding: 14px 20px;
@@ -18,10 +17,13 @@
         font-weight: 700;
         font-size: 15px;
         text-align: center;
-        position: relative;
-        bottom: -2px;
         transition: 0.3s;
         color: #9CA3AF;
+        border-bottom: 2px solid transparent;
+    }
+    .tab-active {
+        border-bottom-color: #4D0B87 !important;
+        color: #4D0B87 !important;
     }
 </style>
 <?php $__env->stopPush(); ?>
@@ -35,16 +37,14 @@
             <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?>
 
         </p>
-        <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
-            Pembayaran
-        </h1>
+        <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0;">Pembayaran</h1>
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Kelola Pembayaran Murid dan Riwayat Pembayaran</p>
     </div>
 
     
-    <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 25px;">
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 25px;">
         <a href="<?php echo e(route($role . '.pembayaran.create')); ?>" style="text-decoration: none;">
-            <button style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: 0.3s; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
+            <button style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px;">
                 <i class="fas fa-plus"></i> Input Pembayaran Murid
             </button>
         </a>
@@ -52,144 +52,111 @@
 
     
     <div style="display: flex; width: 100%; border-bottom: 2px solid #E5E7EB; margin-bottom: 25px;">
-        <div class="tab-item"
-             @click="tab = 'tagihan'"
-             :style="tab === 'tagihan' ? 'border-bottom: 3px solid #4D0B87; color: #4D0B87;' : 'color: #9CA3AF;'">
+        <div class="tab-item" :class="tab === 'tagihan' ? 'tab-active' : ''" @click="tab = 'tagihan'">
             Tagihan Murid
         </div>
-        <div class="tab-item"
-             @click="tab = 'riwayat'"
-             :style="tab === 'riwayat' ? 'border-bottom: 3px solid #4D0B87; color: #4D0B87;' : 'color: #9CA3AF;'">
+        <div class="tab-item" :class="tab === 'riwayat' ? 'tab-active' : ''" @click="tab = 'riwayat'">
             Riwayat Pembayaran
         </div>
     </div>
 
     
-    <div x-show="tab === 'tagihan'" x-transition:enter.duration.300ms>
-
-        
-        <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border: 1px solid #F3F4F6; margin-bottom: 20px;">
+    <div x-show="tab === 'tagihan'" x-cloak>
+        <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 20px;">
             <div style="position: relative; margin-bottom: 12px;">
                 <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
                 <input type="text" id="searchTagihan" placeholder="Cari Nama Murid..."
-                       style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: #F9FAFB; font-size: 14px; color: #374151;">
+                       style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 14px;">
             </div>
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                <select id="filterPaket" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: #F9FAFB; outline: none; cursor: pointer; min-width: 150px;">
+                <select id="filterPaket" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB;">
                     <option value="">Status Paket</option>
-                    <option value="SD">SD</option>
-                    <option value="SMP">SMP</option>
-                    <option value="SMA">SMA</option>
+                    <?php $__currentLoopData = $paketList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $paket): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($paket->tingkat); ?>"><?php echo e($paket->tingkat); ?></option>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
-                <select id="filterPembayaran" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: #F9FAFB; outline: none; cursor: pointer; min-width: 150px;">
+                <select id="filterPembayaran" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB;">
                     <option value="">Status Pembayaran</option>
-                    <option value="Lunas">Lunas</option>
-                    <option value="Belum">Belum</option>
+                    <option value="Lunas">Lunas (Sudah Bayar Pendaftaran)</option>
+                    <option value="Belum">Belum (Belum Bayar Pendaftaran)</option>
                 </select>
-                <select id="filterTagihan" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: #F9FAFB; outline: none; cursor: pointer; min-width: 150px;">
-                    <option value="">Status Tagihan</option>
+                <select id="filterTagihan" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB;">
+                    <option value="">Status Tagihan Bulanan</option>
                     <option value="Lunas">Lunas</option>
-                    <option value="Tunggak">Tunggak</option>
                     <option value="Uang Muka">Uang Muka</option>
+                    <option value="Tunggak">Tunggak</option>
                 </select>
             </div>
         </div>
 
-        
-        <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
-                    <thead>
-                        <tr style="background: #F3E8FF; color: #111827;">
-                            <th style="padding: 15px; font-weight: 700; width: 50px;">No</th>
-                            <th style="padding: 15px; font-weight: 700;">Nama Lengkap</th>
-                            <th style="padding: 15px; font-weight: 700;">Kelas</th>
-                            <th style="padding: 15px; font-weight: 700;">Status Paket</th>
-                            <th style="padding: 15px; font-weight: 700; text-align: center;">Status Pembayaran</th>
-                            <th style="padding: 15px; font-weight: 700; text-align: center;">Status Tagihan</th>
-                            <th style="padding: 15px; font-weight: 700; text-align: center;">Total Bulan</th>
-                            <th style="padding: 15px; font-weight: 700; text-align: center;">Total Piutang</th>
-                            <th style="padding: 15px; font-weight: 700; text-align: center;">Total Uang Muka</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tagihanTableBody" style="color: #374151;">
-                        <?php $__empty_1 = true; $__currentLoopData = $tagihan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                        <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;"
-                            onmouseover="this.style.background='#F9FAFB'"
-                            onmouseout="this.style.background='transparent'">
-                            <td style="padding: 15px;"><?php echo e($index + 1); ?></td>
-                            <td style="padding: 15px;"><?php echo e($t->nama); ?></td>
-                            <td style="padding: 15px;"><?php echo e($t->kelas); ?></td>
-                            <td style="padding: 15px;"><?php echo e($t->paket); ?></td>
-                            <td style="padding: 15px; text-align: center;">
-                                <?php if($t->status_pembayaran == 'Lunas'): ?>
-                                    <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #E1F7E3; color: #0E7490;">Lunas</span>
-                                <?php else: ?>
-                                    <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #FEE2E2; color: #EF4444;">Belum</span>
-                                <?php endif; ?>
-                            </td>
-                            <td style="padding: 15px; text-align: center;">
-                                <?php if($t->status_tagihan == 'Lunas'): ?>
-                                    <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #E1F7E3; color: #0E7490;">Lunas</span>
-                                <?php elseif(str_contains($t->status_tagihan, 'Tunggak')): ?>
-                                    <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #FEF3C7; color: #92400E;"><?php echo e($t->status_tagihan); ?></span>
-                                <?php else: ?>
-                                    <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #E0E7FF; color: #4338CA;"><?php echo e($t->status_tagihan); ?></span>
-                                <?php endif; ?>
-                            </td>
-                            <td style="padding: 15px; text-align: center;"><?php echo e($t->total_bulan); ?></td>
-                            <td style="padding: 15px; text-align: center; <?php echo e($t->total_piutang != '-' ? 'font-weight: 700; color: #EF4444;' : ''); ?>"><?php echo e($t->total_piutang); ?></td>
-                            <td style="padding: 15px; text-align: center;"><?php echo e($t->uang_muka); ?></td>
-                        </tr>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                        <tr>
-                            <td colspan="9" style="padding: 30px; text-align: center; color: #6B7280;">Belum ada data tagihan</td>
-                        </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
+        <div style="background: white; border-radius: 20px; overflow-x: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap;">
+                <thead>
+                    <tr style="background: #F3E8FF;">
+                        <th style="padding: 15px;">No</th>
+                        <th style="padding: 15px;">Nama Murid</th>
+                        <th style="padding: 15px;">Kelas</th>
+                        <th style="padding: 15px;">Status Paket</th>
+                        <th style="padding: 15px; text-align: center;">Status Pembayaran</th>
+                        <th style="padding: 15px; text-align: center;">Status Tagihan</th>
+                        <th style="padding: 15px; text-align: center;">Tagihan Bulan</th>
+                        <th style="padding: 15px; text-align: center;">Total Piutang</th>
+                        <th style="padding: 15px; text-align: center;">Uang Muka</th>
+                    </tr>
+                </thead>
+                <tbody id="tagihanTableBody">
+                    <?php $__empty_1 = true; $__currentLoopData = $tagihan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <tr style="border-bottom: 1px solid #F3F4F6;">
+                        <td style="padding: 15px;"><?php echo e($index + 1); ?></td>
+                        <td style="padding: 15px;"><?php echo e($t->nama_murid); ?></td>
+                        <td style="padding: 15px;"><?php echo e($t->kelas); ?></td>
+                        <td style="padding: 15px;"><?php echo e($t->paket); ?></td>
+                        <td style="padding: 15px; text-align: center;">
+                            <?php if($t->status_pembayaran == 'Lunas'): ?>
+                                <span style="padding: 5px 12px; border-radius: 20px; background: #E1F7E3; color: #0E7490;">Lunas</span>
+                            <?php else: ?>
+                                <span style="padding: 5px 12px; border-radius: 20px; background: #FEE2E2; color: #EF4444;">Belum</span>
+                            <?php endif; ?>
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <?php if($t->status_tagihan == 'Lunas'): ?>
+                                <span style="padding: 5px 12px; border-radius: 20px; background: #E1F7E3; color: #0E7490;">Lunas</span>
+                            <?php elseif(str_contains($t->status_tagihan, 'Tunggak')): ?>
+                                <span style="padding: 5px 12px; border-radius: 20px; background: #FEF3C7; color: #92400E;"><?php echo e($t->status_tagihan); ?></span>
+                            <?php else: ?>
+                                <span style="padding: 5px 12px; border-radius: 20px; background: #E0E7FF; color: #4338CA;"><?php echo e($t->status_tagihan); ?></span>
+                            <?php endif; ?>
+                        </td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($t->tagihan_bulan); ?></td>
+                        <td style="padding: 15px; text-align: center; <?php echo e($t->total_piutang != '-' ? 'font-weight:700;color:#EF4444;' : ''); ?>"><?php echo e($t->total_piutang); ?></td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($t->uang_muka); ?></td>
+                    </tr>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                    <tr>
+                        <td colspan="9" style="padding: 40px; text-align: center;">Belum ada data tagihan</td>
+                    </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
-
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <select id="perPageTagihan" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <option value="10">10 baris</option>
-                    <option value="25">25 baris</option>
-                    <option value="50">50 baris</option>
-                </select>
-                <span style="color: #374151; font-size: 13px;">Menampilkan <?php echo e($tagihan->count()); ?> data</span>
-            </div>
-
-            <div style="display: flex; gap: 5px;">
-                <button class="page-btn-tagihan" data-page="first" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-double-left"></i></button>
-                <button class="page-btn-tagihan" data-page="prev" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-left"></i></button>
-                <button class="page-btn-tagihan active" data-page="1" style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">1</button>
-                <button class="page-btn-tagihan" data-page="next" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-right"></i></button>
-            </div>
-        </div>
-
     </div>
 
     
-    <div x-show="tab === 'riwayat'" x-transition:enter.duration.300ms>
-
-        
-        <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border: 1px solid #F3F4F6; margin-bottom: 20px;">
+    <div x-show="tab === 'riwayat'" x-cloak>
+        <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 20px;">
             <div style="position: relative; margin-bottom: 12px;">
                 <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
                 <input type="text" id="searchRiwayat" placeholder="Cari Nama Murid..."
-                       style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: #F9FAFB; font-size: 14px; color: #374151;">
+                       style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 14px;">
             </div>
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                <select id="filterPaketRiwayat" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: #F9FAFB; outline: none; cursor: pointer; min-width: 150px;">
+                <select id="filterPaketRiwayat" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB;">
                     <option value="">Status Paket</option>
-                    <option value="SD">SD</option>
-                    <option value="SMP">SMP</option>
-                    <option value="SMA">SMA</option>
+                    <?php $__currentLoopData = $paketList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $paket): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($paket->tingkat); ?>"><?php echo e($paket->tingkat); ?></option>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
-                <select id="filterBulan" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: #F9FAFB; outline: none; cursor: pointer; min-width: 150px;">
+                <select id="filterBulan" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB;">
                     <option value="">Pilih Bulan</option>
                     <option value="1">Januari</option>
                     <option value="2">Februari</option>
@@ -204,77 +171,46 @@
                     <option value="11">November</option>
                     <option value="12">Desember</option>
                 </select>
-                <select id="filterTahun" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: #F9FAFB; outline: none; cursor: pointer; min-width: 150px;">
+                <select id="filterTahunRiwayat" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB;">
                     <option value="">Pilih Tahun</option>
-                    <?php
-                        $tahunList = $riwayat->pluck('tanggal')->map(function($date) {
-                            return explode('/', $date)[2] ?? null;
-                        })->filter()->unique()->sort()->values();
-                    ?>
-                    <?php $__currentLoopData = $tahunList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tahun): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <option value="<?php echo e($tahun); ?>"><?php echo e($tahun); ?></option>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
             </div>
         </div>
 
-        
-        <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
-                    <thead>
-                        <tr style="background: #F3E8FF; color: #111827;">
-                            <th style="padding: 15px; font-weight: 700; width: 50px;">No</th>
-                            <th style="padding: 15px; font-weight: 700;">Tanggal</th>
-                            <th style="padding: 15px; font-weight: 700;">Nama Murid</th>
-                            <th style="padding: 15px; font-weight: 700;">Paket Awal</th>
-                            <th style="padding: 15px; font-weight: 700;">Paket Selanjutnya</th>
-                            <th style="padding: 15px; font-weight: 700; text-align: center;">Total Bayar</th>
-                            <th style="padding: 15px; font-weight: 700;">Keterangan</th>
-                        </tr>
-                    </thead>
-                    <tbody id="riwayatTableBody" style="color: #374151;">
-                        <?php $__empty_1 = true; $__currentLoopData = $riwayat; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                        <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;"
-                            onmouseover="this.style.background='#F9FAFB'"
-                            onmouseout="this.style.background='transparent'">
-                            <td style="padding: 15px;"><?php echo e($index + 1); ?></td>
-                            <td style="padding: 15px;"><?php echo e($r->tanggal); ?></td>
-                            <td style="padding: 15px;"><?php echo e($r->nama_murid); ?></td>
-                            <td style="padding: 15px;">Rp <?php echo e($r->paket_awal); ?></td>
-                            <td style="padding: 15px;"><?php echo e($r->paket_selanjutnya); ?></td>
-                            <td style="padding: 15px; text-align: center; font-weight: 700; color: #4D0B87;"><?php echo e($r->total_bayar); ?></td>
-                            <td style="padding: 15px;"><?php echo e($r->keterangan); ?></td>
-                        </tr>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                        <tr>
-                            <td colspan="7" style="padding: 30px; text-align: center; color: #6B7280;">Belum ada data riwayat pembayaran</td>
-                        </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
+        <div style="background: white; border-radius: 20px; overflow-x: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap;">
+                <thead>
+                    <tr style="background: #F3E8FF;">
+                        <th style="padding: 15px;">No</th>
+                        <th style="padding: 15px;">Tanggal</th>
+                        <th style="padding: 15px;">Nama Murid</th>
+                        <th style="padding: 15px;">Paket Awal</th>
+                        <th style="padding: 15px;">Paket Belajar</th>
+                        <th style="padding: 15px;">Untuk Bulan</th>
+                        <th style="padding: 15px; text-align: center;">Total Bayar</th>
+                        <th style="padding: 15px;">Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody id="riwayatTableBody">
+                    <?php $__empty_1 = true; $__currentLoopData = $riwayat; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <tr style="border-bottom: 1px solid #F3F4F6;">
+                        <td style="padding: 15px;"><?php echo e($index + 1); ?></td>
+                        <td style="padding: 15px;"><?php echo e($r->tanggal); ?></td>
+                        <td style="padding: 15px;"><?php echo e($r->nama_murid); ?></td>
+                        <td style="padding: 15px;"><?php echo e($r->paket_awal); ?></td>
+                        <td style="padding: 15px;"><?php echo e($r->paket_selanjutnya); ?></td>
+                        <td style="padding: 15px;"><?php echo e($r->bulan_dibayar); ?></td>
+                        <td style="padding: 15px; text-align: center; font-weight: 700; color: #4D0B87;"><?php echo e($r->total_bayar); ?></td>
+                        <td style="padding: 15px;"><?php echo e($r->keterangan); ?></td>
+                    </tr>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                    <tr>
+                        <td colspan="8" style="padding: 40px; text-align: center;">Belum ada riwayat pembayaran</td>
+                    </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
-
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <select id="perPageRiwayat" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <option value="10">10 baris</option>
-                    <option value="25">25 baris</option>
-                    <option value="50">50 baris</option>
-                </select>
-                <span style="color: #374151; font-size: 13px;">Menampilkan <?php echo e($riwayat->count()); ?> data</span>
-            </div>
-
-            <div style="display: flex; gap: 5px;">
-                <button class="page-btn-riwayat" data-page="first" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-double-left"></i></button>
-                <button class="page-btn-riwayat" data-page="prev" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-left"></i></button>
-                <button class="page-btn-riwayat active" data-page="1" style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">1</button>
-                <button class="page-btn-riwayat" data-page="next" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-right"></i></button>
-            </div>
-        </div>
-
     </div>
 
 </div>
@@ -282,252 +218,89 @@
 <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
 <script>
-    // ========== FILTER TABEL TAGIHAN ==========
+    // Filter Tagihan
     function filterTagihan() {
-        const searchValue = document.getElementById('searchTagihan')?.value.toLowerCase() || '';
+        const search = document.getElementById('searchTagihan')?.value.toLowerCase() || '';
         const filterPaket = document.getElementById('filterPaket')?.value || '';
         const filterPembayaran = document.getElementById('filterPembayaran')?.value || '';
         const filterTagihanStatus = document.getElementById('filterTagihan')?.value || '';
         
         const rows = document.querySelectorAll('#tagihanTableBody tr');
-        let visibleCount = 0;
-        
         rows.forEach(row => {
             if (!row.cells || row.cells.length < 9) return;
-            
             const nama = row.cells[1]?.innerText.toLowerCase() || '';
             const paket = row.cells[3]?.innerText || '';
             const statusPembayaran = row.cells[4]?.innerText.trim() || '';
             const statusTagihan = row.cells[5]?.innerText.trim() || '';
             
             let show = true;
-            
-            if (searchValue && !nama.includes(searchValue)) show = false;
+            if (search && !nama.includes(search)) show = false;
             if (filterPaket && paket !== filterPaket) show = false;
             if (filterPembayaran && statusPembayaran !== filterPembayaran) show = false;
             if (filterTagihanStatus) {
                 if (filterTagihanStatus === 'Tunggak' && !statusTagihan.includes('Tunggak')) show = false;
-                else if (filterTagihanStatus === 'Uang Muka' && statusTagihan !== 'Uang Muka 1 Bln') show = false;
+                else if (filterTagihanStatus === 'Uang Muka' && statusTagihan !== 'Uang Muka') show = false;
                 else if (filterTagihanStatus === 'Lunas' && statusTagihan !== 'Lunas') show = false;
             }
-            
             row.style.display = show ? '' : 'none';
-            if (show) visibleCount++;
         });
-        
-        const infoSpan = document.querySelector('#tagihanTableBody').closest('.tab-item') ? 
-            document.querySelector('#tagihanCountInfo') : null;
-        if (infoSpan) infoSpan.innerText = `Menampilkan ${visibleCount} data`;
     }
     
-    // ========== FILTER TABEL RIWAYAT ==========
+    // Filter Riwayat
     function filterRiwayat() {
-        const searchValue = document.getElementById('searchRiwayat')?.value.toLowerCase() || '';
+        const search = document.getElementById('searchRiwayat')?.value.toLowerCase() || '';
         const filterPaket = document.getElementById('filterPaketRiwayat')?.value || '';
         const filterBulan = document.getElementById('filterBulan')?.value || '';
-        const filterTahun = document.getElementById('filterTahun')?.value || '';
+        const filterTahun = document.getElementById('filterTahunRiwayat')?.value || '';
         
         const rows = document.querySelectorAll('#riwayatTableBody tr');
-        let visibleCount = 0;
-        
         rows.forEach(row => {
-            if (!row.cells || row.cells.length < 7) return;
-            
+            if (!row.cells || row.cells.length < 8) return;
             const nama = row.cells[2]?.innerText.toLowerCase() || '';
             const paket = row.cells[4]?.innerText || '';
-            const tanggal = row.cells[1]?.innerText || '';
-            
-            const parts = tanggal.split('/');
+            const tgl = row.cells[1]?.innerText || '';
+            const parts = tgl.split('/');
             const bulan = parts[1] ? parseInt(parts[1]) : 0;
             const tahun = parts[2] ? parseInt(parts[2]) : 0;
             
             let show = true;
-            
-            if (searchValue && !nama.includes(searchValue)) show = false;
+            if (search && !nama.includes(search)) show = false;
             if (filterPaket && paket !== filterPaket) show = false;
             if (filterBulan && bulan !== parseInt(filterBulan)) show = false;
             if (filterTahun && tahun !== parseInt(filterTahun)) show = false;
-            
             row.style.display = show ? '' : 'none';
-            if (show) visibleCount++;
         });
-        
-        const infoSpan = document.getElementById('riwayatCountInfo');
-        if (infoSpan) infoSpan.innerText = `Menampilkan ${visibleCount} data`;
     }
     
-    // ========== PAGINATION CLIENT SIDE (SEDERHANA) ==========
-    let tagihanCurrentPage = 1;
-    let tagihanPerPage = 10;
-    let riwayatCurrentPage = 1;
-    let riwayatPerPage = 10;
+    // Event Listeners
+    document.getElementById('searchTagihan')?.addEventListener('keyup', filterTagihan);
+    document.getElementById('filterPaket')?.addEventListener('change', filterTagihan);
+    document.getElementById('filterPembayaran')?.addEventListener('change', filterTagihan);
+    document.getElementById('filterTagihan')?.addEventListener('change', filterTagihan);
     
-    function updateTagihanPagination() {
-        const rows = document.querySelectorAll('#tagihanTableBody tr');
-        const totalRows = rows.length;
-        const totalPages = Math.ceil(totalRows / tagihanPerPage);
-        
-        // Sembunyikan semua row dulu
-        rows.forEach((row, index) => {
-            const start = (tagihanCurrentPage - 1) * tagihanPerPage;
-            const end = start + tagihanPerPage;
-            if (index >= start && index < end) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
+    document.getElementById('searchRiwayat')?.addEventListener('keyup', filterRiwayat);
+    document.getElementById('filterPaketRiwayat')?.addEventListener('change', filterRiwayat);
+    document.getElementById('filterBulan')?.addEventListener('change', filterRiwayat);
+    document.getElementById('filterTahunRiwayat')?.addEventListener('change', filterRiwayat);
+    
+    // Isi dropdown tahun riwayat
+    const tahunSelect = document.getElementById('filterTahunRiwayat');
+    if (tahunSelect) {
+        const tahunSet = new Set();
+        document.querySelectorAll('#riwayatTableBody tr').forEach(row => {
+            if (row.cells && row.cells[1]) {
+                const tgl = row.cells[1].innerText;
+                const parts = tgl.split('/');
+                if (parts[2]) tahunSet.add(parseInt(parts[2]));
             }
         });
-        
-        // Update tombol pagination
-        const btns = document.querySelectorAll('.page-btn-tagihan');
-        btns.forEach(btn => {
-            btn.style.background = 'white';
-            btn.style.color = '#374151';
-            btn.style.border = '1px solid #E5E7EB';
+        Array.from(tahunSet).sort().reverse().forEach(tahun => {
+            const option = document.createElement('option');
+            option.value = tahun;
+            option.textContent = tahun;
+            tahunSelect.appendChild(option);
         });
-        
-        const activeBtn = document.querySelector(`.page-btn-tagihan[data-page="${tagihanCurrentPage}"]`);
-        if (activeBtn) {
-            activeBtn.style.background = '#4D0B87';
-            activeBtn.style.color = 'white';
-            activeBtn.style.border = 'none';
-        }
-        
-        // Update info jumlah data yang ditampilkan
-        let visibleCount = 0;
-        rows.forEach(row => {
-            if (row.style.display !== 'none') visibleCount++;
-        });
-        const infoSpan = document.querySelector('#tagihanTableBody').closest('div').querySelector('.page-btn-tagihan')?.closest('.page-btn-tagihan') ?
-            null : document.getElementById('tagihanCountInfo');
-        if (infoSpan) infoSpan.innerText = `Menampilkan ${visibleCount} data`;
     }
-    
-    function updateRiwayatPagination() {
-        const rows = document.querySelectorAll('#riwayatTableBody tr');
-        const totalRows = rows.length;
-        const totalPages = Math.ceil(totalRows / riwayatPerPage);
-        
-        rows.forEach((row, index) => {
-            const start = (riwayatCurrentPage - 1) * riwayatPerPage;
-            const end = start + riwayatPerPage;
-            if (index >= start && index < end) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-        
-        const btns = document.querySelectorAll('.page-btn-riwayat');
-        btns.forEach(btn => {
-            btn.style.background = 'white';
-            btn.style.color = '#374151';
-            btn.style.border = '1px solid #E5E7EB';
-        });
-        
-        const activeBtn = document.querySelector(`.page-btn-riwayat[data-page="${riwayatCurrentPage}"]`);
-        if (activeBtn) {
-            activeBtn.style.background = '#4D0B87';
-            activeBtn.style.color = 'white';
-            activeBtn.style.border = 'none';
-        }
-    }
-    
-    // ========== EVENT LISTENERS ==========
-    document.addEventListener('DOMContentLoaded', function() {
-        // Tagihan filters
-        const searchTagihan = document.getElementById('searchTagihan');
-        const filterPaket = document.getElementById('filterPaket');
-        const filterPembayaran = document.getElementById('filterPembayaran');
-        const filterTagihanStatus = document.getElementById('filterTagihan');
-        const perPageTagihan = document.getElementById('perPageTagihan');
-        
-        if (searchTagihan) searchTagihan.addEventListener('keyup', filterTagihan);
-        if (filterPaket) filterPaket.addEventListener('change', filterTagihan);
-        if (filterPembayaran) filterPembayaran.addEventListener('change', filterTagihan);
-        if (filterTagihanStatus) filterTagihanStatus.addEventListener('change', filterTagihan);
-        
-        if (perPageTagihan) {
-            perPageTagihan.addEventListener('change', function() {
-                tagihanPerPage = parseInt(this.value);
-                tagihanCurrentPage = 1;
-                updateTagihanPagination();
-            });
-        }
-        
-        // Riwayat filters
-        const searchRiwayat = document.getElementById('searchRiwayat');
-        const filterPaketRiwayat = document.getElementById('filterPaketRiwayat');
-        const filterBulan = document.getElementById('filterBulan');
-        const filterTahun = document.getElementById('filterTahun');
-        const perPageRiwayat = document.getElementById('perPageRiwayat');
-        
-        if (searchRiwayat) searchRiwayat.addEventListener('keyup', filterRiwayat);
-        if (filterPaketRiwayat) filterPaketRiwayat.addEventListener('change', filterRiwayat);
-        if (filterBulan) filterBulan.addEventListener('change', filterRiwayat);
-        if (filterTahun) filterTahun.addEventListener('change', filterRiwayat);
-        
-        if (perPageRiwayat) {
-            perPageRiwayat.addEventListener('change', function() {
-                riwayatPerPage = parseInt(this.value);
-                riwayatCurrentPage = 1;
-                updateRiwayatPagination();
-            });
-        }
-        
-        // Pagination button handlers
-        document.querySelectorAll('.page-btn-tagihan').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const page = this.dataset.page;
-                const rows = document.querySelectorAll('#tagihanTableBody tr');
-                const totalPages = Math.ceil(rows.length / tagihanPerPage);
-                
-                if (page === 'first') tagihanCurrentPage = 1;
-                else if (page === 'prev') tagihanCurrentPage = Math.max(1, tagihanCurrentPage - 1);
-                else if (page === 'next') tagihanCurrentPage = Math.min(totalPages, tagihanCurrentPage + 1);
-                else tagihanCurrentPage = parseInt(page);
-                
-                updateTagihanPagination();
-            });
-        });
-        
-        document.querySelectorAll('.page-btn-riwayat').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const page = this.dataset.page;
-                const rows = document.querySelectorAll('#riwayatTableBody tr');
-                const totalPages = Math.ceil(rows.length / riwayatPerPage);
-                
-                if (page === 'first') riwayatCurrentPage = 1;
-                else if (page === 'prev') riwayatCurrentPage = Math.max(1, riwayatCurrentPage - 1);
-                else if (page === 'next') riwayatCurrentPage = Math.min(totalPages, riwayatCurrentPage + 1);
-                else riwayatCurrentPage = parseInt(page);
-                
-                updateRiwayatPagination();
-            });
-        });
-        
-        // Initial pagination
-        updateTagihanPagination();
-        updateRiwayatPagination();
-        
-        // Fix untuk count info
-        const tagihanInfo = document.querySelector('#tagihanTableBody').closest('.tab-item') ? 
-            document.querySelector('#tagihanCountInfo') : null;
-        if (!tagihanInfo) {
-            const newSpan = document.createElement('span');
-            newSpan.id = 'tagihanCountInfo';
-            newSpan.style.color = '#374151';
-            newSpan.style.fontSize = '13px';
-            newSpan.innerText = 'Menampilkan data';
-            document.querySelector('#tagihanTableBody').closest('div').querySelector('.page-btn-tagihan')?.parentNode?.parentNode?.querySelector('div:first-child')?.appendChild(newSpan);
-        }
-        
-        const riwayatInfo = document.getElementById('riwayatCountInfo');
-        if (riwayatInfo) {
-            riwayatInfo.innerText = `Menampilkan ${document.querySelectorAll('#riwayatTableBody tr:not([style*="display: none"])').length} data`;
-        }
-    });
 </script>
-
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/pembayaran/pembayaran.blade.php ENDPATH**/ ?>

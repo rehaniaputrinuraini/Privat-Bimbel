@@ -1,8 +1,8 @@
-@extends('layouts.app')
 
-@section('title', 'Input Pembayaran')
 
-@section('content')
+<?php $__env->startSection('title', 'Input Pembayaran'); ?>
+
+<?php $__env->startSection('content'); ?>
 <style>
     .autocomplete-items {
         position: absolute;
@@ -51,30 +51,32 @@
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
     <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Input Pembayaran</h1>
 
-    @if($errors->any())
+    <?php if($errors->any()): ?>
         <div style="background: #FEE2E2; color: #EF4444; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
-            <i class="fas fa-exclamation-circle"></i> {{ $errors->first() }}
-        </div>
-    @endif
+            <i class="fas fa-exclamation-circle"></i> <?php echo e($errors->first()); ?>
 
-    @if(session('success'))
-        <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
         </div>
-    @endif
+    <?php endif; ?>
+
+    <?php if(session('success')): ?>
+        <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+            <i class="fas fa-check-circle"></i> <?php echo e(session('success')); ?>
+
+        </div>
+    <?php endif; ?>
 
     <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB;">
-        <form action="{{ route($role . '.pembayaran.store') }}" method="POST" id="mainForm">
-            @csrf
+        <form action="<?php echo e(route($role . '.pembayaran.store')); ?>" method="POST" id="mainForm">
+            <?php echo csrf_field(); ?>
 
-            {{-- Tanggal --}}
+            
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px;">Tanggal <span style="color: red;">*</span></label>
-                <input type="date" name="tanggal" id="tanggal" required value="{{ date('Y-m-d') }}"
+                <input type="date" name="tanggal" id="tanggal" required value="<?php echo e(date('Y-m-d')); ?>"
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
             </div>
 
-            {{-- Nama Murid (Autocomplete) --}}
+            
             <div style="margin-bottom: 15px; position: relative;">
                 <label style="display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px;">Nama Murid <span style="color: red;">*</span></label>
                 <input type="text" id="searchMurid" name="search_murid" 
@@ -87,7 +89,7 @@
 
             <div id="infoStatusMurid" style="display: none;"></div>
 
-            {{-- Paket Awal (Pendaftaran) --}}
+            
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px;">Paket Awal (Pendaftaran)</label>
                 <input type="text" name="paket_awal_display" id="paket_awal_display" readonly 
@@ -95,26 +97,26 @@
                 <input type="hidden" name="paket_awal" id="paket_awal">
             </div>
 
-            {{-- Paket Belajar (Dinamis dari database) --}}
+            
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px;">Paket Belajar <span style="color: red;">*</span></label>
                 <select name="paket_selanjutnya" id="paket_selanjutnya" required 
                         style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                     <option value="">Pilih Paket</option>
-                    @foreach($pakets as $paket)
-                        <option value="{{ $paket->tingkat }}" data-harga="{{ $paket->harga }}">
-                            {{ $paket->tingkat }} - Rp {{ number_format($paket->harga, 0, ',', '.') }} / bulan
+                    <?php $__currentLoopData = $pakets; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $paket): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($paket->tingkat); ?>" data-harga="<?php echo e($paket->harga); ?>">
+                            <?php echo e($paket->tingkat); ?> - Rp <?php echo e(number_format($paket->harga, 0, ',', '.')); ?> / bulan
                         </option>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
             </div>
 
-            {{-- Info Harga --}}
+            
             <div id="infoHarga" style="margin-bottom: 15px; padding: 12px 15px; background: #E0E7FF; border-radius: 10px; display: none;">
                 <i class="fas fa-info-circle"></i> Harga: <strong id="hargaPaketValue">Rp 0</strong> / bulan
             </div>
 
-            {{-- Untuk Bulan (jika pembayaran bulanan) --}}
+            
             <div id="bulanGroup" style="margin-bottom: 15px; display: none;">
                 <label style="display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px;">Untuk Bulan</label>
                 <select name="bulan_dibayar" id="bulan_dibayar" style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
@@ -135,7 +137,7 @@
                 <small style="color: #9CA3AF;">Kosongkan jika ini pembayaran pendaftaran</small>
             </div>
 
-            {{-- Total Pembayaran --}}
+            
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px;">Total Pembayaran <span style="color: red;">*</span></label>
                 <input type="text" inputmode="numeric" name="total_pembayaran" id="total_pembayaran" placeholder="Masukkan Total Pembayaran" required 
@@ -144,17 +146,17 @@
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
             </div>
 
-            {{-- Preview Status --}}
+            
             <div id="previewStatus" style="margin-bottom: 15px; padding: 12px 15px; border-radius: 10px; display: none;"></div>
 
-            {{-- Keterangan --}}
+            
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px;">Keterangan</label>
                 <textarea name="keterangan" id="keterangan" rows="3" placeholder="Masukkan Keterangan" 
                           style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; resize: vertical;"></textarea>
             </div>
 
-            {{-- Tombol Aksi --}}
+            
             <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">
                 <button type="button" onclick="bukaModalBatal()" 
                         style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 16px; background: #FFFFFF; cursor: pointer;">
@@ -169,7 +171,7 @@
     </div>
 </div>
 
-{{-- MODAL KONFIRMASI BATAL --}}
+
 <div id="modalBatal" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -184,7 +186,7 @@
     </div>
 </div>
 
-{{-- MODAL PERINGATAN PERUBAHAN BELUM DISIMPAN --}}
+
 <div id="modalPindahHalaman" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -217,11 +219,11 @@
             document.getElementById('modalPindahHalaman').style.display = 'flex';
             document.getElementById('confirmPindahBtn').onclick = function() {
                 formChanged = false;
-                window.location.href = "{{ route($role . '.pembayaran') }}";
+                window.location.href = "<?php echo e(route($role . '.pembayaran')); ?>";
             };
         } else {
             document.getElementById('modalBatal').style.display = 'flex';
-            document.getElementById('confirmKeluarLink').href = "{{ route($role . '.pembayaran') }}";
+            document.getElementById('confirmKeluarLink').href = "<?php echo e(route($role . '.pembayaran')); ?>";
         }
     }
     
@@ -376,4 +378,5 @@
         document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
     }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/pembayaran/create-pembayaran.blade.php ENDPATH**/ ?>

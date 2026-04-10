@@ -18,6 +18,7 @@ class LaporanKeuangan extends Model
         'rincian',
         'jumlah',
         'nama_murid',
-        'bulan_periode'
+        'bulan_periode',
+        'id_murid'
     ];
 }

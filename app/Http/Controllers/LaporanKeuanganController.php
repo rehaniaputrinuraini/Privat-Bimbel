@@ -4,38 +4,64 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\LaporanKeuangan;
+use App\Models\HargaPaket;
+use App\Models\Murid;
+use Carbon\Carbon;
 
 class LaporanKeuanganController extends Controller
 {
     // Menampilkan semua data keuangan
     public function index(Request $request)
     {
-        $role = $request->route()->getPrefix() == '/superadmin' ? 'superadmin' : 'admin';
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
-        // Ambil data dari database sesuai kategori
-        $pemasukan = LaporanKeuangan::where('kategori', 'pemasukan')
-            ->orderBy('tanggal', 'desc')
-            ->get();
+        $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
         
-        $pengeluaran = LaporanKeuangan::where('kategori', 'pengeluaran')
-            ->orderBy('tanggal', 'desc')
-            ->get();
+        $queryPemasukan = LaporanKeuangan::where('kategori', 'pemasukan');
+        $queryPengeluaran = LaporanKeuangan::where('kategori', 'pengeluaran');
+        $queryPiutang = LaporanKeuangan::where('kategori', 'piutang');
+        $queryUangMuka = LaporanKeuangan::where('kategori', 'uang_muka');
         
-        $piutang = LaporanKeuangan::where('kategori', 'piutang')
-            ->orderBy('tanggal', 'desc')
-            ->get();
+        if ($request->filled('bulan')) {
+            $queryPemasukan->whereMonth('tanggal', $request->bulan);
+            $queryPengeluaran->whereMonth('tanggal', $request->bulan);
+            $queryPiutang->whereMonth('tanggal', $request->bulan);
+            $queryUangMuka->whereMonth('tanggal', $request->bulan);
+        }
         
-        $uang_muka = LaporanKeuangan::where('kategori', 'uang_muka')
-            ->orderBy('tanggal', 'desc')
-            ->get();
+        if ($request->filled('tahun')) {
+            $queryPemasukan->whereYear('tanggal', $request->tahun);
+            $queryPengeluaran->whereYear('tanggal', $request->tahun);
+            $queryPiutang->whereYear('tanggal', $request->tahun);
+            $queryUangMuka->whereYear('tanggal', $request->tahun);
+        }
         
-        // Hitung total
+        if ($request->filled('paket')) {
+            $queryPemasukan->where('rincian', 'like', '%' . $request->paket . '%');
+        }
+        
+        $pemasukan = $queryPemasukan->orderBy('tanggal', 'desc')->get();
+        $pengeluaran = $queryPengeluaran->orderBy('tanggal', 'desc')->get();
+        $piutang = $queryPiutang->orderBy('tanggal', 'desc')->get();
+        $uang_muka = $queryUangMuka->orderBy('tanggal', 'desc')->get();
+        
         $totalPemasukan = $pemasukan->sum('jumlah');
         $totalPengeluaran = $pengeluaran->sum('jumlah');
         $totalPiutang = $piutang->sum('jumlah');
         $totalUangMuka = $uang_muka->sum('jumlah');
         $totalPemasukanKas = $totalPemasukan + $totalPiutang + $totalUangMuka;
         $saldoKas = $totalPemasukan - $totalPengeluaran;
+        
+        $bulanList = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        
+        $tahunList = LaporanKeuangan::selectRaw('YEAR(tanggal) as tahun')
+            ->distinct()
+            ->orderBy('tahun', 'desc')
+            ->pluck('tahun');
         
         return view('dashboard.shared.laporan-keuangan.laporan-keuangan', [
             'role' => $role,
@@ -48,42 +74,72 @@ class LaporanKeuanganController extends Controller
             'totalPiutang' => $totalPiutang,
             'totalUangMuka' => $totalUangMuka,
             'totalPemasukanKas' => $totalPemasukanKas,
-            'saldoKas' => $saldoKas
+            'saldoKas' => $saldoKas,
+            'paketList' => $paketList,
+            'bulanList' => $bulanList,
+            'tahunList' => $tahunList,
+            'filterBulan' => $request->bulan,
+            'filterTahun' => $request->tahun,
+            'filterPaket' => $request->paket,
         ]);
     }
 
     // Form tambah data
     public function create(Request $request)
     {
-        $role = $request->route()->getPrefix() == '/superadmin' ? 'superadmin' : 'admin';
-        return view('dashboard.shared.laporan-keuangan.create-laporan-keuangan', ['role' => $role]);
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        
+        $muridList = Murid::orderBy('nama_lengkap_murid', 'asc')->get();
+        $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
+        
+        return view('dashboard.shared.laporan-keuangan.create-laporan-keuangan', [
+            'role' => $role,
+            'muridList' => $muridList,
+            'paketList' => $paketList,
+        ]);
     }
 
     // Simpan data
     public function store(Request $request)
     {
-        $request->validate([
+        // Validasi input
+        $validated = $request->validate([
             'tanggal' => 'required|date',
             'kategori' => 'required|in:pemasukan,pengeluaran,piutang,uang_muka',
             'rincian' => 'required|string|max:255',
             'jumlah' => 'required|numeric|min:0'
         ]);
 
-        // Bersihkan jumlah dari titik atau koma jika ada
+        // Bersihkan jumlah
         $jumlah = str_replace(['.', ','], '', $request->jumlah);
+        $jumlah = (float) $jumlah;
         
-        LaporanKeuangan::create([
+        // Siapkan data untuk disimpan
+        $data = [
             'tanggal' => $request->tanggal,
             'kategori' => $request->kategori,
             'rincian' => $request->rincian,
             'jumlah' => $jumlah,
             'nama_murid' => $request->nama_murid ?? null,
-            'bulan_periode' => $request->bulan_periode ?? null
-        ]);
-
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+            'bulan_periode' => $request->bulan_periode ?? null,
+        ];
         
-        return redirect()->route($role . '.laporan-keuangan')->with('success', 'Data berhasil ditambahkan');
+        // ========== TAMBAHKAN DEBUG UNTUK CEK ==========
+        // return back()->withErrors(['debug' => json_encode($data)]);
+        
+        try {
+            LaporanKeuangan::create($data);
+            
+            $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+            
+            return redirect()->route($role . '.laporan-keuangan')
+                ->with('success', 'Data berhasil ditambahkan');
+                
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
     }
 
     // Hapus data
@@ -96,5 +152,91 @@ class LaporanKeuanganController extends Controller
         $role = str_contains($referer, 'superadmin') ? 'superadmin' : 'admin';
         
         return redirect()->route($role . '.laporan-keuangan')->with('success', 'Data berhasil dihapus');
+    }
+    
+    // Laporan rekap per bulan
+    public function rekapBulanan(Request $request)
+    {
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        
+        $tahun = $request->tahun ?? Carbon::now()->year;
+        
+        $rekap = [];
+        for ($bulan = 1; $bulan <= 12; $bulan++) {
+            $pemasukan = LaporanKeuangan::where('kategori', 'pemasukan')
+                ->whereYear('tanggal', $tahun)
+                ->whereMonth('tanggal', $bulan)
+                ->sum('jumlah');
+            
+            $pengeluaran = LaporanKeuangan::where('kategori', 'pengeluaran')
+                ->whereYear('tanggal', $tahun)
+                ->whereMonth('tanggal', $bulan)
+                ->sum('jumlah');
+            
+            $rekap[$bulan] = [
+                'bulan' => Carbon::create()->month($bulan)->translatedFormat('F'),
+                'pemasukan' => $pemasukan,
+                'pengeluaran' => $pengeluaran,
+                'saldo' => $pemasukan - $pengeluaran
+            ];
+        }
+        
+        $tahunList = LaporanKeuangan::selectRaw('YEAR(tanggal) as tahun')
+            ->distinct()
+            ->orderBy('tahun', 'desc')
+            ->pluck('tahun');
+        
+        return view('dashboard.shared.laporan-keuangan.rekap-bulanan', [
+            'role' => $role,
+            'rekap' => $rekap,
+            'tahun' => $tahun,
+            'tahunList' => $tahunList,
+        ]);
+    }
+    
+    // Laporan rekap per murid
+    public function rekapPerMurid(Request $request)
+    {
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        
+        $query = LaporanKeuangan::whereIn('kategori', ['pemasukan', 'piutang', 'uang_muka'])
+            ->whereNotNull('nama_murid');
+        
+        if ($request->filled('murid_id')) {
+            $murid = Murid::find($request->murid_id);
+            if ($murid) {
+                $query->where('nama_murid', $murid->nama_lengkap_murid);
+            }
+        }
+        
+        if ($request->filled('tahun')) {
+            $query->whereYear('tanggal', $request->tahun);
+        }
+        
+        $laporanMurid = $query->orderBy('tanggal', 'desc')->get();
+        
+        $muridList = Murid::orderBy('nama_lengkap_murid', 'asc')->get();
+        $tahunList = LaporanKeuangan::selectRaw('YEAR(tanggal) as tahun')
+            ->distinct()
+            ->orderBy('tahun', 'desc')
+            ->pluck('tahun');
+        
+        $totalPerMurid = [];
+        foreach ($laporanMurid as $item) {
+            if (!isset($totalPerMurid[$item->nama_murid])) {
+                $totalPerMurid[$item->nama_murid] = 0;
+            }
+            $totalPerMurid[$item->nama_murid] += $item->jumlah;
+        }
+        
+        return view('dashboard.shared.laporan-keuangan.rekap-per-murid', [
+            'role' => $role,
+            'laporanMurid' => $laporanMurid,
+            'totalPerMurid' => $totalPerMurid,
+            'muridList' => $muridList,
+            'tahunList' => $tahunList,
+            'filterMurid' => $request->murid_id,
+            'filterTahun' => $request->tahun,
+        ]);
     }
 }
