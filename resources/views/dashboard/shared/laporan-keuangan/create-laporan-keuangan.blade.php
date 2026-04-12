@@ -6,7 +6,7 @@
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
     <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Input Pemasukan/Pengeluaran</h1>
 
-    <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+    <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);" data-aos="fade-up">
         <form action="{{ route($role . '.laporan-keuangan.store') }}" method="POST" id="mainForm">
             @csrf
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px;">
@@ -21,11 +21,9 @@
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Kategori <span style="color: red;">*</span></label>
                         <select name="kategori" id="select-kategori" onchange="updateLabel()" required 
                                 style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; color: #374151; cursor: pointer; font-size: 14px;">
-                            <option value="" disabled selected>Pilih (Pemasukan/Pengeluaran)</option>
+                            <option value="" disabled selected>Pilih Kategori</option>
                             <option value="pemasukan">Pemasukan</option>
                             <option value="pengeluaran">Pengeluaran</option>
-                            <option value="piutang">Piutang</option>
-                            <option value="uang_muka">Uang Dimuka</option>
                         </select>
                         @error('kategori') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
@@ -48,18 +46,6 @@
                 </div>
             </div>
 
-            <div id="field-nama-murid" style="display: none; margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Murid</label>
-                <input type="text" name="nama_murid" placeholder="Masukkan Nama Murid" 
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-            </div>
-
-            <div id="field-bulan-periode" style="display: none; margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Bulan/Periode</label>
-                <input type="text" name="bulan_periode" placeholder="Contoh: Januari 2026" 
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-            </div>
-
             <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">
                 <button type="button" onclick="bukaModalBatal()" 
                         style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 16px; background: #FFFFFF; cursor: pointer;">Keluar</button>
@@ -70,8 +56,9 @@
     </div>
 </div>
 
+{{-- MODAL KONFIRMASI BATAL --}}
 <div id="modalBatal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
-    <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center;">
+    <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
         <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Batalkan?</h2>
         <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Data yang Anda masukkan tidak akan disimpan. Yakin ingin keluar?</p>
@@ -84,8 +71,9 @@
     </div>
 </div>
 
+{{-- MODAL PERINGATAN PERUBAHAN BELUM DISIMPAN --}}
 <div id="modalPindahHalaman" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
-    <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center;">
+    <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
         <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Perubahan Belum Disimpan</h2>
         <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Ada data yang belum disimpan. Yakin ingin meninggalkan halaman ini?</p>
@@ -97,6 +85,7 @@
 </div>
 
 <script>
+    // ========== UNSAVED CHANGES WARNING ==========
     let formChanged = false;
     let pendingUrl = null;
     const form = document.getElementById('mainForm');
@@ -146,7 +135,6 @@
                         document.getElementById('confirmPindahBtn').onclick = function() {
                             formChanged = false;
                             document.getElementById('modalPindahHalaman').style.display = 'none';
-                            bukaModalLogout();
                         };
                     }
                 }
@@ -158,29 +146,13 @@
         const kategori = document.getElementById('select-kategori').value;
         const label = document.getElementById('label-rincian');
         const input = document.getElementById('input-rincian');
-        const fieldNama = document.getElementById('field-nama-murid');
-        const fieldPeriode = document.getElementById('field-bulan-periode');
         
         if (kategori === 'pengeluaran') {
             label.innerText = 'Rincian Pengeluaran';
             input.placeholder = 'Masukkan Rincian Pengeluaran';
-            fieldNama.style.display = 'none';
-            fieldPeriode.style.display = 'none';
-        } else if (kategori === 'piutang') {
-            label.innerText = 'Rincian Piutang';
-            input.placeholder = 'Masukkan Rincian Piutang';
-            fieldNama.style.display = 'block';
-            fieldPeriode.style.display = 'block';
-        } else if (kategori === 'uang_muka') {
-            label.innerText = 'Rincian Uang Muka';
-            input.placeholder = 'Masukkan Rincian Uang Muka';
-            fieldNama.style.display = 'block';
-            fieldPeriode.style.display = 'block';
         } else {
             label.innerText = 'Rincian Pemasukan';
             input.placeholder = 'Masukkan Rincian Pemasukan';
-            fieldNama.style.display = 'none';
-            fieldPeriode.style.display = 'none';
         }
     }
 </script>
