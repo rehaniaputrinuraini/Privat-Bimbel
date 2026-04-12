@@ -1,4 +1,4 @@
-@extends('layouts.app')
+<!-- @extends('layouts.app')
 
 @section('title', 'Edit Harga Paket')
 
@@ -148,4 +148,4 @@
         });
     });
 </script>
-@endsection
+@endsection -->

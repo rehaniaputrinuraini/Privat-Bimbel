@@ -24,11 +24,11 @@
 
     <?php
         $statsList = [
-            ['title' => 'Total Murid',  'val' => number_format($stats['total_murid'], 0, ',', '.'),         'bg' => '#3A3AA7', 'icon' => 'icon_orang.png',       'size' => '30px'],
-            ['title' => 'Total Tentor', 'val' => number_format($stats['total_tentor'], 0, ',', '.'),        'bg' => '#BE7E5E', 'icon' => 'icon_orang.png',       'size' => '30px'],
-            ['title' => 'Pemasukan',    'val' => 'Rp ' . number_format($stats['pemasukan'], 0, ',', '.'),    'bg' => '#0CCC0C', 'icon' => 'icon_pemasukan.png',   'size' => '25px'],
-            ['title' => 'Pengeluaran',  'val' => 'Rp ' . number_format($stats['pengeluaran'], 0, ',', '.'),  'bg' => '#F14D4D', 'icon' => 'icon_pengeluaran.png', 'size' => '25px'],
-            ['title' => 'Laba Bersih',  'val' => 'Rp ' . number_format($stats['laba_bersih'], 0, ',', '.'),    'bg' => '#E7C255', 'icon' => 'icon_lababersih.png',  'size' => '25px'],
+            ['title' => 'Total Murid',  'val' => number_format($stats['total_murid'], 0, ',', '.'),         'bg' => '#3A3AA7', 'icon' => 'icon_orang.png',       'size' => '35px'],
+            ['title' => 'Total Tentor', 'val' => number_format($stats['total_tentor'], 0, ',', '.'),        'bg' => '#BE7E5E', 'icon' => 'icon_orang.png',       'size' => '35px'],
+            ['title' => 'Pemasukan',    'val' => 'Rp ' . number_format($stats['pemasukan'], 0, ',', '.'),    'bg' => '#0CCC0C', 'icon' => 'icon_pemasukan.png',   'size' => '30px'],
+            ['title' => 'Pengeluaran',  'val' => 'Rp ' . number_format($stats['pengeluaran'], 0, ',', '.'),  'bg' => '#F14D4D', 'icon' => 'icon_pengeluaran.png', 'size' => '30px'],
+            ['title' => 'Laba Bersih',  'val' => 'Rp ' . number_format($stats['laba_bersih'], 0, ',', '.'),    'bg' => '#E7C255', 'icon' => 'icon_lababersih.png',  'size' => '40px'],
         ];
 
         $role = Auth::user()->peran ?? 'admin';

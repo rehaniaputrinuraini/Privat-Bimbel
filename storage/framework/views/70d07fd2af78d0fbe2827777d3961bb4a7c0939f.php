@@ -5,7 +5,6 @@
 <?php $__env->startSection('content'); ?>
 <div style="width: 100%;">
     
-    
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
             <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?>
@@ -17,7 +16,6 @@
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Lihat Riwayat Presensi Semua Tentor</p>
     </div>
 
-    
     <?php if(session('success')): ?>
         <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
             <i class="fas fa-check-circle"></i> <?php echo e(session('success')); ?>
@@ -31,18 +29,15 @@
         </div>
     <?php endif; ?>
 
-    
     <form method="GET" action="<?php echo e(route($role . '.kelola-presensi')); ?>" id="filterForm">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
             <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
-                
                 <div style="position: relative; width: 300px;">
                     <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
                     <input type="text" name="search" placeholder="Cari Nama Tentor..." value="<?php echo e($search ?? ''); ?>"
                            style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
                 </div>
 
-                
                 <select name="bulan" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 140px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
                     <option value="">--- Pilih Bulan ---</option>
                     <option value="1" <?php echo e(($bulan ?? '') == '1' ? 'selected' : ''); ?>>Januari</option>
@@ -59,7 +54,6 @@
                     <option value="12" <?php echo e(($bulan ?? '') == '12' ? 'selected' : ''); ?>>Desember</option>
                 </select>
 
-                
                 <select name="tahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 100px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
                     <option value="">--- Tahun ---</option>
                     <?php $currentYear = date('Y'); ?>
@@ -68,7 +62,6 @@
                     <?php endfor; ?>
                 </select>
                 
-                
                 <?php if(($bulan ?? '') || ($tahun ?? '') || ($search ?? '')): ?>
                     <a href="<?php echo e(route($role . '.kelola-presensi')); ?>" style="padding: 10px 15px; border-radius: 12px; background: #F3F4F6; color: #374151; text-decoration: none; font-size: 13px;">Reset</a>
                 <?php endif; ?>
@@ -76,7 +69,6 @@
         </div>
     </form>
 
-    
     <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
@@ -88,11 +80,13 @@
                         <th style="padding: 15px; font-weight: 700;">Jam Masuk</th>
                         <th style="padding: 15px; font-weight: 700;">Jam Keluar</th>
                         <th style="padding: 15px; font-weight: 700;">Kelas</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Status</th>
-                        <th style="padding: 15px; font-weight: 700;">Honor</th>
-                        <th style="padding: 15px; font-weight: 700;">Makan</th>
+                        <th style="padding: 15px; font-weight: 700;">Jenjang</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: center;">Status Murid</th>
+                        <th style="padding: 15px; font-weight: 700;">Total Honor</th>
+                        <th style="padding: 15px; font-weight: 700;">Uang Makan</th>
                         <th style="padding: 15px; font-weight: 700;">Transport</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Bukti</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: center;">Keterangan</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: center;">Bukti Foto</th>
                         <th style="padding: 15px; font-weight: 700; text-align: center;">Verifikasi</th>
                         <th style="padding: 15px; font-weight: 700; text-align: center;">Aksi</th>
                     </tr>
@@ -106,9 +100,23 @@
                             : 'background: #FEE2E2; color: #EF4444;';
                         $jamMasuk = $item->jam_masuk ? \Carbon\Carbon::parse($item->jam_masuk)->format('H:i') : '-';
                         $jamKeluar = $item->jam_keluar ? \Carbon\Carbon::parse($item->jam_keluar)->format('H:i') : '-';
-                        $honor = $item->total_honor ? 'Rp ' . number_format($item->total_honor, 0, ',', '.') : 'Rp 0';
-                        $uangMakan = $item->uang_makan ? 'Rp ' . number_format($item->uang_makan, 0, ',', '.') : 'Rp 0';
-                        $transport = $item->transport ? 'Rp ' . number_format($item->transport, 0, ',', '.') : 'Rp 0';
+                        
+                        // Hitung honor berdasarkan jenjang dan jam mengajar
+                        $honorPerJam = 0;
+                        switch ($item->jenjang) {
+                            case 'SD':
+                                $honorPerJam = $item->tentor->hr_sd ?? 0;
+                                break;
+                            case 'SMP':
+                                $honorPerJam = $item->tentor->hr_smp ?? 0;
+                                break;
+                            case 'SMA':
+                                $honorPerJam = $item->tentor->hr_sma ?? 0;
+                                break;
+                        }
+                        $totalHonorItem = $honorPerJam * ($item->jam_mengajar ?? 0);
+                        $uangMakan = $item->tentor->uang_makan ?? 0;
+                        $transport = $item->tentor->uang_transport ?? 0;
                     ?>
                     <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                         <td style="padding: 15px;"><?php echo e($presensi->firstItem() + $index); ?></td>
@@ -117,15 +125,17 @@
                         <td style="padding: 15px;"><?php echo e($jamMasuk); ?></td>
                         <td style="padding: 15px;"><?php echo e($jamKeluar); ?></td>
                         <td style="padding: 15px;"><?php echo e($item->kelas ?? '-'); ?></td>
+                        <td style="padding: 15px;"><?php echo e($item->jenjang ?? '-'); ?></td>
                         <td style="padding: 15px; text-align: center;">
                             <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; <?php echo e($statusClass); ?>">
                                 <?php echo e($statusText); ?>
 
                             </span>
                         </td>
-                        <td style="padding: 15px;"><?php echo e($honor); ?></td>
-                        <td style="padding: 15px;"><?php echo e($uangMakan); ?></td>
-                        <td style="padding: 15px;"><?php echo e($transport); ?></td>
+                        <td style="padding: 15px;">Rp <?php echo e(number_format($totalHonorItem, 0, ',', '.')); ?></td>
+                        <td style="padding: 15px;">Rp <?php echo e(number_format($uangMakan, 0, ',', '.')); ?></td>
+                        <td style="padding: 15px;">Rp <?php echo e(number_format($transport, 0, ',', '.')); ?></td>
+                        <td style="padding: 15px;"><?php echo e($item->keterangan ?? '-'); ?></td>
                         <td style="padding: 15px; text-align: center;">
                             <?php if($item->bukti_foto): ?>
                                 <a href="<?php echo e(route($role . '.kelola-presensi.download', $item->id_presensi)); ?>" 
@@ -164,7 +174,7 @@
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
-                        <td colspan="13" style="padding: 40px; text-align: center; color: #9CA3AF;">
+                        <td colspan="15" style="padding: 40px; text-align: center; color: #9CA3AF;">
                             <i class="fas fa-calendar-alt" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
                             Belum ada data presensi
                         </td>
@@ -175,13 +185,15 @@
         </div>
     </div>
     
-    
     <?php if($presensi->count() > 0): ?>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
             <span style="color: #374151; font-size: 13px;">Menampilkan <?php echo e($presensi->firstItem()); ?> - <?php echo e($presensi->lastItem()); ?> dari <?php echo e($presensi->total()); ?> data</span>
-        </div>
+            <span style="background: #4D0B87; color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                Total Honor: Rp <?php echo e(number_format($totalHonor ?? 0, 0, ',', '.')); ?>
 
+            </span>
+        </div>
         <div>
             <?php echo e($presensi->appends(request()->query())->links('pagination::simple-bootstrap-4')); ?>
 
@@ -190,7 +202,6 @@
     <?php endif; ?>
 
 </div>
-
 
 <div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
@@ -209,7 +220,6 @@
 </div>
 
 <script>
-    // Submit ketika search menekan enter
     document.querySelector('input[name="search"]')?.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -217,7 +227,6 @@
         }
     });
 
-    // Modal Hapus (sama persis dengan harga-paket)
     function bukaModalHapus(id, nama, tanggal) {
         let form = document.getElementById('formHapus');
         let url = "<?php echo e(route('superadmin.kelola-presensi.destroy', ':id')); ?>";
@@ -234,7 +243,6 @@
         document.getElementById('modalHapus').style.display = 'none';
     }
 
-    // Live search (filter tabel)
     document.getElementById('searchInput')?.addEventListener('keyup', function() {
         let searchValue = this.value.toLowerCase();
         let rows = document.querySelectorAll('#tableBody tr');
@@ -252,4 +260,4 @@
     });
 </script>
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/riwayat presensi/riwayat-presensi.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\privat-bimbel\resources\views/dashboard/shared/riwayat presensi/riwayat-presensi.blade.php ENDPATH**/ ?>

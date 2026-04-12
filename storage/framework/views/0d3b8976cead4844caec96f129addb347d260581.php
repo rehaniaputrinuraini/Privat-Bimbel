@@ -1,21 +1,14 @@
 
 
-
-
 <?php $__env->startPush('styles'); ?>
 <style>
-    /* ── 1. FIX LAYOUT (Tanpa Padding Tambahan) ── */
     .dashboard-wrapper {
         width: 100%;
-        /* Mengandalkan .content-wrapper bawaan (25px), 
-           tanpa padding kiri tambahan agar lurus dengan sidebar */
     }
 
-    /* ── 2. HEADER STYLE (Sesuai Hirarki Visual) ── */
     .dashboard-header { 
         margin-bottom: 25px; 
     }
-    /* Baris 1: Bulan & Tahun (13px) */
     .header-meta { 
         font-size: 13px; 
         color: #6B7280; 
@@ -23,7 +16,6 @@
         font-weight: 400;
         display: block;
     }
-    /* Baris 2: Judul Halaman (26px) */
     .header-title { 
         font-size: 26px; 
         font-weight: 700; 
@@ -32,7 +24,6 @@
         letter-spacing: -0.5px;
         line-height: 1.2;
     }
-    /* Baris 3: Keterangan (14px) */
     .header-desc { 
         font-size: 14px; 
         color: #6B7280; 
@@ -40,7 +31,6 @@
         display: block;
     }
 
-    /* ── 3. STAT CARDS (Style Kotak 160px) ── */
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -73,8 +63,24 @@
         color: white;
         font-size: 22px;
     }
+    .stat-value {
+        font-size: 32px;
+        font-weight: 800;
+        margin: 0;
+        color: #111827;
+    }
+    .stat-label {
+        font-size: 12px;
+        color: #6B7280;
+        margin: 5px 0 0 0;
+        text-align: center;
+    }
+    .stat-sub {
+        font-size: 11px;
+        color: #9CA3AF;
+        margin-top: 4px;
+    }
 
-    /* ── 4. STATUS INDICATOR & ALERT ── */
     .status-panel {
         background: white;
         border-radius: 20px;
@@ -84,9 +90,22 @@
         margin-bottom: 20px;
         display: flex;
         gap: 30px;
+        justify-content: center;
     }
-    .indicator { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #4B5563; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .indicator { 
+        display: flex; 
+        align-items: center; 
+        gap: 8px; 
+        font-size: 13px; 
+        font-weight: 600; 
+        transition: all 0.3s ease;
+    }
+    .dot { 
+        width: 10px; 
+        height: 10px; 
+        border-radius: 50%; 
+        transition: all 0.3s ease;
+    }
 
     .alert-banner {
         display: flex;
@@ -96,6 +115,32 @@
         color: white;
         font-size: 14px;
         font-weight: 700;
+        transition: all 0.3s ease;
+    }
+    
+    .timer-container {
+        background: #F3E8FF;
+        border-radius: 15px;
+        padding: 15px 20px;
+        margin-top: 20px;
+        text-align: center;
+    }
+    .timer-label {
+        font-size: 12px;
+        color: #4D0B87;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    .timer-value {
+        font-size: 28px;
+        font-weight: 800;
+        color: #4D0B87;
+        font-family: monospace;
+    }
+    .timer-note {
+        font-size: 10px;
+        color: #6B7280;
+        margin-top: 5px;
     }
 </style>
 <?php $__env->stopPush(); ?>
@@ -116,44 +161,175 @@
             <div class="icon-wrap" style="background: #4D0B87;">
                 <i class="fas fa-calendar-check"></i>
             </div>
-            <h3 style="font-size: 32px; font-weight: 800; margin: 0;"><?php echo e($total_hadir ?? 0); ?> Kali</h3>
-            <p style="font-size: 12px; color: #6B7280; margin: 5px 0 0 0;">TOTAL HADIR BULAN INI</p>
+            <div class="stat-value"><?php echo e($total_hadir ?? 0); ?> Kali</div>
+            <div class="stat-label">TOTAL HADIR BULAN INI</div>
         </div>
 
         <div class="stat-box">
             <div class="icon-wrap" style="background: #F59E0B;">
                 <i class="fas fa-clock"></i>
             </div>
-            <h3 style="font-size: 32px; font-weight: 800; margin: 0;"><?php echo e($total_jam ?? 0); ?> Jam</h3>
-            <p style="font-size: 12px; color: #6B7280; margin: 5px 0 0 0;">TOTAL JAM MENGAJAR</p>
+            <div class="stat-value" id="totalJamDisplay"><?php echo e($total_jam_formatted ?? '0 Jam 0 Menit'); ?></div>
+            <div class="stat-label">TOTAL JAM MENGAJAR</div>
+            <div class="stat-sub">(Akumulasi semua sesi)</div>
         </div>
     </div>
 
     
     <div class="status-panel">
-        <div class="indicator"><div class="dot" style="background: #EF4444;"></div> Belum Presensi</div>
-        <div class="indicator"><div class="dot" style="background: #F59E0B;"></div> Sedang Mengajar</div>
-        <div class="indicator"><div class="dot" style="background: #10B981;"></div> Selesai Sesi</div>
+        <div class="indicator" id="indicatorBelum">
+            <div class="dot" style="background: <?php echo e($status_hari_ini == 'belum' ? '#EF4444' : '#D1D5DB'); ?>;"></div>
+            <span style="color: <?php echo e($status_hari_ini == 'belum' ? '#EF4444' : '#9CA3AF'); ?>;">Belum Presensi</span>
+        </div>
+        <div class="indicator" id="indicatorSedang">
+            <div class="dot" style="background: <?php echo e($status_hari_ini == 'sedang' ? '#F59E0B' : '#D1D5DB'); ?>;"></div>
+            <span style="color: <?php echo e($status_hari_ini == 'sedang' ? '#F59E0B' : '#9CA3AF'); ?>;">Sedang Mengajar</span>
+        </div>
+        <div class="indicator" id="indicatorSelesai">
+            <div class="dot" style="background: <?php echo e($status_hari_ini == 'selesai' ? '#10B981' : '#D1D5DB'); ?>;"></div>
+            <span style="color: <?php echo e($status_hari_ini == 'selesai' ? '#10B981' : '#9CA3AF'); ?>;">Selesai Sesi</span>
+        </div>
     </div>
 
     
     <?php if($status_hari_ini == 'belum'): ?>
-    <div class="alert-banner" style="background: #EF4444;">
+    <div class="alert-banner" style="background: #EF4444;" id="alertBanner">
         <i class="fas fa-exclamation-triangle" style="margin-right: 12px; font-size: 18px;"></i>
         Silakan lakukan presensi masuk terlebih dahulu untuk memulai sesi mengajar hari ini.
     </div>
     <?php elseif($status_hari_ini == 'sedang'): ?>
-    <div class="alert-banner" style="background: #F59E0B;">
+    <div class="alert-banner" style="background: #F59E0B;" id="alertBanner">
         <i class="fas fa-chalkboard-teacher" style="margin-right: 12px; font-size: 18px;"></i>
-        Anda sedang dalam sesi mengajar. Jangan lupa verifikasi kehadiran setelah selesai!
+        Anda sedang dalam sesi mengajar. Jangan lupa isi laporan dan presensi keluar setelah selesai!
+    </div>
+    
+    
+    <div class="timer-container" id="timerContainer">
+        <div class="timer-label">
+            <i class="fas fa-hourglass-half"></i> Durasi Mengajar Hari Ini
+        </div>
+        <div class="timer-value" id="realtimeTimer">
+            <?php echo e($durasi_berjalan ?? '0 jam 0 menit'); ?>
+
+        </div>
+        <div class="timer-note">
+            Mulai mengajar pada: <?php echo e($jam_mulai ? $jam_mulai->format('H:i:s') : '-'); ?>
+
+        </div>
     </div>
     <?php else: ?>
-    <div class="alert-banner" style="background: #10B981;">
+    <div class="alert-banner" style="background: #10B981;" id="alertBanner">
         <i class="fas fa-check-circle" style="margin-right: 12px; font-size: 18px;"></i>
         Sesi mengajar hari ini telah selesai. Terima kasih!
     </div>
     <?php endif; ?>
 
 </div>
+
+<?php if($status_hari_ini == 'sedang' && $jam_mulai): ?>
+<script>
+    // Timer realtime untuk menghitung durasi mengajar
+    let startTime = new Date('<?php echo e($jam_mulai->format('Y-m-d H:i:s')); ?>');
+    let totalMenitSebelumnya = <?php echo e($total_menit ?? 0); ?>;
+    let timerInterval;
+    
+    function updateTimer() {
+        let now = new Date();
+        let diffMs = now - startTime;
+        let diffMenit = Math.floor(diffMs / (1000 * 60));
+        let diffJam = Math.floor(diffMenit / 60);
+        let diffMenitSisa = diffMenit % 60;
+        
+        let timerText = diffJam + ' jam ' + diffMenitSisa + ' menit';
+        let timerElement = document.getElementById('realtimeTimer');
+        if (timerElement) {
+            timerElement.innerHTML = timerText;
+        }
+        
+        // Update total jam mengajar (akumulasi)
+        let totalMenitBaru = totalMenitSebelumnya + diffMenit;
+        let totalJamBaru = Math.floor(totalMenitBaru / 60);
+        let totalMenitSisaBaru = totalMenitBaru % 60;
+        let totalDisplay = totalJamBaru + ' Jam ' + totalMenitSisaBaru + ' Menit';
+        let totalDisplayElement = document.getElementById('totalJamDisplay');
+        if (totalDisplayElement) {
+            totalDisplayElement.innerHTML = totalDisplay;
+        }
+    }
+    
+    // Update timer setiap detik
+    timerInterval = setInterval(updateTimer, 1000);
+    updateTimer();
+    
+    // Hentikan timer saat halaman ditutup
+    window.addEventListener('beforeunload', function() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+        }
+    });
+</script>
+<?php endif; ?>
+
+
+<script>
+    // Cek status setiap 10 detik untuk update indicator dan banner
+    let statusInterval = setInterval(function() {
+        fetch('<?php echo e(route("tentor.presensi.cek-status")); ?>')
+            .then(response => response.json())
+            .then(data => {
+                let newStatus = 'belum';
+                if (data.has_laporan && data.has_presensi_masuk) {
+                    newStatus = 'sedang';
+                } else if (data.has_presensi_masuk && !data.has_laporan) {
+                    newStatus = 'sedang';
+                } else if (!data.has_presensi_masuk) {
+                    newStatus = 'belum';
+                }
+                
+                if (data.data && data.data.jam_keluar) {
+                    newStatus = 'selesai';
+                }
+                
+                updateIndicators(newStatus);
+                
+                if (newStatus === 'selesai' && '<?php echo e($status_hari_ini); ?>' !== 'selesai') {
+                    location.reload();
+                }
+            })
+            .catch(error => console.log('Error cek status:', error));
+    }, 10000);
+    
+    function updateIndicators(status) {
+        const belumDot = document.querySelector('#indicatorBelum .dot');
+        const belumText = document.querySelector('#indicatorBelum span');
+        if (status === 'belum') {
+            belumDot.style.background = '#EF4444';
+            belumText.style.color = '#EF4444';
+        } else {
+            belumDot.style.background = '#D1D5DB';
+            belumText.style.color = '#9CA3AF';
+        }
+        
+        const sedangDot = document.querySelector('#indicatorSedang .dot');
+        const sedangText = document.querySelector('#indicatorSedang span');
+        if (status === 'sedang') {
+            sedangDot.style.background = '#F59E0B';
+            sedangText.style.color = '#F59E0B';
+        } else {
+            sedangDot.style.background = '#D1D5DB';
+            sedangText.style.color = '#9CA3AF';
+        }
+        
+        const selesaiDot = document.querySelector('#indicatorSelesai .dot');
+        const selesaiText = document.querySelector('#indicatorSelesai span');
+        if (status === 'selesai') {
+            selesaiDot.style.background = '#10B981';
+            selesaiText.style.color = '#10B981';
+        } else {
+            selesaiDot.style.background = '#D1D5DB';
+            selesaiText.style.color = '#9CA3AF';
+        }
+    }
+</script>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\privat-bimbel\resources\views/dashboard/tentor/index.blade.php ENDPATH**/ ?>

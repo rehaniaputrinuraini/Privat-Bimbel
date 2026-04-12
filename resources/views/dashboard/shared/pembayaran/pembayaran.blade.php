@@ -25,6 +25,7 @@
         border-bottom-color: #4D0B87 !important;
         color: #4D0B87 !important;
     }
+    [x-cloak] { display: none !important; }
 </style>
 @endpush
 
@@ -59,7 +60,7 @@
         </div>
     </div>
 
-    {{-- TAB TAGIHAN --}}
+    {{-- ==================== TAB TAGIHAN ==================== --}}
     <div x-show="tab === 'tagihan'" x-cloak>
         <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 20px;">
             <div style="position: relative; margin-bottom: 12px;">
@@ -75,15 +76,15 @@
                     @endforeach
                 </select>
                 <select id="filterPembayaran" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB;">
-                    <option value="">Status Pembayaran</option>
-                    <option value="Lunas">Lunas (Sudah Bayar Pendaftaran)</option>
-                    <option value="Belum">Belum (Belum Bayar Pendaftaran)</option>
+                    <option value="">Status Pembayaran Bulan Ini</option>
+                    <option value="Lunas">Lunas</option>
+                    <option value="Belum">Belum</option>
                 </select>
                 <select id="filterTagihan" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB;">
-                    <option value="">Status Tagihan Bulanan</option>
+                    <option value="">Status Tagihan</option>
                     <option value="Lunas">Lunas</option>
-                    <option value="Uang Muka">Uang Muka</option>
                     <option value="Tunggak">Tunggak</option>
+                    <option value="Uang Muka">Uang Muka</option>
                 </select>
             </div>
         </div>
@@ -96,6 +97,7 @@
                         <th style="padding: 15px;">Nama Murid</th>
                         <th style="padding: 15px;">Kelas</th>
                         <th style="padding: 15px;">Status Paket</th>
+                        <th style="padding: 15px; text-align: center;">Status Pendaftaran</th>
                         <th style="padding: 15px; text-align: center;">Status Pembayaran</th>
                         <th style="padding: 15px; text-align: center;">Status Tagihan</th>
                         <th style="padding: 15px; text-align: center;">Tagihan Bulan</th>
@@ -110,29 +112,47 @@
                         <td style="padding: 15px;">{{ $t->nama_murid }}</td>
                         <td style="padding: 15px;">{{ $t->kelas }}</td>
                         <td style="padding: 15px;">{{ $t->paket }}</td>
+                        
+                        {{-- Status Pendaftaran --}}
                         <td style="padding: 15px; text-align: center;">
-                            @if($t->status_pembayaran == 'Lunas')
+                            @if($t->status_pendaftaran == 'Lunas')
                                 <span style="padding: 5px 12px; border-radius: 20px; background: #E1F7E3; color: #0E7490;">Lunas</span>
                             @else
                                 <span style="padding: 5px 12px; border-radius: 20px; background: #FEE2E2; color: #EF4444;">Belum</span>
                             @endif
                         </td>
+                        
+                        {{-- Status Pembayaran Bulan Ini --}}
+                        <td style="padding: 15px; text-align: center;">
+                            @if($t->status_pembayaran == 'Lunas')
+                                <span style="padding: 5px 12px; border-radius: 20px; background: #E1F7E3; color: #0E7490;">Lunas</span>
+                            @elseif($t->status_pembayaran == 'Belum')
+                                <span style="padding: 5px 12px; border-radius: 20px; background: #FEE2E2; color: #EF4444;">Belum</span>
+                            @else
+                                <span style="padding: 5px 12px; border-radius: 20px; background: #F3F4F6; color: #6B7280;">-</span>
+                            @endif
+                        </td>
+                        
+                        {{-- Status Tagihan --}}
                         <td style="padding: 15px; text-align: center;">
                             @if($t->status_tagihan == 'Lunas')
                                 <span style="padding: 5px 12px; border-radius: 20px; background: #E1F7E3; color: #0E7490;">Lunas</span>
-                            @elseif(str_contains($t->status_tagihan, 'Tunggak'))
-                                <span style="padding: 5px 12px; border-radius: 20px; background: #FEF3C7; color: #92400E;">{{ $t->status_tagihan }}</span>
+                            @elseif($t->status_tagihan == 'Tunggak')
+                                <span style="padding: 5px 12px; border-radius: 20px; background: #FEF3C7; color: #92400E;">Tunggak</span>
+                            @elseif($t->status_tagihan == 'Uang Muka')
+                                <span style="padding: 5px 12px; border-radius: 20px; background: #E0E7FF; color: #4338CA;">Uang Muka</span>
                             @else
-                                <span style="padding: 5px 12px; border-radius: 20px; background: #E0E7FF; color: #4338CA;">{{ $t->status_tagihan }}</span>
+                                <span style="padding: 5px 12px; border-radius: 20px; background: #F3F4F6; color: #6B7280;">-</span>
                             @endif
                         </td>
+                        
                         <td style="padding: 15px; text-align: center;">{{ $t->tagihan_bulan }}</td>
                         <td style="padding: 15px; text-align: center; {{ $t->total_piutang != '-' ? 'font-weight:700;color:#EF4444;' : '' }}">{{ $t->total_piutang }}</td>
                         <td style="padding: 15px; text-align: center;">{{ $t->uang_muka }}</td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="9" style="padding: 40px; text-align: center;">Belum ada data tagihan</td>
+                        <td colspan="10" style="padding: 40px; text-align: center; color: #9CA3AF;">Belum ada data tagihan</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -140,7 +160,7 @@
         </div>
     </div>
 
-    {{-- TAB RIWAYAT --}}
+    {{-- ==================== TAB RIWAYAT ==================== --}}
     <div x-show="tab === 'riwayat'" x-cloak>
         <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 20px;">
             <div style="position: relative; margin-bottom: 12px;">
@@ -204,7 +224,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" style="padding: 40px; text-align: center;">Belum ada riwayat pembayaran</td>
+                        <td colspan="8" style="padding: 40px; text-align: center; color: #9CA3AF;">Belum ada riwayat pembayaran</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -226,18 +246,18 @@
         
         const rows = document.querySelectorAll('#tagihanTableBody tr');
         rows.forEach(row => {
-            if (!row.cells || row.cells.length < 9) return;
+            if (!row.cells || row.cells.length < 10) return;
             const nama = row.cells[1]?.innerText.toLowerCase() || '';
             const paket = row.cells[3]?.innerText || '';
-            const statusPembayaran = row.cells[4]?.innerText.trim() || '';
-            const statusTagihan = row.cells[5]?.innerText.trim() || '';
+            const statusPembayaran = row.cells[5]?.innerText.trim() || '';
+            const statusTagihan = row.cells[6]?.innerText.trim() || '';
             
             let show = true;
             if (search && !nama.includes(search)) show = false;
             if (filterPaket && paket !== filterPaket) show = false;
             if (filterPembayaran && statusPembayaran !== filterPembayaran) show = false;
             if (filterTagihanStatus) {
-                if (filterTagihanStatus === 'Tunggak' && !statusTagihan.includes('Tunggak')) show = false;
+                if (filterTagihanStatus === 'Tunggak' && statusTagihan !== 'Tunggak') show = false;
                 else if (filterTagihanStatus === 'Uang Muka' && statusTagihan !== 'Uang Muka') show = false;
                 else if (filterTagihanStatus === 'Lunas' && statusTagihan !== 'Lunas') show = false;
             }

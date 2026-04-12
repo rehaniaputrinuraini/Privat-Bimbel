@@ -4,7 +4,6 @@
 
 @section('content')
 <style>
-    /* Layout */
     .presensi-flex { 
         display: flex; 
         gap: 20px; 
@@ -12,7 +11,6 @@
         flex-wrap: wrap;
     }
     
-    /* Card Style */
     .presensi-card { 
         background: #fff; 
         border-radius: 20px; 
@@ -35,7 +33,6 @@
         margin: 5px 0 20px 0; 
     }
 
-    /* Buttons */
     .button-group-presensi { 
         display: flex; 
         gap: 12px; 
@@ -69,7 +66,6 @@
         cursor: not-allowed; 
     }
 
-    /* Form Elements */
     .form-group { margin-bottom: 18px; }
     .form-group label { 
         display: block; 
@@ -203,7 +199,6 @@
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
     <div style="width: 100%;">
 
-        {{-- ── HEADER HALAMAN ── --}}
         <div style="margin-bottom: 25px;">
             <p style="color: #6B7280; font-size: 13px; margin: 0 0 4px 0;">
                 {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
@@ -214,7 +209,6 @@
             <p style="color: #6B7280; font-size: 14px; margin: 4px 0 0 0;">Silakan kelola kehadiran sesi mengajar Anda di sini.</p>
         </div>
 
-        {{-- ALERT --}}
         <div id="alertSuccess" class="alert-success">
             <i class="fas fa-check-circle"></i> <span id="successMessage"></span>
         </div>
@@ -222,16 +216,13 @@
             <i class="fas fa-exclamation-circle"></i> <span id="errorMessage"></span>
         </div>
 
-        {{-- TAMPILAN ERROR DARI SERVER --}}
         @if(isset($error))
             <div style="background: #FEE2E2; color: #EF4444; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
                 <i class="fas fa-exclamation-circle"></i> {{ $error }}
             </div>
         @endif
 
-        {{-- ── KONTEN PRESENSI ── --}}
         <div class="presensi-flex">
-            {{-- CARD KIRI: TOMBOL MASUK/KELUAR --}}
             <div class="presensi-card">
                 <div class="card-header-custom">
                     <h3>Presensi Hari Ini</h3>
@@ -251,11 +242,10 @@
 
                 <div class="presensi-info">
                     <i class="fas fa-info-circle" style="margin-right: 5px; color: #4D0B87;"></i>
-                    Presensi keluar bisa dilakukan setelah mengisi laporan kegiatan. Durasi mengajar akan dihitung otomatis.
+                    Presensi keluar bisa dilakukan setelah mengisi laporan kegiatan. Sesi mengajar = 1 sesi.
                 </div>
             </div>
 
-            {{-- CARD KANAN: FORMULIR LAPORAN --}}
             <div class="presensi-card" id="formPresensi" style="{{ $presensiHariIni && !$presensiHariIni->kelas ? 'display: block;' : 'display: none;' }}">
                 <div class="card-header-custom">
                     <h3>Laporan Kegiatan</h3>
@@ -266,15 +256,21 @@
                     @csrf
                     
                     <div class="form-group">
-                        <label>Kelas / Materi <span style="color: red;">*</span></label>
+                        <label>Kelas <span style="color: red;">*</span></label>
                         <input type="text" class="form-control-custom" id="kelas" name="kelas" 
-                               placeholder="Contoh: 9A - Matematika atau Intensif SBMPTN" required>
+                               placeholder="Contoh: 12D, 9A, 11 IPA" maxlength="50" required>
+                        <small style="font-size: 11px; color: #6B7280;">Masukkan nama kelas yang diajar (contoh: 12D, 9A, 11 IPA)</small>
                     </div>
 
                     <div class="form-group">
-                        <label>Jam Mengajar <span style="color: red;">*</span></label>
-                        <input type="number" class="form-control-custom" id="jam_mengajar" name="jam_mengajar" 
-                                placeholder="Jumlah jam mengajar" min="1" max="12" required>
+                        <label>Jenjang yang Diajar <span style="color: red;">*</span></label>
+                        <select class="form-control-custom" id="jenjang" name="jenjang" required>
+                            <option value="">Pilih Jenjang</option>
+                            <option value="SD">SD (Sekolah Dasar)</option>
+                            <option value="SMP">SMP (Sekolah Menengah Pertama)</option>
+                            <option value="SMA">SMA (Sekolah Menengah Atas)</option>
+                        </select>
+                        <small style="font-size: 11px; color: #6B7280;">Jenjang akan mempengaruhi perhitungan honor</small>
                     </div>
 
                     <div class="form-group">
@@ -329,7 +325,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const uploadHint = document.getElementById('uploadHint');
     const btnSubmit = document.getElementById('btnSubmitForm');
     
-    // Fungsi show alert
     function showAlert(type, message) {
         if (type === 'success') {
             document.getElementById('successMessage').innerText = message;
@@ -346,12 +341,10 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
     
-    // Upload area click
     uploadArea.addEventListener('click', function() {
         fotoInput.click();
     });
     
-    // Preview foto dan validasi wajib foto
     fotoInput.addEventListener('change', function(e) {
         if (e.target.files && e.target.files[0]) {
             const reader = new FileReader();
@@ -371,7 +364,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
     
-    // Tombol Masuk
     btnMasuk.addEventListener('click', function() {
         fetch('{{ route("tentor.presensi.masuk") }}', {
             method: 'POST',
@@ -395,11 +387,9 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
     
-    // Submit Laporan
     formLaporan.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        // Validasi foto wajib
         if (!fotoInput.files[0]) {
             showAlert('error', 'Foto kegiatan wajib diupload!');
             uploadHint.style.color = '#EF4444';
@@ -408,7 +398,7 @@ document.addEventListener("DOMContentLoaded", function() {
         
         const formData = new FormData();
         formData.append('kelas', document.getElementById('kelas').value);
-        formData.append('jam_mengajar', document.getElementById('jam_mengajar').value); 
+        formData.append('jenjang', document.getElementById('jenjang').value);
         formData.append('status_murid', document.querySelector('input[name="status_murid"]:checked').value);
         formData.append('keterangan', document.getElementById('keterangan').value);
         formData.append('foto', fotoInput.files[0]);
@@ -429,6 +419,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 showAlert('success', data.message);
                 btnKeluar.disabled = false;
                 document.getElementById('kelas').disabled = true;
+                document.getElementById('jenjang').disabled = true;
                 document.getElementById('keterangan').disabled = true;
                 document.querySelectorAll('input[name="status_murid"]').forEach(radio => {
                     radio.disabled = true;
@@ -450,7 +441,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
     
-            // Tombol Keluar (reset ke keadaan awal sebelum masuk)
     btnKeluar.addEventListener('click', function() {
         btnKeluar.disabled = true;
         btnKeluar.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
@@ -467,21 +457,15 @@ document.addEventListener("DOMContentLoaded", function() {
             if (data.success) {
                 showAlert('success', data.message);
                 
-                // Reset ke keadaan awal seperti sebelum masuk
-                // 1. Aktifkan tombol Masuk
                 btnMasuk.disabled = false;
-                
-                // 2. Nonaktifkan tombol Keluar
                 btnKeluar.disabled = true;
                 btnKeluar.innerHTML = '<i class="fas fa-sign-out-alt"></i> Keluar';
-                
-                // 3. Sembunyikan form laporan
                 formCard.style.display = 'none';
                 
-                // 4. Reset semua field form
                 document.getElementById('kelas').value = '';
                 document.getElementById('kelas').disabled = false;
-                
+                document.getElementById('jenjang').value = '';
+                document.getElementById('jenjang').disabled = false;
                 document.getElementById('keterangan').value = '';
                 document.getElementById('keterangan').disabled = false;
                 
@@ -490,7 +474,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
                 document.querySelector('input[name="status_murid"][value="hadir"]').checked = true;
                 
-                // 5. Reset upload foto
                 fotoInput.disabled = false;
                 fotoInput.value = '';
                 uploadArea.style.pointerEvents = 'auto';
@@ -500,7 +483,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 uploadHint.classList.remove('upload-hint-success');
                 uploadHint.style.color = '#EF4444';
                 
-                // 6. Reset tombol submit
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Laporan';
                 
@@ -517,7 +499,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
     
-    // Cek status awal
     fetch('{{ route("tentor.presensi.cek-status") }}')
         .then(response => response.json())
         .then(data => {
@@ -525,6 +506,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 btnKeluar.disabled = false;
                 formCard.style.display = 'block';
                 document.getElementById('kelas').disabled = true;
+                document.getElementById('jenjang').disabled = true;
                 document.getElementById('keterangan').disabled = true;
                 document.querySelectorAll('input[name="status_murid"]').forEach(radio => {
                     radio.disabled = true;
@@ -536,6 +518,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 
                 if (data.data) {
                     document.getElementById('kelas').value = data.data.kelas || '';
+                    document.getElementById('jenjang').value = data.data.jenjang || '';
                     document.getElementById('keterangan').value = data.data.keterangan || '';
                     if (data.data.status_murid) {
                         document.querySelector(`input[name="status_murid"][value="${data.data.status_murid}"]`).checked = true;

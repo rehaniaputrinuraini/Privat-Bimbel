@@ -10,84 +10,68 @@ use Carbon\Carbon;
 
 class KelolaPresensiController extends Controller
 {
-    /**
-     * Menampilkan semua riwayat presensi tentor (untuk admin & superadmin)
-     */
     public function index(Request $request)
     {
-        $role = auth()->user()->peran; // 'admin' atau 'superadmin'
+        $role = auth()->user()->peran;
         
-        // Query dengan relasi tentor
         $query = PresensiTentor::with('tentor');
         
-        // Filter berdasarkan nama tentor (search)
         if ($request->filled('search')) {
             $query->whereHas('tentor', function($q) use ($request) {
                 $q->where('nama_lengkap_tentor', 'like', '%' . $request->search . '%');
             });
         }
         
-        // Filter berdasarkan bulan
         if ($request->filled('bulan')) {
             $query->whereMonth('tanggal', $request->bulan);
         }
         
-        // Filter berdasarkan tahun
         if ($request->filled('tahun')) {
             $query->whereYear('tanggal', $request->tahun);
         }
         
-        // Urutkan dari terbaru
         $presensi = $query->orderBy('tanggal', 'desc')
                           ->orderBy('jam_masuk', 'desc')
                           ->paginate(10)
                           ->appends($request->all());
         
-        // Data untuk filter (opsional)
+        $totalHonor = 0;
+        foreach ($presensi as $item) {
+            $totalHonor += $item->total_honor;
+        }
+        
         $tentors = Tentor::all();
         $bulan = $request->bulan;
         $tahun = $request->tahun;
         $search = $request->search;
         
-        return view('dashboard.shared.riwayat presensi.riwayat-presensi', compact('presensi', 'role', 'tentors', 'bulan', 'tahun', 'search'));
+        return view('dashboard.shared.riwayat presensi.riwayat-presensi', compact('presensi', 'role', 'tentors', 'bulan', 'tahun', 'search', 'totalHonor'));
     }
     
-    /**
-     * Verifikasi presensi (Admin & Superadmin)
-     */
     public function verify($id)
     {
         try {
             $presensi = PresensiTentor::findOrFail($id);
             $presensi->update(['verifikasi_kehadiran' => true]);
-            
             return redirect()->back()->with('success', '✅ Presensi berhasil diverifikasi!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', '❌ Gagal verifikasi: ' . $e->getMessage());
         }
     }
     
-    /**
-     * Batalkan verifikasi (Admin & Superadmin)
-     */
     public function unverify($id)
     {
         try {
             $presensi = PresensiTentor::findOrFail($id);
             $presensi->update(['verifikasi_kehadiran' => false]);
-            
             return redirect()->back()->with('success', '✅ Verifikasi dibatalkan!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', '❌ Gagal: ' . $e->getMessage());
         }
     }
     
-    /**
-     * Hapus presensi (HANYA UNTUK SUPERADMIN)
-     */
     public function destroy($id)
     {
-        // Cegah admin menghapus
         if (auth()->user()->peran != 'superadmin') {
             return redirect()->back()->with('error', '❌ Anda tidak memiliki izin untuk menghapus data!');
         }
@@ -95,14 +79,12 @@ class KelolaPresensiController extends Controller
         try {
             $presensi = PresensiTentor::findOrFail($id);
             
-            // Hapus file foto jika ada
             if ($presensi->bukti_foto && Storage::exists('public/' . $presensi->bukti_foto)) {
                 Storage::delete('public/' . $presensi->bukti_foto);
             }
             
             $namaTentor = $presensi->tentor->nama_lengkap_tentor ?? 'Tentor';
             $tanggal = Carbon::parse($presensi->tanggal)->translatedFormat('d F Y');
-            
             $presensi->delete();
             
             return redirect()->back()->with('success', "✅ Data presensi {$namaTentor} ({$tanggal}) berhasil dihapus!");
@@ -111,9 +93,6 @@ class KelolaPresensiController extends Controller
         }
     }
     
-    /**
-     * Download bukti foto (Admin & Superadmin)
-     */
     public function downloadFoto($id)
     {
         $presensi = PresensiTentor::findOrFail($id);
@@ -135,9 +114,6 @@ class KelolaPresensiController extends Controller
         return Storage::download($filePath, $filename);
     }
     
-    /**
-     * Tampilkan detail presensi (opsional)
-     */
     public function show($id)
     {
         $presensi = PresensiTentor::with('tentor')->findOrFail($id);

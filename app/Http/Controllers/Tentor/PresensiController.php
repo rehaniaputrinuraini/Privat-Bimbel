@@ -12,9 +12,6 @@ use Carbon\Carbon;
 
 class PresensiController extends Controller
 {
-    /**
-     * Tampilkan halaman presensi
-     */
     public function index()
     {
         $tentor = Tentor::where('id_user', Auth::id())->first();
@@ -26,7 +23,6 @@ class PresensiController extends Controller
             ]);
         }
         
-        // Cari presensi hari ini yang BELUM KELUAR
         $presensiHariIni = PresensiTentor::where('id_tentor', $tentor->id_tentor)
                                         ->whereDate('tanggal', today())
                                         ->whereNull('jam_keluar')
@@ -35,72 +31,51 @@ class PresensiController extends Controller
         return view('dashboard.tentor.presensi', compact('presensiHariIni', 'tentor'));
     }
 
-    /**
-     * Proses presensi masuk
-     */
     public function masuk(Request $request)
     {
         try {
             $tentor = Tentor::where('id_user', Auth::id())->first();
             
             if (!$tentor) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data tentor tidak ditemukan'
-                ], 404);
+                return response()->json(['success' => false, 'message' => 'Data tentor tidak ditemukan'], 404);
             }
             
-            // Cek apakah sudah presensi hari ini dan BELUM KELUAR
             $existing = PresensiTentor::where('id_tentor', $tentor->id_tentor)
                                       ->whereDate('tanggal', today())
                                       ->whereNull('jam_keluar')
                                       ->first();
             
             if ($existing) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda sudah melakukan presensi masuk hari ini dan belum keluar!'
-                ], 400);
+                return response()->json(['success' => false, 'message' => 'Anda sudah presensi masuk hari ini!'], 400);
             }
             
-            // Buat presensi baru
             $presensi = PresensiTentor::create([
                 'id_tentor' => $tentor->id_tentor,
                 'tanggal' => today(),
                 'jam_masuk' => Carbon::now('Asia/Jakarta'),
                 'jam_keluar' => null,
-                'durasi' => null,
+                'jam_mengajar' => null,
                 'kelas' => null,
+                'jenjang' => null,
                 'status_murid' => null,
                 'keterangan' => null,
-                'uang_makan' => $tentor->uang_makan ?? 0,
-                'transport' => $tentor->uang_transport ?? 0,
                 'bukti_foto' => null,
                 'verifikasi_kehadiran' => false,
             ]);
             
-            return response()->json([
-                'success' => true,
-                'message' => 'Presensi masuk berhasil! Silakan isi laporan kegiatan.',
-                'data' => $presensi
-            ]);
+            return response()->json(['success' => true, 'message' => '✅ Presensi masuk berhasil! Silakan isi laporan.']);
             
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal presensi: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => 'Gagal: ' . $e->getMessage()], 500);
         }
     }
     
-    /**
-     * Simpan laporan kegiatan (foto WAJIB)
-     */
     public function simpanLaporan(Request $request)
     {
         try {
             $request->validate([
                 'kelas' => 'required|string|max:255',
+                'jenjang' => 'required|in:SD,SMP,SMA',
                 'status_murid' => 'required|in:hadir,tidak_hadir',
                 'keterangan' => 'nullable|string',
                 'foto' => 'required|image|mimes:jpeg,png,jpg|max:2048'
@@ -109,64 +84,48 @@ class PresensiController extends Controller
             $tentor = Tentor::where('id_user', Auth::id())->first();
             
             if (!$tentor) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data tentor tidak ditemukan'
-                ], 404);
+                return response()->json(['success' => false, 'message' => 'Data tentor tidak ditemukan'], 404);
             }
             
-            // Cari presensi hari ini yang BELUM KELUAR
             $presensi = PresensiTentor::where('id_tentor', $tentor->id_tentor)
                                       ->whereDate('tanggal', today())
                                       ->whereNull('jam_keluar')
                                       ->first();
             
             if (!$presensi) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda belum melakukan presensi masuk!'
-                ], 400);
+                return response()->json(['success' => false, 'message' => 'Anda belum presensi masuk!'], 400);
             }
             
-            // Upload foto (WAJIB)
             $fotoPath = $request->file('foto')->store('bukti-presensi', 'public');
             
-            // Update data laporan
+            $statusMurid = $request->status_murid;
+            if ($statusMurid == 'tidak_hadir') {
+                $statusMurid = 'tidak hadir';
+            }
+            
             $presensi->update([
                 'kelas' => $request->kelas,
-                'jam_mengajar' => $request->jam_mengajar,
-                'status_murid' => $request->status_murid,
+                'jenjang' => $request->jenjang,
+                'status_murid' => $statusMurid,
                 'keterangan' => $request->keterangan,
                 'bukti_foto' => $fotoPath,
                 'verifikasi_kehadiran' => false
             ]);
             
-            return response()->json([
-                'success' => true,
-                'message' => 'Laporan kegiatan berhasil disimpan! Menunggu verifikasi admin.'
-            ]);
+            return response()->json(['success' => true, 'message' => '✅ Laporan berhasil disimpan! Silakan presensi keluar.']);
             
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menyimpan laporan: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => 'Gagal: ' . $e->getMessage()], 500);
         }
     }
     
-    /**
-     * Proses presensi keluar (hitung durasi otomatis)
-     */
     public function keluar(Request $request)
     {
         try {
             $tentor = Tentor::where('id_user', Auth::id())->first();
             
             if (!$tentor) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data tentor tidak ditemukan'
-                ], 404);
+                return response()->json(['success' => false, 'message' => 'Data tentor tidak ditemukan'], 404);
             }
             
             $presensi = PresensiTentor::where('id_tentor', $tentor->id_tentor)
@@ -175,49 +134,36 @@ class PresensiController extends Controller
                                       ->first();
             
             if (!$presensi) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda belum melakukan presensi masuk!'
-                ], 400);
+                return response()->json(['success' => false, 'message' => 'Anda belum presensi masuk!'], 400);
             }
             
             if (!$presensi->kelas) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Silakan isi laporan kegiatan terlebih dahulu!'
-                ], 400);
+                return response()->json(['success' => false, 'message' => 'Silakan isi laporan terlebih dahulu!'], 400);
             }
             
-            // Hitung durasi dalam menit
-            $jamMasuk = Carbon::parse($presensi->jam_masuk);
-            $jamKeluar = Carbon::now();
-            $durasiMenit = $jamMasuk->diffInMinutes($jamKeluar);
-            
-            $jam = floor($durasiMenit / 60);
-            $menit = $durasiMenit % 60;
-            $durasiText = $jam . ' jam ' . $menit . ' menit';
+            $jamKeluar = Carbon::now('Asia/Jakarta');
             
             $presensi->update([
-                'jam_keluar' => Carbon::now('Asia/Jakarta'),
-                'durasi' => $durasiMenit
+                'jam_keluar' => $jamKeluar,
+                'jam_mengajar' => 1,
             ]);
             
+            $jamMasuk = Carbon::parse($presensi->jam_masuk);
+            $durasiMenit = $jamMasuk->diffInMinutes($jamKeluar);
+            $jam = floor($durasiMenit / 60);
+            $menit = $durasiMenit % 60;
+            
+            // TANPA MENAMPILKAN HONOR (RAHASIA UNTUK TENTOR)
             return response()->json([
-                'success' => true,
-                'message' => 'Sesi mengajar selesai! Durasi: ' . $durasiText
+                'success' => true, 
+                'message' => "✅ Selesai! Durasi: {$jam} jam {$menit} menit."
             ]);
             
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => 'Gagal: ' . $e->getMessage()], 500);
         }
     }
     
-    /**
-     * Cek status presensi untuk UI
-     */
     public function cekStatus()
     {
         $tentor = Tentor::where('id_user', Auth::id())->first();
@@ -230,7 +176,6 @@ class PresensiController extends Controller
             ]);
         }
         
-        // Cek presensi yang BELUM KELUAR
         $presensi = PresensiTentor::where('id_tentor', $tentor->id_tentor)
                                   ->whereDate('tanggal', today())
                                   ->whereNull('jam_keluar')
@@ -244,9 +189,6 @@ class PresensiController extends Controller
         ]);
     }
     
-    /**
-     * Riwayat presensi tentor dengan filter bulan, tahun, dan search
-     */
     public function riwayat(Request $request)
     {
         $tentor = Tentor::where('id_user', Auth::id())->first();
@@ -262,34 +204,24 @@ class PresensiController extends Controller
             ]);
         }
         
-        // Ambil filter dari request
         $bulan = $request->get('bulan', date('m'));
         $tahun = $request->get('tahun', date('Y'));
         $perPage = $request->get('perPage', 10);
         $search = $request->get('search');
         
-        // Query dasar
         $query = PresensiTentor::where('id_tentor', $tentor->id_tentor);
         
-        // Filter bulan
         if ($bulan) {
             $query->whereMonth('tanggal', $bulan);
         }
-        
-        // Filter tahun
         if ($tahun) {
             $query->whereYear('tanggal', $tahun);
         }
-        
-        // Filter pencarian (kelas)
         if ($search) {
             $query->where('kelas', 'like', '%' . $search . '%');
         }
         
-        // Urutkan dari tanggal terbaru
-        $riwayat = $query->orderBy('tanggal', 'desc')
-                         ->paginate($perPage)
-                         ->appends($request->all());
+        $riwayat = $query->orderBy('tanggal', 'desc')->paginate($perPage)->appends($request->all());
         
         return view('dashboard.tentor.riwayat-presensi', compact('riwayat', 'bulan', 'tahun', 'perPage', 'search'));
     }

@@ -4,34 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class PresensiTentor extends Model
 {
     use HasFactory;
 
-    /**
-     * Nama tabel yang digunakan
-     */
     protected $table = 'tr_presensi_tentor';
-    
-    /**
-     * Primary key tabel
-     */
     protected $primaryKey = 'id_presensi';
-    
-    /**
-     * Tipe primary key
-     */
     protected $keyType = 'int';
-    
-    /**
-     * Apakah primary key auto-increment?
-     */
     public $incrementing = true;
 
-    /**
-     * Kolom-kolom yang bisa diisi (mass assignable)
-     */
     protected $fillable = [
         'id_tentor',
         'tanggal',
@@ -39,149 +22,82 @@ class PresensiTentor extends Model
         'jam_keluar',
         'jam_mengajar',
         'kelas',
+        'jenjang',
         'status_murid',
-        'total_honor',
-        'uang_makan',
-        'transport',
+        'keterangan',
         'bukti_foto',
         'verifikasi_kehadiran',
     ];
 
-    /**
-     * Tipe data casting
-     */
     protected $casts = [
         'tanggal' => 'date',
         'jam_masuk' => 'datetime',
-        'jam_keluar'=> 'datetime',
-        'jam_mengajar' => 'decimal:2',
-        'total_honor' => 'decimal:2',
-        'uang_makan' => 'decimal:2',
-        'transport' => 'decimal:2',
+        'jam_keluar' => 'datetime',
+        'jam_mengajar' => 'integer',
+        'jenjang' => 'string',
         'verifikasi_kehadiran' => 'boolean',
     ];
 
-    /**
-     * Nonaktifkan timestamps jika tidak ada kolom created_at/updated_at
-     * Jika ada kolom created_at/updated_at, ubah jadi true
-     */
-    public $timestamps = false;
+    public $timestamps = true;
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = 'updated_at';
 
-    /**
-     * Jika pakai timestamps, tapi nama kolomnya beda:
-     * const CREATED_AT = 'created_at';
-     * const UPDATED_AT = 'updated_at';
-     */
-
-    // ============================================================
-    // RELASI
-    // ============================================================
-    
-    /**
-     * Relasi ke model Tentor (many to one)
-     */
+    // ========== RELASI ==========
     public function tentor()
     {
         return $this->belongsTo(Tentor::class, 'id_tentor', 'id_tentor');
     }
 
-    // ============================================================
-    // ACCESSORS (Getter)
-    // ============================================================
-    
-    /**
-     * Format jam masuk (H:i)
-     */
+    // ========== ACCESSORS ==========
     public function getJamMasukFormattedAttribute()
     {
-        if (!$this->jam_masuk) {
-            return '-';
-        }
-        return date('H:i', strtotime($this->jam_masuk));
+        if (!$this->jam_masuk) return '-';
+        return Carbon::parse($this->jam_masuk)->format('H:i');
     }
 
-    /**
-     * Format jam masuk lengkap (H:i:s)
-     */
     public function getJamMasukFullAttribute()
     {
-        if (!$this->jam_masuk) {
-            return '-';
-        }
-        return date('H:i:s', strtotime($this->jam_masuk));
+        if (!$this->jam_masuk) return '-';
+        return Carbon::parse($this->jam_masuk)->format('H:i:s');
     }
 
-    /**
-     * Format tanggal Indonesia
-     */
+    public function getJamKeluarFormattedAttribute()
+    {
+        if (!$this->jam_keluar) return '-';
+        return Carbon::parse($this->jam_keluar)->format('H:i');
+    }
+
     public function getTanggalFormattedAttribute()
     {
-        if (!$this->tanggal) {
-            return '-';
-        }
-        return $this->tanggal->translatedFormat('l, d F Y');
+        if (!$this->tanggal) return '-';
+        return Carbon::parse($this->tanggal)->translatedFormat('l, d F Y');
     }
 
-    /**
-     * Format jam mengajar
-     */
     public function getJamMengajarFormattedAttribute()
     {
-        if (!$this->jam_mengajar) {
-            return '-';
-        }
-        return $this->jam_mengajar . ' Jam';
+        if (!$this->jam_mengajar) return '-';
+        return $this->jam_mengajar . ' Sesi';
     }
 
-    /**
-     * Format total honor (Rupiah)
-     */
-    public function getTotalHonorFormattedAttribute()
+    public function getJenjangFormattedAttribute()
     {
-        if (!$this->total_honor) {
-            return 'Rp 0';
-        }
-        return 'Rp ' . number_format($this->total_honor, 0, ',', '.');
+        if (!$this->jenjang) return '-';
+        $jenjangList = [
+            'SD' => 'SD (Sekolah Dasar)',
+            'SMP' => 'SMP (Sekolah Menengah Pertama)',
+            'SMA' => 'SMA (Sekolah Menengah Atas)',
+        ];
+        return $jenjangList[$this->jenjang] ?? $this->jenjang;
     }
 
-    /**
-     * Format uang makan (Rupiah)
-     */
-    public function getUangMakanFormattedAttribute()
-    {
-        if (!$this->uang_makan) {
-            return 'Rp 0';
-        }
-        return 'Rp ' . number_format($this->uang_makan, 0, ',', '.');
-    }
-
-    /**
-     * Format transport (Rupiah)
-     */
-    public function getTransportFormattedAttribute()
-    {
-        if (!$this->transport) {
-            return 'Rp 0';
-        }
-        return 'Rp ' . number_format($this->transport, 0, ',', '.');
-    }
-
-    /**
-     * Status kehadiran murid dalam bahasa Indonesia
-     */
     public function getStatusMuridTextAttribute()
     {
-        if ($this->status_murid == 'hadir') {
-            return 'Hadir';
-        } elseif ($this->status_murid == 'tidak_hadir') {
-            return 'Tidak Hadir';
-        }
+        if ($this->status_murid == 'hadir') return 'Hadir';
+        if ($this->status_murid == 'tidak hadir') return 'Tidak Hadir';
+        if ($this->status_murid == 'tidak_hadir') return 'Tidak Hadir';
         return '-';
     }
 
-    /**
-     * Badge status verifikasi (HTML)
-     */
     public function getStatusBadgeAttribute()
     {
         if ($this->verifikasi_kehadiran) {
@@ -190,157 +106,135 @@ class PresensiTentor extends Model
         return '<span class="badge badge-warning"><i class="fas fa-clock"></i> Menunggu Verifikasi</span>';
     }
 
-    /**
-     * Badge status verifikasi plain text
-     */
-    public function getStatusVerifikasiTextAttribute()
-    {
-        return $this->verifikasi_kehadiran ? 'Terverifikasi' : 'Belum Verifikasi';
-    }
-
-    /**
-     * Warna status verifikasi untuk styling
-     */
-    public function getStatusColorAttribute()
-    {
-        return $this->verifikasi_kehadiran ? 'green' : 'orange';
-    }
-
-    // ============================================================
-    // MUTATORS (Setter)
-    // ============================================================
+    // ========== ACCESSOR UNTUK HONOR (LANGSUNG DARI ms_tentor, TANPA SIMPAN DI DATABASE) ==========
     
     /**
-     * Set jam masuk otomatis
+     * Get honor per sesi berdasarkan jenjang dari data tentor
      */
-    public function setJamMasukAttribute($value)
+    public function getHonorPerSesiAttribute()
     {
-        $this->attributes['jam_masuk'] = $value;
-    }
-
-    /**
-     * Set total honor berdasarkan perhitungan
-     */
-    public function setTotalHonorFromHourly($honorPerJam)
-    {
-        if ($this->jam_mengajar && $honorPerJam) {
-            $this->attributes['total_honor'] = $honorPerJam * $this->jam_mengajar;
+        if (!$this->tentor) return 0;
+        
+        switch ($this->jenjang) {
+            case 'SD':
+                return $this->tentor->hr_sd ?? 0;
+            case 'SMP':
+                return $this->tentor->hr_smp ?? 0;
+            case 'SMA':
+                return $this->tentor->hr_sma ?? 0;
+            default:
+                return 0;
         }
     }
 
-    // ============================================================
-    // SCOPES (Query Filters)
-    // ============================================================
-    
     /**
-     * Scope untuk filter berdasarkan tentor
+     * Total Honor = Gaji per sesi dengan penyesuaian status murid
+     * - Hadir: 100% dari honor per sesi
+     * - Tidak Hadir: 50% dari honor per sesi
+     * 
+     * NOTE: Ini hanya perhitungan dinamis, TIDAK DISIMPAN ke database!
      */
+    public function getTotalHonorAttribute()
+    {
+        $honorPerSesi = $this->honor_per_sesi;
+        
+        // Cek status murid (cakup semua kemungkinan format: 'tidak hadir', 'tidak_hadir')
+        $status = strtolower(trim($this->status_murid ?? ''));
+        
+        if ($status == 'tidak hadir' || $status == 'tidak_hadir' || str_contains($status, 'tidak')) {
+            // Tidak hadir → 50% dari honor
+            return $honorPerSesi * 0.5;
+        }
+        
+        // Hadir → 100% dari honor
+        return $honorPerSesi;
+    }
+
+    public function getTotalHonorFormattedAttribute()
+    {
+        $honor = $this->total_honor;
+        return 'Rp ' . number_format($honor, 0, ',', '.');
+    }
+
+    /**
+     * Uang Makan (tetap 100% terlepas dari status murid)
+     */
+    public function getUangMakanAttribute()
+    {
+        return $this->tentor->uang_makan ?? 0;
+    }
+
+    public function getUangMakanFormattedAttribute()
+    {
+        return 'Rp ' . number_format($this->uang_makan, 0, ',', '.');
+    }
+
+    /**
+     * Transport (tetap 100% terlepas dari status murid)
+     */
+    public function getTransportAttribute()
+    {
+        return $this->tentor->uang_transport ?? 0;
+    }
+
+    public function getTransportFormattedAttribute()
+    {
+        return 'Rp ' . number_format($this->transport, 0, ',', '.');
+    }
+
+    // ========== SCOPES ==========
     public function scopeForTentor($query, $idTentor)
     {
         return $query->where('id_tentor', $idTentor);
     }
 
-    /**
-     * Scope untuk filter berdasarkan tanggal
-     */
     public function scopeOnDate($query, $date)
     {
         return $query->whereDate('tanggal', $date);
     }
 
-    /**
-     * Scope untuk hari ini
-     */
     public function scopeToday($query)
     {
         return $query->whereDate('tanggal', today());
     }
 
-    /**
-     * Scope untuk bulan ini
-     */
     public function scopeThisMonth($query)
     {
-        return $query->whereYear('tanggal', date('Y'))
-                     ->whereMonth('tanggal', date('m'));
+        return $query->whereYear('tanggal', date('Y'))->whereMonth('tanggal', date('m'));
     }
 
-    /**
-     * Scope untuk yang sudah terverifikasi
-     */
     public function scopeVerified($query)
     {
         return $query->where('verifikasi_kehadiran', true);
     }
 
-    /**
-     * Scope untuk yang belum terverifikasi
-     */
     public function scopeUnverified($query)
     {
         return $query->where('verifikasi_kehadiran', false);
     }
 
-    /**
-     * Scope untuk status murid hadir
-     */
-    public function scopeMuridHadir($query)
-    {
-        return $query->where('status_murid', 'hadir');
-    }
-
-    // ============================================================
-    // HELPER METHODS
-    // ============================================================
-    
-    /**
-     * Cek apakah sudah presensi masuk
-     */
+    // ========== HELPERS ==========
     public function hasMasuk()
     {
         return !is_null($this->jam_masuk);
     }
 
-    /**
-     * Cek apakah sudah mengisi laporan
-     */
     public function hasLaporan()
     {
-        return !is_null($this->kelas) && !is_null($this->jam_mengajar);
+        return !is_null($this->kelas) && !is_null($this->jenjang);
     }
 
-    /**
-     * Cek apakah sudah diverifikasi
-     */
     public function isVerified()
     {
         return $this->verifikasi_kehadiran == true;
     }
 
-    /**
-     * Hitung ulang total honor (jika grade berubah)
-     */
-    public function recalculateHonor($honorPerJam)
-    {
-        if ($this->jam_mengajar) {
-            $this->total_honor = $honorPerJam * $this->jam_mengajar;
-            return $this->total_honor;
-        }
-        return 0;
-    }
-
-    /**
-     * Approve verifikasi oleh admin
-     */
     public function approve()
     {
         $this->verifikasi_kehadiran = true;
         return $this->save();
     }
 
-    /**
-     * Batalkan verifikasi
-     */
     public function reject()
     {
         $this->verifikasi_kehadiran = false;

@@ -5,7 +5,6 @@
 <?php $__env->startSection('content'); ?>
 <div style="width: 100%;">
     
-    
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
             <?php echo e(isset($bulan) && isset($tahun) ? \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('F Y') : \Carbon\Carbon::now()->translatedFormat('F Y')); ?>
@@ -17,18 +16,15 @@
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Lihat riwayat kehadiran mengajar Anda setiap bulannya</p>
     </div>
 
-    
     <form method="GET" action="<?php echo e(route('tentor.riwayat-presensi')); ?>" id="filterForm">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
             <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
-                
                 <div style="position: relative; width: 300px;">
                     <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
                     <input type="text" name="search" placeholder="Cari kelas..." value="<?php echo e($search ?? ''); ?>"
                            style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
                 </div>
 
-                
                 <select name="bulan" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 140px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
                     <option value="">--- Pilih Bulan ---</option>
                     <option value="1" <?php echo e(($bulan ?? '') == '1' ? 'selected' : ''); ?>>Januari</option>
@@ -45,7 +41,6 @@
                     <option value="12" <?php echo e(($bulan ?? '') == '12' ? 'selected' : ''); ?>>Desember</option>
                 </select>
 
-                
                 <select name="tahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 100px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
                     <option value="">--- Tahun ---</option>
                     <?php $currentYear = date('Y'); ?>
@@ -54,18 +49,15 @@
                     <?php endfor; ?>
                 </select>
                 
-                
                 <?php if(($bulan ?? '') || ($tahun ?? '') || ($search ?? '')): ?>
                     <a href="<?php echo e(route('tentor.riwayat-presensi')); ?>" style="padding: 10px 15px; border-radius: 12px; background: #F3F4F6; color: #374151; text-decoration: none; font-size: 13px;">Reset</a>
                 <?php endif; ?>
             </div>
         </div>
         
-        
         <input type="hidden" name="perPage" id="perPageInput" value="<?php echo e($perPage ?? 10); ?>">
     </form>
 
-    
     <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
@@ -74,6 +66,7 @@
                         <th style="padding: 15px; font-weight: 700; width: 50px;">No</th>
                         <th style="padding: 15px; font-weight: 700;">Tanggal</th>
                         <th style="padding: 15px; font-weight: 700;">Kelas</th>
+                        <th style="padding: 15px; font-weight: 700;">Jenjang</th>
                         <th style="padding: 15px; font-weight: 700;">Jam Masuk</th>
                         <th style="padding: 15px; font-weight: 700;">Jam Keluar</th>
                         <th style="padding: 15px; font-weight: 700; text-align: center;">Status</th>
@@ -82,13 +75,10 @@
                 <tbody style="color: #374151;">
                     <?php $__empty_1 = true; $__currentLoopData = $riwayat; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <?php
-                            // Tentukan status berdasarkan status_murid
                             $statusText = $item->status_murid == 'hadir' ? 'Hadir' : 'Tidak Hadir';
                             $statusClass = $item->status_murid == 'hadir' 
                                 ? 'background: #E1F7E3; color: #0E7490;' 
                                 : 'background: #FEE2E2; color: #EF4444;';
-                            
-                            // Format jam
                             $jamMasuk = $item->jam_masuk ? \Carbon\Carbon::parse($item->jam_masuk)->format('H:i') : '-';
                             $jamKeluar = $item->jam_keluar ? \Carbon\Carbon::parse($item->jam_keluar)->format('H:i') : '-';
                         ?>
@@ -96,6 +86,7 @@
                             <td style="padding: 15px;"><?php echo e($loop->iteration + ($riwayat->currentPage() - 1) * $riwayat->perPage()); ?></td>
                             <td style="padding: 15px;"><?php echo e(\Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y')); ?></td>
                             <td style="padding: 15px;"><?php echo e($item->kelas ?? '-'); ?></td>
+                            <td style="padding: 15px;"><?php echo e($item->jenjang ?? '-'); ?></td>
                             <td style="padding: 15px;"><?php echo e($jamMasuk); ?></td>
                             <td style="padding: 15px;"><?php echo e($jamKeluar); ?></td>
                             <td style="padding: 15px; text-align: center;">
@@ -107,7 +98,7 @@
                         </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
-                            <td colspan="6" style="padding: 40px; text-align: center; color: #9CA3AF;">
+                            <td colspan="7" style="padding: 40px; text-align: center; color: #9CA3AF;">
                                 <i class="fas fa-calendar-alt" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
                                 <?php if(isset($error) && $error): ?>
                                     <?php echo e($error); ?>
@@ -122,7 +113,6 @@
             </table>
         </div>
     </div>
-    
     
     <?php if($riwayat->count() > 0): ?>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
@@ -147,13 +137,11 @@
 </div>
 
 <script>
-    // Auto submit ketika perPage berubah
     document.getElementById('perPageSelect')?.addEventListener('change', function() {
         document.getElementById('perPageInput').value = this.value;
         document.getElementById('filterForm').submit();
     });
     
-    // Submit ketika search menekan enter
     document.querySelector('input[name="search"]')?.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -161,6 +149,5 @@
         }
     });
 </script>
-
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/tentor/riwayat-presensi.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\privat-bimbel\resources\views/dashboard/tentor/riwayat-presensi.blade.php ENDPATH**/ ?>
