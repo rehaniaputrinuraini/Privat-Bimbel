@@ -26,9 +26,9 @@
         $statsList = [
             ['title' => 'Total Murid',  'val' => number_format($stats['total_murid'], 0, ',', '.'),         'bg' => '#3A3AA7', 'icon' => 'icon_orang.png',       'size' => '35px'],
             ['title' => 'Total Tentor', 'val' => number_format($stats['total_tentor'], 0, ',', '.'),        'bg' => '#BE7E5E', 'icon' => 'icon_orang.png',       'size' => '35px'],
-            ['title' => 'Pemasukan',    'val' => 'Rp ' . number_format($stats['pemasukan'], 0, ',', '.'),    'bg' => '#0CCC0C', 'icon' => 'icon_pemasukan.png',   'size' => '30px'],
-            ['title' => 'Pengeluaran',  'val' => 'Rp ' . number_format($stats['pengeluaran'], 0, ',', '.'),  'bg' => '#F14D4D', 'icon' => 'icon_pengeluaran.png', 'size' => '30px'],
-            ['title' => 'Laba Bersih',  'val' => 'Rp ' . number_format($stats['laba_bersih'], 0, ',', '.'),    'bg' => '#E7C255', 'icon' => 'icon_lababersih.png',  'size' => '40px'],
+            ['title' => 'Pemasukan',    'val' => 'Rp ' . number_format($stats['pemasukan'], 0, ',', '.'),    'bg' => '#4472DF', 'icon' => 'icon_pemasukan.png',   'size' => '30px'],
+            ['title' => 'Pengeluaran',  'val' => 'Rp ' . number_format($stats['pengeluaran'], 0, ',', '.'),  'bg' => '#D74E4E', 'icon' => 'icon_pengeluaran.png', 'size' => '30px'],
+            ['title' => 'Laba Bersih',  'val' => 'Rp ' . number_format($stats['laba_bersih'], 0, ',', '.'),  'bg' => '#4D0B87', 'icon' => 'icon_lababersih.png',  'size' => '40px'],
         ];
 
         $role = Auth::user()->peran ?? 'admin';
@@ -70,15 +70,34 @@
         
         <?php $__empty_1 = true; $__currentLoopData = $riwayatKeuangan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <?php
-                $isPemasukan = $item->kategori == 'pemasukan';
-                $bgColor = $isPemasukan ? '#60A060' : '#D74E4E';
-                $icon = $isPemasukan ? '📥' : '📤';
+                // Tentukan warna berdasarkan kategori (SAMA DENGAN LAPORAN KEUANGAN)
+                switch ($item->kategori) {
+                    case 'pemasukan':
+                        $bgColor = '#4472DF'; // Biru
+                        $icon = '📥';
+                        break;
+                    case 'pengeluaran':
+                        $bgColor = '#D74E4E'; // Merah
+                        $icon = '📤';
+                        break;
+                    case 'piutang':
+                        $bgColor = '#E7C255'; // Kuning
+                        $icon = '💰';
+                        break;
+                    case 'uang_muka':
+                        $bgColor = '#4AB462'; // Hijau
+                        $icon = '💵';
+                        break;
+                    default:
+                        $bgColor = '#6B7280'; // Abu-abu
+                        $icon = '📋';
+                }
             ?>
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: <?php echo e($bgColor); ?>; color: white; border-radius: 12px; transition: 0.2s;">
                 <span style="font-weight: 600; font-size: 14px;">
                     <?php echo e($icon); ?> <?php echo e($item->rincian); ?>
 
-                    <small style="opacity: 0.8; font-weight: normal;">(<?php echo e(\Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y')); ?>)</small>
+                    <small style="opacity: 0.9; font-weight: normal; margin-left: 8px;">(<?php echo e(\Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y')); ?>)</small>
                 </span>
                 <span style="font-weight: 700; font-size: 14px;">
                     Rp <?php echo e(number_format($item->jumlah, 0, ',', '.')); ?>
@@ -96,4 +115,4 @@
 </div>
 
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\privat-bimbel\resources\views/dashboard/shared/halaman-utama/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/halaman-utama/index.blade.php ENDPATH**/ ?>

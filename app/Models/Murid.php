@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Pembayaran; // ← TAMBAHKAN BARIS INI
+use App\Models\Pembayaran;
 
 class Murid extends Model
 {
@@ -23,7 +23,8 @@ class Murid extends Model
         'no_hp_orang_tua',
         'paket_awal',
         'pilihan_paket',
-        'tahun_masuk'
+        'tahun_masuk',
+        'tanggal_daftar',     
     ];
 
     /**

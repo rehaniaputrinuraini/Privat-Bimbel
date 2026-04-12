@@ -22,6 +22,7 @@ class LaporanKeuanganController extends Controller
         $queryPiutang = LaporanKeuangan::where('kategori', 'piutang');
         $queryUangMuka = LaporanKeuangan::where('kategori', 'uang_muka');
         
+        // Filter Bulan
         if ($request->filled('bulan')) {
             $queryPemasukan->whereMonth('tanggal', $request->bulan);
             $queryPengeluaran->whereMonth('tanggal', $request->bulan);
@@ -29,6 +30,7 @@ class LaporanKeuanganController extends Controller
             $queryUangMuka->whereMonth('tanggal', $request->bulan);
         }
         
+        // Filter Tahun
         if ($request->filled('tahun')) {
             $queryPemasukan->whereYear('tanggal', $request->tahun);
             $queryPengeluaran->whereYear('tanggal', $request->tahun);
@@ -36,6 +38,16 @@ class LaporanKeuanganController extends Controller
             $queryUangMuka->whereYear('tanggal', $request->tahun);
         }
         
+        // Filter Search (Nama Murid)
+        if ($request->filled('search')) {
+            $searchTerm = '%' . $request->search . '%';
+            $queryPemasukan->where('rincian', 'like', $searchTerm);
+            $queryPengeluaran->where('rincian', 'like', $searchTerm);
+            $queryPiutang->where('nama_murid', 'like', $searchTerm);
+            $queryUangMuka->where('nama_murid', 'like', $searchTerm);
+        }
+        
+        // Filter Paket
         if ($request->filled('paket')) {
             $queryPemasukan->where('rincian', 'like', '%' . $request->paket . '%');
         }
@@ -81,6 +93,7 @@ class LaporanKeuanganController extends Controller
             'filterBulan' => $request->bulan,
             'filterTahun' => $request->tahun,
             'filterPaket' => $request->paket,
+            'filterSearch' => $request->search,
         ]);
     }
 
@@ -123,9 +136,6 @@ class LaporanKeuanganController extends Controller
             'nama_murid' => $request->nama_murid ?? null,
             'bulan_periode' => $request->bulan_periode ?? null,
         ];
-        
-        // ========== TAMBAHKAN DEBUG UNTUK CEK ==========
-        // return back()->withErrors(['debug' => json_encode($data)]);
         
         try {
             LaporanKeuangan::create($data);

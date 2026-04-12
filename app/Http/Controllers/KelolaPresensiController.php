@@ -30,14 +30,27 @@ class KelolaPresensiController extends Controller
             $query->whereYear('tanggal', $request->tahun);
         }
         
+        $perPage = $request->get('perPage', 10);
         $presensi = $query->orderBy('tanggal', 'desc')
                           ->orderBy('jam_masuk', 'desc')
-                          ->paginate(10)
+                          ->paginate($perPage)
                           ->appends($request->all());
         
+        // Hitung total honor
         $totalHonor = 0;
         foreach ($presensi as $item) {
             $totalHonor += $item->total_honor;
+        }
+        
+        // ✅ AMBIL DAFTAR TAHUN DARI DATA YANG ADA (DINAMIS)
+        $tahunList = PresensiTentor::selectRaw('YEAR(tanggal) as tahun')
+            ->distinct()
+            ->orderBy('tahun', 'desc')
+            ->pluck('tahun');
+        
+        // Kalau tidak ada data sama sekali, tampilkan tahun sekarang
+        if ($tahunList->isEmpty()) {
+            $tahunList = collect([date('Y')]);
         }
         
         $tentors = Tentor::all();
@@ -45,7 +58,16 @@ class KelolaPresensiController extends Controller
         $tahun = $request->tahun;
         $search = $request->search;
         
-        return view('dashboard.shared.riwayat presensi.riwayat-presensi', compact('presensi', 'role', 'tentors', 'bulan', 'tahun', 'search', 'totalHonor'));
+        return view('dashboard.shared.riwayat presensi.riwayat-presensi', compact(
+            'presensi', 
+            'role', 
+            'tentors', 
+            'bulan', 
+            'tahun', 
+            'search', 
+            'totalHonor',
+            'tahunList'        // ✅ KIRIM KE VIEW
+        ));
     }
     
     public function verify($id)

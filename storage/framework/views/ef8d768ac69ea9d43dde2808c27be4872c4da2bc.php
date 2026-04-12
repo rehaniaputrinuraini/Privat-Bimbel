@@ -1,22 +1,23 @@
-@extends('layouts.app')
 
-@section('title', 'Riwayat Presensi')
 
-@push('styles')
+<?php $__env->startSection('title', 'Riwayat Presensi'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <style>
     .table thead th {
         white-space: nowrap;
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div style="width: 100%;">
     
-    {{-- HEADER --}}
+    
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
-            {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+            <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?>
+
         </p>
         <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
             Riwayat Presensi
@@ -24,59 +25,62 @@
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Lihat Riwayat Presensi Semua Tentor</p>
     </div>
 
-    {{-- ALERT SUCCESS/ERROR --}}
-    @if(session('success'))
+    
+    <?php if(session('success')): ?>
         <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
-        </div>
-    @endif
-    @if(session('error'))
-        <div style="background: #FEE2E2; color: #EF4444; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
-            <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
-        </div>
-    @endif
+            <i class="fas fa-check-circle"></i> <?php echo e(session('success')); ?>
 
-    {{-- FILTER --}}
-    <form method="GET" action="{{ route($role . '.kelola-presensi') }}" id="filterForm">
+        </div>
+    <?php endif; ?>
+    <?php if(session('error')): ?>
+        <div style="background: #FEE2E2; color: #EF4444; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+            <i class="fas fa-exclamation-circle"></i> <?php echo e(session('error')); ?>
+
+        </div>
+    <?php endif; ?>
+
+    
+    <form method="GET" action="<?php echo e(route($role . '.kelola-presensi')); ?>" id="filterForm">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
             <div style="display: flex; align-items: center; gap: 12px; flex: 1; flex-wrap: wrap;">
                 
-                {{-- SEARCH BAR (LIVE SEARCH) --}}
+                
                 <div style="position: relative; width: 300px;">
                     <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
                     <input type="text" id="liveSearchInput" placeholder="Cari Nama Tentor..."
                            style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
                 </div>
 
-                {{-- FILTER BULAN --}}
+                
                 <select name="bulan" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 140px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
                     <option value="">--- Pilih Bulan ---</option>
-                    @foreach(range(1, 12) as $b)
-                        <option value="{{ $b }}" {{ ($bulan ?? '') == $b ? 'selected' : '' }}>
-                            {{ \Carbon\Carbon::create()->month($b)->translatedFormat('F') }}
+                    <?php $__currentLoopData = range(1, 12); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $b): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($b); ?>" <?php echo e(($bulan ?? '') == $b ? 'selected' : ''); ?>>
+                            <?php echo e(\Carbon\Carbon::create()->month($b)->translatedFormat('F')); ?>
+
                         </option>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
 
-                {{-- FILTER TAHUN DINAMIS --}}
+                
                 <select name="tahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 100px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
                     <option value="">--- Tahun ---</option>
-                    @foreach($tahunList ?? [] as $th)
-                        <option value="{{ $th }}" {{ ($tahun ?? '') == $th ? 'selected' : '' }}>{{ $th }}</option>
-                    @endforeach
+                    <?php $__currentLoopData = $tahunList ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $th): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($th); ?>" <?php echo e(($tahun ?? '') == $th ? 'selected' : ''); ?>><?php echo e($th); ?></option>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
                 
-                {{-- RESET --}}
-                @if(($bulan ?? '') || ($tahun ?? ''))
-                    <a href="{{ route($role . '.kelola-presensi') }}" style="padding: 10px 15px; border-radius: 12px; background: #F3F4F6; color: #374151; text-decoration: none; font-size: 13px;">
+                
+                <?php if(($bulan ?? '') || ($tahun ?? '')): ?>
+                    <a href="<?php echo e(route($role . '.kelola-presensi')); ?>" style="padding: 10px 15px; border-radius: 12px; background: #F3F4F6; color: #374151; text-decoration: none; font-size: 13px;">
                         <i class="fas fa-times"></i> Reset
                     </a>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
     </form>
 
-    {{-- TABEL --}}
+    
     <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
@@ -103,8 +107,8 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody" style="color: #374151;">
-                    @forelse($presensi as $index => $item)
-                    @php
+                    <?php $__empty_1 = true; $__currentLoopData = $presensi; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
                         $statusText = $item->status_murid == 'hadir' ? 'Hadir' : 'Tidak Hadir';
                         $statusClass = $item->status_murid == 'hadir' 
                             ? 'background: #E1F7E3; color: #0E7490;' 
@@ -139,154 +143,158 @@
                         $uangMakan = $item->tentor->uang_makan ?? 0;
                         $transport = $item->tentor->uang_transport ?? 0;
                         $totalHonorItem = $honorAkhir + $uangMakan + $transport;
-                    @endphp
+                    ?>
                     <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 15px;">{{ $presensi->firstItem() + $index }}</td>
-                        <td style="padding: 15px;">{{ $item->tentor->nama_lengkap_tentor ?? '-' }}</td>
-                        <td style="padding: 15px;">{{ \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') }}</td>
-                        <td style="padding: 15px;">{{ $jamMasuk }}</td>
-                        <td style="padding: 15px;">{{ $jamKeluar }}</td>
-                        <td style="padding: 15px;">{{ $item->kelas ?? '-' }}</td>
-                        <td style="padding: 15px;">{{ $item->jenjang ?? '-' }}</td>
+                        <td style="padding: 15px;"><?php echo e($presensi->firstItem() + $index); ?></td>
+                        <td style="padding: 15px;"><?php echo e($item->tentor->nama_lengkap_tentor ?? '-'); ?></td>
+                        <td style="padding: 15px;"><?php echo e(\Carbon\Carbon::parse($item->tanggal)->format('d/m/Y')); ?></td>
+                        <td style="padding: 15px;"><?php echo e($jamMasuk); ?></td>
+                        <td style="padding: 15px;"><?php echo e($jamKeluar); ?></td>
+                        <td style="padding: 15px;"><?php echo e($item->kelas ?? '-'); ?></td>
+                        <td style="padding: 15px;"><?php echo e($item->jenjang ?? '-'); ?></td>
                         <td style="padding: 15px; text-align: center;">
-                            <span style="padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; {{ $statusClass }}">
-                                {{ $statusText }}
+                            <span style="padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; <?php echo e($statusClass); ?>">
+                                <?php echo e($statusText); ?>
+
                             </span>
                         </td>
-                        <td style="padding: 15px; text-align: right;">Rp {{ number_format($honorDasar, 0, ',', '.') }}</td>
+                        <td style="padding: 15px; text-align: right;">Rp <?php echo e(number_format($honorDasar, 0, ',', '.')); ?></td>
                         <td style="padding: 15px; text-align: center;">
-                            @if($item->status_murid == 'tidak hadir')
+                            <?php if($item->status_murid == 'tidak hadir'): ?>
                                 <span style="color: #EF4444; font-size: 11px;">-50%</span>
                                 <br>
-                                <span style="color: #EF4444; font-size: 11px;">(Rp {{ number_format($potongan, 0, ',', '.') }})</span>
-                            @else
+                                <span style="color: #EF4444; font-size: 11px;">(Rp <?php echo e(number_format($potongan, 0, ',', '.')); ?>)</span>
+                            <?php else: ?>
                                 <span style="color: #10B981;">-</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
-                        <td style="padding: 15px; text-align: right; font-weight: 600; color: #4D0B87;">Rp {{ number_format($honorAkhir, 0, ',', '.') }}</td>
-                        <td style="padding: 15px; text-align: right;">Rp {{ number_format($uangMakan, 0, ',', '.') }}</td>
-                        <td style="padding: 15px; text-align: right;">Rp {{ number_format($transport, 0, ',', '.') }}</td>
-                        <td style="padding: 15px; text-align: right; font-weight: 700; color: #111827;">Rp {{ number_format($totalHonorItem, 0, ',', '.') }}</td>
-                        <td style="padding: 15px; text-align: center; max-width: 100px; overflow: hidden; text-overflow: ellipsis;" title="{{ $item->keterangan ?? '' }}">
-                            {{ Str::limit($item->keterangan, 10) ?? '-' }}
+                        <td style="padding: 15px; text-align: right; font-weight: 600; color: #4D0B87;">Rp <?php echo e(number_format($honorAkhir, 0, ',', '.')); ?></td>
+                        <td style="padding: 15px; text-align: right;">Rp <?php echo e(number_format($uangMakan, 0, ',', '.')); ?></td>
+                        <td style="padding: 15px; text-align: right;">Rp <?php echo e(number_format($transport, 0, ',', '.')); ?></td>
+                        <td style="padding: 15px; text-align: right; font-weight: 700; color: #111827;">Rp <?php echo e(number_format($totalHonorItem, 0, ',', '.')); ?></td>
+                        <td style="padding: 15px; text-align: center; max-width: 100px; overflow: hidden; text-overflow: ellipsis;" title="<?php echo e($item->keterangan ?? ''); ?>">
+                            <?php echo e(Str::limit($item->keterangan, 10) ?? '-'); ?>
+
                         </td>
                         <td style="padding: 15px; text-align: center;">
-                            @if($item->bukti_foto)
-                                <a href="{{ route($role . '.kelola-presensi.download', $item->id_presensi) }}" 
+                            <?php if($item->bukti_foto): ?>
+                                <a href="<?php echo e(route($role . '.kelola-presensi.download', $item->id_presensi)); ?>" 
                                    style="background: #F3E8FF; color: #4D0B87; width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
                                     <i class="fas fa-download"></i>
                                 </a>
-                            @else
+                            <?php else: ?>
                                 <span style="color: #9CA3AF;">-</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                         <td style="padding: 15px; text-align: center;">
-                            @if($role == 'superadmin' || $role == 'admin')
-                                <form method="POST" action="{{ route($role . '.kelola-presensi.' . ($item->verifikasi_kehadiran ? 'unverify' : 'verify'), $item->id_presensi) }}" style="display: inline;">
-                                    @csrf
+                            <?php if($role == 'superadmin' || $role == 'admin'): ?>
+                                <form method="POST" action="<?php echo e(route($role . '.kelola-presensi.' . ($item->verifikasi_kehadiran ? 'unverify' : 'verify'), $item->id_presensi)); ?>" style="display: inline;">
+                                    <?php echo csrf_field(); ?>
                                     <button type="submit" style="background: none; border: none; cursor: pointer;">
-                                        <input type="checkbox" {{ $item->verifikasi_kehadiran ? 'checked' : '' }} 
+                                        <input type="checkbox" <?php echo e($item->verifikasi_kehadiran ? 'checked' : ''); ?> 
                                                style="accent-color: #4D0B87; width: 18px; height: 18px; pointer-events: none;">
                                     </button>
                                 </form>
-                            @else
-                                <input type="checkbox" {{ $item->verifikasi_kehadiran ? 'checked' : '' }} 
+                            <?php else: ?>
+                                <input type="checkbox" <?php echo e($item->verifikasi_kehadiran ? 'checked' : ''); ?> 
                                        style="accent-color: #4D0B87; width: 18px; height: 18px;" disabled>
-                            @endif
+                            <?php endif; ?>
                         </td>
                         <td style="padding: 15px; text-align: center;">
-                            @if($role == 'superadmin')
+                            <?php if($role == 'superadmin'): ?>
                                 <button type="button" 
-                                        onclick="bukaModalHapus({{ $item->id_presensi }}, '{{ addslashes($item->tentor->nama_lengkap_tentor ?? 'Tentor') }}', '{{ \Carbon\Carbon::parse($item->tanggal)->format('d F Y') }}')" 
+                                        onclick="bukaModalHapus(<?php echo e($item->id_presensi); ?>, '<?php echo e(addslashes($item->tentor->nama_lengkap_tentor ?? 'Tentor')); ?>', '<?php echo e(\Carbon\Carbon::parse($item->tanggal)->format('d F Y')); ?>')" 
                                         style="background: #E35D5D; color: white; padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; font-size: 11px;">
                                     <i class="fas fa-trash"></i>
                                 </button>
-                            @else
+                            <?php else: ?>
                                 <span style="color: #9CA3AF; font-size: 11px;">-</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="18" style="padding: 40px; text-align: center; color: #9CA3AF;">
                             <i class="fas fa-calendar-alt" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
                             Belum ada data presensi
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 
-    {{-- TOTAL HONOR --}}
-    @if($presensi->count() > 0)
+    
+    <?php if($presensi->count() > 0): ?>
     <div style="padding: 15px 30px; display: flex; justify-content: flex-end; align-items: center; background: #F9FAFB; border-top: 2px solid #F3F4F6; border-radius: 0 0 20px 20px;">
         <span style="font-size: 15px; font-weight: 700; color: #374151; margin-right: 15px;">Total Honor Bulan Ini :</span>
         <div style="background: #10B981; color: white; padding: 10px 25px; border-radius: 12px; font-size: 17px; font-weight: 800; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);">
-            Rp {{ number_format($totalHonor ?? 0, 0, ',', '.') }}
+            Rp <?php echo e(number_format($totalHonor ?? 0, 0, ',', '.')); ?>
+
         </div>
     </div>
-    @endif
+    <?php endif; ?>
 
-    {{-- PAGINATION --}}
-    @if($presensi->count() > 0)
+    
+    <?php if($presensi->count() > 0): ?>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
             <select id="perPageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
-                <option value="10" {{ request('perPage', 10) == 10 ? 'selected' : '' }}>10 baris</option>
-                <option value="25" {{ request('perPage', 10) == 25 ? 'selected' : '' }}>25 baris</option>
-                <option value="50" {{ request('perPage', 10) == 50 ? 'selected' : '' }}>50 baris</option>
+                <option value="10" <?php echo e(request('perPage', 10) == 10 ? 'selected' : ''); ?>>10 baris</option>
+                <option value="25" <?php echo e(request('perPage', 10) == 25 ? 'selected' : ''); ?>>25 baris</option>
+                <option value="50" <?php echo e(request('perPage', 10) == 50 ? 'selected' : ''); ?>>50 baris</option>
             </select>
             <span style="color: #374151; font-size: 13px;">
-                Menampilkan {{ $presensi->total() }} data
+                Menampilkan <?php echo e($presensi->total()); ?> data
             </span>
         </div>
 
         <div style="display: flex; gap: 5px;">
-            @if($presensi->onFirstPage())
+            <?php if($presensi->onFirstPage()): ?>
                 <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled>
                     <i class="fas fa-angle-double-left"></i>
                 </button>
-            @else
-                <a href="{{ $presensi->url(1) }}&{{ http_build_query(request()->except('page')) }}" 
+            <?php else: ?>
+                <a href="<?php echo e($presensi->url(1)); ?>&<?php echo e(http_build_query(request()->except('page'))); ?>" 
                    style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">
                     <i class="fas fa-angle-double-left"></i>
                 </a>
-            @endif
+            <?php endif; ?>
 
-            @if($presensi->onFirstPage())
+            <?php if($presensi->onFirstPage()): ?>
                 <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled>
                     <i class="fas fa-angle-left"></i>
                 </button>
-            @else
-                <a href="{{ $presensi->previousPageUrl() }}&{{ http_build_query(request()->except('page')) }}" 
+            <?php else: ?>
+                <a href="<?php echo e($presensi->previousPageUrl()); ?>&<?php echo e(http_build_query(request()->except('page'))); ?>" 
                    style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">
                     <i class="fas fa-angle-left"></i>
                 </a>
-            @endif
+            <?php endif; ?>
 
             <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: default;">
-                {{ $presensi->currentPage() }}
+                <?php echo e($presensi->currentPage()); ?>
+
             </button>
 
-            @if($presensi->hasMorePages())
-                <a href="{{ $presensi->nextPageUrl() }}&{{ http_build_query(request()->except('page')) }}" 
+            <?php if($presensi->hasMorePages()): ?>
+                <a href="<?php echo e($presensi->nextPageUrl()); ?>&<?php echo e(http_build_query(request()->except('page'))); ?>" 
                    style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">
                     <i class="fas fa-angle-right"></i>
                 </a>
-            @else
+            <?php else: ?>
                 <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled>
                     <i class="fas fa-angle-right"></i>
                 </button>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
-    @endif
+    <?php endif; ?>
 
 </div>
 
-{{-- MODAL HAPUS --}}
+
 <div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #E35D5D; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-trash-alt"></i></div>
@@ -295,8 +303,8 @@
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalHapus()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
             <form id="formHapus" method="POST" style="flex: 1;">
-                @csrf
-                @method('DELETE')
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('DELETE'); ?>
                 <button type="submit" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #E35D5D; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Hapus</button>
             </form>
         </div>
@@ -334,7 +342,7 @@
 
     function bukaModalHapus(id, nama, tanggal) {
         let form = document.getElementById('formHapus');
-        let url = "{{ route('superadmin.kelola-presensi.destroy', ':id') }}";
+        let url = "<?php echo e(route('superadmin.kelola-presensi.destroy', ':id')); ?>";
         url = url.replace(':id', id);
         form.action = url;
         
@@ -348,4 +356,5 @@
         document.getElementById('modalHapus').style.display = 'none';
     }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/riwayat presensi/riwayat-presensi.blade.php ENDPATH**/ ?>

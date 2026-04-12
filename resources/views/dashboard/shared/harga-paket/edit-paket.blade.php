@@ -1,4 +1,4 @@
-<!-- @extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', 'Edit Harga Paket')
 
@@ -28,12 +28,12 @@
                 @error('harga') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
-            {{-- Tingkat (WAJIB) --}}
+            {{-- Tingkat (READONLY - Tidak Bisa Diedit) --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tingkat <span style="color: red;">*</span></label>
-                <input type="text" name="tingkat" value="{{ $paket->tingkat }}" placeholder="Masukkan Tingkat" required 
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-                @error('tingkat') <small style="color: red;">{{ $message }}</small> @enderror
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tingkat</label>
+                <input type="text" value="{{ $paket->tingkat }}" readonly 
+                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px;">
+                <small style="color: #9CA3AF;"><i class="fas fa-lock"></i> Tingkat tidak dapat diubah setelah dibuat.</small>
             </div>
 
             {{-- TOMBOL AKSI --}}
@@ -148,4 +148,4 @@
         });
     });
 </script>
-@endsection -->
+@endsection

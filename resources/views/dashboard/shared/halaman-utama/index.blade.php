@@ -27,9 +27,9 @@
         $statsList = [
             ['title' => 'Total Murid',  'val' => number_format($stats['total_murid'], 0, ',', '.'),         'bg' => '#3A3AA7', 'icon' => 'icon_orang.png',       'size' => '35px'],
             ['title' => 'Total Tentor', 'val' => number_format($stats['total_tentor'], 0, ',', '.'),        'bg' => '#BE7E5E', 'icon' => 'icon_orang.png',       'size' => '35px'],
-            ['title' => 'Pemasukan',    'val' => 'Rp ' . number_format($stats['pemasukan'], 0, ',', '.'),    'bg' => '#0CCC0C', 'icon' => 'icon_pemasukan.png',   'size' => '30px'],
-            ['title' => 'Pengeluaran',  'val' => 'Rp ' . number_format($stats['pengeluaran'], 0, ',', '.'),  'bg' => '#F14D4D', 'icon' => 'icon_pengeluaran.png', 'size' => '30px'],
-            ['title' => 'Laba Bersih',  'val' => 'Rp ' . number_format($stats['laba_bersih'], 0, ',', '.'),    'bg' => '#E7C255', 'icon' => 'icon_lababersih.png',  'size' => '40px'],
+            ['title' => 'Pemasukan',    'val' => 'Rp ' . number_format($stats['pemasukan'], 0, ',', '.'),    'bg' => '#4472DF', 'icon' => 'icon_pemasukan.png',   'size' => '30px'],
+            ['title' => 'Pengeluaran',  'val' => 'Rp ' . number_format($stats['pengeluaran'], 0, ',', '.'),  'bg' => '#D74E4E', 'icon' => 'icon_pengeluaran.png', 'size' => '30px'],
+            ['title' => 'Laba Bersih',  'val' => 'Rp ' . number_format($stats['laba_bersih'], 0, ',', '.'),  'bg' => '#4D0B87', 'icon' => 'icon_lababersih.png',  'size' => '40px'],
         ];
 
         $role = Auth::user()->peran ?? 'admin';
@@ -54,10 +54,10 @@
 
 </div>
 
-{{-- ── PANEL RINCIAN KEUANGAN (FORMAT KOTAK & TETAP BERWARNA) ── --}}
+{{-- ── PANEL RINCIAN KEUANGAN (WARNA DISAMAKAN DENGAN LAPORAN KEUANGAN) ── --}}
 <div class="finance-panel" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
     
-    {{-- Header Panel: Disamakan dengan header tabel Kelola Murid --}}
+    {{-- Header Panel --}}
     <div style="display: flex; justify-content: space-between; align-items: center; background-color: #F3E8FF; padding: 15px 25px; border-bottom: 1px solid #E5E7EB;">
         <h2 style="font-size: 16px; font-weight: 700; color: #111827; margin: 0;">Rincian Keuangan Terakhir</h2>
         @if($role !== 'tentor')
@@ -65,19 +65,38 @@
         @endif
     </div>
 
-    {{-- Daftar Rincian: Dari Database --}}
+    {{-- Daftar Rincian: Warna disamakan dengan Laporan Keuangan --}}
     <div style="padding: 20px; display: flex; flex-direction: column; gap: 10px;">
         
         @forelse($riwayatKeuangan as $item)
             @php
-                $isPemasukan = $item->kategori == 'pemasukan';
-                $bgColor = $isPemasukan ? '#60A060' : '#D74E4E';
-                $icon = $isPemasukan ? '📥' : '📤';
+                // Tentukan warna berdasarkan kategori (SAMA DENGAN LAPORAN KEUANGAN)
+                switch ($item->kategori) {
+                    case 'pemasukan':
+                        $bgColor = '#4472DF'; // Biru
+                        $icon = '📥';
+                        break;
+                    case 'pengeluaran':
+                        $bgColor = '#D74E4E'; // Merah
+                        $icon = '📤';
+                        break;
+                    case 'piutang':
+                        $bgColor = '#E7C255'; // Kuning
+                        $icon = '💰';
+                        break;
+                    case 'uang_muka':
+                        $bgColor = '#4AB462'; // Hijau
+                        $icon = '💵';
+                        break;
+                    default:
+                        $bgColor = '#6B7280'; // Abu-abu
+                        $icon = '📋';
+                }
             @endphp
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: {{ $bgColor }}; color: white; border-radius: 12px; transition: 0.2s;">
                 <span style="font-weight: 600; font-size: 14px;">
                     {{ $icon }} {{ $item->rincian }}
-                    <small style="opacity: 0.8; font-weight: normal;">({{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y') }})</small>
+                    <small style="opacity: 0.9; font-weight: normal; margin-left: 8px;">({{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y') }})</small>
                 </span>
                 <span style="font-weight: 700; font-size: 14px;">
                     Rp {{ number_format($item->jumlah, 0, ',', '.') }}

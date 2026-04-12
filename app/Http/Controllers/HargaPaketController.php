@@ -7,6 +7,9 @@ use App\Models\HargaPaket;
 
 class HargaPaketController extends Controller
 {
+    // Daftar tingkat yang tersedia (ENUM)
+    private $tingkatOptions = ['SD', 'SMP', 'SMA'];
+
     // Menampilkan semua data
     public function index(Request $request)
     {
@@ -23,26 +26,50 @@ class HargaPaketController extends Controller
     public function create(Request $request)
     {
         $role = $request->route()->getPrefix() == '/superadmin' ? 'superadmin' : 'admin';
-        return view('dashboard.shared.harga-paket.create-paket', ['role' => $role]);
+        
+        // ✅ Ambil tingkat yang SUDAH TERPAKAI di database
+        $tingkatTerpakai = HargaPaket::pluck('tingkat')->toArray();
+        
+        // ✅ Filter tingkat yang BELUM TERPAKAI
+        $tingkatTersedia = array_diff($this->tingkatOptions, $tingkatTerpakai);
+        
+        return view('dashboard.shared.harga-paket.create-paket', [
+            'role' => $role,
+            'tingkatTersedia' => $tingkatTersedia   // ✅ Kirim ke view
+        ]);
     }
 
     // Simpan data
     public function store(Request $request)
-{
-    $request->validate([
-        'tingkat' => 'required|string|max:25',
-        'harga' => 'required|numeric|min:0'
-    ]);
+    {
+        $request->validate([
+            'tingkat' => 'required|in:SD,SMP,SMA',   // ✅ Validasi enum
+            'harga' => 'required|numeric|min:1000'
+        ], [
+            'tingkat.required' => 'Tingkat wajib dipilih.',
+            'tingkat.in' => 'Tingkat tidak valid.',
+            'harga.required' => 'Harga paket wajib diisi.',
+            'harga.numeric' => 'Harga harus berupa angka.',
+            'harga.min' => 'Harga minimal Rp 1.000.',
+        ]);
 
-    HargaPaket::create([
-        'tingkat' => $request->tingkat,
-        'harga' => $request->harga
-    ]);
+        // ✅ Cek apakah tingkat sudah ada (double protection)
+        $existing = HargaPaket::where('tingkat', $request->tingkat)->first();
+        if ($existing) {
+            return redirect()->back()
+                ->withErrors(['tingkat' => 'Tingkat ' . $request->tingkat . ' sudah ada. Pilih tingkat lain.'])
+                ->withInput();
+        }
 
-    $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-    
-    return redirect()->route($role . '.harga-paket')->with('success', 'Data berhasil ditambahkan');
-}
+        HargaPaket::create([
+            'tingkat' => $request->tingkat,
+            'harga' => $request->harga
+        ]);
+
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        
+        return redirect()->route($role . '.harga-paket')->with('success', 'Data berhasil ditambahkan');
+    }
 
     // Form edit data
     public function edit(Request $request, $id)
@@ -57,25 +84,29 @@ class HargaPaketController extends Controller
     }
 
     // Update data
-   public function update(Request $request, $id)
-{
-    $request->validate([
-        'tingkat' => 'required|string|max:25',
-        'harga' => 'required|numeric|min:0',
-        'biaya_pendaftaran' => 'nullable|numeric|min:0'
-    ]);
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            // ✅ tingkat TIDAK DIVALIDASI karena tidak boleh diubah
+            'harga' => 'required|numeric|min:1000',
+        ], [
+            'harga.required' => 'Harga paket wajib diisi.',
+            'harga.numeric' => 'Harga harus berupa angka.',
+            'harga.min' => 'Harga minimal Rp 1.000.',
+        ]);
 
-    $paket = HargaPaket::findOrFail($id);
-    $paket->update([
-        'tingkat' => $request->tingkat,
-        'harga' => $request->harga,
-       
-    ]);
+        $paket = HargaPaket::findOrFail($id);
+        
+        // ✅ HANYA UPDATE HARGA, tingkat TIDAK DIUBAH
+        $paket->update([
+            'harga' => $request->harga,
+            // tingkat tidak diupdate
+        ]);
 
-    $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-    
-    return redirect()->route($role . '.harga-paket')->with('success', 'Data berhasil diperbarui');
-}
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        
+        return redirect()->route($role . '.harga-paket')->with('success', 'Data berhasil diperbarui');
+    }
 
     // Hapus data
     public function destroy($id)
@@ -88,4 +119,4 @@ class HargaPaketController extends Controller
         
         return redirect()->route($role . '.harga-paket')->with('success', 'Data berhasil dihapus');
     }
-}       
+}

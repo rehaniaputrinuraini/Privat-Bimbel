@@ -173,4 +173,4 @@
             });
         }
     });
-</script><?php /**PATH C:\xampp\htdocs\privat-bimbel\resources\views/components/sidebar.blade.php ENDPATH**/ ?>
+</script><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/components/sidebar.blade.php ENDPATH**/ ?>

@@ -9,16 +9,17 @@
         gap: 20px; 
         align-items: flex-start; 
         flex-wrap: wrap;
+        font-family: 'Poppins', sans-serif;
     }
     
     .presensi-card { 
-        background: #fff; 
-        border-radius: 20px; 
-        padding: 25px; 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+        background: #FFFFFF; 
+        border-radius: 15px; 
+        padding: 30px; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.02); 
         flex: 1; 
         min-width: 350px;
-        border: 1px solid #F3F4F6;
+        border: 1.5px solid #E5E7EB;
     }
     
     .card-header-custom h3 { 
@@ -44,7 +45,7 @@
         border-radius: 12px; 
         padding: 14px 20px; 
         font-size: 15px; 
-        font-weight: 700; 
+        font-weight: 600; 
         color: #fff; 
         cursor: pointer; 
         display: flex; 
@@ -53,6 +54,7 @@
         flex: 1; 
         justify-content: center; 
         transition: 0.3s; 
+        font-family: 'Poppins', sans-serif;
     }
     
     .btn-masuk { background-color: #10B981; }
@@ -69,10 +71,11 @@
     .form-group { margin-bottom: 18px; }
     .form-group label { 
         display: block; 
-        font-size: 13px; 
-        font-weight: 700; 
+        font-size: 14px; 
+        font-weight: 600; 
         color: #374151; 
         margin-bottom: 8px; 
+        font-family: 'Poppins', sans-serif;
     }
     .form-control-custom { 
         width: 100%; 
@@ -82,6 +85,7 @@
         outline: none; 
         font-size: 14px; 
         background: #FFFFFF;
+        font-family: 'Poppins', sans-serif;
     }
     .form-control-custom:focus { 
         border-color: #4D0B87; 
@@ -98,6 +102,7 @@
         gap: 20px; 
         font-size: 14px; 
         color: #4B5563; 
+        font-family: 'Poppins', sans-serif;
     }
     .radio-group label {
         font-weight: normal;
@@ -115,6 +120,7 @@
         color: #9CA3AF; 
         cursor: pointer;
         transition: 0.3s;
+        font-family: 'Poppins', sans-serif;
     }
     .upload-area:hover { 
         border-color: #4D0B87; 
@@ -128,10 +134,11 @@
     }
     
     .upload-hint {
-        font-size: 11px;
+        font-size: 12px;
         color: #EF4444;
         margin-top: 5px;
         display: block;
+        font-family: 'Poppins', sans-serif;
     }
     
     .upload-hint-success {
@@ -144,11 +151,13 @@
         color: white; 
         border: none; 
         padding: 14px; 
-        border-radius: 12px; 
-        font-weight: 700; 
-        font-size: 14px;
+        border-radius: 10px; 
+        font-weight: 600; 
+        font-size: 16px;
         cursor: pointer; 
         transition: 0.3s; 
+        font-family: 'Poppins', sans-serif;
+        box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);
     }
     .btn-submit:hover { 
         background: #3B0A6B; 
@@ -158,16 +167,18 @@
         background: #9CA3AF;
         cursor: not-allowed;
         transform: none;
+        box-shadow: none;
     }
 
     .presensi-info { 
-        font-size: 12px; 
+        font-size: 13px; 
         color: #6B7280; 
         line-height: 1.6; 
-        padding: 12px; 
+        padding: 12px 15px; 
         background: #F9FAFB; 
         border-radius: 10px; 
         border-left: 4px solid #4D0B87;
+        font-family: 'Poppins', sans-serif;
     }
     
     .alert-success {
@@ -177,6 +188,8 @@
         border-radius: 10px;
         margin-bottom: 15px;
         display: none;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
     }
     
     .alert-error {
@@ -186,6 +199,8 @@
         border-radius: 10px;
         margin-bottom: 15px;
         display: none;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
     }
     
     #previewFoto {
@@ -194,20 +209,25 @@
         border-radius: 10px;
         display: none;
     }
+    
+    small {
+        font-family: 'Poppins', sans-serif;
+        font-size: 12px;
+    }
 </style>
 
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
     <div style="width: 100%;">
 
         <div style="margin-bottom: 25px;">
-            <p style="color: #6B7280; font-size: 13px; margin: 0 0 4px 0;">
+            <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
                 <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?>
 
             </p>
             <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
                 Presensi
             </h1>
-            <p style="color: #6B7280; font-size: 14px; margin: 4px 0 0 0;">Silakan kelola kehadiran sesi mengajar Anda di sini.</p>
+            <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Silakan kelola kehadiran sesi mengajar Anda di sini.</p>
         </div>
 
         <div id="alertSuccess" class="alert-success">
@@ -218,7 +238,7 @@
         </div>
 
         <?php if(isset($error)): ?>
-            <div style="background: #FEE2E2; color: #EF4444; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+            <div style="background: #FEE2E2; color: #EF4444; padding: 12px; border-radius: 10px; margin-bottom: 20px; font-family: 'Poppins', sans-serif;">
                 <i class="fas fa-exclamation-circle"></i> <?php echo e($error); ?>
 
             </div>
@@ -258,25 +278,25 @@
                     <?php echo csrf_field(); ?>
                     
                     <div class="form-group">
-                        <label>Kelas <span style="color: red;">*</span></label>
+                        <label>Kelas <span style="color: #EF4444;">*</span></label>
                         <input type="text" class="form-control-custom" id="kelas" name="kelas" 
-                               placeholder="Contoh: 12D, 9A, 11 IPA" maxlength="50" required>
-                        <small style="font-size: 11px; color: #6B7280;">Masukkan nama kelas yang diajar (contoh: 12D, 9A, 11 IPA)</small>
+                               placeholder="Masukkan kelas..." maxlength="50" required>
+                        <small style="font-size: 12px; color: #6B7280;">Masukkan nama kelas yang diajar</small>
                     </div>
 
                     <div class="form-group">
-                        <label>Jenjang yang Diajar <span style="color: red;">*</span></label>
+                        <label>Jenjang yang Diajar <span style="color: #EF4444;">*</span></label>
                         <select class="form-control-custom" id="jenjang" name="jenjang" required>
                             <option value="">Pilih Jenjang</option>
                             <option value="SD">SD (Sekolah Dasar)</option>
                             <option value="SMP">SMP (Sekolah Menengah Pertama)</option>
                             <option value="SMA">SMA (Sekolah Menengah Atas)</option>
                         </select>
-                        <small style="font-size: 11px; color: #6B7280;">Jenjang akan mempengaruhi perhitungan honor</small>
+                        <small style="font-size: 12px; color: #6B7280;">Jenjang akan mempengaruhi perhitungan honor</small>
                     </div>
 
                     <div class="form-group">
-                        <label>Status Kehadiran Murid <span style="color: red;">*</span></label>
+                        <label>Status Kehadiran Murid <span style="color: #EF4444;">*</span></label>
                         <div class="radio-group">
                             <label style="cursor: pointer;">
                                 <input type="radio" name="status_murid" value="hadir" checked> Hadir
@@ -290,11 +310,11 @@
                     <div class="form-group">
                         <label>Keterangan</label>
                         <textarea class="form-control-custom" id="keterangan" name="keterangan" 
-                                  placeholder="Contoh: Materi yang diajarkan, kendala, atau catatan lainnya..."></textarea>
+                                  placeholder="Isikan materi yang diajarkan, kendala, atau catatan lainnya..."></textarea>
                     </div>
 
                     <div class="form-group">
-                        <label>Upload Foto Kegiatan <span style="color: red;">*</span></label>
+                        <label>Upload Foto Kegiatan <span style="color: #EF4444;">*</span></label>
                         <div class="upload-area" id="uploadArea">
                             <i class="fas fa-camera" style="font-size: 20px; margin-bottom: 8px; display: block;"></i>
                             <p style="font-size: 12px; margin: 0;">Klik untuk ambil atau pilih foto KBM</p>
@@ -538,4 +558,4 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\privat-bimbel\resources\views/dashboard/tentor/presensi.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/tentor/presensi.blade.php ENDPATH**/ ?>
