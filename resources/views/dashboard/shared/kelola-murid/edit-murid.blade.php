@@ -18,36 +18,30 @@
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px;">
             </div>
 
-            {{-- Nama Lengkap (WAJIB) --}}
+            {{-- Nama Lengkap --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Lengkap <span style="color: red;">*</span></label>
-                <input type="text" name="nama_lengkap_murid" value="{{ $murid->nama_lengkap_murid }}" placeholder="Masukkan Nama Lengkap" required 
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Lengkap</label>
+                <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap', $murid->nama_lengkap) }}" 
+                       placeholder="Masukkan Nama Lengkap"
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-                @error('nama_lengkap_murid') <small style="color: red;">{{ $message }}</small> @enderror
+                @error('nama_lengkap') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
-            {{-- Kelas (WAJIB) --}}
+            {{-- Asal Sekolah --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Kelas <span style="color: red;">*</span></label>
-                <input type="text" name="kelas" value="{{ $murid->kelas }}" placeholder="Masukkan Kelas" required 
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-                @error('kelas') <small style="color: red;">{{ $message }}</small> @enderror
-            </div>
-
-            {{-- Asal Sekolah (WAJIB) --}}
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Asal Sekolah <span style="color: red;">*</span></label>
-                <input type="text" name="asal_sekolah" value="{{ $murid->asal_sekolah }}" placeholder="Masukkan Asal Sekolah" required 
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Asal Sekolah</label>
+                <input type="text" name="asal_sekolah" value="{{ old('asal_sekolah', $murid->asal_sekolah) }}" 
+                       placeholder="Masukkan Asal Sekolah"
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                 @error('asal_sekolah') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
-            {{-- Alamat (WAJIB) --}}
+            {{-- Alamat --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Alamat <span style="color: red;">*</span></label>
-                <textarea name="alamat_murid" rows="3" placeholder="Masukkan Alamat Lengkap" required 
-                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-family: 'Poppins', sans-serif; font-size: 14px; resize: vertical;">{{ $murid->alamat_murid }}</textarea>
-                @error('alamat_murid') <small style="color: red;">{{ $message }}</small> @enderror
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Alamat</label>
+                <textarea name="alamat" rows="3" placeholder="Masukkan Alamat Lengkap"
+                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-family: 'Poppins', sans-serif; font-size: 14px; resize: vertical;">{{ old('alamat', $murid->alamat) }}</textarea>
+                @error('alamat') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
             <hr style="border: 0; border-top: 1px solid #E5E7EB; margin-bottom: 25px;">
@@ -56,28 +50,31 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; align-items: start;">
                 {{-- KOLOM KIRI --}}
                 <div>
-                    {{-- No HP Siswa (WAJIB & HANYA ANGKA) --}}
+                    {{-- No HP Siswa --}}
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No HP Siswa <span style="color: red;">*</span></label>
-                        <input type="tel" inputmode="numeric" name="no_hp_murid" value="{{ $murid->no_hp_murid }}" placeholder="Masukkan No HP Siswa" required
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No HP Siswa</label>
+                        <input type="tel" inputmode="numeric" name="no_hp" value="{{ old('no_hp', $murid->no_hp) }}" 
+                               placeholder="Masukkan No HP Siswa"
                                onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-                        @error('no_hp_murid') <small style="color: red;">{{ $message }}</small> @enderror
+                        @error('no_hp') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
 
-                    {{-- Nama Orang Tua (WAJIB) --}}
+                    {{-- Nama Orang Tua --}}
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Orang Tua <span style="color: red;">*</span></label>
-                        <input type="text" name="nama_orang_tua" value="{{ $murid->nama_orang_tua }}" placeholder="Masukkan Nama Orang Tua" required 
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Orang Tua</label>
+                        <input type="text" name="nama_orang_tua" value="{{ old('nama_orang_tua', $murid->nama_orang_tua) }}" 
+                               placeholder="Masukkan Nama Orang Tua"
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                         @error('nama_orang_tua') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
 
-                    {{-- No HP Orang Tua (WAJIB & HANYA ANGKA) --}}
+                    {{-- No HP Orang Tua --}}
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No HP Orang Tua <span style="color: red;">*</span></label>
-                        <input type="tel" inputmode="numeric" name="no_hp_orang_tua" value="{{ $murid->no_hp_orang_tua }}" placeholder="Masukkan No HP Orang Tua" required
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No HP Orang Tua</label>
+                        <input type="tel" inputmode="numeric" name="no_hp_orang_tua" value="{{ old('no_hp_orang_tua', $murid->no_hp_orang_tua) }}" 
+                               placeholder="Masukkan No HP Orang Tua"
                                onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
@@ -87,38 +84,23 @@
 
                 {{-- KOLOM KANAN --}}
                 <div>
-                    {{-- Paket Awal (READONLY) --}}
+                    {{-- Tahun Masuk --}}
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Paket Awal (Rp)</label>
-                        <input type="text" name="paket_awal" id="paket_awal" value="100000" readonly 
-                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px;">
-                        <small style="color: #6B7280;">Biaya pendaftaran tetap Rp 100.000</small>
-                    </div>
-
-                    {{-- Pilihan Paket (WAJIB) --}}
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Pilihan Paket <span style="color: red;">*</span></label>
-                        <select name="pilihan_paket" id="pilihan_paket" required 
-                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-                            <option value="">Pilih Paket</option>
-                            @foreach($paketList as $paket)
-                                <option value="{{ $paket->tingkat }}" {{ $murid->pilihan_paket == $paket->tingkat ? 'selected' : '' }}>
-                                    {{ $paket->tingkat }} - Rp {{ number_format($paket->harga, 0, ',', '.') }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('pilihan_paket') <small style="color: red;">{{ $message }}</small> @enderror
-                    </div>
-
-                    {{-- Tahun Masuk (WAJIB & HANYA ANGKA) --}}
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tahun Masuk <span style="color: red;">*</span></label>
-                        <input type="tel" inputmode="numeric" name="tahun_masuk" value="{{ $murid->tahun_masuk }}" placeholder="Masukkan Tahun Masuk" required
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tahun Masuk</label>
+                        <input type="tel" inputmode="numeric" name="tahun_masuk" value="{{ old('tahun_masuk', $murid->tahun_masuk) }}" 
+                               placeholder="Masukkan Tahun Masuk"
                                min="2000" max="{{ date('Y') }}"
                                onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                         @error('tahun_masuk') <small style="color: red;">{{ $message }}</small> @enderror
+                    </div>
+
+                    {{-- Tanggal Daftar (READONLY) --}}
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tanggal Daftar</label>
+                        <input type="text" value="{{ $murid->tanggal_daftar ? date('d/m/Y', strtotime($murid->tanggal_daftar)) : '-' }}" readonly 
+                               style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px;">
                     </div>
                 </div>
             </div>
@@ -128,111 +110,12 @@
                 <button type="button" onclick="bukaModalBatal()" 
                         style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 16px; background: #FFFFFF; cursor: pointer;">Keluar</button>
                 <button type="submit" 
-                        style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">Simpan</button>
+                        style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">Update</button>
             </div>
         </form>
     </div>
 </div>
 
-{{-- MODAL KONFIRMASI BATAL (UNTUK KELUAR) --}}
-<div id="modalBatal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
-    <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
-        <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
-        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Batalkan?</h2>
-        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Data yang Anda masukkan tidak akan disimpan. Yakin ingin keluar?</p>
-        <div style="display: flex; gap: 10px; justify-content: center;">
-            <button onclick="tutupModalBatal()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Tidak</button>
-            <a href="#" id="confirmKeluarLink" style="flex: 1; text-decoration: none;">
-                <button type="button" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Keluar</button>
-            </a>
-        </div>
-    </div>
-</div>
-
-{{-- MODAL KONFIRMASI UNTUK PINDAH HALAMAN (SAAT FORM BERUBAH) --}}
-<div id="modalPindahHalaman" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
-    <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
-        <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
-        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Perubahan Belum Disimpan</h2>
-        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Ada data yang belum disimpan. Yakin ingin meninggalkan halaman ini?</p>
-        <div style="display: flex; gap: 10px; justify-content: center;">
-            <button onclick="tutupModalPindah()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Tidak</button>
-            <button id="confirmPindahBtn" style="flex: 1; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Keluar</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    // ========== UNSAVED CHANGES WARNING ==========
-    let formChanged = false;
-    let pendingUrl = null;
-    const form = document.getElementById('mainForm');
-    
-    // Deteksi perubahan pada semua input, select, textarea (abaikan readonly)
-    if (form) {
-        const inputs = form.querySelectorAll('input:not([readonly]), select, textarea');
-        inputs.forEach(input => {
-            input.addEventListener('change', () => formChanged = true);
-            input.addEventListener('keyup', () => formChanged = true);
-        });
-        
-        // Reset saat form disubmit
-        form.addEventListener('submit', () => formChanged = false);
-    }
-    
-    // Fungsi untuk modal keluar (tombol keluar)
-    function bukaModalBatal() { 
-        if (formChanged) {
-            // Jika ada perubahan, buka modal peringatan
-            document.getElementById('modalPindahHalaman').style.display = 'flex';
-            document.getElementById('confirmPindahBtn').onclick = function() {
-                formChanged = false;
-                window.location.href = "{{ route($role . '.kelola-murid') }}";
-            };
-        } else {
-            // Jika tidak ada perubahan, buka modal konfirmasi biasa
-            document.getElementById('modalBatal').style.display = 'flex';
-            document.getElementById('confirmKeluarLink').href = "{{ route($role . '.kelola-murid') }}";
-        }
-    }
-    
-    function tutupModalBatal() { 
-        document.getElementById('modalBatal').style.display = 'none'; 
-    }
-    
-    function tutupModalPindah() {
-        document.getElementById('modalPindahHalaman').style.display = 'none';
-        pendingUrl = null;
-    }
-    
-    // Cegah klik link sidebar jika form berubah
-    document.addEventListener('DOMContentLoaded', function() {
-        const sidebarLinks = document.querySelectorAll('.sidebar-nav a, .sidebar-footer a, .logout-btn');
-        
-        sidebarLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                if (formChanged) {
-                    e.preventDefault();
-                    const targetUrl = this.href || (this.tagName === 'BUTTON' ? null : this.getAttribute('href'));
-                    if (targetUrl && targetUrl !== '#') {
-                        pendingUrl = targetUrl;
-                        document.getElementById('modalPindahHalaman').style.display = 'flex';
-                        document.getElementById('confirmPindahBtn').onclick = function() {
-                            formChanged = false;
-                            window.location.href = pendingUrl;
-                        };
-                    } else if (this.classList.contains('logout-btn')) {
-                        pendingUrl = "{{ route('logout') }}";
-                        document.getElementById('modalPindahHalaman').style.display = 'flex';
-                        document.getElementById('confirmPindahBtn').onclick = function() {
-                            formChanged = false;
-                            document.getElementById('modalPindahHalaman').style.display = 'none';
-                            bukaModalLogout();
-                        };
-                    }
-                }
-            });
-        });
-    });
-</script>
+{{-- MODAL SCRIPTS (SAMA SEPERTI CREATE) --}}
+{{-- Copy script yang sama dari view create di atas --}}
 @endsection

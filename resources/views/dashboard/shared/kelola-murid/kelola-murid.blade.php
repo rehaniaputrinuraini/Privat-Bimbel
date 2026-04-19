@@ -32,14 +32,21 @@
                        style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
             </div>
 
-            {{-- DROPDOWN PILIHAN PAKET - DINAMIS DARI DATABASE --}}
+            {{-- FILTER PAKET - AMBIL DARI tr_paket --}}
             <select id="filterPaket" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;">
                 <option value="">--- Pilihan Paket ---</option>
                 @php
-                    // Ambil data unik dari tabel murid
-                    $paketUnik = $murids->pluck('pilihan_paket')->unique()->sort()->filter();
+                    // Ambil paket unik dari data yang ditampilkan
+                    $paketList = [];
+                    foreach($murids as $m) {
+                        $paket = $m->transaksiPaket()->orderBy('created_at', 'desc')->first();
+                        if($paket && $paket->paket) {
+                            $paketList[$paket->paket->tingkat] = $paket->paket->tingkat;
+                        }
+                    }
+                    sort($paketList);
                 @endphp
-                @foreach($paketUnik as $paket)
+                @foreach($paketList as $paket)
                     <option value="{{ $paket }}">{{ $paket }}</option>
                 @endforeach
             </select>
@@ -62,7 +69,7 @@
         </a>
     </div>
 
-    {{-- TABEL UTAMA --}}
+    {{-- TABEL MURID --}}
     <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
@@ -76,8 +83,7 @@
                         <th style="padding: 15px; font-weight: 700;">No HP Siswa</th>
                         <th style="padding: 15px; font-weight: 700;">Nama Orang Tua</th>
                         <th style="padding: 15px; font-weight: 700;">No HP Ortu</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Paket Awal</th>
-                        <th style="padding: 15px; font-weight: 700;">Pilihan Paket</th>
+                        <th style="padding: 15px; font-weight: 700;">Paket</th>
                         <th style="padding: 15px; font-weight: 700; text-align: center;">Tahun Masuk</th>
                         <th style="padding: 15px; font-weight: 700; text-align: center;">Aksi</th>
                     </tr>
@@ -86,27 +92,40 @@
                     @forelse($murids as $index => $m)
                     <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                         <td style="padding: 15px;">{{ $loop->iteration }}</td>
-                        <td style="padding: 15px;">{{ $m->nama_lengkap_murid }}</td>
-                        <td style="padding: 15px;">{{ $m->kelas }}</td>
-                        <td style="padding: 15px;">{{ $m->asal_sekolah }}</td>
-                        <td style="padding: 15px; color: #6B7280;">{{ $m->alamat_murid }}</td>
-                        <td style="padding: 15px;">{{ $m->no_hp_murid }}</td>
-                        <td style="padding: 15px;">{{ $m->nama_orang_tua }}</td>
-                        <td style="padding: 15px;">{{ $m->no_hp_orang_tua }}</td>
-                        <td style="padding: 15px; text-align: center;">
-                            Rp {{ number_format($m->paket_awal, 0, ',', '.') }}
+                        <td style="padding: 15px; font-weight: 500;">{{ $m->nama_lengkap }}</td>
+                        <td style="padding: 15px;">
+                            @php
+                                // Ambil kelas TERBARU berdasarkan created_at
+                                $kelasTerbaru = $m->transaksiKelas()
+                                    ->orderBy('created_at', 'desc')
+                                    ->first();
+                            @endphp
+                            {{ $kelasTerbaru && $kelasTerbaru->kelas ? $kelasTerbaru->kelas->jenjang . ' - ' . $kelasTerbaru->kelas->nama_kelas : '-' }}
                         </td>
-                        <td style="padding: 15px;">{{ $m->pilihan_paket }}</td>
-                        <td style="padding: 15px; text-align: center;">{{ $m->tahun_masuk }}</td>
+                        <td style="padding: 15px;">{{ $m->asal_sekolah ?? '-' }}</td>
+                        <td style="padding: 15px; max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="{{ $m->alamat }}">{{ $m->alamat ?? '-' }}</td>
+                        <td style="padding: 15px;">{{ $m->no_hp ?? '-' }}</td>
+                        <td style="padding: 15px;">{{ $m->nama_orang_tua ?? '-' }}</td>
+                        <td style="padding: 15px;">{{ $m->no_hp_orang_tua ?? '-' }}</td>
+                        <td style="padding: 15px;">
+                            @php
+                                // Ambil paket TERBARU berdasarkan created_at
+                                $paketTerbaru = $m->transaksiPaket()
+                                    ->orderBy('created_at', 'desc')
+                                    ->first();
+                            @endphp
+                            {{ $paketTerbaru && $paketTerbaru->paket ? $paketTerbaru->paket->tingkat : '-' }}
+                        </td>
+                        <td style="padding: 15px; text-align: center;">{{ $m->tahun_masuk ?? date('Y') }}</td>
                         <td style="padding: 15px; text-align: center;">
                             <div style="display: flex; gap: 8px; justify-content: center;">
                                 <a href="{{ route($role . '.murid.edit', $m->id_murid) }}" 
-                                   style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-size: 12px;">
+                                   style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; white-space: nowrap;">
                                     <i class="far fa-edit"></i> Edit
                                 </a>
                                 <button type="button" 
-                                        onclick="bukaModalHapus('{{ $m->id_murid }}', '{{ $m->nama_lengkap_murid }}')" 
-                                        style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 12px;">
+                                        onclick="bukaModalHapus('{{ $m->id_murid }}', '{{ $m->nama_lengkap }}')" 
+                                        style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; white-space: nowrap;">
                                     <i class="fas fa-trash"></i> Hapus
                                 </button>
                             </div>
@@ -114,7 +133,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="12" style="padding: 40px; text-align: center; color: #9CA3AF;">
+                        <td colspan="11" style="padding: 40px; text-align: center; color: #9CA3AF;">
                             <i class="fas fa-database" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
                             Belum ada data murid. Silakan tambah data baru.
                         </td>
@@ -128,19 +147,7 @@
     {{-- PAGINATION & SHOW ENTRIES --}}
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
-                <option value="10">10 baris</option>
-                <option value="25">25 baris</option>
-                <option value="50">50 baris</option>
-            </select>
-            <span style="color: #374151; font-size: 13px;">Menampilkan {{ $murids->count() }} data</span>
-        </div>
-
-        <div style="display: flex; gap: 5px;">
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-double-left"></i></button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-left"></i></button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">1</button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-right"></i></button>
+            <span style="color: #374151; font-size: 13px;">Total: {{ $murids->count() }} murid</span>
         </div>
     </div>
 
@@ -181,14 +188,14 @@
         });
     });
 
-    // Filter Paket (dinamis dari data yang ada)
+    // Filter Paket
     document.getElementById('filterPaket').addEventListener('change', function() {
         let filterValue = this.value;
         let rows = document.querySelectorAll('#tableBody tr');
         
         rows.forEach(row => {
-            if(row.cells && row.cells.length >= 10) {
-                let paket = row.cells[9]?.innerText || '';
+            if(row.cells && row.cells.length >= 9) {
+                let paket = row.cells[8]?.innerText.trim() || '';
                 if(filterValue === '' || paket === filterValue) {
                     row.style.display = '';
                 } else {
@@ -204,8 +211,8 @@
         let rows = document.querySelectorAll('#tableBody tr');
         
         rows.forEach(row => {
-            if(row.cells && row.cells.length >= 11) {
-                let tahun = row.cells[10]?.innerText || '';
+            if(row.cells && row.cells.length >= 10) {
+                let tahun = row.cells[9]?.innerText.trim() || '';
                 if(filterValue === '' || tahun === filterValue) {
                     row.style.display = '';
                 } else {
