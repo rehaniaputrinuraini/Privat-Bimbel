@@ -7,15 +7,13 @@ use Carbon\Carbon;
 
 class Pembayaran extends Model
 {
-    // ✅ GANTI NAMA TABEL KE tr_transaksi
     protected $table = 'tr_transaksi';
-    
     protected $primaryKey = 'id_pembayaran';
     
     protected $fillable = [
         'id_murid',
         'id_paket',
-        'id_transaksi',        // ✅ TAMBAHKAN INI
+        'id_transaksi',
         'tanggal',
         'paket_awal',
         'paket_selanjutnya',
@@ -37,6 +35,12 @@ class Pembayaran extends Model
     public function paket()
     {
         return $this->belongsTo(HargaPaket::class, 'id_paket', 'id_paket');
+    }
+    
+    // Relasi ke transaksi umum (ms_transaksi)
+    public function transaksiUmum()
+    {
+        return $this->belongsTo(TransaksiUmum::class, 'id_transaksi', 'id_transaksi');
     }
     
     // Accessor untuk format tanggal Indonesia

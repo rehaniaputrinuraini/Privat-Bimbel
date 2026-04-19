@@ -7,7 +7,7 @@
     <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Edit Harga Paket</h1>
 
     <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
-        <form action="{{ route('superadmin.harga-paket.update', $paket->id_paket) }}" method="POST" id="mainForm">
+        <form action="{{ route($role . '.harga-paket.update', $paket->id_paket) }}" method="POST" id="mainForm">
             @csrf
             @method('PUT')
             
@@ -55,7 +55,7 @@
         <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Perubahan Anda tidak akan disimpan. Yakin ingin keluar?</p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalBatal()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Tidak</button>
-            <a href="{{ route('superadmin.master-data') }}" style="flex: 1; text-decoration: none;">
+            <a href="{{ route($role . '.master-data') }}" style="flex: 1; text-decoration: none;">
                 <button type="button" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Keluar</button>
             </a>
         </div>
@@ -94,7 +94,7 @@
             document.getElementById('modalPindahHalaman').style.display = 'flex';
             document.getElementById('confirmPindahBtn').onclick = function() {
                 formChanged = false;
-                window.location.href = "{{ route('superadmin.master-data') }}"; // ✅ SUDAH DIPERBAIKI
+                window.location.href = "{{ route($role . '.master-data') }}";
             };
         } else {
             document.getElementById('modalBatal').style.display = 'flex';

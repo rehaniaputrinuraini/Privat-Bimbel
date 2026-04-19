@@ -5,6 +5,7 @@
 @section('content')
 <div style="width: 100%;">
     
+    {{-- HEADER --}}
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
             {{ isset($bulan) && isset($tahun) ? \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('F Y') : \Carbon\Carbon::now()->translatedFormat('F Y') }}
@@ -15,17 +16,19 @@
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Lihat riwayat kehadiran mengajar Anda setiap bulannya</p>
     </div>
 
+    {{-- FILTER FORM --}}
     <form method="GET" action="{{ route('tentor.riwayat-presensi') }}" id="filterForm">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
             <div style="display: flex; align-items: center; gap: 12px; flex: 1; flex-wrap: wrap;">
                 
-                {{-- SEARCH BAR (LIVE SEARCH) --}}
+                {{-- SEARCH BAR --}}
                 <div style="position: relative; width: 300px;">
                     <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
-                    <input type="text" id="liveSearchInput" placeholder="Cari Kelas, Jenjang, Status..."
+                    <input type="text" id="liveSearchInput" name="search" value="{{ $search ?? '' }}" placeholder="Cari Kelas, Ruang, Status..."
                            style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
                 </div>
 
+                {{-- FILTER BULAN --}}
                 <select name="bulan" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 140px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
                     <option value="">--- Pilih Bulan ---</option>
                     @foreach(range(1, 12) as $b)
@@ -35,6 +38,7 @@
                     @endforeach
                 </select>
 
+                {{-- FILTER TAHUN --}}
                 <select name="tahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 100px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
                     <option value="">--- Tahun ---</option>
                     @php $currentYear = date('Y'); @endphp
@@ -43,7 +47,8 @@
                     @endfor
                 </select>
                 
-                @if(($bulan ?? '') || ($tahun ?? ''))
+                {{-- RESET BUTTON --}}
+                @if(($bulan ?? '') || ($tahun ?? '') || ($search ?? ''))
                     <a href="{{ route('tentor.riwayat-presensi') }}" style="padding: 10px 15px; border-radius: 12px; background: #F3F4F6; color: #374151; text-decoration: none; font-size: 13px;">
                         <i class="fas fa-times"></i> Reset
                     </a>
@@ -54,6 +59,7 @@
         <input type="hidden" name="perPage" id="perPageInput" value="{{ $perPage ?? 10 }}">
     </form>
 
+    {{-- TABEL RIWAYAT --}}
     <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
@@ -62,27 +68,34 @@
                         <th style="padding: 15px; font-weight: 700; width: 50px;">No</th>
                         <th style="padding: 15px; font-weight: 700;">Tanggal</th>
                         <th style="padding: 15px; font-weight: 700;">Kelas</th>
-                        <th style="padding: 15px; font-weight: 700;">Jenjang</th>
+                        <th style="padding: 15px; font-weight: 700;">Ruang</th>
                         <th style="padding: 15px; font-weight: 700;">Jam Masuk</th>
                         <th style="padding: 15px; font-weight: 700;">Jam Keluar</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Status Kehadiran Murid</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: center;">Status Murid</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody" style="color: #374151;">
                     @forelse($riwayat as $index => $item)
                         @php
-                            $statusText = $item->status_murid == 'hadir' ? 'Hadir' : 'Tidak Hadir';
-                            $statusClass = $item->status_murid == 'hadir' 
-                                ? 'background: #E1F7E3; color: #0E7490;' 
-                                : 'background: #FEE2E2; color: #EF4444;';
-                            $jamMasuk = $item->jam_masuk ? \Carbon\Carbon::parse($item->jam_masuk)->format('H:i') : '-';
-                            $jamKeluar = $item->jam_keluar ? \Carbon\Carbon::parse($item->jam_keluar)->format('H:i') : '-';
+                            // Ambil data dari relasi
+                            $namaKelas = $item->kelas ? $item->kelas->jenjang . ' - ' . $item->kelas->nama_kelas : '-';
+                            $namaRuang = $item->ruang ? $item->ruang->nama_ruang : '-';
+                            
+                            // Status murid
+                            $statusText = $item->murid_hadir == 'Hadir' ? 'Hadir' : 'Tidak Hadir';
+                            $statusClass = $item->murid_hadir == 'Hadir' 
+                                ? 'background: #D1FAE5; color: #065F46;' 
+                                : 'background: #FEE2E2; color: #991B1B;';
+                            
+                            // Jam
+                            $jamMasuk = $item->jam_mulai ? \Carbon\Carbon::parse($item->jam_mulai)->format('H:i') : '-';
+                            $jamKeluar = $item->jam_selesai ? \Carbon\Carbon::parse($item->jam_selesai)->format('H:i') : '-';
                         @endphp
                         <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                             <td style="padding: 15px;">{{ $riwayat->firstItem() + $index }}</td>
                             <td style="padding: 15px;">{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}</td>
-                            <td style="padding: 15px;">{{ $item->kelas ?? '-' }}</td>
-                            <td style="padding: 15px;">{{ $item->jenjang ?? '-' }}</td>
+                            <td style="padding: 15px;">{{ $namaKelas }}</td>
+                            <td style="padding: 15px;">{{ $namaRuang }}</td>
                             <td style="padding: 15px;">{{ $jamMasuk }}</td>
                             <td style="padding: 15px;">{{ $jamKeluar }}</td>
                             <td style="padding: 15px; text-align: center;">
@@ -108,7 +121,7 @@
         </div>
     </div>
     
-    {{-- PAGINATION & SHOW ENTRIES --}}
+    {{-- PAGINATION --}}
     @if($riwayat->count() > 0)
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -118,45 +131,62 @@
                 <option value="50" {{ ($perPage ?? 10) == 50 ? 'selected' : '' }}>50 baris</option>
             </select>
             <span style="color: #374151; font-size: 13px;">
-                Menampilkan {{ $riwayat->total() }} data
+                Menampilkan {{ $riwayat->firstItem() ?? 0 }} - {{ $riwayat->lastItem() ?? 0 }} dari {{ $riwayat->total() }} data
             </span>
         </div>
 
+        {{-- PAGINATION LINKS --}}
         <div style="display: flex; gap: 5px;">
+            {{-- First Page --}}
             @if($riwayat->onFirstPage())
                 <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled>
                     <i class="fas fa-angle-double-left"></i>
                 </button>
             @else
-                <a href="{{ $riwayat->url(1) }}&{{ http_build_query(request()->except('page')) }}" 
+                <a href="{{ $riwayat->url(1) }}" 
                    style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">
                     <i class="fas fa-angle-double-left"></i>
                 </a>
             @endif
 
+            {{-- Previous Page --}}
             @if($riwayat->onFirstPage())
                 <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled>
                     <i class="fas fa-angle-left"></i>
                 </button>
             @else
-                <a href="{{ $riwayat->previousPageUrl() }}&{{ http_build_query(request()->except('page')) }}" 
+                <a href="{{ $riwayat->previousPageUrl() }}" 
                    style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">
                     <i class="fas fa-angle-left"></i>
                 </a>
             @endif
 
+            {{-- Current Page --}}
             <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: default;">
                 {{ $riwayat->currentPage() }}
             </button>
 
+            {{-- Next Page --}}
             @if($riwayat->hasMorePages())
-                <a href="{{ $riwayat->nextPageUrl() }}&{{ http_build_query(request()->except('page')) }}" 
+                <a href="{{ $riwayat->nextPageUrl() }}" 
                    style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">
                     <i class="fas fa-angle-right"></i>
                 </a>
             @else
                 <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled>
                     <i class="fas fa-angle-right"></i>
+                </button>
+            @endif
+
+            {{-- Last Page --}}
+            @if($riwayat->hasMorePages())
+                <a href="{{ $riwayat->url($riwayat->lastPage()) }}" 
+                   style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            @else
+                <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled>
+                    <i class="fas fa-angle-double-right"></i>
                 </button>
             @endif
         </div>
@@ -166,37 +196,22 @@
 </div>
 
 <script>
-    // Live Search - Mencari di Kelas, Jenjang, dan Status
+    // Live Search dengan debounce (500ms)
+    let timeout = null;
     const liveSearchInput = document.getElementById('liveSearchInput');
-    const tableBody = document.getElementById('tableBody');
+    const filterForm = document.getElementById('filterForm');
     
     liveSearchInput?.addEventListener('keyup', function() {
-        const searchValue = this.value.toLowerCase();
-        const rows = tableBody.querySelectorAll('tr');
-        
-        rows.forEach(row => {
-            if (row.cells && row.cells.length >= 6) {
-                const kelas = row.cells[2]?.innerText.toLowerCase() || '';
-                const jenjang = row.cells[3]?.innerText.toLowerCase() || '';
-                const status = row.cells[6]?.innerText.toLowerCase() || '';
-                
-                if (kelas.includes(searchValue) || 
-                    jenjang.includes(searchValue) || 
-                    status.includes(searchValue)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            }
-        });
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            filterForm.submit();
+        }, 500);
     });
 
     // Pagination Show Entries
     document.getElementById('perPageSelect')?.addEventListener('change', function() {
-        let url = new URL(window.location.href);
-        url.searchParams.set('perPage', this.value);
-        url.searchParams.delete('page');
-        window.location.href = url.toString();
+        document.getElementById('perPageInput').value = this.value;
+        filterForm.submit();
     });
 </script>
 @endsection

@@ -111,8 +111,8 @@
                     <tr style="border-bottom: 1px solid #F3F4F6;">
                         <td style="padding: 15px;"><?php echo e($index + 1); ?></td>
                         <td style="padding: 15px;"><?php echo e($t->nama_murid); ?></td>
-                        <td style="padding: 15px;"><?php echo e($t->kelas); ?></td>
-                        <td style="padding: 15px;"><?php echo e($t->paket); ?></td>
+                        <td style="padding: 15px;"><?php echo e($t->kelas ?? '-'); ?></td>
+                        <td style="padding: 15px;"><?php echo e($t->paket ?? '-'); ?></td>
                         
                         
                         <td style="padding: 15px; text-align: center;">
@@ -147,9 +147,9 @@
                             <?php endif; ?>
                         </td>
                         
-                        <td style="padding: 15px; text-align: center;"><?php echo e($t->tagihan_bulan); ?></td>
-                        <td style="padding: 15px; text-align: center; <?php echo e($t->total_piutang != '-' ? 'font-weight:700;color:#EF4444;' : ''); ?>"><?php echo e($t->total_piutang); ?></td>
-                        <td style="padding: 15px; text-align: center;"><?php echo e($t->uang_muka); ?></td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($t->tagihan_bulan ?? '-'); ?></td>
+                        <td style="padding: 15px; text-align: center; <?php echo e($t->total_piutang != '-' ? 'font-weight:700;color:#EF4444;' : ''); ?>"><?php echo e($t->total_piutang ?? '-'); ?></td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($t->uang_muka ?? '-'); ?></td>
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
@@ -175,6 +175,11 @@
                     <?php $__currentLoopData = $paketList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $paket): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <option value="<?php echo e($paket->tingkat); ?>"><?php echo e($paket->tingkat); ?></option>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </select>
+                <select id="filterJenisPembayaran" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB;">
+                    <option value="">Jenis Pembayaran</option>
+                    <option value="Tunai">Tunai</option>
+                    <option value="Transfer">Transfer</option>
                 </select>
                 <select id="filterBulan" class="filter-select" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB;">
                     <option value="">Pilih Bulan</option>
@@ -207,6 +212,7 @@
                         <th style="padding: 15px;">Paket Awal</th>
                         <th style="padding: 15px;">Paket Belajar</th>
                         <th style="padding: 15px;">Untuk Bulan</th>
+                        <th style="padding: 15px;">Jenis</th>
                         <th style="padding: 15px; text-align: center;">Total Bayar</th>
                         <th style="padding: 15px;">Keterangan</th>
                     </tr>
@@ -220,12 +226,13 @@
                         <td style="padding: 15px;"><?php echo e($r->paket_awal); ?></td>
                         <td style="padding: 15px;"><?php echo e($r->paket_selanjutnya); ?></td>
                         <td style="padding: 15px;"><?php echo e($r->bulan_dibayar); ?></td>
+                        <td style="padding: 15px;"><?php echo e($r->jenis_pembayaran ?? '-'); ?></td>
                         <td style="padding: 15px; text-align: center; font-weight: 700; color: #4D0B87;"><?php echo e($r->total_bayar); ?></td>
                         <td style="padding: 15px;"><?php echo e($r->keterangan); ?></td>
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
-                        <td colspan="8" style="padding: 40px; text-align: center; color: #9CA3AF;">Belum ada riwayat pembayaran</td>
+                        <td colspan="9" style="padding: 40px; text-align: center; color: #9CA3AF;">Belum ada riwayat pembayaran</td>
                     </tr>
                     <?php endif; ?>
                 </tbody>
@@ -270,14 +277,16 @@
     function filterRiwayat() {
         const search = document.getElementById('searchRiwayat')?.value.toLowerCase() || '';
         const filterPaket = document.getElementById('filterPaketRiwayat')?.value || '';
+        const filterJenis = document.getElementById('filterJenisPembayaran')?.value || '';
         const filterBulan = document.getElementById('filterBulan')?.value || '';
         const filterTahun = document.getElementById('filterTahunRiwayat')?.value || '';
         
         const rows = document.querySelectorAll('#riwayatTableBody tr');
         rows.forEach(row => {
-            if (!row.cells || row.cells.length < 8) return;
+            if (!row.cells || row.cells.length < 9) return;
             const nama = row.cells[2]?.innerText.toLowerCase() || '';
             const paket = row.cells[4]?.innerText || '';
+            const jenis = row.cells[6]?.innerText || '';
             const tgl = row.cells[1]?.innerText || '';
             const parts = tgl.split('/');
             const bulan = parts[1] ? parseInt(parts[1]) : 0;
@@ -286,6 +295,7 @@
             let show = true;
             if (search && !nama.includes(search)) show = false;
             if (filterPaket && paket !== filterPaket) show = false;
+            if (filterJenis && jenis !== filterJenis) show = false;
             if (filterBulan && bulan !== parseInt(filterBulan)) show = false;
             if (filterTahun && tahun !== parseInt(filterTahun)) show = false;
             row.style.display = show ? '' : 'none';
@@ -300,6 +310,7 @@
     
     document.getElementById('searchRiwayat')?.addEventListener('keyup', filterRiwayat);
     document.getElementById('filterPaketRiwayat')?.addEventListener('change', filterRiwayat);
+    document.getElementById('filterJenisPembayaran')?.addEventListener('change', filterRiwayat);
     document.getElementById('filterBulan')?.addEventListener('change', filterRiwayat);
     document.getElementById('filterTahunRiwayat')?.addEventListener('change', filterRiwayat);
     

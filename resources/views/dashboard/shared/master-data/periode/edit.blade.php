@@ -7,7 +7,7 @@
     <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Edit Periode</h1>
 
     <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB;">
-        <form action="{{ route('superadmin.periode.update', $periode->id_periode) }}" method="POST" id="mainForm">
+        <form action="{{ route($role . '.periode.update', $periode->id_periode) }}" method="POST" id="mainForm">
             @csrf
             @method('PUT')
             
@@ -42,7 +42,7 @@
 
             {{-- Tombol --}}
             <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">
-                <a href="{{ route('superadmin.master-data') }}" style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; text-decoration: none;">Keluar</a>
+                <a href="{{ route($role . '.master-data') }}" style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; text-decoration: none;">Keluar</a>
                 <button type="submit" style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600;">Simpan</button>
             </div>
         </form>

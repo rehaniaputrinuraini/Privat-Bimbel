@@ -53,7 +53,7 @@
                                    style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
                         </div>
                     </div>
-                    <a href="<?php echo e(route('superadmin.harga-paket.create')); ?>" style="text-decoration: none;">
+                    <a href="<?php echo e(route($role . '.harga-paket.create')); ?>" style="text-decoration: none;">
                         <button style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: 0.3s; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
                             <i class="fas fa-plus"></i> Tambah
                         </button>
@@ -87,7 +87,7 @@
                                 <td style="padding: 15px; text-align: center;"><?php echo e($item->tingkat); ?></td>
                                 <td style="padding: 15px; text-align: center;">
                                     <div style="display: flex; gap: 8px; justify-content: center;">
-                                        <a href="<?php echo e(route('superadmin.harga-paket.edit', $item->id_paket)); ?>" style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none;">
+                                        <a href="<?php echo e(route($role . '.harga-paket.edit', $item->id_paket)); ?>" style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none;">
                                             <i class="far fa-edit"></i> Edit
                                         </a>
                                         <button type="button" onclick="bukaModalHapusPaket('<?php echo e($item->id_paket); ?>', 'PK<?php echo e(str_pad($item->id_paket, 4, '0', STR_PAD_LEFT)); ?>')" style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
@@ -131,7 +131,7 @@
                             <input type="text" id="searchKelas" placeholder="Cari Nama Kelas..." style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB;">
                         </div>
                     </div>
-                    <a href="<?php echo e(route('superadmin.kelas.create')); ?>" style="text-decoration: none;">
+                    <a href="<?php echo e(route($role . '.kelas.create')); ?>" style="text-decoration: none;">
                         <button style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600;">
                             <i class="fas fa-plus"></i> Tambah Kelas
                         </button>
@@ -165,7 +165,7 @@
                                 <td style="padding: 15px; text-align: center;"><?php echo e($item->jumlah_murid ?? 0); ?></td>
                                 <td style="padding: 15px; text-align: center;">
                                     <div style="display: flex; gap: 8px; justify-content: center;">
-                                        <a href="<?php echo e(route('superadmin.kelas.edit', $item->id_kelas)); ?>" style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none;">
+                                        <a href="<?php echo e(route($role . '.kelas.edit', $item->id_kelas)); ?>" style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none;">
                                             <i class="far fa-edit"></i> Edit
                                         </a>
                                         <button type="button" onclick="bukaModalHapusKelas('<?php echo e($item->id_kelas); ?>', '<?php echo e($item->nama_kelas); ?>')" style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
@@ -209,7 +209,7 @@
                             <input type="text" id="searchRuang" placeholder="Cari Nama Ruang..." style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB;">
                         </div>
                     </div>
-                    <a href="<?php echo e(route('superadmin.ruang.create')); ?>" style="text-decoration: none;">
+                    <a href="<?php echo e(route($role . '.ruang.create')); ?>" style="text-decoration: none;">
                         <button style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600;">
                             <i class="fas fa-plus"></i> Tambah Ruang
                         </button>
@@ -239,7 +239,7 @@
                                 <td style="padding: 15px; text-align: center;"><?php echo e($item->nama_ruang); ?></td>
                                 <td style="padding: 15px; text-align: center;">
                                     <div style="display: flex; gap: 8px; justify-content: center;">
-                                        <a href="<?php echo e(route('superadmin.ruang.edit', $item->id_ruang)); ?>" style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none;">
+                                        <a href="<?php echo e(route($role . '.ruang.edit', $item->id_ruang)); ?>" style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none;">
                                             <i class="far fa-edit"></i> Edit
                                         </a>
                                         <button type="button" onclick="bukaModalHapusRuang('<?php echo e($item->id_ruang); ?>', '<?php echo e($item->nama_ruang); ?>')" style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
@@ -283,7 +283,7 @@
                             <input type="text" id="searchPeriode" placeholder="Cari Periode..." style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB;">
                         </div>
                     </div>
-                    <a href="<?php echo e(route('superadmin.periode.create')); ?>" style="text-decoration: none;">
+                    <a href="<?php echo e(route($role . '.periode.create')); ?>" style="text-decoration: none;">
                         <button style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600;">
                             <i class="fas fa-plus"></i> Tambah Periode
                         </button>
@@ -331,7 +331,7 @@
                                 </td>
                                 <td style="padding: 15px; text-align: center;">
                                     <div style="display: flex; gap: 8px; justify-content: center;">
-                                        <a href="<?php echo e(route('superadmin.periode.edit', $item->id_periode)); ?>" style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none;">
+                                        <a href="<?php echo e(route($role . '.periode.edit', $item->id_periode)); ?>" style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none;">
                                             <i class="far fa-edit"></i> Edit
                                         </a>
                                         <button type="button" onclick="bukaModalHapusPeriode('<?php echo e($item->id_periode); ?>', '<?php echo e($item->tahun_periode); ?>')" style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
@@ -503,7 +503,7 @@
     // Modal Hapus Paket
     function bukaModalHapusPaket(id, nama) {
         let form = document.getElementById('formHapusPaket');
-        form.action = "<?php echo e(route('superadmin.harga-paket.destroy', '')); ?>/" + id;
+        form.action = "<?php echo e(route($role . '.harga-paket.destroy', '')); ?>/" + id;
         document.getElementById('pesanHapusPaket').innerHTML = `Yakin ingin menghapus paket <strong>${nama}</strong>?`;
         document.getElementById('modalHapusPaket').style.display = 'flex';
     }
@@ -512,7 +512,7 @@
     // Modal Hapus Kelas
     function bukaModalHapusKelas(id, nama) {
         let form = document.getElementById('formHapusKelas');
-        form.action = "<?php echo e(route('superadmin.kelas.destroy', '')); ?>/" + id;
+        form.action = "<?php echo e(route($role . '.kelas.destroy', '')); ?>/" + id;
         document.getElementById('pesanHapusKelas').innerHTML = `Yakin ingin menghapus kelas <strong>${nama}</strong>?`;
         document.getElementById('modalHapusKelas').style.display = 'flex';
     }
@@ -521,7 +521,7 @@
     // Modal Hapus Ruang
     function bukaModalHapusRuang(id, nama) {
         let form = document.getElementById('formHapusRuang');
-        form.action = "<?php echo e(route('superadmin.ruang.destroy', '')); ?>/" + id;
+        form.action = "<?php echo e(route($role . '.ruang.destroy', '')); ?>/" + id;
         document.getElementById('pesanHapusRuang').innerHTML = `Yakin ingin menghapus ruang <strong>${nama}</strong>?`;
         document.getElementById('modalHapusRuang').style.display = 'flex';
     }
@@ -530,7 +530,7 @@
     // Modal Hapus Periode
     function bukaModalHapusPeriode(id, nama) {
         let form = document.getElementById('formHapusPeriode');
-        form.action = "<?php echo e(route('superadmin.periode.destroy', '')); ?>/" + id;
+        form.action = "<?php echo e(route($role . '.periode.destroy', '')); ?>/" + id;
         document.getElementById('pesanHapusPeriode').innerHTML = `Yakin ingin menghapus periode <strong>${nama}</strong>?`;
         document.getElementById('modalHapusPeriode').style.display = 'flex';
     }

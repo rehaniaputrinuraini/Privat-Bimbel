@@ -314,7 +314,7 @@
             <h2 class="section-title" data-aos="fade-up">Galeri Kegiatan</h2>
             <p class="section-subtitle" data-aos="fade-up">Dokumentasi kegiatan belajar mengajar kami</p>
             <div class="galeri-grid">
-                <img src="{{ asset('images/companyprofile/galeri/gambar1.jpg') }}" alt="Galeri 1" data-aos="zoom-in"> 
+                <img src="{{ asset('images/companyprofile/galeri/gambar_1.jpg') }}" alt="Galeri 1" data-aos="zoom-in"> 
                 <img src="{{ asset('images/companyprofile/galeri/gambar2.jpg') }}" alt="Galeri 2" data-aos="zoom-in" data-aos-delay="100">
                 <img src="{{ asset('images/companyprofile/galeri/gambar3.jpg') }}" alt="Galeri 3" data-aos="zoom-in" data-aos-delay="200">
                 <img src="{{ asset('images/companyprofile/galeri/gambar1.jpg') }}" alt="Galeri 4" data-aos="zoom-in">

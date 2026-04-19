@@ -129,31 +129,31 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/kelola-murid/update/{id}', [MuridController::class, 'update'])->name('murid.update');
         Route::delete('/kelola-murid/destroy/{id}', [MuridController::class, 'destroy'])->name('murid.destroy');
         
-        // ✅ MASTER DATA (Halaman Utama dengan 3 Tab)
+        // MASTER DATA (Halaman Utama dengan 3 Tab)
         Route::get('/master-data', [MasterDataController::class, 'index'])->name('master-data');
         
-        // ✅ HARGA PAKET (CRUD Routes)
+        // HARGA PAKET (CRUD Routes)
         Route::get('/harga-paket/create', [MasterDataController::class, 'createPaket'])->name('harga-paket.create');
         Route::post('/harga-paket/store', [MasterDataController::class, 'storePaket'])->name('harga-paket.store');
         Route::get('/harga-paket/edit/{id}', [MasterDataController::class, 'editPaket'])->name('harga-paket.edit');
         Route::put('/harga-paket/update/{id}', [MasterDataController::class, 'updatePaket'])->name('harga-paket.update');
         Route::delete('/harga-paket/destroy/{id}', [MasterDataController::class, 'destroyPaket'])->name('harga-paket.destroy');
         
-        // ✅ KELAS (CRUD Routes)
+        // KELAS (CRUD Routes)
         Route::get('/kelas/create', [MasterDataController::class, 'createKelas'])->name('kelas.create');
         Route::post('/kelas/store', [MasterDataController::class, 'storeKelas'])->name('kelas.store');
         Route::get('/kelas/edit/{id}', [MasterDataController::class, 'editKelas'])->name('kelas.edit');
         Route::put('/kelas/update/{id}', [MasterDataController::class, 'updateKelas'])->name('kelas.update');
         Route::delete('/kelas/destroy/{id}', [MasterDataController::class, 'destroyKelas'])->name('kelas.destroy');
         
-        // ✅ RUANG (CRUD Routes)
+        // RUANG (CRUD Routes)
         Route::get('/ruang/create', [MasterDataController::class, 'createRuang'])->name('ruang.create');
         Route::post('/ruang/store', [MasterDataController::class, 'storeRuang'])->name('ruang.store');
         Route::get('/ruang/edit/{id}', [MasterDataController::class, 'editRuang'])->name('ruang.edit');
         Route::put('/ruang/update/{id}', [MasterDataController::class, 'updateRuang'])->name('ruang.update');
         Route::delete('/ruang/destroy/{id}', [MasterDataController::class, 'destroyRuang'])->name('ruang.destroy');
         
-                // ✅ PERIODE (CRUD Routes) - TAMBAH DI SINI
+        // PERIODE (CRUD Routes)
         Route::get('/periode/create', [MasterDataController::class, 'createPeriode'])->name('periode.create');
         Route::post('/periode/store', [MasterDataController::class, 'storePeriode'])->name('periode.store');
         Route::get('/periode/edit/{id}', [MasterDataController::class, 'editPeriode'])->name('periode.edit');
@@ -189,7 +189,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan-keuangan');
         Route::get('/laporan-keuangan/create', [LaporanKeuanganController::class, 'create'])->name('laporan-keuangan.create');
         Route::post('/laporan-keuangan/store', [LaporanKeuanganController::class, 'store'])->name('laporan-keuangan.store');
-        Route::delete('/laporan-keuangan/destroy/{id}', [LaporanKeuanganController::class, '68'])->name('laporan-keuangan.destroy');
+        Route::delete('/laporan-keuangan/destroy/{id}', [LaporanKeuanganController::class, 'destroy'])->name('laporan-keuangan.destroy');
         
         // KELOLA PRESENSI
         Route::get('/kelola-presensi', [KelolaPresensiController::class, 'index'])->name('kelola-presensi');
@@ -214,9 +214,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/kelola-murid/store', [MuridController::class, 'store'])->name('murid.store');
         Route::get('/kelola-murid/edit/{id}', [MuridController::class, 'edit'])->name('murid.edit');
         Route::put('/kelola-murid/update/{id}', [MuridController::class, 'update'])->name('murid.update');
-        Route::delete('/kelola-murid/destroy/{id}', [MuridController::class, 'destroy'])->name('murid.destroy');
+        Route::delete('/kelola-murid/destroy/{id}', [MuridController::class, '69'])->name('murid.destroy');
         
-        // ✅ MASTER DATA (Halaman Utama dengan 3 Tab)
+        // MASTER DATA (Halaman Utama dengan 3 Tab)
         Route::get('/master-data', [MasterDataController::class, 'index'])->name('master-data');
         
         // HARGA PAKET (CRUD Routes)
@@ -226,19 +226,26 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/harga-paket/update/{id}', [MasterDataController::class, 'updatePaket'])->name('harga-paket.update');
         Route::delete('/harga-paket/destroy/{id}', [MasterDataController::class, 'destroyPaket'])->name('harga-paket.destroy');
         
-        // ✅ KELAS (CRUD Routes)
+        // KELAS (CRUD Routes)
         Route::get('/kelas/create', [MasterDataController::class, 'createKelas'])->name('kelas.create');
         Route::post('/kelas/store', [MasterDataController::class, 'storeKelas'])->name('kelas.store');
         Route::get('/kelas/edit/{id}', [MasterDataController::class, 'editKelas'])->name('kelas.edit');
         Route::put('/kelas/update/{id}', [MasterDataController::class, 'updateKelas'])->name('kelas.update');
         Route::delete('/kelas/destroy/{id}', [MasterDataController::class, 'destroyKelas'])->name('kelas.destroy');
         
-        // ✅ RUANG (CRUD Routes)
+        // RUANG (CRUD Routes)
         Route::get('/ruang/create', [MasterDataController::class, 'createRuang'])->name('ruang.create');
         Route::post('/ruang/store', [MasterDataController::class, 'storeRuang'])->name('ruang.store');
         Route::get('/ruang/edit/{id}', [MasterDataController::class, 'editRuang'])->name('ruang.edit');
-        Route::put('/ruang/update/{id}', [MasterDataController::class, 'updateRuang'])->name('ruang.update');
+        Route::put('/ruang/update/{id}', [MasterDataController::class, '70'])->name('ruang.update');
         Route::delete('/ruang/destroy/{id}', [MasterDataController::class, 'destroyRuang'])->name('ruang.destroy');
+        
+        // PERIODE (CRUD Routes)
+        Route::get('/periode/create', [MasterDataController::class, 'createPeriode'])->name('periode.create');
+        Route::post('/periode/store', [MasterDataController::class, 'storePeriode'])->name('periode.store');
+        Route::get('/periode/edit/{id}', [MasterDataController::class, 'editPeriode'])->name('periode.edit');
+        Route::put('/periode/update/{id}', [MasterDataController::class, 'updatePeriode'])->name('periode.update');
+        Route::delete('/periode/destroy/{id}', [MasterDataController::class, 'destroyPeriode'])->name('periode.destroy');
         
         // PEMBAYARAN
         Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran');
@@ -262,6 +269,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kelola-presensi/{id}', [KelolaPresensiController::class, 'show'])->name('kelola-presensi.show');
         Route::post('/kelola-presensi/{id}/verify', [KelolaPresensiController::class, 'verify'])->name('kelola-presensi.verify');
         Route::post('/kelola-presensi/{id}/unverify', [KelolaPresensiController::class, 'unverify'])->name('kelola-presensi.unverify');
+        Route::delete('/kelola-presensi/{id}', [KelolaPresensiController::class, 'destroy'])->name('kelola-presensi.destroy');
         Route::get('/kelola-presensi/download/{id}', [KelolaPresensiController::class, 'downloadFoto'])->name('kelola-presensi.download');
         
         // REKAP GAJI

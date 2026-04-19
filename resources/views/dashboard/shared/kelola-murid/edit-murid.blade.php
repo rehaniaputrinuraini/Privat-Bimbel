@@ -20,9 +20,9 @@
 
             {{-- Nama Lengkap --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Lengkap</label>
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Lengkap <span style="color: red;">*</span></label>
                 <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap', $murid->nama_lengkap) }}" 
-                       placeholder="Masukkan Nama Lengkap"
+                       placeholder="Masukkan Nama Lengkap" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                 @error('nama_lengkap') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
@@ -116,6 +116,109 @@
     </div>
 </div>
 
-{{-- MODAL SCRIPTS (SAMA SEPERTI CREATE) --}}
-{{-- Copy script yang sama dari view create di atas --}}
+{{-- MODAL KONFIRMASI BATAL --}}
+<div id="modalBatal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
+        <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
+        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Batalkan?</h2>
+        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Perubahan yang Anda lakukan tidak akan disimpan. Yakin ingin keluar?</p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button onclick="tutupModalBatal()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Tidak</button>
+            <a href="{{ route($role . '.kelola-murid') }}" id="confirmKeluarLink" style="flex: 1; text-decoration: none;">
+                <button type="button" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Keluar</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+{{-- MODAL KONFIRMASI PINDAH HALAMAN --}}
+<div id="modalPindahHalaman" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
+        <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
+        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Perubahan Belum Disimpan</h2>
+        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Ada data yang belum disimpan. Yakin ingin meninggalkan halaman ini?</p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button onclick="tutupModalPindah()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Tidak</button>
+            <button id="confirmPindahBtn" style="flex: 1; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Keluar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========== UNSAVED CHANGES WARNING ==========
+    let formChanged = false;
+    let pendingUrl = null;
+    const form = document.getElementById('mainForm');
+    
+    // Deteksi perubahan pada semua input, select, textarea (abaikan readonly)
+    if (form) {
+        const inputs = form.querySelectorAll('input:not([readonly]), select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('change', () => formChanged = true);
+            input.addEventListener('keyup', () => formChanged = true);
+        });
+        
+        // Reset saat form disubmit
+        form.addEventListener('submit', () => formChanged = false);
+    }
+    
+    // Fungsi untuk modal keluar (tombol keluar)
+    function bukaModalBatal() { 
+        if (formChanged) {
+            // Jika ada perubahan, buka modal peringatan
+            document.getElementById('modalPindahHalaman').style.display = 'flex';
+            document.getElementById('confirmPindahBtn').onclick = function() {
+                formChanged = false;
+                window.location.href = "{{ route($role . '.kelola-murid') }}";
+            };
+        } else {
+            // Jika tidak ada perubahan, langsung ke halaman kelola murid atau buka modal konfirmasi
+            document.getElementById('modalBatal').style.display = 'flex';
+        }
+    }
+    
+    function tutupModalBatal() { 
+        document.getElementById('modalBatal').style.display = 'none'; 
+    }
+    
+    function tutupModalPindah() {
+        document.getElementById('modalPindahHalaman').style.display = 'none';
+        pendingUrl = null;
+    }
+    
+    // Cegah klik link sidebar jika form berubah
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebarLinks = document.querySelectorAll('.sidebar-nav a, .sidebar-footer a, .logout-btn');
+        
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (formChanged) {
+                    e.preventDefault();
+                    const targetUrl = this.href || (this.tagName === 'BUTTON' ? null : this.getAttribute('href'));
+                    if (targetUrl && targetUrl !== '#') {
+                        pendingUrl = targetUrl;
+                        document.getElementById('modalPindahHalaman').style.display = 'flex';
+                        document.getElementById('confirmPindahBtn').onclick = function() {
+                            formChanged = false;
+                            window.location.href = pendingUrl;
+                        };
+                    }
+                }
+            });
+        });
+    });
+
+    // Tutup modal jika klik di luar modal
+    window.onclick = function(event) {
+        const modalBatal = document.getElementById('modalBatal');
+        const modalPindah = document.getElementById('modalPindahHalaman');
+        
+        if (event.target === modalBatal) {
+            tutupModalBatal();
+        }
+        if (event.target === modalPindah) {
+            tutupModalPindah();
+        }
+    }
+</script>
 @endsection

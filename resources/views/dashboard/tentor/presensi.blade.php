@@ -214,6 +214,10 @@
         font-family: 'Poppins', sans-serif;
         font-size: 12px;
     }
+    
+    select.form-control-custom {
+        cursor: pointer;
+    }
 </style>
 
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
@@ -243,6 +247,7 @@
         @endif
 
         <div class="presensi-flex">
+            {{-- KARTU PRESENSI MASUK/KELUAR --}}
             <div class="presensi-card">
                 <div class="card-header-custom">
                     <h3>Presensi Hari Ini</h3>
@@ -266,7 +271,8 @@
                 </div>
             </div>
 
-            <div class="presensi-card" id="formPresensi" style="{{ $presensiHariIni && !$presensiHariIni->kelas ? 'display: block;' : 'display: none;' }}">
+            {{-- KARTU LAPORAN KEGIATAN --}}
+            <div class="presensi-card" id="formPresensi" style="{{ $presensiHariIni && !$presensiHariIni->id_kelas ? 'display: block;' : 'display: none;' }}">
                 <div class="card-header-custom">
                     <h3>Laporan Kegiatan</h3>
                     <p>Input detail pengajaran hari ini</p>
@@ -275,32 +281,46 @@
                 <form id="formLaporan" enctype="multipart/form-data">
                     @csrf
                     
-                    <div class="form-group">
-                        <label>Kelas <span style="color: #EF4444;">*</span></label>
-                        <input type="text" class="form-control-custom" id="kelas" name="kelas" 
-                               placeholder="Masukkan kelas..." maxlength="50" required>
-                        <small style="font-size: 12px; color: #6B7280;">Masukkan nama kelas yang diajar</small>
-                    </div>
+                    {{-- DROPDOWN KELAS (DARI ms_kelas) --}}
+                    {{-- DROPDOWN KELAS (DARI ms_kelas) --}}
+<div class="form-group">
+    <label>Kelas <span style="color: #EF4444;">*</span></label>
+    <select class="form-control-custom" id="id_kelas" name="id_kelas" required>
+        <option value="">-- Pilih Kelas --</option>
+        @foreach($kelasList as $kelas)
+            <option value="{{ $kelas->id_kelas }}" data-jenjang="{{ $kelas->jenjang }}">
+                {{ $kelas->jenjang }} - {{ $kelas->nama_kelas }}
+            </option>
+        @endforeach
+    </select>
+    <small style="font-size: 12px; color: #6B7280;">Pilih kelas yang diajar</small>
+</div>
 
-                    <div class="form-group">
-                        <label>Jenjang yang Diajar <span style="color: #EF4444;">*</span></label>
-                        <select class="form-control-custom" id="jenjang" name="jenjang" required>
-                            <option value="">Pilih Jenjang</option>
-                            <option value="SD">SD (Sekolah Dasar)</option>
-                            <option value="SMP">SMP (Sekolah Menengah Pertama)</option>
-                            <option value="SMA">SMA (Sekolah Menengah Atas)</option>
-                        </select>
-                        <small style="font-size: 12px; color: #6B7280;">Jenjang akan mempengaruhi perhitungan honor</small>
-                    </div>
+{{-- DROPDOWN RUANG (DARI ms_ruang) - TANPA KATA "Ruang" --}}
+<div class="form-group">
+    <label>Ruang <span style="color: #EF4444;">*</span></label>
+    <select class="form-control-custom" id="id_ruang" name="id_ruang" required>
+        <option value="">-- Pilih Ruang --</option>
+        @foreach($ruangList as $ruang)
+            <option value="{{ $ruang->id_ruang }}">
+                {{ $ruang->nama_ruang }}
+            </option>
+        @endforeach
+    </select>
+    <small style="font-size: 12px; color: #6B7280;">Pilih ruang tempat mengajar</small>
+</div>
+
+                    {{-- JENJANG (AUTO-FILL DARI KELAS) - HIDDEN --}}
+                    <input type="hidden" id="jenjang" name="jenjang">
 
                     <div class="form-group">
                         <label>Status Kehadiran Murid <span style="color: #EF4444;">*</span></label>
                         <div class="radio-group">
                             <label style="cursor: pointer;">
-                                <input type="radio" name="status_murid" value="hadir" checked> Hadir
+                                <input type="radio" name="murid_hadir" value="Hadir" checked> Hadir
                             </label>
                             <label style="cursor: pointer;">
-                                <input type="radio" name="status_murid" value="tidak_hadir"> Tidak Hadir
+                                <input type="radio" name="murid_hadir" value="Tidak Hadir"> Tidak Hadir
                             </label>
                         </div>
                     </div>
@@ -308,7 +328,8 @@
                     <div class="form-group">
                         <label>Keterangan</label>
                         <textarea class="form-control-custom" id="keterangan" name="keterangan" 
-                                  placeholder="Isikan materi yang diajarkan, kendala, atau catatan lainnya..."></textarea>
+                                  placeholder="Isikan materi yang diajarkan, kendala, atau catatan lainnya..." maxlength="30"></textarea>
+                        <small style="font-size: 12px; color: #6B7280;">Maksimal 30 karakter</small>
                     </div>
 
                     <div class="form-group">
@@ -344,6 +365,15 @@ document.addEventListener("DOMContentLoaded", function() {
     const previewFoto = document.getElementById('previewFoto');
     const uploadHint = document.getElementById('uploadHint');
     const btnSubmit = document.getElementById('btnSubmitForm');
+    const kelasSelect = document.getElementById('id_kelas');
+    const jenjangHidden = document.getElementById('jenjang');
+    
+    // Auto-fill jenjang saat kelas dipilih
+    kelasSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const jenjang = selectedOption.getAttribute('data-jenjang');
+        jenjangHidden.value = jenjang || '';
+    });
     
     function showAlert(type, message) {
         if (type === 'success') {
@@ -412,14 +442,19 @@ document.addEventListener("DOMContentLoaded", function() {
         
         if (!fotoInput.files[0]) {
             showAlert('error', 'Foto kegiatan wajib diupload!');
-            uploadHint.style.color = '#EF4444';
+            return;
+        }
+        
+        if (!kelasSelect.value) {
+            showAlert('error', 'Silakan pilih kelas!');
             return;
         }
         
         const formData = new FormData();
-        formData.append('kelas', document.getElementById('kelas').value);
-        formData.append('jenjang', document.getElementById('jenjang').value);
-        formData.append('status_murid', document.querySelector('input[name="status_murid"]:checked').value);
+        formData.append('id_kelas', kelasSelect.value);
+        formData.append('id_ruang', document.getElementById('id_ruang').value);
+        formData.append('jenjang', jenjangHidden.value);
+        formData.append('murid_hadir', document.querySelector('input[name="murid_hadir"]:checked').value);
         formData.append('keterangan', document.getElementById('keterangan').value);
         formData.append('foto', fotoInput.files[0]);
         
@@ -438,10 +473,10 @@ document.addEventListener("DOMContentLoaded", function() {
             if (data.success) {
                 showAlert('success', data.message);
                 btnKeluar.disabled = false;
-                document.getElementById('kelas').disabled = true;
-                document.getElementById('jenjang').disabled = true;
+                kelasSelect.disabled = true;
+                document.getElementById('id_ruang').disabled = true;
                 document.getElementById('keterangan').disabled = true;
-                document.querySelectorAll('input[name="status_murid"]').forEach(radio => {
+                document.querySelectorAll('input[name="murid_hadir"]').forEach(radio => {
                     radio.disabled = true;
                 });
                 fotoInput.disabled = true;
@@ -482,17 +517,18 @@ document.addEventListener("DOMContentLoaded", function() {
                 btnKeluar.innerHTML = '<i class="fas fa-sign-out-alt"></i> Keluar';
                 formCard.style.display = 'none';
                 
-                document.getElementById('kelas').value = '';
-                document.getElementById('kelas').disabled = false;
-                document.getElementById('jenjang').value = '';
-                document.getElementById('jenjang').disabled = false;
+                kelasSelect.value = '';
+                kelasSelect.disabled = false;
+                document.getElementById('id_ruang').value = '';
+                document.getElementById('id_ruang').disabled = false;
+                jenjangHidden.value = '';
                 document.getElementById('keterangan').value = '';
                 document.getElementById('keterangan').disabled = false;
                 
-                document.querySelectorAll('input[name="status_murid"]').forEach(radio => {
+                document.querySelectorAll('input[name="murid_hadir"]').forEach(radio => {
                     radio.disabled = false;
                 });
-                document.querySelector('input[name="status_murid"][value="hadir"]').checked = true;
+                document.querySelector('input[name="murid_hadir"][value="Hadir"]').checked = true;
                 
                 fotoInput.disabled = false;
                 fotoInput.value = '';
@@ -501,7 +537,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 previewFoto.style.display = 'none';
                 uploadHint.innerHTML = '<i class="fas fa-info-circle"></i> Pastikan foto menunjukkan wajah murid yang sedang belajar';
                 uploadHint.classList.remove('upload-hint-success');
-                uploadHint.style.color = '#EF4444';
                 
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Laporan';
@@ -519,16 +554,20 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
     
+    // Cek status saat halaman load
     fetch('{{ route("tentor.presensi.cek-status") }}')
         .then(response => response.json())
         .then(data => {
+            if (data.has_presensi_masuk) {
+                btnMasuk.disabled = true;
+                formCard.style.display = 'block';
+            }
             if (data.has_laporan) {
                 btnKeluar.disabled = false;
-                formCard.style.display = 'block';
-                document.getElementById('kelas').disabled = true;
-                document.getElementById('jenjang').disabled = true;
+                kelasSelect.disabled = true;
+                document.getElementById('id_ruang').disabled = true;
                 document.getElementById('keterangan').disabled = true;
-                document.querySelectorAll('input[name="status_murid"]').forEach(radio => {
+                document.querySelectorAll('input[name="murid_hadir"]').forEach(radio => {
                     radio.disabled = true;
                 });
                 fotoInput.disabled = true;
@@ -537,20 +576,26 @@ document.addEventListener("DOMContentLoaded", function() {
                 btnSubmit.innerHTML = '<i class="fas fa-check"></i> Laporan Terkirim';
                 
                 if (data.data) {
-                    document.getElementById('kelas').value = data.data.kelas || '';
-                    document.getElementById('jenjang').value = data.data.jenjang || '';
-                    document.getElementById('keterangan').value = data.data.keterangan || '';
-                    if (data.data.status_murid) {
-                        document.querySelector(`input[name="status_murid"][value="${data.data.status_murid}"]`).checked = true;
+                    if (data.data.id_kelas) {
+                        kelasSelect.value = data.data.id_kelas;
+                        const selectedOption = kelasSelect.options[kelasSelect.selectedIndex];
+                        jenjangHidden.value = selectedOption.getAttribute('data-jenjang') || '';
                     }
-                    if (data.data.bukti_foto) {
-                        previewFoto.src = '/storage/' + data.data.bukti_foto;
+                    if (data.data.id_ruang) {
+                        document.getElementById('id_ruang').value = data.data.id_ruang;
+                    }
+                    document.getElementById('keterangan').value = data.data.keterangan || '';
+                    if (data.data.murid_hadir) {
+                        document.querySelector(`input[name="murid_hadir"][value="${data.data.murid_hadir}"]`).checked = true;
+                    }
+                    if (data.data.bukti_mengajar) {
+                        previewFoto.src = '/storage/' + data.data.bukti_mengajar;
                         previewFoto.style.display = 'block';
                         uploadArea.classList.add('has-file');
+                        uploadHint.innerHTML = '<i class="fas fa-check-circle"></i> Foto sudah terupload';
+                        uploadHint.classList.add('upload-hint-success');
                     }
                 }
-            } else if (data.has_presensi_masuk) {
-                formCard.style.display = 'block';
             }
         });
 });

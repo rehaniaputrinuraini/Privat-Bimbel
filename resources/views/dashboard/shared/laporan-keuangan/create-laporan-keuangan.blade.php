@@ -27,6 +27,16 @@
                         </select>
                         @error('kategori') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Jenis Pembayaran <span style="color: red;">*</span></label>
+                        <select name="jenis_pembayaran" required 
+                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; color: #374151; cursor: pointer; font-size: 14px;">
+                            <option value="" disabled selected>Pilih Jenis Pembayaran</option>
+                            <option value="Tunai">Tunai</option>
+                            <option value="Transfer">Transfer</option>
+                        </select>
+                        @error('jenis_pembayaran') <small style="color: red;">{{ $message }}</small> @enderror
+                    </div>
                 </div>
                 <div>
                     <div style="margin-bottom: 15px;">
@@ -85,7 +95,6 @@
 </div>
 
 <script>
-    // ========== UNSAVED CHANGES WARNING ==========
     let formChanged = false;
     let pendingUrl = null;
     const form = document.getElementById('mainForm');

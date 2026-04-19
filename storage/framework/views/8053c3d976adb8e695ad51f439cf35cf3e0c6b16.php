@@ -7,13 +7,13 @@
     <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Tambah Kelas</h1>
 
     <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
-        <form action="<?php echo e(route('superadmin.kelas.store')); ?>" method="POST" id="mainForm">
+        <form action="<?php echo e(route($role . '.kelas.store')); ?>" method="POST" id="mainForm">
             <?php echo csrf_field(); ?>
             
             
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Kelas <span style="color: red;">*</span></label>
-                <input type="text" name="nama_kelas" value="<?php echo e(old('nama_kelas')); ?>" placeholder="Contoh: 7A, 8B, 9C" required
+                <input type="text" name="nama_kelas" value="<?php echo e(old('nama_kelas')); ?>" placeholder="Masukkan nama kelas" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                 <?php $__errorArgs = ['nama_kelas'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -87,7 +87,7 @@ unset($__errorArgs, $__bag); ?>
         <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Data yang Anda masukkan tidak akan disimpan. Yakin ingin keluar?</p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalBatal()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Tidak</button>
-            <a href="<?php echo e(route('superadmin.master-data')); ?>" style="flex: 1; text-decoration: none;">
+            <a href="<?php echo e(route($role . '.master-data')); ?>" style="flex: 1; text-decoration: none;">
                 <button type="button" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Keluar</button>
             </a>
         </div>
@@ -125,7 +125,7 @@ unset($__errorArgs, $__bag); ?>
             document.getElementById('modalPindahHalaman').style.display = 'flex';
             document.getElementById('confirmPindahBtn').onclick = function() {
                 formChanged = false;
-                window.location.href = "<?php echo e(route('superadmin.master-data')); ?>";
+                window.location.href = "<?php echo e(route($role . '.master-data')); ?>";
             };
         } else {
             document.getElementById('modalBatal').style.display = 'flex';

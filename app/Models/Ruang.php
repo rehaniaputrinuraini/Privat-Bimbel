@@ -24,12 +24,4 @@ class Ruang extends Model
     {
         return $this->hasMany(Mengajar::class, 'id_ruang', 'id_ruang');
     }
-
-    /**
-     * Scope untuk pencarian
-     */
-    public function scopeSearch($query, $search)
-    {
-        return $query->where('nama_ruang', 'like', '%' . $search . '%');
-    }
 }

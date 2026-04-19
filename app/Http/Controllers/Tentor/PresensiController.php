@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Tentor;
 
 use App\Http\Controllers\Controller;
-use App\Models\PresensiTentor;
-use App\Models\Tentor;
+use App\Models\Mengajar;
+use App\Models\Pegawai;
+use App\Models\Kelas;
+use App\Models\Ruang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -12,61 +14,99 @@ use Carbon\Carbon;
 
 class PresensiController extends Controller
 {
+    /**
+     * Get tentor yang sedang login
+     */
+    private function getTentorLogin()
+    {
+        $user = Auth::user();
+        
+        if (!$user) {
+            return null;
+        }
+        
+        return Pegawai::where('jenis_pegawai', 'tentor')
+            ->where('id_pegawai', $user->id_pegawai)
+            ->first();
+    }
+
     public function index()
     {
-        $tentor = Tentor::where('id_user', Auth::id())->first();
+        $tentor = $this->getTentorLogin();
         
         if (!$tentor) {
             return view('dashboard.tentor.presensi', [
                 'presensiHariIni' => null,
+                'tentor' => null,
+                'kelasList' => [],
+                'ruangList' => [],
                 'error' => 'Data tentor tidak ditemukan'
             ]);
         }
         
-        $presensiHariIni = PresensiTentor::where('id_tentor', $tentor->id_tentor)
-                                        ->whereDate('tanggal', today())
-                                        ->whereNull('jam_keluar')
-                                        ->first();
+        $presensiHariIni = Mengajar::where('id_pegawai', $tentor->id_pegawai)
+            ->whereDate('tanggal', today())
+            ->whereNull('jam_selesai')
+            ->first();
         
-        return view('dashboard.tentor.presensi', compact('presensiHariIni', 'tentor'));
+        $kelasList = Kelas::orderBy('jenjang')->orderBy('nama_kelas')->get();
+        $ruangList = Ruang::orderBy('nama_ruang')->get();
+        
+        return view('dashboard.tentor.presensi', compact(
+            'presensiHariIni', 
+            'tentor', 
+            'kelasList', 
+            'ruangList'
+        ));
     }
 
     public function masuk(Request $request)
     {
         try {
-            $tentor = Tentor::where('id_user', Auth::id())->first();
+            $tentor = $this->getTentorLogin();
             
             if (!$tentor) {
-                return response()->json(['success' => false, 'message' => 'Data tentor tidak ditemukan'], 404);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Data tentor tidak ditemukan'
+                ], 404);
             }
             
-            $existing = PresensiTentor::where('id_tentor', $tentor->id_tentor)
-                                      ->whereDate('tanggal', today())
-                                      ->whereNull('jam_keluar')
-                                      ->first();
+            $existing = Mengajar::where('id_pegawai', $tentor->id_pegawai)
+                ->whereDate('tanggal', today())
+                ->whereNull('jam_selesai')
+                ->first();
             
             if ($existing) {
-                return response()->json(['success' => false, 'message' => 'Anda sudah presensi masuk hari ini!'], 400);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Anda sudah presensi masuk hari ini!'
+                ], 400);
             }
             
-            $presensi = PresensiTentor::create([
-                'id_tentor' => $tentor->id_tentor,
+            Mengajar::create([
+                'id_pegawai' => $tentor->id_pegawai,
                 'tanggal' => today(),
-                'jam_masuk' => Carbon::now('Asia/Jakarta'),
-                'jam_keluar' => null,
-                'jam_mengajar' => null,
-                'kelas' => null,
-                'jenjang' => null,
-                'status_murid' => null,
+                'jam_mulai' => Carbon::now('Asia/Jakarta')->format('H:i:s'),
+                'jam_selesai' => null,
+                'lama_mengajar' => null,
+                'id_kelas' => null,
+                'id_ruang' => null,
+                'murid_hadir' => null,
                 'keterangan' => null,
-                'bukti_foto' => null,
-                'verifikasi_kehadiran' => false,
+                'bukti_mengajar' => null,
             ]);
             
-            return response()->json(['success' => true, 'message' => '✅ Presensi masuk berhasil! Silakan isi laporan.']);
+            return response()->json([
+                'success' => true, 
+                'message' => '✅ Presensi masuk berhasil! Silakan isi laporan.'
+            ]);
             
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal: ' . $e->getMessage()], 500);
+            return response()->json([
+                'success' => false, 
+                'message' => 'Gagal: ' . $e->getMessage()
+            ], 500);
         }
     }
     
@@ -74,124 +114,140 @@ class PresensiController extends Controller
     {
         try {
             $request->validate([
-                'kelas' => 'required|string|max:255',
+                'id_kelas' => 'required|exists:ms_kelas,id_kelas',
+                'id_ruang' => 'required|exists:ms_ruang,id_ruang',
                 'jenjang' => 'required|in:SD,SMP,SMA',
-                'status_murid' => 'required|in:hadir,tidak_hadir',
-                'keterangan' => 'nullable|string',
+                'murid_hadir' => 'required|in:Hadir,Tidak Hadir',
+                'keterangan' => 'nullable|string|max:30',
                 'foto' => 'required|image|mimes:jpeg,png,jpg|max:2048'
             ]);
             
-            $tentor = Tentor::where('id_user', Auth::id())->first();
+            $tentor = $this->getTentorLogin();
             
             if (!$tentor) {
-                return response()->json(['success' => false, 'message' => 'Data tentor tidak ditemukan'], 404);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Data tentor tidak ditemukan'
+                ], 404);
             }
             
-            $presensi = PresensiTentor::where('id_tentor', $tentor->id_tentor)
-                                      ->whereDate('tanggal', today())
-                                      ->whereNull('jam_keluar')
-                                      ->first();
+            $presensi = Mengajar::where('id_pegawai', $tentor->id_pegawai)
+                ->whereDate('tanggal', today())
+                ->whereNull('jam_selesai')
+                ->first();
             
             if (!$presensi) {
-                return response()->json(['success' => false, 'message' => 'Anda belum presensi masuk!'], 400);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Anda belum presensi masuk!'
+                ], 400);
             }
             
-            $fotoPath = $request->file('foto')->store('bukti-presensi', 'public');
-            
-            $statusMurid = $request->status_murid;
-            if ($statusMurid == 'tidak_hadir') {
-                $statusMurid = 'tidak hadir';
-            }
+            $fotoPath = $request->file('foto')->store('bukti-mengajar', 'public');
             
             $presensi->update([
-                'kelas' => $request->kelas,
-                'jenjang' => $request->jenjang,
-                'status_murid' => $statusMurid,
+                'id_kelas' => $request->id_kelas,
+                'id_ruang' => $request->id_ruang,
+                'murid_hadir' => $request->murid_hadir,
                 'keterangan' => $request->keterangan,
-                'bukti_foto' => $fotoPath,
-                'verifikasi_kehadiran' => false
+                'bukti_mengajar' => $fotoPath,
             ]);
             
-            return response()->json(['success' => true, 'message' => '✅ Laporan berhasil disimpan! Silakan presensi keluar.']);
+            return response()->json([
+                'success' => true, 
+                'message' => '✅ Laporan berhasil disimpan! Silakan presensi keluar.'
+            ]);
             
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal: ' . $e->getMessage()], 500);
+            return response()->json([
+                'success' => false, 
+                'message' => 'Gagal: ' . $e->getMessage()
+            ], 500);
         }
     }
     
     public function keluar(Request $request)
     {
         try {
-            $tentor = Tentor::where('id_user', Auth::id())->first();
+            $tentor = $this->getTentorLogin();
             
             if (!$tentor) {
-                return response()->json(['success' => false, 'message' => 'Data tentor tidak ditemukan'], 404);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Data tentor tidak ditemukan'
+                ], 404);
             }
             
-            $presensi = PresensiTentor::where('id_tentor', $tentor->id_tentor)
-                                      ->whereDate('tanggal', today())
-                                      ->whereNull('jam_keluar')
-                                      ->first();
+            $presensi = Mengajar::where('id_pegawai', $tentor->id_pegawai)
+                ->whereDate('tanggal', today())
+                ->whereNull('jam_selesai')
+                ->first();
             
             if (!$presensi) {
-                return response()->json(['success' => false, 'message' => 'Anda belum presensi masuk!'], 400);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Anda belum presensi masuk!'
+                ], 400);
             }
             
-            if (!$presensi->kelas) {
-                return response()->json(['success' => false, 'message' => 'Silakan isi laporan terlebih dahulu!'], 400);
+            if (!$presensi->id_kelas) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Silakan isi laporan terlebih dahulu!'
+                ], 400);
             }
             
             $jamKeluar = Carbon::now('Asia/Jakarta');
+            $jamMulai = Carbon::parse($presensi->jam_mulai);
+            $lamaMengajar = $jamMulai->diffInMinutes($jamKeluar);
             
             $presensi->update([
-                'jam_keluar' => $jamKeluar,
-                'jam_mengajar' => 1,
+                'jam_selesai' => $jamKeluar->format('H:i:s'),
+                'lama_mengajar' => $lamaMengajar,
             ]);
             
-            $jamMasuk = Carbon::parse($presensi->jam_masuk);
-            $durasiMenit = $jamMasuk->diffInMinutes($jamKeluar);
-            $jam = floor($durasiMenit / 60);
-            $menit = $durasiMenit % 60;
+            $jam = floor($lamaMengajar / 60);
+            $menit = $lamaMengajar % 60;
             
-            // TANPA MENAMPILKAN HONOR (RAHASIA UNTUK TENTOR)
             return response()->json([
                 'success' => true, 
                 'message' => "✅ Selesai! Durasi: {$jam} jam {$menit} menit."
             ]);
             
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal: ' . $e->getMessage()], 500);
+            return response()->json([
+                'success' => false, 
+                'message' => 'Gagal: ' . $e->getMessage()
+            ], 500);
         }
     }
     
     public function cekStatus()
     {
-        $tentor = Tentor::where('id_user', Auth::id())->first();
+        $tentor = $this->getTentorLogin();
         
         if (!$tentor) {
             return response()->json([
                 'has_presensi_masuk' => false,
                 'has_laporan' => false,
-                'is_verified' => false
             ]);
         }
         
-        $presensi = PresensiTentor::where('id_tentor', $tentor->id_tentor)
-                                  ->whereDate('tanggal', today())
-                                  ->whereNull('jam_keluar')
-                                  ->first();
+        $presensi = Mengajar::where('id_pegawai', $tentor->id_pegawai)
+            ->whereDate('tanggal', today())
+            ->whereNull('jam_selesai')
+            ->first();
         
         return response()->json([
             'has_presensi_masuk' => $presensi ? true : false,
-            'has_laporan' => $presensi && $presensi->kelas ? true : false,
-            'is_verified' => $presensi && $presensi->verifikasi_kehadiran ? true : false,
+            'has_laporan' => $presensi && $presensi->id_kelas ? true : false,
             'data' => $presensi
         ]);
     }
     
     public function riwayat(Request $request)
     {
-        $tentor = Tentor::where('id_user', Auth::id())->first();
+        $tentor = $this->getTentorLogin();
         
         if (!$tentor) {
             return view('dashboard.tentor.riwayat-presensi', [
@@ -204,25 +260,42 @@ class PresensiController extends Controller
             ]);
         }
         
-        $bulan = $request->get('bulan', date('m'));
-        $tahun = $request->get('tahun', date('Y'));
+        $bulan = $request->get('bulan');
+        $tahun = $request->get('tahun');
         $perPage = $request->get('perPage', 10);
         $search = $request->get('search');
         
-        $query = PresensiTentor::where('id_tentor', $tentor->id_tentor);
+        $query = Mengajar::with(['kelas', 'ruang'])
+            ->where('id_pegawai', $tentor->id_pegawai);
         
         if ($bulan) {
             $query->whereMonth('tanggal', $bulan);
         }
+        
         if ($tahun) {
             $query->whereYear('tanggal', $tahun);
         }
+        
         if ($search) {
-            $query->where('kelas', 'like', '%' . $search . '%');
+            $query->where(function($q) use ($search) {
+                $q->whereHas('kelas', function($subQ) use ($search) {
+                    $subQ->where('nama_kelas', 'like', '%' . $search . '%')
+                         ->orWhere('jenjang', 'like', '%' . $search . '%');
+                })
+                ->orWhereHas('ruang', function($subQ) use ($search) {
+                    $subQ->where('nama_ruang', 'like', '%' . $search . '%');
+                })
+                ->orWhere('murid_hadir', 'like', '%' . $search . '%');
+            });
         }
         
-        $riwayat = $query->orderBy('tanggal', 'desc')->paginate($perPage)->appends($request->all());
+        $riwayat = $query->orderBy('tanggal', 'desc')
+            ->orderBy('jam_mulai', 'desc')
+            ->paginate($perPage)
+            ->appends($request->all());
         
-        return view('dashboard.tentor.riwayat-presensi', compact('riwayat', 'bulan', 'tahun', 'perPage', 'search'));
+        return view('dashboard.tentor.riwayat-presensi', compact(
+            'riwayat', 'bulan', 'tahun', 'perPage', 'search'
+        ));
     }
 }

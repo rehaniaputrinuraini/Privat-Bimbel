@@ -14,20 +14,29 @@ class KelolaPresensiController extends Controller
     {
         $role = auth()->user()->peran;
         
-        // ✅ Pakai Model Mengajar (ms_mengajar)
-        $query = Mengajar::with('pegawai');
+        // Query dengan relasi
+        $query = Mengajar::with(['pegawai', 'kelas', 'ruang']);
         
-        // Filter pencarian (nama tentor)
+        // Filter pencarian (nama tentor, kelas, ruang)
         if ($request->filled('search')) {
-            $query->whereHas('pegawai', function($q) use ($request) {
-                $q->where('nama_lengkap', 'like', '%' . $request->search . '%')
-                  ->where('jenis_pegawai', 'tentor');
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->whereHas('pegawai', function($subQ) use ($search) {
+                    $subQ->where('nama_lengkap', 'like', '%' . $search . '%');
+                })
+                ->orWhereHas('kelas', function($subQ) use ($search) {
+                    $subQ->where('nama_kelas', 'like', '%' . $search . '%')
+                         ->orWhere('jenjang', 'like', '%' . $search . '%');
+                })
+                ->orWhereHas('ruang', function($subQ) use ($search) {
+                    $subQ->where('nama_ruang', 'like', '%' . $search . '%');
+                });
             });
-        } else {
-            // Hanya tampilkan tentor
-            $query->whereHas('pegawai', function($q) {
-                $q->where('jenis_pegawai', 'tentor');
-            });
+        }
+        
+        // Filter tentor
+        if ($request->filled('tentor')) {
+            $query->where('id_pegawai', $request->tentor);
         }
         
         // Filter bulan
@@ -46,9 +55,6 @@ class KelolaPresensiController extends Controller
                           ->paginate($perPage)
                           ->appends($request->all());
         
-        // Hitung total honor (tidak ada di tabel ms_mengajar, set 0 dulu)
-        $totalHonor = 0;
-        
         // Ambil daftar tahun dari data yang ada
         $tahunList = Mengajar::selectRaw('YEAR(tanggal) as tahun')
             ->distinct()
@@ -65,6 +71,7 @@ class KelolaPresensiController extends Controller
         $bulan = $request->bulan;
         $tahun = $request->tahun;
         $search = $request->search;
+        $tentorFilter = $request->tentor;
         
         return view('dashboard.shared.riwayat presensi.riwayat-presensi', compact(
             'presensi', 
@@ -73,7 +80,7 @@ class KelolaPresensiController extends Controller
             'bulan', 
             'tahun', 
             'search', 
-            'totalHonor',
+            'tentorFilter',
             'tahunList'
         ));
     }
@@ -147,7 +154,7 @@ class KelolaPresensiController extends Controller
     
     public function show($id)
     {
-        $presensi = Mengajar::with('pegawai', 'kelas', 'ruang')->findOrFail($id);
+        $presensi = Mengajar::with(['pegawai', 'kelas', 'ruang'])->findOrFail($id);
         $role = auth()->user()->peran;
         
         return view('dashboard.shared.riwayat presensi.detail-presensi', compact('presensi', 'role'));

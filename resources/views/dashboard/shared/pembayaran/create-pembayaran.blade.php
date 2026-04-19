@@ -2,7 +2,7 @@
 
 @section('title', 'Input Pembayaran')
 
-@section('content')
+@push('styles')
 <style>
     .autocomplete-items {
         position: absolute;
@@ -10,7 +10,7 @@
         background: white;
         border: 1px solid #E5E7EB;
         border-radius: 12px;
-        width: calc(100% - 30px);
+        width: 100%;
         max-height: 250px;
         overflow-y: auto;
         margin-top: 5px;
@@ -42,13 +42,15 @@
         color: #1E40AF;
         border-left: 4px solid #4D0B87;
     }
-    .info-error {
-        background: #FEE2E2;
-        color: #EF4444;
-        border-left: 4px solid #EF4444;
+    select:disabled {
+        background: #F3F4F6;
+        color: #9CA3AF;
+        cursor: not-allowed;
     }
 </style>
+@endpush
 
+@section('content')
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
     <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Input Pembayaran</h1>
 
@@ -75,6 +77,17 @@
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
             </div>
 
+            {{-- Jenis Pembayaran --}}
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Jenis Pembayaran <span style="color: red;">*</span></label>
+                <select name="jenis_pembayaran" id="jenis_pembayaran" required 
+                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
+                    <option value="">Pilih Jenis Pembayaran</option>
+                    <option value="Tunai">Tunai</option>
+                    <option value="Transfer">Transfer</option>
+                </select>
+            </div>
+
             {{-- Nama Murid (Autocomplete) --}}
             <div style="margin-bottom: 15px; position: relative;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Murid <span style="color: red;">*</span></label>
@@ -88,18 +101,19 @@
 
             <div id="infoStatusMurid" style="display: none;"></div>
 
-            {{-- Paket Awal (Pendaftaran) --}}
+            {{-- Paket Awal (Pendaftaran) - FIX 100.000 --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Paket Awal (Pendaftaran)</label>
-                <input type="text" name="paket_awal_display" id="paket_awal_display" readonly 
+                <input type="text" id="paket_awal_display" readonly 
+                       value="Rp 100.000"
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #6B7280; font-size: 14px;">
-                <input type="hidden" name="paket_awal" id="paket_awal">
+                <input type="hidden" name="paket_awal" id="paket_awal" value="100000">
             </div>
 
             {{-- Paket Belajar (Dinamis dari database) --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Paket Belajar <span style="color: red;">*</span></label>
-                <select name="paket_selanjutnya" id="paket_selanjutnya" required 
+                <select name="paket_selanjutnya" id="paket_selanjutnya" 
                         style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                     <option value="">Pilih Paket</option>
                     @foreach($pakets as $paket)
@@ -133,7 +147,6 @@
                     <option value="11">November</option>
                     <option value="12">Desember</option>
                 </select>
-                <small style="color: #9CA3AF; font-size: 12px;">Kosongkan jika ini pembayaran pendaftaran</small>
             </div>
 
             {{-- Total Pembayaran --}}
@@ -199,16 +212,12 @@
 </div>
 
 <script>
-    // ========== UNSAVED CHANGES WARNING ==========
     let formChanged = false;
-    let pendingUrl = null;
     const form = document.getElementById('mainForm');
-    
     if (form) {
-        const inputs = form.querySelectorAll('input, select, textarea');
-        inputs.forEach(input => {
-            input.addEventListener('change', () => formChanged = true);
-            input.addEventListener('keyup', () => formChanged = true);
+        form.querySelectorAll('input, select, textarea').forEach(i => {
+            i.addEventListener('change', () => formChanged = true);
+            i.addEventListener('keyup', () => formChanged = true);
         });
         form.addEventListener('submit', () => formChanged = false);
     }
@@ -216,7 +225,7 @@
     function bukaModalBatal() { 
         if (formChanged) {
             document.getElementById('modalPindahHalaman').style.display = 'flex';
-            document.getElementById('confirmPindahBtn').onclick = function() {
+            document.getElementById('confirmPindahBtn').onclick = () => {
                 formChanged = false;
                 window.location.href = "{{ route($role . '.pembayaran') }}";
             };
@@ -225,11 +234,10 @@
             document.getElementById('confirmKeluarLink').href = "{{ route($role . '.pembayaran') }}";
         }
     }
-    
     function tutupModalBatal() { document.getElementById('modalBatal').style.display = 'none'; }
-    function tutupModalPindah() { document.getElementById('modalPindahHalaman').style.display = 'none'; pendingUrl = null; }
+    function tutupModalPindah() { document.getElementById('modalPindahHalaman').style.display = 'none'; }
     
-    // Autocomplete Murid
+    // Autocomplete
     const searchInput = document.getElementById('searchMurid');
     const autocompleteDiv = document.getElementById('autocompleteResult');
     const idHidden = document.getElementById('id_murid');
@@ -238,143 +246,125 @@
         const query = this.value.trim();
         if (query.length < 2) {
             autocompleteDiv.style.display = 'none';
-            idHidden.value = '';
             return;
         }
-        
         fetch(`/search-murid?q=${encodeURIComponent(query)}`)
-            .then(response => response.json())
+            .then(r => r.json())
             .then(data => {
-                if (data.length > 0) {
-                    autocompleteDiv.innerHTML = data.map(murid => `
-                        <div class="autocomplete-item" data-id="${murid.id_murid}" data-paket-awal="${murid.paket_awal}" data-pilihan-paket="${murid.pilihan_paket || ''}">
-                            <strong>${murid.nama_lengkap_murid}</strong><br>
-                            <small>Kelas: ${murid.kelas} | Paket: ${murid.pilihan_paket || '-'}</small>
+                if (data.length) {
+                    autocompleteDiv.innerHTML = data.map(m => `
+                        <div class="autocomplete-item" data-id="${m.id_murid}">
+                            <strong>${m.nama_lengkap}</strong><br>
+                            <small>Asal: ${m.asal_sekolah || '-'} | HP: ${m.no_hp || '-'}</small>
                         </div>
                     `).join('');
                     autocompleteDiv.style.display = 'block';
-                    
                     document.querySelectorAll('.autocomplete-item').forEach(item => {
                         item.addEventListener('click', function() {
                             searchInput.value = this.querySelector('strong').innerText;
                             idHidden.value = this.dataset.id;
                             autocompleteDiv.style.display = 'none';
-                            cekStatusPembayaran(this.dataset.id);
+                            cekStatus(this.dataset.id);
                         });
                     });
                 } else {
-                    autocompleteDiv.innerHTML = '<div class="autocomplete-item" style="color: #9CA3AF;">Murid tidak ditemukan</div>';
+                    autocompleteDiv.innerHTML = '<div class="autocomplete-item">Tidak ditemukan</div>';
                     autocompleteDiv.style.display = 'block';
-                    idHidden.value = '';
                 }
             });
     });
     
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', e => {
         if (!searchInput.contains(e.target) && !autocompleteDiv.contains(e.target)) {
             autocompleteDiv.style.display = 'none';
         }
     });
     
-    function cekStatusPembayaran(idMurid) {
-        fetch(`/cek-status-pembayaran/${idMurid}`)
-            .then(response => response.json())
-            .then(data => {
-                const infoDiv = document.getElementById('infoStatusMurid');
-                const paketSelanjutnya = document.getElementById('paket_selanjutnya');
-                const totalBayarInput = document.getElementById('total_pembayaran');
-                const paketAwalDisplay = document.getElementById('paket_awal_display');
-                const paketAwalHidden = document.getElementById('paket_awal');
+    function cekStatus(id) {
+        fetch(`/cek-status-pembayaran/${id}`)
+            .then(r => r.json())
+            .then(d => {
+                const info = document.getElementById('infoStatusMurid');
+                const paketSelect = document.getElementById('paket_selanjutnya');
+                const totalInput = document.getElementById('total_pembayaran');
                 const bulanGroup = document.getElementById('bulanGroup');
+                const infoHarga = document.getElementById('infoHarga');
+                const preview = document.getElementById('previewStatus');
                 
-                if (!data.sudah_bayar_pendaftaran) {
-                    infoDiv.innerHTML = `<div class="info-box info-pendaftaran"><i class="fas fa-exclamation-triangle"></i> <strong>Pendaftaran Baru!</strong><br>Murid ini WAJIB membayar biaya pendaftaran sebesar Rp ${new Intl.NumberFormat('id-ID').format(data.paket_awal)} terlebih dahulu.</div>`;
-                    infoDiv.style.display = 'block';
-                    paketAwalDisplay.value = 'Rp ' + new Intl.NumberFormat('id-ID').format(data.paket_awal);
-                    paketAwalHidden.value = data.paket_awal;
-                    paketSelanjutnya.disabled = true;
+                if (!d.sudah_bayar_pendaftaran) {
+                    info.innerHTML = `<div class="info-box info-pendaftaran"><i class="fas fa-exclamation-triangle"></i> <strong>Pendaftaran Baru!</strong><br>Murid ini WAJIB membayar biaya pendaftaran sebesar Rp 100.000 terlebih dahulu.</div>`;
+                    info.style.display = 'block';
+                    paketSelect.disabled = true;
+                    paketSelect.value = '';
                     bulanGroup.style.display = 'none';
-                    totalBayarInput.value = data.paket_awal;
-                    document.getElementById('infoHarga').style.display = 'none';
-                    document.getElementById('previewStatus').style.display = 'none';
+                    totalInput.value = '100000';
+                    infoHarga.style.display = 'none';
+                    preview.style.display = 'none';
                 } else {
-                    paketAwalDisplay.value = 'Rp ' + new Intl.NumberFormat('id-ID').format(data.paket_awal);
-                    paketAwalHidden.value = data.paket_awal;
-                    infoDiv.innerHTML = `<div class="info-box info-bulanan"><i class="fas fa-check-circle"></i> <strong>Sudah Terdaftar!</strong><br>Silakan lanjutkan pembayaran bulanan.</div>`;
-                    infoDiv.style.display = 'block';
-                    paketSelanjutnya.disabled = false;
+                    info.innerHTML = `<div class="info-box info-bulanan"><i class="fas fa-check-circle"></i> <strong>Sudah Terdaftar!</strong><br>Silakan lanjutkan pembayaran bulanan.</div>`;
+                    info.style.display = 'block';
+                    paketSelect.disabled = false;
                     bulanGroup.style.display = 'block';
                     
-                    if (data.pilihan_paket && data.pilihan_paket !== '') {
-                        paketSelanjutnya.value = data.pilihan_paket;
-                        const selectedOption = paketSelanjutnya.options[paketSelanjutnya.selectedIndex];
-                        const harga = selectedOption?.dataset?.harga || 0;
-                        totalBayarInput.value = harga;
-                        document.getElementById('infoHarga').style.display = 'block';
+                    if (d.paket_aktif) {
+                        paketSelect.value = d.paket_aktif;
+                        const opt = paketSelect.options[paketSelect.selectedIndex];
+                        const harga = parseInt(opt?.dataset?.harga) || 0;
+                        totalInput.value = harga;
+                        infoHarga.style.display = 'block';
                         document.getElementById('hargaPaketValue').innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(harga);
-                        updatePreviewStatus();
+                        updatePreview();
+                    }
+                    if (d.bulan_tunggakan) {
+                        document.getElementById('bulan_dibayar').value = d.bulan_tunggakan;
                     }
                 }
             });
     }
     
-    function updatePreviewStatus() {
-        const paketSelanjutnya = document.getElementById('paket_selanjutnya').value;
-        const totalBayar = parseInt(document.getElementById('total_pembayaran').value) || 0;
-        const previewDiv = document.getElementById('previewStatus');
-        const infoHargaDiv = document.getElementById('infoHarga');
+    function updatePreview() {
+        const paket = document.getElementById('paket_selanjutnya').value;
+        const total = parseInt(document.getElementById('total_pembayaran').value) || 0;
+        const preview = document.getElementById('previewStatus');
+        const infoHarga = document.getElementById('infoHarga');
         
-        if (!paketSelanjutnya || !totalBayar || totalBayar <= 0) {
-            previewDiv.style.display = 'none';
+        if (!paket || total <= 0) {
+            preview.style.display = 'none';
             return;
         }
         
-        const selectedOption = document.getElementById('paket_selanjutnya').options[document.getElementById('paket_selanjutnya').selectedIndex];
-        const hargaPerBulan = parseInt(selectedOption?.dataset?.harga) || 0;
+        const opt = document.getElementById('paket_selanjutnya').options[document.getElementById('paket_selanjutnya').selectedIndex];
+        const harga = parseInt(opt?.dataset?.harga) || 0;
         
-        if (hargaPerBulan > 0) {
-            document.getElementById('hargaPaketValue').innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(hargaPerBulan);
-            infoHargaDiv.style.display = 'block';
+        if (harga > 0) {
+            document.getElementById('hargaPaketValue').innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(harga);
+            infoHarga.style.display = 'block';
             
-            let statusText = '', statusColor = '', statusBg = '';
-            if (totalBayar >= hargaPerBulan) {
-                const kelebihan = totalBayar - hargaPerBulan;
-                if (kelebihan > 0) {
-                    statusText = `✅ Lunas + Uang Muka Rp ${new Intl.NumberFormat('id-ID').format(kelebihan)} untuk bulan depan`;
-                } else {
-                    statusText = `✅ Lunas - Pembayaran untuk 1 bulan penuh`;
-                }
-                statusColor = '#0E7490'; statusBg = '#E1F7E3';
+            let text = '', color = '', bg = '';
+            if (total >= harga) {
+                const lebih = total - harga;
+                text = lebih > 0 ? `✅ Lunas + Uang Muka Rp ${new Intl.NumberFormat('id-ID').format(lebih)}` : `✅ Lunas - Pembayaran penuh`;
+                color = '#0E7490'; bg = '#E1F7E3';
             } else {
-                const sisa = hargaPerBulan - totalBayar;
-                statusText = `⚠️ Uang Muka - Masih kurang Rp ${new Intl.NumberFormat('id-ID').format(sisa)} untuk lunas 1 bulan`;
-                statusColor = '#92400E'; statusBg = '#FEF3C7';
+                const kurang = harga - total;
+                text = `⚠️ Uang Muka - Kurang Rp ${new Intl.NumberFormat('id-ID').format(kurang)}`;
+                color = '#92400E'; bg = '#FEF3C7';
             }
-            
-            previewDiv.innerHTML = `<div style="display: flex; align-items: center; gap: 10px;"><i class="fas fa-calculator"></i><div><strong>Preview Status:</strong><br><span style="color: ${statusColor};">${statusText}</span></div></div>`;
-            previewDiv.style.background = statusBg;
-            previewDiv.style.display = 'block';
-        } else {
-            infoHargaDiv.style.display = 'none';
-            previewDiv.style.display = 'none';
+            preview.innerHTML = `<div><strong>Preview:</strong><br><span style="color:${color};">${text}</span></div>`;
+            preview.style.background = bg;
+            preview.style.display = 'block';
         }
     }
     
     document.getElementById('paket_selanjutnya').addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const harga = parseInt(selectedOption?.dataset?.harga) || 0;
-        const totalBayarInput = document.getElementById('total_pembayaran');
-        
+        const harga = parseInt(this.options[this.selectedIndex]?.dataset?.harga) || 0;
         if (harga > 0) {
-            totalBayarInput.value = harga;
-            updatePreviewStatus();
+            document.getElementById('total_pembayaran').value = harga;
+            updatePreview();
         }
     });
     
-    document.getElementById('total_pembayaran').addEventListener('input', updatePreviewStatus);
-    
-    if (!document.getElementById('tanggal').value) {
-        document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
-    }
+    document.getElementById('total_pembayaran').addEventListener('input', updatePreview);
+    document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
 </script>
 @endsection

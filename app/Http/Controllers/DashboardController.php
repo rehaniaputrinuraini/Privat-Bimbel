@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Pegawai;
-use App\Models\Mengajar;  // ✅ GANTI PresensiTentor → Mengajar
+use App\Models\Mengajar;
 use App\Models\Murid;
+use App\Models\Pembayaran;
+use App\Models\TransaksiUmum;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -18,13 +20,16 @@ class DashboardController extends Controller
         $totalTentor = Pegawai::where('jenis_pegawai', 'tentor')->count();
         $totalAdmin = Pegawai::where('jenis_pegawai', 'admin')->count();
         
+        // AMBIL DATA KEUANGAN DARI tr_transaksi & ms_transaksi
+        $keuangan = $this->getDataKeuangan();
+        
         $stats = [
             'total_murid' => $totalMurid,
             'total_tentor' => $totalTentor,
             'total_admin' => $totalAdmin,
-            'pemasukan' => 0,
-            'pengeluaran' => 0,
-            'laba_bersih' => 0,
+            'pemasukan' => $keuangan['totalPemasukan'],
+            'pengeluaran' => $keuangan['totalPengeluaran'],
+            'laba_bersih' => $keuangan['labaBersih'],
         ];
         
         $chartData = [
@@ -33,7 +38,7 @@ class DashboardController extends Controller
             'expenses' => []
         ];
         
-        $riwayatKeuangan = collect([]);
+        $riwayatKeuangan = $keuangan['riwayat'];
         
         return view('dashboard.shared.halaman-utama.index', compact('stats', 'riwayatKeuangan', 'chartData'));
     }
@@ -44,15 +49,18 @@ class DashboardController extends Controller
         $totalMurid = Murid::count();
         $totalTentor = Pegawai::where('jenis_pegawai', 'tentor')->count();
         
+        // AMBIL DATA KEUANGAN DARI tr_transaksi & ms_transaksi
+        $keuangan = $this->getDataKeuangan();
+        
         $stats = [
             'total_murid' => $totalMurid,
             'total_tentor' => $totalTentor,
-            'pemasukan' => 0,
-            'pengeluaran' => 0,
-            'laba_bersih' => 0,
+            'pemasukan' => $keuangan['totalPemasukan'],
+            'pengeluaran' => $keuangan['totalPengeluaran'],
+            'laba_bersih' => $keuangan['labaBersih'],
         ];
         
-        $riwayatKeuangan = collect([]);
+        $riwayatKeuangan = $keuangan['riwayat'];
         
         return view('dashboard.shared.halaman-utama.index', compact('stats', 'riwayatKeuangan'));
     }
@@ -82,20 +90,20 @@ class DashboardController extends Controller
         }
         
         // Total Hadir Bulan Ini
-        $totalHadir = Mengajar::where('id_pegawai', $pegawai->id_pegawai)  // ✅ GANTI id_tentor → id_pegawai
+        $totalHadir = Mengajar::where('id_pegawai', $pegawai->id_pegawai)
                                     ->whereMonth('tanggal', now()->month)
                                     ->whereYear('tanggal', now()->year)
-                                    ->where('murid_hadir', 'Hadir')  // ✅ GANTI status_murid → murid_hadir
+                                    ->where('murid_hadir', 'Hadir')
                                     ->count();
         
         // Total Jam Mengajar
-        $presensiSelesai = Mengajar::where('id_pegawai', $pegawai->id_pegawai)  // ✅ GANTI
-                                         ->whereNotNull('jam_selesai')  // ✅ GANTI jam_keluar → jam_selesai
+        $presensiSelesai = Mengajar::where('id_pegawai', $pegawai->id_pegawai)
+                                         ->whereNotNull('jam_selesai')
                                          ->get();
         
         $totalMenit = 0;
         foreach ($presensiSelesai as $p) {
-            if ($p->jam_mulai && $p->jam_selesai) {  // ✅ GANTI jam_masuk → jam_mulai
+            if ($p->jam_mulai && $p->jam_selesai) {
                 $masuk = Carbon::parse($p->jam_mulai);
                 $keluar = Carbon::parse($p->jam_selesai);
                 $totalMenit += $masuk->diffInMinutes($keluar);
@@ -107,7 +115,7 @@ class DashboardController extends Controller
         $totalJamFormatted = $totalJam . ' Jam ' . $totalMenitSisa . ' Menit';
         
         // Cek status hari ini
-        $presensiHariIni = Mengajar::where('id_pegawai', $pegawai->id_pegawai)  // ✅ GANTI
+        $presensiHariIni = Mengajar::where('id_pegawai', $pegawai->id_pegawai)
                                          ->whereDate('tanggal', today())
                                          ->first();
         
@@ -118,12 +126,12 @@ class DashboardController extends Controller
         $menitBerjalan = 0;
         
         if ($presensiHariIni) {
-            if ($presensiHariIni->jam_selesai) {  // ✅ GANTI jam_keluar → jam_selesai
+            if ($presensiHariIni->jam_selesai) {
                 $statusHariIni = 'selesai';
             } else {
                 $statusHariIni = 'sedang';
                 $presensiAktif = $presensiHariIni;
-                $jamMulai = Carbon::parse($presensiHariIni->jam_mulai);  // ✅ GANTI jam_masuk → jam_mulai
+                $jamMulai = Carbon::parse($presensiHariIni->jam_mulai);
                 
                 $now = Carbon::now();
                 $diffMenit = $jamMulai->diffInMinutes($now);
@@ -145,5 +153,132 @@ class DashboardController extends Controller
             'nama_tentor' => $pegawai->nama_lengkap,
             'tentor' => $pegawai
         ]);
+    }
+    
+    // FUNGSI PRIVATE UNTUK AMBIL DATA KEUANGAN
+    private function getDataKeuangan()
+    {
+        // 1. PEMASUKAN = Pendaftaran + Pemasukan Manual
+        $pemasukanPendaftaran = Pembayaran::whereNotNull('paket_awal')
+            ->whereNull('paket_selanjutnya')
+            ->sum('paket_awal');
+        
+        $pemasukanManual = Pembayaran::whereHas('transaksiUmum', function($q) {
+            $q->where('kategori', 'pemasukan');
+        })->sum('total_pembayaran');
+        
+        $totalPemasukan = $pemasukanPendaftaran + $pemasukanManual;
+        
+        // 2. PENGELUARAN = Dari transaksiUmum kategori pengeluaran
+        $totalPengeluaran = Pembayaran::whereHas('transaksiUmum', function($q) {
+            $q->where('kategori', 'pengeluaran');
+        })->sum('total_pembayaran');
+        
+        // 3. LABA BERSIH
+        $labaBersih = $totalPemasukan - $totalPengeluaran;
+        
+        // 4. RIWAYAT KEUANGAN TERAKHIR (10 data)
+        $riwayat = collect();
+        
+        // Pemasukan Pendaftaran
+        $pendaftaran = Pembayaran::whereNotNull('paket_awal')
+            ->whereNull('paket_selanjutnya')
+            ->with('murid')
+            ->orderBy('tanggal', 'desc')
+            ->limit(5)
+            ->get();
+        
+        foreach ($pendaftaran as $item) {
+            $riwayat->push((object)[
+                'tanggal' => $item->tanggal,
+                'rincian' => 'Pendaftaran - ' . ($item->murid->nama_lengkap ?? 'Tidak Diketahui'),
+                'jumlah' => $item->paket_awal ?? 100000,
+                'kategori' => 'pemasukan',
+            ]);
+        }
+        
+        // Pemasukan Manual
+        $manualMasuk = Pembayaran::whereHas('transaksiUmum', function($q) {
+            $q->where('kategori', 'pemasukan');
+        })->with('transaksiUmum')
+          ->orderBy('tanggal', 'desc')
+          ->limit(5)
+          ->get();
+        
+        foreach ($manualMasuk as $item) {
+            $riwayat->push((object)[
+                'tanggal' => $item->tanggal,
+                'rincian' => $item->transaksiUmum->keterangan ?? 'Pemasukan Manual',
+                'jumlah' => $item->total_pembayaran ?? 0,
+                'kategori' => 'pemasukan',
+            ]);
+        }
+        
+        // Pengeluaran
+        $pengeluaran = Pembayaran::whereHas('transaksiUmum', function($q) {
+            $q->where('kategori', 'pengeluaran');
+        })->with('transaksiUmum')
+          ->orderBy('tanggal', 'desc')
+          ->limit(5)
+          ->get();
+        
+        foreach ($pengeluaran as $item) {
+            $riwayat->push((object)[
+                'tanggal' => $item->tanggal,
+                'rincian' => $item->transaksiUmum->keterangan ?? 'Pengeluaran',
+                'jumlah' => $item->total_pembayaran ?? 0,
+                'kategori' => 'pengeluaran',
+            ]);
+        }
+        
+        // Piutang (Tunggakan)
+        $piutang = Pembayaran::whereNotNull('paket_selanjutnya')
+            ->where('status_tagihan', 'tunggak')
+            ->with('murid')
+            ->orderBy('tanggal', 'desc')
+            ->limit(5)
+            ->get();
+        
+        foreach ($piutang as $item) {
+            $bulanPeriode = $item->bulan_dibayar 
+                ? Carbon::create()->month($item->bulan_dibayar)->translatedFormat('F') . ' ' . $item->tahun_dibayar
+                : '-';
+            $riwayat->push((object)[
+                'tanggal' => $item->tanggal,
+                'rincian' => 'Piutang - ' . ($item->murid->nama_lengkap ?? 'Tidak Diketahui') . ' (' . $bulanPeriode . ')',
+                'jumlah' => $item->total_piutang ?? 0,
+                'kategori' => 'piutang',
+            ]);
+        }
+        
+        // Uang Muka
+        $uangMuka = Pembayaran::whereNotNull('paket_selanjutnya')
+            ->where('status_tagihan', 'uang_muka')
+            ->with('murid')
+            ->orderBy('tanggal', 'desc')
+            ->limit(5)
+            ->get();
+        
+        foreach ($uangMuka as $item) {
+            $bulanPeriode = $item->bulan_dibayar 
+                ? Carbon::create()->month($item->bulan_dibayar)->translatedFormat('F') . ' ' . $item->tahun_dibayar
+                : '-';
+            $riwayat->push((object)[
+                'tanggal' => $item->tanggal,
+                'rincian' => 'Uang Muka - ' . ($item->murid->nama_lengkap ?? 'Tidak Diketahui') . ' (' . $bulanPeriode . ')',
+                'jumlah' => $item->total_uang_muka ?? 0,
+                'kategori' => 'uang_muka',
+            ]);
+        }
+        
+        // Sortir dan ambil 10 terbaru
+        $riwayat = $riwayat->sortByDesc('tanggal')->take(10)->values();
+        
+        return [
+            'totalPemasukan' => $totalPemasukan,
+            'totalPengeluaran' => $totalPengeluaran,
+            'labaBersih' => $labaBersih,
+            'riwayat' => $riwayat,
+        ];
     }
 }

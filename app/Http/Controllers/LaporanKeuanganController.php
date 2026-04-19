@@ -3,75 +3,159 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\LaporanKeuangan;
-use App\Models\HargaPaket;
-use App\Models\Murid;
+use App\Models\Pembayaran;
+use App\Models\TransaksiUmum;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class LaporanKeuanganController extends Controller
 {
-    // Menampilkan semua data keuangan
+    // ========== HALAMAN INDEX ==========
     public function index(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
-        $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
+        $filterBulan = $request->bulan;
+        $filterTahun = $request->tahun;
         
-        $queryPemasukan = LaporanKeuangan::where('kategori', 'pemasukan');
-        $queryPengeluaran = LaporanKeuangan::where('kategori', 'pengeluaran');
-        $queryPiutang = LaporanKeuangan::where('kategori', 'piutang');
-        $queryUangMuka = LaporanKeuangan::where('kategori', 'uang_muka');
+        // ========== DATA DARI tr_transaksi ==========
         
-        // Filter Bulan
-        if ($request->filled('bulan')) {
-            $queryPemasukan->whereMonth('tanggal', $request->bulan);
-            $queryPengeluaran->whereMonth('tanggal', $request->bulan);
-            $queryPiutang->whereMonth('tanggal', $request->bulan);
-            $queryUangMuka->whereMonth('tanggal', $request->bulan);
+        // 1. PEMASUKAN PENDaftaran
+        $queryPemasukanPendaftaran = Pembayaran::whereNotNull('paket_awal')
+            ->whereNull('paket_selanjutnya');
+        
+        // 2. PEMASUKAN MANUAL (dari ms_transaksi via transaksiUmum)
+        $queryPemasukanManual = Pembayaran::whereHas('transaksiUmum', function($q) {
+            $q->where('kategori', 'pemasukan');
+        });
+        
+        // 3. PENGELUARAN MANUAL
+        $queryPengeluaran = Pembayaran::whereHas('transaksiUmum', function($q) {
+            $q->where('kategori', 'pengeluaran');
+        });
+        
+        // 4. PIUTANG (Tunggakan)
+        $queryPiutang = Pembayaran::whereNotNull('paket_selanjutnya')
+            ->where('status_tagihan', 'tunggak');
+        
+        // 5. UANG MUKA (dari pembayaran bulanan)
+        $queryUangMuka = Pembayaran::whereNotNull('paket_selanjutnya')
+            ->where('status_tagihan', 'uang_muka');
+        
+        // Filter Bulan & Tahun
+        if ($filterBulan) {
+            $queryPemasukanPendaftaran->whereMonth('tanggal', $filterBulan);
+            $queryPemasukanManual->whereMonth('tanggal', $filterBulan);
+            $queryPengeluaran->whereMonth('tanggal', $filterBulan);
+            $queryPiutang->whereMonth('tanggal', $filterBulan);
+            $queryUangMuka->whereMonth('tanggal', $filterBulan);
         }
         
-        // Filter Tahun
-        if ($request->filled('tahun')) {
-            $queryPemasukan->whereYear('tanggal', $request->tahun);
-            $queryPengeluaran->whereYear('tanggal', $request->tahun);
-            $queryPiutang->whereYear('tanggal', $request->tahun);
-            $queryUangMuka->whereYear('tanggal', $request->tahun);
+        if ($filterTahun) {
+            $queryPemasukanPendaftaran->whereYear('tanggal', $filterTahun);
+            $queryPemasukanManual->whereYear('tanggal', $filterTahun);
+            $queryPengeluaran->whereYear('tanggal', $filterTahun);
+            $queryPiutang->whereYear('tanggal', $filterTahun);
+            $queryUangMuka->whereYear('tanggal', $filterTahun);
         }
         
-        // Filter Search (Nama Murid)
-        if ($request->filled('search')) {
-            $searchTerm = '%' . $request->search . '%';
-            $queryPemasukan->where('rincian', 'like', $searchTerm);
-            $queryPengeluaran->where('rincian', 'like', $searchTerm);
-            $queryPiutang->where('nama_murid', 'like', $searchTerm);
-            $queryUangMuka->where('nama_murid', 'like', $searchTerm);
+        // ========== GABUNGKAN DATA PEMASUKAN ==========
+        $pemasukan = collect();
+        
+        // A. Pemasukan dari Pendaftaran
+        $pendaftaranMurid = $queryPemasukanPendaftaran->with('murid')->orderBy('tanggal', 'desc')->get();
+        foreach ($pendaftaranMurid as $item) {
+            $pemasukan->push((object)[
+                'id' => 'P' . $item->id_pembayaran,
+                'tanggal' => $item->tanggal,
+                'rincian' => 'Pendaftaran - ' . ($item->murid->nama_lengkap ?? 'Tidak Diketahui'),
+                'jenis_pembayaran' => '-',
+                'jumlah' => $item->paket_awal ?? 100000,
+                'sumber' => 'pendaftaran',
+            ]);
         }
         
-        // Filter Paket
-        if ($request->filled('paket')) {
-            $queryPemasukan->where('rincian', 'like', '%' . $request->paket . '%');
+        // B. Pemasukan Manual
+        $pemasukanManual = $queryPemasukanManual->with('transaksiUmum')->orderBy('tanggal', 'desc')->get();
+        foreach ($pemasukanManual as $item) {
+            $pemasukan->push((object)[
+                'id' => 'M' . $item->id_pembayaran,
+                'tanggal' => $item->tanggal,
+                'rincian' => $item->transaksiUmum->keterangan ?? 'Pemasukan Manual',
+                'jenis_pembayaran' => $item->transaksiUmum->jenis_pembayaran ?? '-',
+                'jumlah' => $item->total_pembayaran ?? 0,
+                'sumber' => 'manual',
+            ]);
         }
         
-        $pemasukan = $queryPemasukan->orderBy('tanggal', 'desc')->get();
-        $pengeluaran = $queryPengeluaran->orderBy('tanggal', 'desc')->get();
-        $piutang = $queryPiutang->orderBy('tanggal', 'desc')->get();
-        $uang_muka = $queryUangMuka->orderBy('tanggal', 'desc')->get();
+        $pemasukan = $pemasukan->sortByDesc('tanggal')->values();
         
+        // ========== PENGELUARAN ==========
+        $pengeluaran = $queryPengeluaran->with('transaksiUmum')->orderBy('tanggal', 'desc')->get()->map(function($item) {
+            return (object)[
+                'id' => 'K' . $item->id_pembayaran,
+                'tanggal' => $item->tanggal,
+                'rincian' => $item->transaksiUmum->keterangan ?? 'Pengeluaran',
+                'jenis_pembayaran' => $item->transaksiUmum->jenis_pembayaran ?? '-',
+                'jumlah' => $item->total_pembayaran ?? 0,
+            ];
+        });
+        
+        // ========== PIUTANG ==========
+        $piutang = $queryPiutang->with('murid')->orderBy('tanggal', 'desc')->get()->map(function($item) {
+            $bulanPeriode = $item->bulan_dibayar 
+                ? Carbon::create()->month($item->bulan_dibayar)->translatedFormat('F') . ' ' . $item->tahun_dibayar
+                : '-';
+            return (object)[
+                'id' => 'T' . $item->id_pembayaran,
+                'tanggal' => $item->tanggal,
+                'nama_murid' => $item->murid->nama_lengkap ?? 'Tidak Diketahui',
+                'bulan_periode' => $bulanPeriode,
+                'jumlah' => $item->total_piutang ?? 0,
+                'sumber' => 'pembayaran',
+            ];
+        });
+        
+        // ========== UANG MUKA ==========
+        $uang_muka = $queryUangMuka->with('murid')->orderBy('tanggal', 'desc')->get()->map(function($item) {
+            $bulanPeriode = $item->bulan_dibayar 
+                ? Carbon::create()->month($item->bulan_dibayar)->translatedFormat('F') . ' ' . $item->tahun_dibayar
+                : '-';
+            return (object)[
+                'id' => 'W' . $item->id_pembayaran,
+                'tanggal' => $item->tanggal,
+                'nama_murid' => $item->murid->nama_lengkap ?? 'Tidak Diketahui',
+                'bulan_periode' => $bulanPeriode,
+                'jumlah' => $item->total_uang_muka ?? 0, // ✅ AMBIL DARI total_uang_muka
+                'sumber' => 'pembayaran',
+            ];
+        });
+        
+        // ========== HITUNG TOTAL ==========
         $totalPemasukan = $pemasukan->sum('jumlah');
         $totalPengeluaran = $pengeluaran->sum('jumlah');
         $totalPiutang = $piutang->sum('jumlah');
-        $totalUangMuka = $uang_muka->sum('jumlah');
+        $totalUangMuka = $uang_muka->sum('jumlah'); // ✅ TOTAL DARI UANG MUKA
         $totalPemasukanKas = $totalPemasukan + $totalPiutang + $totalUangMuka;
-        $saldoKas = $totalPemasukan - $totalPengeluaran;
+        $saldoKas = $totalPemasukanKas - $totalPengeluaran;
         
+        // ========== BULAN LIST ==========
         $bulanList = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
             5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
             9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
         
-        $tahunList = LaporanKeuangan::selectRaw('YEAR(tanggal) as tahun')
+        // ========== TAHUN LIST ==========
+        $tahunPembayaran = Pembayaran::selectRaw('YEAR(tanggal) as tahun')
             ->distinct()
+            ->whereNotNull('tanggal');
+            
+        $tahunTransaksiUmum = TransaksiUmum::selectRaw('YEAR(tanggal_bayar) as tahun')
+            ->distinct()
+            ->whereNotNull('tanggal_bayar');
+            
+        $tahunList = $tahunPembayaran->union($tahunTransaksiUmum)
             ->orderBy('tahun', 'desc')
             ->pluck('tahun');
         
@@ -87,166 +171,94 @@ class LaporanKeuanganController extends Controller
             'totalUangMuka' => $totalUangMuka,
             'totalPemasukanKas' => $totalPemasukanKas,
             'saldoKas' => $saldoKas,
-            'paketList' => $paketList,
             'bulanList' => $bulanList,
             'tahunList' => $tahunList,
-            'filterBulan' => $request->bulan,
-            'filterTahun' => $request->tahun,
-            'filterPaket' => $request->paket,
-            'filterSearch' => $request->search,
+            'filterBulan' => $filterBulan,
+            'filterTahun' => $filterTahun,
         ]);
     }
 
-    // Form tambah data
+    // ========== FORM CREATE ==========
     public function create(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
-        $muridList = Murid::orderBy('nama_lengkap_murid', 'asc')->get();
-        $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
-        
         return view('dashboard.shared.laporan-keuangan.create-laporan-keuangan', [
             'role' => $role,
-            'muridList' => $muridList,
-            'paketList' => $paketList,
         ]);
     }
 
-    // Simpan data
+    // ========== STORE ==========
     public function store(Request $request)
     {
-        // Validasi input
-        $validated = $request->validate([
+        $request->validate([
             'tanggal' => 'required|date',
-            'kategori' => 'required|in:pemasukan,pengeluaran,piutang,uang_muka',
+            'kategori' => 'required|in:pemasukan,pengeluaran',
+            'jenis_pembayaran' => 'required|in:Tunai,Transfer',
             'rincian' => 'required|string|max:255',
-            'jumlah' => 'required|numeric|min:0'
+            'jumlah' => 'required|numeric|min:0',
         ]);
 
-        // Bersihkan jumlah
-        $jumlah = str_replace(['.', ','], '', $request->jumlah);
-        $jumlah = (float) $jumlah;
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
-        // Siapkan data untuk disimpan
-        $data = [
-            'tanggal' => $request->tanggal,
-            'kategori' => $request->kategori,
-            'rincian' => $request->rincian,
-            'jumlah' => $jumlah,
-            'nama_murid' => $request->nama_murid ?? null,
-            'bulan_periode' => $request->bulan_periode ?? null,
-        ];
+        DB::beginTransaction();
         
         try {
-            LaporanKeuangan::create($data);
+            // 1. Insert ke ms_transaksi (DETAIL)
+            $idTransaksi = DB::table('ms_transaksi')->insertGetId([
+                'tanggal_bayar' => $request->tanggal,
+                'kategori' => $request->kategori,
+                'jenis_pembayaran' => $request->jenis_pembayaran,
+                'keterangan' => $request->rincian,
+                'status_bayar' => 'Sudah',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
             
-            $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+            // 2. Insert ke tr_transaksi (TOTAL)
+            Pembayaran::create([
+                'id_transaksi' => $idTransaksi,
+                'tanggal' => $request->tanggal,
+                'paket_awal' => null,
+                'paket_selanjutnya' => null,
+                'total_pembayaran' => $request->jumlah,
+                'status_tagihan' => 'lunas',
+            ]);
+            
+            DB::commit();
             
             return redirect()->route($role . '.laporan-keuangan')
                 ->with('success', 'Data berhasil ditambahkan');
                 
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+            DB::rollback();
+            
+            return back()->withInput()
+                ->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
         }
     }
 
-    // Hapus data
+    // ========== DESTROY ==========
     public function destroy($id)
     {
-        $data = LaporanKeuangan::findOrFail($id);
-        $data->delete();
+        $role = request()->is('superadmin*') ? 'superadmin' : 'admin';
         
-        $referer = request()->headers->get('referer');
-        $role = str_contains($referer, 'superadmin') ? 'superadmin' : 'admin';
+        $prefix = substr($id, 0, 1);
+        $realId = substr($id, 1);
         
-        return redirect()->route($role . '.laporan-keuangan')->with('success', 'Data berhasil dihapus');
-    }
-    
-    // Laporan rekap per bulan
-    public function rekapBulanan(Request $request)
-    {
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        
-        $tahun = $request->tahun ?? Carbon::now()->year;
-        
-        $rekap = [];
-        for ($bulan = 1; $bulan <= 12; $bulan++) {
-            $pemasukan = LaporanKeuangan::where('kategori', 'pemasukan')
-                ->whereYear('tanggal', $tahun)
-                ->whereMonth('tanggal', $bulan)
-                ->sum('jumlah');
-            
-            $pengeluaran = LaporanKeuangan::where('kategori', 'pengeluaran')
-                ->whereYear('tanggal', $tahun)
-                ->whereMonth('tanggal', $bulan)
-                ->sum('jumlah');
-            
-            $rekap[$bulan] = [
-                'bulan' => Carbon::create()->month($bulan)->translatedFormat('F'),
-                'pemasukan' => $pemasukan,
-                'pengeluaran' => $pengeluaran,
-                'saldo' => $pemasukan - $pengeluaran
-            ];
-        }
-        
-        $tahunList = LaporanKeuangan::selectRaw('YEAR(tanggal) as tahun')
-            ->distinct()
-            ->orderBy('tahun', 'desc')
-            ->pluck('tahun');
-        
-        return view('dashboard.shared.laporan-keuangan.rekap-bulanan', [
-            'role' => $role,
-            'rekap' => $rekap,
-            'tahun' => $tahun,
-            'tahunList' => $tahunList,
-        ]);
-    }
-    
-    // Laporan rekap per murid
-    public function rekapPerMurid(Request $request)
-    {
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        
-        $query = LaporanKeuangan::whereIn('kategori', ['pemasukan', 'piutang', 'uang_muka'])
-            ->whereNotNull('nama_murid');
-        
-        if ($request->filled('murid_id')) {
-            $murid = Murid::find($request->murid_id);
-            if ($murid) {
-                $query->where('nama_murid', $murid->nama_lengkap_murid);
+        if (in_array($prefix, ['M', 'K'])) {
+            // Hapus dari tr_transaksi dan ms_transaksi
+            $pembayaran = Pembayaran::find($realId);
+            if ($pembayaran) {
+                DB::table('ms_transaksi')->where('id_transaksi', $pembayaran->id_transaksi)->delete();
+                $pembayaran->delete();
             }
+        } elseif (in_array($prefix, ['P', 'T', 'W'])) {
+            // Hapus dari tr_transaksi (pembayaran murid)
+            Pembayaran::where('id_pembayaran', $realId)->delete();
         }
         
-        if ($request->filled('tahun')) {
-            $query->whereYear('tanggal', $request->tahun);
-        }
-        
-        $laporanMurid = $query->orderBy('tanggal', 'desc')->get();
-        
-        $muridList = Murid::orderBy('nama_lengkap_murid', 'asc')->get();
-        $tahunList = LaporanKeuangan::selectRaw('YEAR(tanggal) as tahun')
-            ->distinct()
-            ->orderBy('tahun', 'desc')
-            ->pluck('tahun');
-        
-        $totalPerMurid = [];
-        foreach ($laporanMurid as $item) {
-            if (!isset($totalPerMurid[$item->nama_murid])) {
-                $totalPerMurid[$item->nama_murid] = 0;
-            }
-            $totalPerMurid[$item->nama_murid] += $item->jumlah;
-        }
-        
-        return view('dashboard.shared.laporan-keuangan.rekap-per-murid', [
-            'role' => $role,
-            'laporanMurid' => $laporanMurid,
-            'totalPerMurid' => $totalPerMurid,
-            'muridList' => $muridList,
-            'tahunList' => $tahunList,
-            'filterMurid' => $request->murid_id,
-            'filterTahun' => $request->tahun,
-        ]);
+        return redirect()->route($role . '.laporan-keuangan')
+            ->with('success', 'Data berhasil dihapus');
     }
 }
