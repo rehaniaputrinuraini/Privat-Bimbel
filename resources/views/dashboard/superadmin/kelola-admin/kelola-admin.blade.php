@@ -51,7 +51,7 @@
                         <th style="padding: 15px; font-weight: 700;">Nama Lengkap</th>
                         <th style="padding: 15px; font-weight: 700;">Alamat</th>
                         <th style="padding: 15px; font-weight: 700;">No HP</th>
-                        <th style="padding: 15px; font-weight: 700;">Gaji</th>
+                        <th style="padding: 15px; font-weight: 700;">Gaji Pokok</th>
                         <th style="padding: 15px; font-weight: 700;">Email</th>
                         <th style="padding: 15px; font-weight: 700;">Username</th>
                         <th style="padding: 15px; font-weight: 700; text-align: center;">Aksi</th>
@@ -62,10 +62,16 @@
                     <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                         <td style="padding: 15px; text-align: center;">{{ $loop->iteration }}</td>
                         <td style="padding: 15px;">AD{{ str_pad($item->id_user, 4, '0', STR_PAD_LEFT) }}</td>
-                        <td style="padding: 15px;">{{ $item->admin->nama_lengkap_admin ?? '-' }}</td>
-                        <td style="padding: 15px;">{{ $item->admin->alamat_admin ?? '-' }}</td>
-                        <td style="padding: 15px;">{{ $item->admin->no_hp_admin ?? '-' }}</td>
-                        <td style="padding: 15px;">Rp {{ number_format($item->admin->gaji_pokok ?? 0, 0, ',', '.') }}</td>
+                        <td style="padding: 15px;">{{ $item->pegawai->nama_lengkap ?? '-' }}</td>
+                        <td style="padding: 15px;">{{ $item->pegawai->alamat ?? '-' }}</td>
+                        <td style="padding: 15px;">{{ $item->pegawai->no_hp ?? '-' }}</td>
+                        <td style="padding: 15px;">
+                            @if($item->pegawai && $item->pegawai->gaji_pokok)
+                                Rp {{ number_format($item->pegawai->gaji_pokok, 0, ',', '.') }}
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td style="padding: 15px;">{{ $item->email }}</td>
                         <td style="padding: 15px;">{{ $item->username }}</td>
                         <td style="padding: 15px;">
@@ -75,7 +81,7 @@
                                     <i class="far fa-edit"></i> Edit
                                 </a>
                                 <button type="button" 
-                                        onclick="bukaModalHapus('{{ $item->id_user }}', '{{ $item->admin->nama_lengkap_admin ?? $item->username }}')" 
+                                        onclick="bukaModalHapus('{{ $item->id_user }}', '{{ $item->pegawai->nama_lengkap ?? $item->username }}')" 
                                         style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 12px;">
                                     <i class="fas fa-trash"></i> Hapus
                                 </button>

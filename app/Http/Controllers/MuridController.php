@@ -37,53 +37,33 @@ class MuridController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_lengkap_murid' => 'required|string|max:35',
-            'kelas' => 'nullable|string|max:10',
-            'asal_sekolah' => 'nullable|string|max:35',
-            'alamat_murid' => 'nullable|string',
-            'no_hp_murid' => 'nullable|string|max:15',
+            'nama_lengkap' => 'required|string|max:35',
+            'asal_sekolah' => 'nullable|string|max:20',
+            'alamat' => 'nullable|string|max:100',
+            'no_hp' => 'nullable|string|max:15',
             'nama_orang_tua' => 'nullable|string|max:35',
             'no_hp_orang_tua' => 'nullable|string|max:15',
-            'paket_awal' => 'nullable|numeric|min:0',
-            'pilihan_paket' => 'nullable|string|max:25',
-            'tahun_masuk' => 'nullable|integer|min:1900|max:' . date('Y')
+            'tahun_masuk' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'tanggal_daftar' => 'nullable|date',
         ]);
 
-        $data = $request->all();
+        $data = $request->only([
+            'nama_lengkap',
+            'asal_sekolah',
+            'alamat',
+            'no_hp',
+            'nama_orang_tua',
+            'no_hp_orang_tua',
+            'tahun_masuk',
+            'tanggal_daftar',
+        ]);
         
-        if (empty($data['paket_awal'])) {
-            $data['paket_awal'] = 100000;
+        // Set tanggal_daftar ke hari ini jika kosong
+        if (empty($data['tanggal_daftar'])) {
+            $data['tanggal_daftar'] = date('Y-m-d');
         }
         
-        // Pengecekan jika pilihan_paket kosong
-        if (empty($data['pilihan_paket'])) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['pilihan_paket' => 'Pilihan paket harus dipilih.']);
-        }
-        
-        // ========== DEBUG: Lihat nilai pilihan_paket ==========
-        $nilaiAsli = $data['pilihan_paket'];
-        $panjangAsli = strlen($nilaiAsli);
-        $nilaiBersih = trim($nilaiAsli);
-        $panjangBersih = strlen($nilaiBersih);
-        
-        // Bersihkan data
-        $data['pilihan_paket'] = $nilaiBersih;
-        
-        // Coba simpan dengan try-catch
-        try {
-            Murid::create($data);
-        } catch (\Exception $e) {
-            // Tampilkan error debug
-            return redirect()->back()
-                ->withInput()
-                ->withErrors([
-                    'debug' => "Panjang asli: $panjangAsli | Nilai asli: '$nilaiAsli' | Panjang bersih: $panjangBersih | Nilai bersih: '{$data['pilihan_paket']}'",
-                    'error_sql' => $e->getMessage()
-                ]);
-        }
-        // ========== END DEBUG ==========
+        Murid::create($data);
 
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
@@ -109,29 +89,28 @@ class MuridController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'nama_lengkap_murid' => 'required|string|max:35',
-            'kelas' => 'nullable|string|max:10',
-            'asal_sekolah' => 'nullable|string|max:35',
-            'alamat_murid' => 'nullable|string',
-            'no_hp_murid' => 'nullable|string|max:15',
+            'nama_lengkap' => 'required|string|max:35',
+            'asal_sekolah' => 'nullable|string|max:20',
+            'alamat' => 'nullable|string|max:100',
+            'no_hp' => 'nullable|string|max:15',
             'nama_orang_tua' => 'nullable|string|max:35',
             'no_hp_orang_tua' => 'nullable|string|max:15',
-            'paket_awal' => 'nullable|numeric|min:0',
-            'pilihan_paket' => 'nullable|string|max:25',
-            'tahun_masuk' => 'nullable|integer|min:1900|max:' . date('Y')
+            'tahun_masuk' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'tanggal_daftar' => 'nullable|date',
         ]);
 
         $murid = Murid::findOrFail($id);
         
-        $data = $request->all();
-        if (empty($data['paket_awal'])) {
-            $data['paket_awal'] = 100000;
-        }
-        
-        // Bersihkan pilihan_paket
-        if (isset($data['pilihan_paket'])) {
-            $data['pilihan_paket'] = trim($data['pilihan_paket']);
-        }
+        $data = $request->only([
+            'nama_lengkap',
+            'asal_sekolah',
+            'alamat',
+            'no_hp',
+            'nama_orang_tua',
+            'no_hp_orang_tua',
+            'tahun_masuk',
+            'tanggal_daftar',
+        ]);
         
         $murid->update($data);
 
@@ -161,10 +140,28 @@ class MuridController extends Controller
             return response()->json([]);
         }
         
-        $murids = Murid::where('nama_lengkap_murid', 'like', "%{$query}%")
+        $murids = Murid::where('nama_lengkap', 'like', "%{$query}%")
             ->limit(10)
-            ->get(['id_murid', 'nama_lengkap_murid', 'kelas', 'paket_awal', 'pilihan_paket']);
+            ->get(['id_murid', 'nama_lengkap', 'asal_sekolah', 'no_hp']);
         
         return response()->json($murids);
+    }
+    
+    // Get harga paket (untuk AJAX)
+    public function getHargaPaket($id)
+    {
+        $paket = HargaPaket::find($id);
+        
+        if ($paket) {
+            return response()->json([
+                'success' => true,
+                'harga' => $paket->harga
+            ]);
+        }
+        
+        return response()->json([
+            'success' => false,
+            'harga' => 0
+        ]);
     }
 }

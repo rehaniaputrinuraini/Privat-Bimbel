@@ -16,27 +16,27 @@
             {{-- Nama Lengkap (WAJIB) --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Lengkap <span style="color: red;">*</span></label>
-                <input type="text" name="nama_lengkap_tentor" placeholder="Masukkan Nama Lengkap" required
+                <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap') }}" placeholder="Masukkan Nama Lengkap" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-                @error('nama_lengkap_tentor') <small style="color: red;">{{ $message }}</small> @enderror
+                @error('nama_lengkap') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
             {{-- Alamat (WAJIB) --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Alamat <span style="color: red;">*</span></label>
-                <textarea name="alamat_tentor" rows="2" placeholder="Masukkan Alamat" required
-                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-family: 'Poppins', sans-serif; font-size: 14px; resize: vertical;"></textarea>
-                @error('alamat_tentor') <small style="color: red;">{{ $message }}</small> @enderror
+                <textarea name="alamat" rows="2" placeholder="Masukkan Alamat" required
+                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-family: 'Poppins', sans-serif; font-size: 14px; resize: vertical;">{{ old('alamat') }}</textarea>
+                @error('alamat') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
             {{-- No HP (WAJIB, hanya angka) --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No HP <span style="color: red;">*</span></label>
-                <input type="tel" inputmode="numeric" name="no_hp_tentor" placeholder="Masukkan No HP" required
+                <input type="tel" inputmode="numeric" name="no_hp" value="{{ old('no_hp') }}" placeholder="Masukkan No HP" required
                        onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-                @error('no_hp_tentor') <small style="color: red;">{{ $message }}</small> @enderror
+                @error('no_hp') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
             <hr style="border: 0; border-top: 1px solid #E5E7EB; margin-bottom: 25px;">
@@ -48,7 +48,7 @@
                     {{-- Mapel (WAJIB) --}}
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Mapel <span style="color: red;">*</span></label>
-                        <input type="text" name="mapel" placeholder="Masukkan Mapel" required
+                        <input type="text" name="mapel" value="{{ old('mapel') }}" placeholder="Masukkan Mapel" required
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                         @error('mapel') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
@@ -59,36 +59,36 @@
                         <select name="grade" required
                                 style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; color: #374151;">
                             <option value="">Pilih Grade</option>
-                            <option value="A">A</option>
-                            <option value="B">B</option>
+                            <option value="A" {{ old('grade') == 'A' ? 'selected' : '' }}>A</option>
+                            <option value="B" {{ old('grade') == 'B' ? 'selected' : '' }}>B</option>
                         </select>
                         @error('grade') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
 
-                    {{-- HR SD (tanpa panah, hanya angka) --}}
+                    {{-- HR SD --}}
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">HR SD</label>
-                        <input type="text" inputmode="numeric" name="hr_sd" placeholder="Masukkan HR SD"
+                        <input type="text" inputmode="numeric" name="hr_sd" value="{{ old('hr_sd') }}" placeholder="Masukkan HR SD"
                                onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                         @error('hr_sd') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
 
-                    {{-- HR SMP (tanpa panah, hanya angka) --}}
+                    {{-- HR SMP --}}
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">HR SMP</label>
-                        <input type="text" inputmode="numeric" name="hr_smp" placeholder="Masukkan HR SMP"
+                        <input type="text" inputmode="numeric" name="hr_smp" value="{{ old('hr_smp') }}" placeholder="Masukkan HR SMP"
                                onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                         @error('hr_smp') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
 
-                    {{-- HR SMA (tanpa panah, hanya angka) --}}
+                    {{-- HR SMA --}}
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">HR SMA</label>
-                        <input type="text" inputmode="numeric" name="hr_sma" placeholder="Masukkan HR SMA"
+                        <input type="text" inputmode="numeric" name="hr_sma" value="{{ old('hr_sma') }}" placeholder="Masukkan HR SMA"
                                onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
@@ -98,20 +98,20 @@
 
                 {{-- KOLOM KANAN --}}
                 <div>
-                    {{-- Uang Makan (tanpa panah, hanya angka) --}}
+                    {{-- Uang Makan --}}
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Uang Makan</label>
-                        <input type="text" inputmode="numeric" name="uang_makan" placeholder="Masukkan Uang Makan"
+                        <input type="text" inputmode="numeric" name="uang_makan" value="{{ old('uang_makan') }}" placeholder="Masukkan Uang Makan"
                                onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                         @error('uang_makan') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
 
-                    {{-- Uang Transport (tanpa panah, hanya angka) --}}
+                    {{-- Uang Transport --}}
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Uang Transport</label>
-                        <input type="text" inputmode="numeric" name="uang_transport" placeholder="Masukkan Uang Transport"
+                        <input type="text" inputmode="numeric" name="uang_transport" value="{{ old('uang_transport') }}" placeholder="Masukkan Uang Transport"
                                onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
@@ -121,7 +121,7 @@
                     {{-- Email (WAJIB) --}}
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Email <span style="color: red;">*</span></label>
-                        <input type="email" name="email" placeholder="Masukkan Email" required
+                        <input type="email" name="email" value="{{ old('email') }}" placeholder="Masukkan Email" required
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                         @error('email') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
@@ -129,7 +129,7 @@
                     {{-- Username (WAJIB) --}}
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Username <span style="color: red;">*</span></label>
-                        <input type="text" name="username" placeholder="Masukkan Username" required
+                        <input type="text" name="username" value="{{ old('username') }}" placeholder="Masukkan Username" required
                                style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                         @error('username') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
@@ -168,7 +168,7 @@
         <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Data yang Anda masukkan tidak akan disimpan. Yakin ingin keluar?</p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalBatal()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; color: #374151; font-weight: 600; font-size: 13px; cursor: pointer;">Tidak</button>
-            <a href="#" id="confirmKeluarLink" style="flex: 1; text-decoration: none;">
+            <a href="{{ route('superadmin.kelola-tentor') }}" style="flex: 1; text-decoration: none;">
                 <button type="button" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Keluar</button>
             </a>
         </div>
@@ -211,7 +211,6 @@
             };
         } else {
             document.getElementById('modalBatal').style.display = 'flex';
-            document.getElementById('confirmKeluarLink').href = "{{ route('superadmin.kelola-tentor') }}";
         }
     }
     

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PresensiTentor;
-use App\Models\Tentor;
+use App\Models\Mengajar;
+use App\Models\Pegawai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
@@ -14,46 +14,54 @@ class KelolaPresensiController extends Controller
     {
         $role = auth()->user()->peran;
         
-        $query = PresensiTentor::with('tentor');
+        // ✅ Pakai Model Mengajar (ms_mengajar)
+        $query = Mengajar::with('pegawai');
         
+        // Filter pencarian (nama tentor)
         if ($request->filled('search')) {
-            $query->whereHas('tentor', function($q) use ($request) {
-                $q->where('nama_lengkap_tentor', 'like', '%' . $request->search . '%');
+            $query->whereHas('pegawai', function($q) use ($request) {
+                $q->where('nama_lengkap', 'like', '%' . $request->search . '%')
+                  ->where('jenis_pegawai', 'tentor');
+            });
+        } else {
+            // Hanya tampilkan tentor
+            $query->whereHas('pegawai', function($q) {
+                $q->where('jenis_pegawai', 'tentor');
             });
         }
         
+        // Filter bulan
         if ($request->filled('bulan')) {
             $query->whereMonth('tanggal', $request->bulan);
         }
         
+        // Filter tahun
         if ($request->filled('tahun')) {
             $query->whereYear('tanggal', $request->tahun);
         }
         
         $perPage = $request->get('perPage', 10);
         $presensi = $query->orderBy('tanggal', 'desc')
-                          ->orderBy('jam_masuk', 'desc')
+                          ->orderBy('jam_mulai', 'desc')
                           ->paginate($perPage)
                           ->appends($request->all());
         
-        // Hitung total honor
+        // Hitung total honor (tidak ada di tabel ms_mengajar, set 0 dulu)
         $totalHonor = 0;
-        foreach ($presensi as $item) {
-            $totalHonor += $item->total_honor;
-        }
         
-        // ✅ AMBIL DAFTAR TAHUN DARI DATA YANG ADA (DINAMIS)
-        $tahunList = PresensiTentor::selectRaw('YEAR(tanggal) as tahun')
+        // Ambil daftar tahun dari data yang ada
+        $tahunList = Mengajar::selectRaw('YEAR(tanggal) as tahun')
             ->distinct()
             ->orderBy('tahun', 'desc')
             ->pluck('tahun');
         
-        // Kalau tidak ada data sama sekali, tampilkan tahun sekarang
         if ($tahunList->isEmpty()) {
             $tahunList = collect([date('Y')]);
         }
         
-        $tentors = Tentor::all();
+        // Ambil daftar tentor untuk filter
+        $tentors = Pegawai::where('jenis_pegawai', 'tentor')->get();
+        
         $bulan = $request->bulan;
         $tahun = $request->tahun;
         $search = $request->search;
@@ -66,15 +74,15 @@ class KelolaPresensiController extends Controller
             'tahun', 
             'search', 
             'totalHonor',
-            'tahunList'        // ✅ KIRIM KE VIEW
+            'tahunList'
         ));
     }
     
     public function verify($id)
     {
         try {
-            $presensi = PresensiTentor::findOrFail($id);
-            $presensi->update(['verifikasi_kehadiran' => true]);
+            $presensi = Mengajar::findOrFail($id);
+            $presensi->update(['murid_hadir' => 'Hadir']);
             return redirect()->back()->with('success', '✅ Presensi berhasil diverifikasi!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', '❌ Gagal verifikasi: ' . $e->getMessage());
@@ -84,8 +92,8 @@ class KelolaPresensiController extends Controller
     public function unverify($id)
     {
         try {
-            $presensi = PresensiTentor::findOrFail($id);
-            $presensi->update(['verifikasi_kehadiran' => false]);
+            $presensi = Mengajar::findOrFail($id);
+            $presensi->update(['murid_hadir' => 'Tidak Hadir']);
             return redirect()->back()->with('success', '✅ Verifikasi dibatalkan!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', '❌ Gagal: ' . $e->getMessage());
@@ -99,13 +107,14 @@ class KelolaPresensiController extends Controller
         }
         
         try {
-            $presensi = PresensiTentor::findOrFail($id);
+            $presensi = Mengajar::findOrFail($id);
             
-            if ($presensi->bukti_foto && Storage::exists('public/' . $presensi->bukti_foto)) {
-                Storage::delete('public/' . $presensi->bukti_foto);
+            // Hapus foto bukti jika ada
+            if ($presensi->bukti_mengajar && Storage::exists('public/' . $presensi->bukti_mengajar)) {
+                Storage::delete('public/' . $presensi->bukti_mengajar);
             }
             
-            $namaTentor = $presensi->tentor->nama_lengkap_tentor ?? 'Tentor';
+            $namaTentor = $presensi->pegawai->nama_lengkap ?? 'Tentor';
             $tanggal = Carbon::parse($presensi->tanggal)->translatedFormat('d F Y');
             $presensi->delete();
             
@@ -117,28 +126,28 @@ class KelolaPresensiController extends Controller
     
     public function downloadFoto($id)
     {
-        $presensi = PresensiTentor::findOrFail($id);
+        $presensi = Mengajar::findOrFail($id);
         
-        if (!$presensi->bukti_foto) {
+        if (!$presensi->bukti_mengajar) {
             return redirect()->back()->with('error', '❌ File foto tidak ditemukan!');
         }
         
-        $filePath = 'public/' . $presensi->bukti_foto;
+        $filePath = 'public/' . $presensi->bukti_mengajar;
         
         if (!Storage::exists($filePath)) {
             return redirect()->back()->with('error', '❌ File foto tidak ditemukan di server!');
         }
         
-        $namaTentor = $presensi->tentor->nama_lengkap_tentor ?? 'tentor';
+        $namaTentor = $presensi->pegawai->nama_lengkap ?? 'tentor';
         $tanggal = Carbon::parse($presensi->tanggal)->format('Ymd');
-        $filename = "bukti_presensi_{$namaTentor}_{$tanggal}.jpg";
+        $filename = "bukti_mengajar_{$namaTentor}_{$tanggal}.jpg";
         
         return Storage::download($filePath, $filename);
     }
     
     public function show($id)
     {
-        $presensi = PresensiTentor::with('tentor')->findOrFail($id);
+        $presensi = Mengajar::with('pegawai', 'kelas', 'ruang')->findOrFail($id);
         $role = auth()->user()->peran;
         
         return view('dashboard.shared.riwayat presensi.detail-presensi', compact('presensi', 'role'));

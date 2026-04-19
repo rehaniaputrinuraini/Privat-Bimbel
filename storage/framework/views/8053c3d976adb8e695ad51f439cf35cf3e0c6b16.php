@@ -1,23 +1,21 @@
 
 
-<?php $__env->startSection('title', 'Input Harga Paket'); ?>
+<?php $__env->startSection('title', 'Tambah Kelas'); ?>
 
 <?php $__env->startSection('content'); ?>
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
-    <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Input Harga Paket</h1>
+    <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Tambah Kelas</h1>
 
     <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
-        <form action="<?php echo e(route($role . '.harga-paket.store')); ?>" method="POST" id="mainForm">
+        <form action="<?php echo e(route('superadmin.kelas.store')); ?>" method="POST" id="mainForm">
             <?php echo csrf_field(); ?>
             
             
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Harga Paket <span style="color: red;">*</span></label>
-                <input type="tel" inputmode="numeric" name="harga" placeholder="Masukkan Harga Paket" required
-                       onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Kelas <span style="color: red;">*</span></label>
+                <input type="text" name="nama_kelas" value="<?php echo e(old('nama_kelas')); ?>" placeholder="Contoh: 7A, 8B, 9C" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-                <?php $__errorArgs = ['harga'];
+                <?php $__errorArgs = ['nama_kelas'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -29,24 +27,42 @@ unset($__errorArgs, $__bag); ?>
 
             
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tingkat <span style="color: red;">*</span></label>
-                <select name="tingkat" required 
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Jenjang <span style="color: red;">*</span></label>
+                <select name="jenjang" required 
                         style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; cursor: pointer;">
-                    <option value="">-- Pilih Tingkat --</option>
-                    <?php $__currentLoopData = $tingkatTersedia; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tingkat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <option value="<?php echo e($tingkat); ?>" <?php echo e(old('tingkat') == $tingkat ? 'selected' : ''); ?>><?php echo e($tingkat); ?></option>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    <option value="">-- Pilih Jenjang --</option>
+                    <option value="SD" <?php echo e(old('jenjang') == 'SD' ? 'selected' : ''); ?>>SD</option>
+                    <option value="SMP" <?php echo e(old('jenjang') == 'SMP' ? 'selected' : ''); ?>>SMP</option>
+                    <option value="SMA" <?php echo e(old('jenjang') == 'SMA' ? 'selected' : ''); ?>>SMA</option>
                 </select>
-                <?php if(count($tingkatTersedia) == 0): ?>
-                    <small style="color: #EF4444;">
-                        <i class="fas fa-info-circle"></i> Semua tingkat (SD, SMP, SMA) sudah terpakai. Hapus data yang tidak diperlukan terlebih dahulu.
-                    </small>
-                <?php endif; ?>
-                <?php $__errorArgs = ['tingkat'];
+                <?php $__errorArgs = ['jenjang'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <small style="color: #EF4444;"><?php echo e($message); ?></small> <?php unset($message);
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+            </div>
+
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Periode <span style="color: red;">*</span></label>
+                <select name="id_periode" required 
+                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; cursor: pointer;">
+                    <option value="">-- Pilih Periode --</option>
+                    <?php $__currentLoopData = $periodeList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $periode): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($periode->id_periode); ?>" <?php echo e(old('id_periode') == $periode->id_periode ? 'selected' : ''); ?>>
+                            <?php echo e($periode->tahun_periode); ?>
+
+                        </option>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </select>
+                <?php $__errorArgs = ['id_periode'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <small style="color: red;"><?php echo e($message); ?></small> <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
@@ -71,7 +87,7 @@ unset($__errorArgs, $__bag); ?>
         <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Data yang Anda masukkan tidak akan disimpan. Yakin ingin keluar?</p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalBatal()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Tidak</button>
-            <a href="#" id="confirmKeluarLink" style="flex: 1; text-decoration: none;">
+            <a href="<?php echo e(route('superadmin.master-data')); ?>" style="flex: 1; text-decoration: none;">
                 <button type="button" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Keluar</button>
             </a>
         </div>
@@ -92,77 +108,32 @@ unset($__errorArgs, $__bag); ?>
 </div>
 
 <script>
-    // ========== UNSAVED CHANGES WARNING ==========
     let formChanged = false;
-    let pendingUrl = null;
     const form = document.getElementById('mainForm');
     
-    // Deteksi perubahan pada semua input, select, textarea
     if (form) {
         const inputs = form.querySelectorAll('input, select, textarea');
         inputs.forEach(input => {
             input.addEventListener('change', () => formChanged = true);
             input.addEventListener('keyup', () => formChanged = true);
         });
-        
-        // Reset saat form disubmit
         form.addEventListener('submit', () => formChanged = false);
     }
     
-    // Fungsi untuk modal keluar (tombol keluar)
     function bukaModalBatal() { 
         if (formChanged) {
-            // Jika ada perubahan, buka modal peringatan
             document.getElementById('modalPindahHalaman').style.display = 'flex';
             document.getElementById('confirmPindahBtn').onclick = function() {
                 formChanged = false;
-                window.location.href = "<?php echo e(route($role . '.harga-paket')); ?>";
+                window.location.href = "<?php echo e(route('superadmin.master-data')); ?>";
             };
         } else {
-            // Jika tidak ada perubahan, buka modal konfirmasi biasa
             document.getElementById('modalBatal').style.display = 'flex';
-            document.getElementById('confirmKeluarLink').href = "<?php echo e(route($role . '.harga-paket')); ?>";
         }
     }
     
-    function tutupModalBatal() { 
-        document.getElementById('modalBatal').style.display = 'none'; 
-    }
-    
-    function tutupModalPindah() {
-        document.getElementById('modalPindahHalaman').style.display = 'none';
-        pendingUrl = null;
-    }
-    
-    // Cegah klik link sidebar jika form berubah
-    document.addEventListener('DOMContentLoaded', function() {
-        const sidebarLinks = document.querySelectorAll('.sidebar-nav a, .sidebar-footer a, .logout-btn');
-        
-        sidebarLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                if (formChanged) {
-                    e.preventDefault();
-                    const targetUrl = this.href || (this.tagName === 'BUTTON' ? null : this.getAttribute('href'));
-                    if (targetUrl && targetUrl !== '#') {
-                        pendingUrl = targetUrl;
-                        document.getElementById('modalPindahHalaman').style.display = 'flex';
-                        document.getElementById('confirmPindahBtn').onclick = function() {
-                            formChanged = false;
-                            window.location.href = pendingUrl;
-                        };
-                    } else if (this.classList.contains('logout-btn')) {
-                        pendingUrl = "<?php echo e(route('logout')); ?>";
-                        document.getElementById('modalPindahHalaman').style.display = 'flex';
-                        document.getElementById('confirmPindahBtn').onclick = function() {
-                            formChanged = false;
-                            document.getElementById('modalPindahHalaman').style.display = 'none';
-                            bukaModalLogout();
-                        };
-                    }
-                }
-            });
-        });
-    });
+    function tutupModalBatal() { document.getElementById('modalBatal').style.display = 'none'; }
+    function tutupModalPindah() { document.getElementById('modalPindahHalaman').style.display = 'none'; }
 </script>
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/harga-paket/create-paket.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/master-data/kelas/create.blade.php ENDPATH**/ ?>

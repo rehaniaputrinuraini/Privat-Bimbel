@@ -23,28 +23,28 @@
             {{-- Nama Lengkap --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Lengkap <span style="color: red;">*</span></label>
-                <input type="text" name="nama_lengkap_admin" value="{{ old('nama_lengkap_admin', $admin->admin->nama_lengkap_admin ?? '') }}" placeholder="Masukkan Nama Lengkap" required
+                <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap', $admin->pegawai->nama_lengkap ?? '') }}" placeholder="Masukkan Nama Lengkap" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-                @error('nama_lengkap_admin') <small style="color: red;">{{ $message }}</small> @enderror
+                @error('nama_lengkap') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
-            {{-- Alamat (wajib) --}}
+            {{-- Alamat --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Alamat <span style="color: red;">*</span></label>
-                <textarea name="alamat_admin" rows="2" placeholder="Masukkan Alamat" required
-                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-family: 'Poppins', sans-serif; font-size: 14px; resize: vertical;">{{ old('alamat_admin', $admin->admin->alamat_admin ?? '') }}</textarea>
-                @error('alamat_admin') <small style="color: red;">{{ $message }}</small> @enderror
+                <textarea name="alamat" rows="2" placeholder="Masukkan Alamat" required
+                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-family: 'Poppins', sans-serif; font-size: 14px; resize: vertical;">{{ old('alamat', $admin->pegawai->alamat ?? '') }}</textarea>
+                @error('alamat') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
             {{-- Grid 2 Kolom: No HP (kiri) + Email (kanan) --}}
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; margin-bottom: 15px;">
                 <div>
                     <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No HP <span style="color: red;">*</span></label>
-                    <input type="tel" inputmode="numeric" name="no_hp_admin" value="{{ old('no_hp_admin', $admin->admin->no_hp_admin ?? '') }}" placeholder="Masukkan No HP" required
+                    <input type="tel" inputmode="numeric" name="no_hp" value="{{ old('no_hp', $admin->pegawai->no_hp ?? '') }}" placeholder="Masukkan No HP" required
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                            style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-                    @error('no_hp_admin') <small style="color: red;">{{ $message }}</small> @enderror
+                    @error('no_hp') <small style="color: red;">{{ $message }}</small> @enderror
                 </div>
                 <div>
                     <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Email <span style="color: red;">*</span></label>
@@ -58,7 +58,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; margin-bottom: 15px;">
                 <div>
                     <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Gaji Pokok (Rp) <span style="color: red;">*</span></label>
-                    <input type="text" inputmode="numeric" name="gaji_pokok" value="{{ old('gaji_pokok', $admin->admin->gaji_pokok ?? 0) }}" placeholder="Masukkan Gaji Pokok" required
+                    <input type="text" inputmode="numeric" name="gaji_pokok" value="{{ old('gaji_pokok', $admin->pegawai->gaji_pokok ?? 0) }}" placeholder="Masukkan Gaji Pokok" required
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                            style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">

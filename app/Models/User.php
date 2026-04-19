@@ -12,16 +12,18 @@ class User extends Authenticatable
     protected $table = 'ms_user';
     protected $primaryKey = 'id_user';
 
-    public $timestamps = false;
+    public $timestamps = true;
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
     protected $fillable = [
+        'id_pegawai',   
         'username',
         'email',
         'password',
         'peran',
-        'status',  // ← PASTIKAN 'status' (bukan 'status_akun')
+        'foto',         
+        'status',
     ];
 
     protected $hidden = [
@@ -29,20 +31,18 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    // Relasi ke ms_admin
-    public function admin()
-    {
-        return $this->hasOne(Admin::class, 'id_user', 'id_user');
-    }
+    protected $casts = [
+        'status' => 'boolean',
+    ];
 
-    // Relasi ke ms_tentor
-    public function tentor()
+    // Relasi ke ms_pegawai Satu user terhubung ke satu pegawai
+    public function pegawai()
     {
-        return $this->hasOne(Tentor::class, 'id_user', 'id_user');
+        return $this->belongsTo(Pegawai::class, 'id_pegawai', 'id_pegawai');
     }
 
     // Helper untuk cek role
-    public function isSuperAdmin()
+    public function isSuperadmin()
     {
         return $this->peran === 'superadmin';
     }
@@ -55,5 +55,26 @@ class User extends Authenticatable
     public function isTentor()
     {
         return $this->peran === 'tentor';
+    }
+
+    // Cek apakah user aktif
+    public function isActive()
+    {
+        return $this->status == 1;
+    }
+
+    // Get nama lengkap dari relasi pegawai
+    public function getNamaLengkapAttribute()
+    {
+        return $this->pegawai ? $this->pegawai->nama_lengkap : $this->username;
+    }
+
+    // Get foto profil (default jika kosong)
+    public function getFotoUrlAttribute()
+    {
+        if ($this->foto) {
+            return asset('storage/' . $this->foto);
+        }
+        return asset('images/default-avatar.png');
     }
 }

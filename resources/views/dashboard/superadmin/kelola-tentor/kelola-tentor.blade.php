@@ -40,7 +40,7 @@
         </div>
     @endif
 
-    {{-- TABEL LENGKAP (ADA EMAIL, USERNAME, AKSI) --}}
+    {{-- TABEL LENGKAP --}}
     <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
@@ -67,10 +67,10 @@
                     @forelse($tentors as $index => $t)
                     <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                         <td style="padding: 15px; text-align: center;">{{ $tentors->firstItem() + $index }}</td>
-                        <td style="padding: 15px;">TE{{ str_pad($t->id_tentor, 4, '0', STR_PAD_LEFT) }}</td>
-                        <td style="padding: 15px;">{{ $t->nama_lengkap_tentor }}</td>
-                        <td style="padding: 15px;">{{ $t->alamat_tentor ?? '-' }}</td>
-                        <td style="padding: 15px;">{{ $t->no_hp_tentor ?? '-' }}</td>
+                        <td style="padding: 15px;">TE{{ str_pad($t->id_pegawai, 4, '0', STR_PAD_LEFT) }}</td>
+                        <td style="padding: 15px;">{{ $t->nama_lengkap }}</td>
+                        <td style="padding: 15px;">{{ $t->alamat ?? '-' }}</td>
+                        <td style="padding: 15px;">{{ $t->no_hp ?? '-' }}</td>
                         <td style="padding: 15px;">{{ $t->mapel ?? '-' }}</td>
                         <td style="padding: 15px; text-align: center;">{{ $t->grade ?? '-' }}</td>
                         <td style="padding: 15px;">Rp {{ number_format($t->hr_sd ?? 0, 0, ',', '.') }}</td>
@@ -82,12 +82,12 @@
                         <td style="padding: 15px;">{{ $t->user->username ?? '-' }}</td>
                         <td style="padding: 15px;">
                             <div style="display: flex; gap: 8px; justify-content: center;">
-                                <a href="{{ route('superadmin.kelola-tentor.edit', $t->id_tentor) }}" 
+                                <a href="{{ route('superadmin.kelola-tentor.edit', $t->id_pegawai) }}" 
                                    style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; display: flex; align-items: center; gap: 5px; font-size: 12px;">
                                     <i class="far fa-edit"></i> Edit
                                 </a>
                                 <button type="button" 
-                                        onclick="bukaModalHapus('{{ $t->id_tentor }}', '{{ $t->nama_lengkap_tentor }}')" 
+                                        onclick="bukaModalHapus('{{ $t->id_pegawai }}', '{{ $t->nama_lengkap }}')" 
                                         style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 12px;">
                                     <i class="fas fa-trash"></i> Hapus
                                 </button>
@@ -107,7 +107,7 @@
         </div>
     </div>
     
-    {{-- ── 4. PAGINATION & SHOW ENTRIES ── --}}
+    {{-- PAGINATION & SHOW ENTRIES --}}
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
             <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">

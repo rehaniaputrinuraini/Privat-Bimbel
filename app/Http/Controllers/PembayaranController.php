@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Models\Murid;
 use App\Models\Pembayaran;
 use App\Models\HargaPaket;
-use App\Models\LaporanKeuangan;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -32,8 +31,8 @@ class PembayaranController extends Controller
                     ->isNotEmpty();
                 $status_pendaftaran = $sudahBayarPendaftaran ? 'Lunas' : 'Belum';
                 
-                $hargaPaket = HargaPaket::where('tingkat', $murid->pilihan_paket)->first();
-                $hargaPerBulan = $hargaPaket ? $hargaPaket->harga : 0;
+                // Placeholder karena paket belum terintegrasi penuh
+                $hargaPerBulan = 0;
                 
                 $pembayaranBulanan = $murid->pembayaran
                     ->whereNotNull('paket_selanjutnya')
@@ -46,6 +45,7 @@ class PembayaranController extends Controller
                     ->first();
                 $status_pembayaran_bulan_ini = $pembayaranBulanIni ? 'Lunas' : 'Belum';
                 
+                // Hitung tunggakan
                 $tunggakan = [];
                 $totalPiutang = 0;
 
@@ -76,6 +76,7 @@ class PembayaranController extends Controller
                     }
                 }
                 
+                // Hitung uang muka
                 $uangMukaBulan = [];
                 $totalUangMuka = 0;
                 
@@ -94,6 +95,7 @@ class PembayaranController extends Controller
                     }
                 }
                 
+                // Tentukan status tagihan
                 if (count($tunggakan) > 0) {
                     $status_tagihan = 'Tunggak';
                     $tagihan_bulan = implode(', ', $tunggakan);
@@ -115,15 +117,14 @@ class PembayaranController extends Controller
                     $status_pembayaran_bulan_ini = '-';
                     $status_tagihan = '-';
                     $tagihan_bulan = '-';
-                    $total_piutang = 'Rp ' . number_format($murid->paket_awal ?? 100000, 0, ',', '.');
+                    $total_piutang = 'Rp ' . number_format(100000, 0, ',', '.');
                     $uang_muka = '-';
                 }
                 
                 return (object)[
                     'id_murid' => $murid->id_murid,
-                    'nama_murid' => $murid->nama_lengkap_murid,
-                    'kelas' => $murid->kelas,
-                    'paket' => $murid->pilihan_paket ?: '-',
+                    'nama_murid' => $murid->nama_lengkap,
+                    'paket' => '-',
                     'status_pendaftaran' => $status_pendaftaran,
                     'status_pembayaran' => $status_pembayaran_bulan_ini,
                     'status_tagihan' => $status_tagihan,
@@ -137,20 +138,20 @@ class PembayaranController extends Controller
             ->orderBy('tanggal', 'desc')
             ->get()
             ->map(function ($item) {
-                $nama_murid = $item->murid ? $item->murid->nama_lengkap_murid : 'Tidak Diketahui';
+                $nama_murid = $item->murid ? $item->murid->nama_lengkap : 'Tidak Diketahui';
                 $bulanDibayar = $item->bulan_dibayar 
                     ? Carbon::create()->month($item->bulan_dibayar)->translatedFormat('F') . ' ' . $item->tahun_dibayar
                     : '-';
                 
                 return (object)[
                     'id_pembayaran' => $item->id_pembayaran,
-                    'tanggal' => date('d/m/Y', strtotime($item->tanggal)),
+                    'tanggal' => $item->tanggal ? date('d/m/Y', strtotime($item->tanggal)) : '-',
                     'nama_murid' => $nama_murid,
-                    'paket_awal' => is_numeric($item->paket_awal) ? 'Rp ' . number_format($item->paket_awal, 0, ',', '.') : ($item->paket_awal ?: '-'),
+                    'paket_awal' => $item->paket_awal ? 'Rp ' . number_format($item->paket_awal, 0, ',', '.') : '-',
                     'paket_selanjutnya' => $item->paket_selanjutnya ?: '-',
                     'bulan_dibayar' => $bulanDibayar,
-                    'total_bayar' => 'Rp ' . number_format($item->total_pembayaran, 0, ',', '.'),
-                    'keterangan' => $item->keterangan ?: '-',
+                    'total_bayar' => 'Rp ' . number_format($item->total_pembayaran ?? 0, 0, ',', '.'),
+                    'keterangan' => '-',
                 ];
             });
         
@@ -165,7 +166,7 @@ class PembayaranController extends Controller
     public function create(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        $murids = Murid::orderBy('nama_lengkap_murid', 'asc')->get();
+        $murids = Murid::orderBy('nama_lengkap', 'asc')->get();
         $pakets = HargaPaket::orderBy('id_paket', 'asc')->get();
         
         return view('dashboard.shared.pembayaran.create-pembayaran', [
@@ -175,38 +176,12 @@ class PembayaranController extends Controller
         ]);
     }
     
-    public function cekStatusPembayaran($id)
-    {
-        $murid = Murid::find($id);
-        
-        if (!$murid) {
-            return response()->json(['error' => 'Murid tidak ditemukan'], 404);
-        }
-        
-        $sudahBayarPendaftaran = Pembayaran::where('id_murid', $id)
-            ->whereNull('paket_selanjutnya')
-            ->exists();
-        
-        $hargaPaket = HargaPaket::where('tingkat', $murid->pilihan_paket)->first();
-        $hargaPerBulan = $hargaPaket ? $hargaPaket->harga : 0;
-        
-        return response()->json([
-            'sudah_bayar_pendaftaran' => $sudahBayarPendaftaran,
-            'paket_awal' => $murid->paket_awal ?? 100000,
-            'pilihan_paket' => $murid->pilihan_paket,
-            'nama_murid' => $murid->nama_lengkap_murid,
-            'kelas' => $murid->kelas,
-            'harga_per_bulan' => $hargaPerBulan,
-        ]);
-    }
-    
     public function store(Request $request)
     {
         $request->validate([
             'id_murid' => 'required|exists:ms_murid,id_murid',
             'tanggal' => 'required|date',
             'total_pembayaran' => 'required|numeric|min:1000',
-            'keterangan' => 'nullable|string|max:255',
         ]);
         
         $murid = Murid::find($request->id_murid);
@@ -221,18 +196,13 @@ class PembayaranController extends Controller
         
         // KASUS 1: BELUM BAYAR PENDAFTARAN
         if (!$sudahBayarPendaftaran) {
-            if ($request->total_pembayaran != $murid->paket_awal) {
-                return redirect()->back()->withErrors([
-                    'error' => 'Total pembayaran untuk pendaftaran harus Rp ' . number_format($murid->paket_awal, 0, ',', '.')
-                ]);
-            }
-            
             try {
                 Pembayaran::create([
                     'id_murid' => $request->id_murid,
                     'id_paket' => null,
+                    'id_transaksi' => null,
                     'tanggal' => $request->tanggal,
-                    'paket_awal' => $murid->paket_awal,
+                    'paket_awal' => 100000,
                     'paket_selanjutnya' => null,
                     'bulan_dibayar' => null,
                     'tahun_dibayar' => null,
@@ -240,17 +210,6 @@ class PembayaranController extends Controller
                     'total_piutang' => 0,
                     'total_uang_muka' => 0,
                     'total_pembayaran' => $request->total_pembayaran,
-                    'keterangan' => $request->keterangan ?: 'Pembayaran pendaftaran',
-                ]);
-                
-                LaporanKeuangan::create([
-                    'tanggal' => $request->tanggal,
-                    'kategori' => 'pemasukan',
-                    'rincian' => 'Pendaftaran - ' . $murid->nama_lengkap_murid,
-                    'jumlah' => $request->total_pembayaran,
-                    'nama_murid' => $murid->nama_lengkap_murid,
-                    'bulan_periode' => null,
-                    'id_murid' => $request->id_murid
                 ]);
                 
                 $murid->update(['tanggal_daftar' => $request->tanggal]);
@@ -280,121 +239,24 @@ class PembayaranController extends Controller
         $totalPembayaran = $request->total_pembayaran;
         $tahunDibayar = Carbon::now()->year;
         $bulanDibayar = $request->bulan_dibayar ?? Carbon::now()->month;
-        $bulanSekarang = Carbon::now()->month;
-        $tahunSekarang = Carbon::now()->year;
-        $namaBulan = Carbon::create()->month($bulanDibayar)->translatedFormat('F') . ' ' . $tahunDibayar;
-        
-        $tanggalDibayar = Carbon::create($tahunDibayar, $bulanDibayar, 1);
-        $tanggalSekarang = Carbon::create($tahunSekarang, $bulanSekarang, 1);
         
         $total_piutang = 0;
         $total_uang_muka = 0;
         $status_tagihan = 'lunas';
         
-        if ($tanggalDibayar->equalTo($tanggalSekarang)) {
-            // BULAN INI → PEMASUKAN
-            if ($totalPembayaran >= $hargaPerBulan) {
-                $kelebihan = $totalPembayaran - $hargaPerBulan;
-                
-                LaporanKeuangan::create([
-                    'tanggal' => $request->tanggal,
-                    'kategori' => 'pemasukan',
-                    'rincian' => 'Pembayaran Bulanan - ' . $murid->nama_lengkap_murid,
-                    'jumlah' => $hargaPerBulan,
-                    'nama_murid' => $murid->nama_lengkap_murid,
-                    'bulan_periode' => $namaBulan,
-                    'id_murid' => $request->id_murid
-                ]);
-                
-                if ($kelebihan > 0) {
-                    $bulanDepan = $bulanSekarang + 1;
-                    $tahunDepan = $tahunSekarang;
-                    if ($bulanDepan > 12) {
-                        $bulanDepan = 1;
-                        $tahunDepan++;
-                    }
-                    $namaBulanDepan = Carbon::create()->month($bulanDepan)->translatedFormat('F') . ' ' . $tahunDepan;
-                    
-                    LaporanKeuangan::create([
-                        'tanggal' => $request->tanggal,
-                        'kategori' => 'uang_muka',
-                        'rincian' => 'Uang Muka - ' . $murid->nama_lengkap_murid,
-                        'jumlah' => $kelebihan,
-                        'nama_murid' => $murid->nama_lengkap_murid,
-                        'bulan_periode' => $namaBulanDepan,
-                        'id_murid' => $request->id_murid
-                    ]);
-                    
-                    $total_uang_muka = $kelebihan;
-                    $status_tagihan = 'Uang Muka';
-                }
-            } else {
-                LaporanKeuangan::create([
-                    'tanggal' => $request->tanggal,
-                    'kategori' => 'uang_muka',
-                    'rincian' => 'Uang Muka - ' . $murid->nama_lengkap_murid,
-                    'jumlah' => $totalPembayaran,
-                    'nama_murid' => $murid->nama_lengkap_murid,
-                    'bulan_periode' => $namaBulan,
-                    'id_murid' => $request->id_murid
-                ]);
-                
-                $total_piutang = $hargaPerBulan - $totalPembayaran;
-                $total_uang_muka = $totalPembayaran;
-                $status_tagihan = 'Uang Muka';
-            }
-            
-        } elseif ($tanggalDibayar->greaterThan($tanggalSekarang)) {
-            // BULAN DEPAN → UANG MUKA
-            LaporanKeuangan::create([
-                'tanggal' => $request->tanggal,
-                'kategori' => 'uang_muka',
-                'rincian' => 'Uang Muka - ' . $murid->nama_lengkap_murid,
-                'jumlah' => $totalPembayaran,
-                'nama_murid' => $murid->nama_lengkap_murid,
-                'bulan_periode' => $namaBulan,
-                'id_murid' => $request->id_murid
-            ]);
-            
-            $total_uang_muka = $totalPembayaran;
-            $status_tagihan = 'Uang Muka';
-            
+        if ($totalPembayaran >= $hargaPerBulan) {
+            $total_uang_muka = $totalPembayaran - $hargaPerBulan;
+            $status_tagihan = $total_uang_muka > 0 ? 'uang_muka' : 'lunas';
         } else {
-            // BULAN LALU (TUNGGAKAN) → PIUTANG + PEMASUKAN PELUNASAN
-            $piutangExist = LaporanKeuangan::where('id_murid', $request->id_murid)
-                ->where('kategori', 'piutang')
-                ->where('bulan_periode', $namaBulan)
-                ->first();
-                
-            if (!$piutangExist) {
-                LaporanKeuangan::create([
-                    'tanggal' => $request->tanggal,
-                    'kategori' => 'piutang',
-                    'rincian' => 'Piutang - ' . $murid->nama_lengkap_murid,
-                    'jumlah' => $hargaPerBulan,
-                    'nama_murid' => $murid->nama_lengkap_murid,
-                    'bulan_periode' => $namaBulan,
-                    'id_murid' => $request->id_murid
-                ]);
-            }
-            
-            LaporanKeuangan::create([
-                'tanggal' => $request->tanggal,
-                'kategori' => 'pemasukan',
-                'rincian' => 'Pelunasan Piutang - ' . $murid->nama_lengkap_murid,
-                'jumlah' => $totalPembayaran,
-                'nama_murid' => $murid->nama_lengkap_murid,
-                'bulan_periode' => $namaBulan,
-                'id_murid' => $request->id_murid
-            ]);
-            
-            $total_piutang = 0;
-            $status_tagihan = 'lunas';
+            $total_piutang = $hargaPerBulan - $totalPembayaran;
+            $total_uang_muka = $totalPembayaran;
+            $status_tagihan = 'uang_muka';
         }
         
         Pembayaran::create([
             'id_murid' => $request->id_murid,
             'id_paket' => $hargaPaket->id_paket,
+            'id_transaksi' => null,
             'tanggal' => $request->tanggal,
             'paket_awal' => null,
             'paket_selanjutnya' => $request->paket_selanjutnya,
@@ -404,12 +266,7 @@ class PembayaranController extends Controller
             'total_piutang' => $total_piutang,
             'total_uang_muka' => $total_uang_muka,
             'total_pembayaran' => $totalPembayaran,
-            'keterangan' => $request->keterangan,
         ]);
-        
-        if ($murid->pilihan_paket != $request->paket_selanjutnya) {
-            $murid->update(['pilihan_paket' => $request->paket_selanjutnya]);
-        }
         
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
@@ -422,77 +279,10 @@ class PembayaranController extends Controller
         $murid = Murid::find($id);
         if ($murid) {
             return response()->json([
-                'pilihan_paket' => $murid->pilihan_paket,
-                'kelas' => $murid->kelas,
-                'nama_lengkap_murid' => $murid->nama_lengkap_murid,
-                'paket_awal' => $murid->paket_awal,
+                'nama_lengkap' => $murid->nama_lengkap,
             ]);
         }
-        return response()->json(['pilihan_paket' => ''], 404);
-    }
-    
-    public function edit(Request $request, $id)
-    {
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        $pembayaran = Pembayaran::findOrFail($id);
-        $murids = Murid::orderBy('nama_lengkap_murid', 'asc')->get();
-        $pakets = HargaPaket::orderBy('id_paket', 'asc')->get();
-        
-        return view('dashboard.shared.pembayaran.edit-pembayaran', [
-            'role' => $role,
-            'pembayaran' => $pembayaran,
-            'murids' => $murids,
-            'pakets' => $pakets,
-        ]);
-    }
-    
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'id_murid' => 'required|exists:ms_murid,id_murid',
-            'tanggal' => 'required|date',
-            'paket_selanjutnya' => 'required|string',
-            'total_pembayaran' => 'required|numeric|min:1000',
-            'keterangan' => 'nullable|string|max:255',
-        ]);
-        
-        $pembayaran = Pembayaran::findOrFail($id);
-        
-        $hargaPaket = HargaPaket::where('tingkat', $request->paket_selanjutnya)->first();
-        $hargaPerBulan = $hargaPaket ? $hargaPaket->harga : 0;
-        
-        if ($request->total_pembayaran >= $hargaPerBulan) {
-            $kelebihan = $request->total_pembayaran - $hargaPerBulan;
-            $total_piutang = 0;
-            $total_uang_muka = $kelebihan;
-            $status_tagihan = $kelebihan > 0 ? 'Uang Muka' : 'lunas';
-        } else {
-            $total_piutang = $hargaPerBulan - $request->total_pembayaran;
-            $total_uang_muka = $request->total_pembayaran;
-            $status_tagihan = 'Uang Muka';
-        }
-        
-        try {
-            $pembayaran->update([
-                'id_murid' => $request->id_murid,
-                'id_paket' => $hargaPaket ? $hargaPaket->id_paket : null,
-                'tanggal' => $request->tanggal,
-                'paket_selanjutnya' => $request->paket_selanjutnya,
-                'status_tagihan' => $status_tagihan,
-                'total_piutang' => $total_piutang,
-                'total_uang_muka' => $total_uang_muka,
-                'total_pembayaran' => $request->total_pembayaran,
-                'keterangan' => $request->keterangan,
-            ]);
-            
-            $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-            
-            return redirect()->route($role . '.pembayaran')
-                ->with('success', 'Data pembayaran berhasil diperbarui');
-                
-        } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
-        }
+        return response()->json([], 404);
     }
     
     public function destroy(Request $request, $id)

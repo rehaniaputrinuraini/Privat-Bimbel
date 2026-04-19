@@ -50,9 +50,10 @@
                         </div>
                     @endif
 
+                    {{-- INI SATU-SATUNYA YANG DIUBAH: name="email" jadi name="login" --}}
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Email / Username</label>
-                        <input type="text" name="email" value="{{ old('email') }}" placeholder="Masukkan Email atau Username"
+                        <input type="text" name="login" value="{{ old('login') }}" placeholder="Masukkan Email atau Username"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4D0B87] focus:border-[#4D0B87] outline-none transition-all" required autofocus>
                     </div>
 
@@ -113,11 +114,9 @@
         const eyeIcon = document.getElementById('eyeIcon');
 
         togglePassword.addEventListener('click', function() {
-            // Toggle tipe input
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
             
-            // Toggle icon mata
             if (type === 'password') {
                 eyeIcon.classList.remove('fa-eye');
                 eyeIcon.classList.add('fa-eye-slash');

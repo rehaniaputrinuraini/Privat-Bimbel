@@ -15,34 +15,34 @@
             {{-- 1. Nama Lengkap (FULL WIDTH) --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Lengkap <span style="color: red;">*</span></label>
-                <input type="text" name="nama_lengkap_admin" placeholder="Masukkan Nama Lengkap" required
+                <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap') }}" placeholder="Masukkan Nama Lengkap" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-                @error('nama_lengkap_admin') <small style="color: red;">{{ $message }}</small> @enderror
+                @error('nama_lengkap') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
-            {{-- 2. Alamat (FULL WIDTH) - font placeholder sudah disamakan --}}
+            {{-- 2. Alamat (FULL WIDTH) --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Alamat <span style="color: red;">*</span></label>
-                <textarea name="alamat_admin" rows="2" placeholder="Masukkan Alamat" required
-                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-family: 'Poppins', sans-serif; font-size: 14px; resize: vertical;"></textarea>
-                @error('alamat_admin') <small style="color: red;">{{ $message }}</small> @enderror
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Alamat</label>
+                <textarea name="alamat" rows="2" placeholder="Masukkan Alamat"
+                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-family: 'Poppins', sans-serif; font-size: 14px; resize: vertical;">{{ old('alamat') }}</textarea>
+                @error('alamat') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
             {{-- 3. No HP (FULL WIDTH) - hanya angka --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No HP <span style="color: red;">*</span></label>
-                <input type="tel" inputmode="numeric" name="no_hp_admin" placeholder="Masukkan No HP" required
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">No HP</label>
+                <input type="tel" inputmode="numeric" name="no_hp" value="{{ old('no_hp') }}" placeholder="Masukkan No HP"
                        onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
-                @error('no_hp_admin') <small style="color: red;">{{ $message }}</small> @enderror
+                @error('no_hp') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
             {{-- 4. Grid 2 Kolom: Gaji Pokok (kiri) + Email (kanan) --}}
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; margin-bottom: 15px;">
                 <div>
-                    <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Gaji Pokok (Rp) <span style="color: red;">*</span></label>
-                    <input type="text" inputmode="numeric" name="gaji_pokok" placeholder="Masukkan Gaji Pokok" required
+                    <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Gaji Pokok (Rp)</label>
+                    <input type="text" inputmode="numeric" name="gaji_pokok" value="{{ old('gaji_pokok') }}" placeholder="Masukkan Gaji Pokok"
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                            style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
@@ -50,7 +50,7 @@
                 </div>
                 <div>
                     <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Email <span style="color: red;">*</span></label>
-                    <input type="email" name="email" placeholder="Masukkan Email" required
+                    <input type="email" name="email" value="{{ old('email') }}" placeholder="Masukkan Email" required
                            style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                     @error('email') <small style="color: red;">{{ $message }}</small> @enderror
                 </div>
@@ -60,7 +60,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; margin-bottom: 15px;">
                 <div>
                     <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Username <span style="color: red;">*</span></label>
-                    <input type="text" name="username" placeholder="Masukkan Username" required
+                    <input type="text" name="username" value="{{ old('username') }}" placeholder="Masukkan Username" required
                            style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                     @error('username') <small style="color: red;">{{ $message }}</small> @enderror
                 </div>
@@ -96,7 +96,7 @@
         <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Data yang Anda masukkan tidak akan disimpan. Yakin ingin keluar?</p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalBatal()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; color: #374151; font-weight: 600; font-size: 13px; cursor: pointer;">Tidak</button>
-            <a href="#" id="confirmKeluarLink" style="flex: 1; text-decoration: none;">
+            <a href="{{ route('superadmin.kelola-admin') }}" style="flex: 1; text-decoration: none;">
                 <button type="button" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Keluar</button>
             </a>
         </div>
@@ -139,38 +139,10 @@
             };
         } else {
             document.getElementById('modalBatal').style.display = 'flex';
-            document.getElementById('confirmKeluarLink').href = "{{ route('superadmin.kelola-admin') }}";
         }
     }
     
     function tutupModalBatal() { document.getElementById('modalBatal').style.display = 'none'; }
     function tutupModalPindah() { document.getElementById('modalPindahHalaman').style.display = 'none'; pendingUrl = null; }
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        const sidebarLinks = document.querySelectorAll('.sidebar-nav a, .sidebar-footer a, .logout-btn');
-        sidebarLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                if (formChanged) {
-                    e.preventDefault();
-                    const targetUrl = this.href || (this.tagName === 'BUTTON' ? null : this.getAttribute('href'));
-                    if (targetUrl && targetUrl !== '#') {
-                        pendingUrl = targetUrl;
-                        document.getElementById('modalPindahHalaman').style.display = 'flex';
-                        document.getElementById('confirmPindahBtn').onclick = function() {
-                            formChanged = false;
-                            window.location.href = pendingUrl;
-                        };
-                    } else if (this.classList.contains('logout-btn')) {
-                        pendingUrl = "{{ route('logout') }}";
-                        document.getElementById('modalPindahHalaman').style.display = 'flex';
-                        document.getElementById('confirmPindahBtn').onclick = function() {
-                            formChanged = false;
-                            document.getElementById('modalPindahHalaman').style.display = 'none';
-                        };
-                    }
-                }
-            });
-        });
-    });
 </script>
 @endsection

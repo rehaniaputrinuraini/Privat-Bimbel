@@ -61,8 +61,9 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('admin.harga-paket') }}" class="nav-link-custom {{ request()->routeIs('admin.harga-paket*') ? 'nav-active' : '' }}">
-                        <img src="{{ asset('images/dashboard/icons/icon_hargapaket.png') }}" class="sidebar-icon"> Harga Paket
+                    {{-- ✅ GANTI ROUTE --}}
+                    <a href="{{ route('admin.master-data') }}" class="nav-link-custom {{ request()->routeIs('admin.master-data*') ? 'nav-active' : '' }}">
+                        <img src="{{ asset('images/dashboard/icons/icon_hargapaket.png') }}" class="sidebar-icon"> Master Data
                     </a>
                 </li>
                 <li>
@@ -110,8 +111,9 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('superadmin.harga-paket') }}" class="nav-link-custom {{ request()->routeIs('superadmin.harga-paket*') ? 'nav-active' : '' }}">
-                        <img src="{{ asset('images/dashboard/icons/icon_hargapaket.png') }}" class="sidebar-icon"> Harga Paket
+                    {{-- ✅ GANTI ROUTE --}}
+                    <a href="{{ route('superadmin.master-data') }}" class="nav-link-custom {{ request()->routeIs('superadmin.master-data*') ? 'nav-active' : '' }}">
+                        <img src="{{ asset('images/dashboard/icons/icon_hargapaket.png') }}" class="sidebar-icon"> Master Data
                     </a>
                 </li>
                <li>
@@ -154,7 +156,6 @@
         const sidebarElement = document.getElementById('sidebar');
         
         if (sidebarElement) {
-            // Ambil posisi scroll terakhir dari localStorage
             const sidebarScrollPos = localStorage.getItem('sidebar_scroll');
             if (sidebarScrollPos) {
                 setTimeout(() => {
@@ -162,12 +163,10 @@
                 }, 50);
             }
 
-            // Simpan posisi scroll saat user scroll
             sidebarElement.addEventListener('scroll', function() {
                 localStorage.setItem('sidebar_scroll', sidebarElement.scrollTop);
             });
 
-            // Simpan posisi scroll saat user klik link
             const sidebarLinks = sidebarElement.querySelectorAll('a');
             sidebarLinks.forEach(link => {
                 link.addEventListener('click', function() {

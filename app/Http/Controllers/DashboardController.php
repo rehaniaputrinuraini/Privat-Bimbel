@@ -4,83 +4,68 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Tentor;
-use App\Models\PresensiTentor;
+use App\Models\Pegawai;
+use App\Models\Mengajar;  // ✅ GANTI PresensiTentor → Mengajar
 use App\Models\Murid;
-use App\Models\LaporanKeuangan;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    // Superadmin Dashboard (pakai view shared/halaman-utama)
+    // Superadmin Dashboard
     public function superadmin()
     {
         $totalMurid = Murid::count();
-        $totalTentor = Tentor::count();
+        $totalTentor = Pegawai::where('jenis_pegawai', 'tentor')->count();
+        $totalAdmin = Pegawai::where('jenis_pegawai', 'admin')->count();
         
-        // Pemasukan dari laporan keuangan (kategori = 'pemasukan')
-        $pemasukan = LaporanKeuangan::where('kategori', 'pemasukan')->sum('jumlah');
-        
-        // Pengeluaran dari laporan keuangan (kategori = 'pengeluaran')
-        $pengeluaran = LaporanKeuangan::where('kategori', 'pengeluaran')->sum('jumlah');
-        
-        $labaBersih = $pemasukan - $pengeluaran;
-        
-        // Data untuk chart (6 bulan terakhir)
-        $chartData = $this->getChartData();
-        
-        // Rincian keuangan terakhir
-        $riwayatKeuangan = LaporanKeuangan::orderBy('tanggal', 'desc')->limit(5)->get();
-        
-        // Siapkan stats untuk view shared
         $stats = [
             'total_murid' => $totalMurid,
             'total_tentor' => $totalTentor,
-            'pemasukan' => $pemasukan,
-            'pengeluaran' => $pengeluaran,
-            'laba_bersih' => $labaBersih,
+            'total_admin' => $totalAdmin,
+            'pemasukan' => 0,
+            'pengeluaran' => 0,
+            'laba_bersih' => 0,
         ];
         
-        // VIEW UNTUK SUPERADMIN (shared/halaman-utama)
+        $chartData = [
+            'months' => [],
+            'incomes' => [],
+            'expenses' => []
+        ];
+        
+        $riwayatKeuangan = collect([]);
+        
         return view('dashboard.shared.halaman-utama.index', compact('stats', 'riwayatKeuangan', 'chartData'));
     }
     
-    // Admin Dashboard (pakai view shared/halaman-utama SAMA dengan superadmin)
+    // Admin Dashboard
     public function admin()
     {
         $totalMurid = Murid::count();
-        $totalTentor = Tentor::count();
+        $totalTentor = Pegawai::where('jenis_pegawai', 'tentor')->count();
         
-        // Pemasukan dari laporan keuangan (kategori = 'pemasukan')
-        $pemasukan = LaporanKeuangan::where('kategori', 'pemasukan')->sum('jumlah');
-        
-        // Pengeluaran dari laporan keuangan (kategori = 'pengeluaran')
-        $pengeluaran = LaporanKeuangan::where('kategori', 'pengeluaran')->sum('jumlah');
-        
-        $labaBersih = $pemasukan - $pengeluaran;
-        
-        // Rincian keuangan terakhir
-        $riwayatKeuangan = LaporanKeuangan::orderBy('tanggal', 'desc')->limit(5)->get();
-        
-        // Siapkan stats untuk view shared
         $stats = [
             'total_murid' => $totalMurid,
             'total_tentor' => $totalTentor,
-            'pemasukan' => $pemasukan,
-            'pengeluaran' => $pengeluaran,
-            'laba_bersih' => $labaBersih,
+            'pemasukan' => 0,
+            'pengeluaran' => 0,
+            'laba_bersih' => 0,
         ];
         
-        // VIEW UNTUK ADMIN (sama dengan superadmin)
+        $riwayatKeuangan = collect([]);
+        
         return view('dashboard.shared.halaman-utama.index', compact('stats', 'riwayatKeuangan'));
     }
     
-    // Tentor Dashboard (pakai view tentor/index)
+    // Tentor Dashboard
     public function tentor()
     {
-        $tentor = Tentor::where('id_user', Auth::id())->first();
+        $user = Auth::user();
+        $pegawai = Pegawai::where('id_pegawai', $user->id_pegawai)
+                          ->where('jenis_pegawai', 'tentor')
+                          ->first();
         
-        if (!$tentor) {
+        if (!$pegawai) {
             return view('dashboard.tentor.index', [
                 'total_hadir' => 0,
                 'total_jam_formatted' => '0 Jam 0 Menit',
@@ -97,22 +82,22 @@ class DashboardController extends Controller
         }
         
         // Total Hadir Bulan Ini
-        $totalHadir = PresensiTentor::where('id_tentor', $tentor->id_tentor)
+        $totalHadir = Mengajar::where('id_pegawai', $pegawai->id_pegawai)  // ✅ GANTI id_tentor → id_pegawai
                                     ->whereMonth('tanggal', now()->month)
                                     ->whereYear('tanggal', now()->year)
-                                    ->where('status_murid', 'hadir')
+                                    ->where('murid_hadir', 'Hadir')  // ✅ GANTI status_murid → murid_hadir
                                     ->count();
         
-        // Total Jam Mengajar (akumulasi dari semua presensi yang sudah keluar)
-        $presensiSelesai = PresensiTentor::where('id_tentor', $tentor->id_tentor)
-                                         ->whereNotNull('jam_keluar')
+        // Total Jam Mengajar
+        $presensiSelesai = Mengajar::where('id_pegawai', $pegawai->id_pegawai)  // ✅ GANTI
+                                         ->whereNotNull('jam_selesai')  // ✅ GANTI jam_keluar → jam_selesai
                                          ->get();
         
         $totalMenit = 0;
         foreach ($presensiSelesai as $p) {
-            if ($p->jam_masuk && $p->jam_keluar) {
-                $masuk = Carbon::parse($p->jam_masuk);
-                $keluar = Carbon::parse($p->jam_keluar);
+            if ($p->jam_mulai && $p->jam_selesai) {  // ✅ GANTI jam_masuk → jam_mulai
+                $masuk = Carbon::parse($p->jam_mulai);
+                $keluar = Carbon::parse($p->jam_selesai);
                 $totalMenit += $masuk->diffInMinutes($keluar);
             }
         }
@@ -122,7 +107,7 @@ class DashboardController extends Controller
         $totalJamFormatted = $totalJam . ' Jam ' . $totalMenitSisa . ' Menit';
         
         // Cek status hari ini
-        $presensiHariIni = PresensiTentor::where('id_tentor', $tentor->id_tentor)
+        $presensiHariIni = Mengajar::where('id_pegawai', $pegawai->id_pegawai)  // ✅ GANTI
                                          ->whereDate('tanggal', today())
                                          ->first();
         
@@ -133,12 +118,12 @@ class DashboardController extends Controller
         $menitBerjalan = 0;
         
         if ($presensiHariIni) {
-            if ($presensiHariIni->jam_keluar) {
+            if ($presensiHariIni->jam_selesai) {  // ✅ GANTI jam_keluar → jam_selesai
                 $statusHariIni = 'selesai';
             } else {
                 $statusHariIni = 'sedang';
                 $presensiAktif = $presensiHariIni;
-                $jamMulai = Carbon::parse($presensiHariIni->jam_masuk);
+                $jamMulai = Carbon::parse($presensiHariIni->jam_mulai);  // ✅ GANTI jam_masuk → jam_mulai
                 
                 $now = Carbon::now();
                 $diffMenit = $jamMulai->diffInMinutes($now);
@@ -157,42 +142,8 @@ class DashboardController extends Controller
             'jam_mulai' => $jamMulai,
             'durasi_berjalan' => $durasiBerjalan,
             'menit_berjalan' => $menitBerjalan,
-            'nama_tentor' => $tentor->nama_lengkap_tentor,
-            'tentor' => $tentor
+            'nama_tentor' => $pegawai->nama_lengkap,
+            'tentor' => $pegawai
         ]);
-    }
-    
-    // Helper untuk chart data (6 bulan terakhir)
-    private function getChartData()
-    {
-        $months = [];
-        $incomes = [];
-        $expenses = [];
-        
-        for ($i = 5; $i >= 0; $i--) {
-            $month = Carbon::now()->subMonths($i);
-            $months[] = $month->translatedFormat('M Y');
-            
-            // Pemasukan per bulan (kategori = 'pemasukan')
-            $income = LaporanKeuangan::where('kategori', 'pemasukan')
-                                      ->whereMonth('tanggal', $month->month)
-                                      ->whereYear('tanggal', $month->year)
-                                      ->sum('jumlah');
-            
-            // Pengeluaran per bulan (kategori = 'pengeluaran')
-            $expense = LaporanKeuangan::where('kategori', 'pengeluaran')
-                                       ->whereMonth('tanggal', $month->month)
-                                       ->whereYear('tanggal', $month->year)
-                                       ->sum('jumlah');
-            
-            $incomes[] = (float) $income;
-            $expenses[] = (float) $expense;
-        }
-        
-        return [
-            'months' => $months,
-            'incomes' => $incomes,
-            'expenses' => $expenses
-        ];
     }
 }

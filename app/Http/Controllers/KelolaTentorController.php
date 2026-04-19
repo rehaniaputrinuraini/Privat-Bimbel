@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Tentor;
+use App\Models\Pegawai;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,27 +14,32 @@ class KelolaTentorController extends Controller
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
-        $query = Tentor::with('user');
+        $query = Pegawai::with('user')->where('jenis_pegawai', 'tentor');
         
-        // Filter berdasarkan status akun
-        if ($request->has('status_akun') && $request->status_akun != '') {
+        // Filter berdasarkan status
+        if ($request->has('status') && $request->status != '') {
             $query->whereHas('user', function($q) use ($request) {
-                $q->where('status_akun', $request->status_akun);
+                $q->where('status', $request->status);
             });
         }
         
         // Pencarian
         if ($request->has('search') && $request->search != '') {
-            $query->where(function($q) use ($request) {
-                $q->where('nama_lengkap_tentor', 'like', '%' . $request->search . '%')
-                  ->orWhere('id_tentor', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama_lengkap', 'like', '%' . $search . '%')
+                  ->orWhere('id_pegawai', 'like', '%' . $search . '%')
+                  ->orWhere('mapel', 'like', '%' . $search . '%')
+                  ->orWhereHas('user', function($qu) use ($search) {
+                      $qu->where('username', 'like', '%' . $search . '%')
+                         ->orWhere('email', 'like', '%' . $search . '%');
+                  });
             });
         }
         
         $perPage = $request->get('per_page', 10);
-        $tentors = $query->orderBy('id_tentor', 'asc')->paginate($perPage);
+        $tentors = $query->orderBy('id_pegawai', 'asc')->paginate($perPage);
         
-        // Pilih view berdasarkan role
         if ($role == 'superadmin') {
             return view('dashboard.superadmin.kelola-tentor.kelola-tentor', [
                 'role' => $role,
@@ -48,10 +53,9 @@ class KelolaTentorController extends Controller
         }
     }
     
-    // Form tambah tentor (HANYA UNTUK SUPERADMIN)
+    // Form tambah tentor
     public function create()
     {
-        // Cegah admin mengakses
         if (auth()->user()->peran != 'superadmin') {
             abort(403, 'Unauthorized action.');
         }
@@ -61,51 +65,52 @@ class KelolaTentorController extends Controller
         ]);
     }
     
-    // Simpan tentor baru (HANYA UNTUK SUPERADMIN)
+    // Simpan tentor baru
     public function store(Request $request)
     {
-        // Cegah admin mengakses
         if (auth()->user()->peran != 'superadmin') {
             abort(403, 'Unauthorized action.');
         }
         
         $request->validate([
-            'nama_lengkap_tentor' => 'required|string|max:100',
-            'alamat_tentor' => 'nullable|string',
-            'no_hp_tentor' => 'nullable|string|max:15',
+            'nama_lengkap' => 'required|string|max:35',
+            'alamat' => 'nullable|string|max:100',
+            'no_hp' => 'nullable|string|max:15',
             'mapel' => 'nullable|string|max:50',
-            'grade' => 'nullable|string|max:10',
-            'hr_sd' => 'nullable|numeric|min:0',
-            'hr_smp' => 'nullable|numeric|min:0',
-            'hr_sma' => 'nullable|numeric|min:0',
-            'uang_makan' => 'nullable|numeric|min:0',
-            'uang_transport' => 'nullable|numeric|min:0',
+            'grade' => 'nullable|in:A,B',
+            'hr_sd' => 'nullable|integer|min:0',
+            'hr_smp' => 'nullable|integer|min:0',
+            'hr_sma' => 'nullable|integer|min:0',
+            'uang_makan' => 'nullable|integer|min:0',
+            'uang_transport' => 'nullable|integer|min:0',
             'email' => 'required|email|unique:ms_user,email',
             'username' => 'required|string|unique:ms_user,username',
             'password' => 'required|string|min:6',
         ]);
         
         try {
-            $user = User::create([
-                'email' => $request->email,
-                'username' => $request->username,
-                'password' => Hash::make($request->password),
-                'status_akun' => 'Aktif',
-                'peran' => 'tentor',
-            ]);
-            
-            Tentor::create([
-                'id_user' => $user->id_user,
-                'nama_lengkap_tentor' => $request->nama_lengkap_tentor,
-                'alamat_tentor' => $request->alamat_tentor,
-                'no_hp_tentor' => $request->no_hp_tentor,
+            $pegawai = Pegawai::create([
+                'jenis_pegawai' => 'tentor',
+                'nama_lengkap' => $request->nama_lengkap,
+                'alamat' => $request->alamat,
+                'no_hp' => $request->no_hp,
                 'mapel' => $request->mapel,
+                'gaji_pokok' => null,  // ✅ Tentor tidak punya gaji pokok
                 'grade' => $request->grade,
                 'hr_sd' => $request->hr_sd ?? 0,
                 'hr_smp' => $request->hr_smp ?? 0,
                 'hr_sma' => $request->hr_sma ?? 0,
                 'uang_makan' => $request->uang_makan ?? 0,
                 'uang_transport' => $request->uang_transport ?? 0,
+            ]);
+            
+            User::create([
+                'id_pegawai' => $pegawai->id_pegawai,
+                'email' => $request->email,
+                'username' => $request->username,
+                'password' => Hash::make($request->password),
+                'status' => 1,
+                'peran' => 'tentor',
             ]);
             
             return redirect()->route('superadmin.kelola-tentor')
@@ -118,15 +123,14 @@ class KelolaTentorController extends Controller
         }
     }
     
-    // Form edit tentor (HANYA UNTUK SUPERADMIN)
+    // Form edit tentor
     public function edit($id)
     {
-        // Cegah admin mengakses
         if (auth()->user()->peran != 'superadmin') {
             abort(403, 'Unauthorized action.');
         }
         
-        $tentor = Tentor::with('user')->findOrFail($id);
+        $tentor = Pegawai::with('user')->where('jenis_pegawai', 'tentor')->findOrFail($id);
         
         return view('dashboard.superadmin.kelola-tentor.edit-tentor', [
             'role' => 'superadmin',
@@ -134,33 +138,33 @@ class KelolaTentorController extends Controller
         ]);
     }
     
-    // Update tentor (HANYA UNTUK SUPERADMIN)
+    // Update tentor
     public function update(Request $request, $id)
     {
-        // Cegah admin mengakses
         if (auth()->user()->peran != 'superadmin') {
             abort(403, 'Unauthorized action.');
         }
         
-        $tentor = Tentor::with('user')->findOrFail($id);
+        $tentor = Pegawai::with('user')->where('jenis_pegawai', 'tentor')->findOrFail($id);
         
         $request->validate([
-            'nama_lengkap_tentor' => 'required|string|max:100',
-            'alamat_tentor' => 'nullable|string',
-            'no_hp_tentor' => 'nullable|string|max:15',
+            'nama_lengkap' => 'required|string|max:35',
+            'alamat' => 'nullable|string|max:100',
+            'no_hp' => 'nullable|string|max:15',
             'mapel' => 'nullable|string|max:50',
-            'grade' => 'nullable|string|max:10',
-            'hr_sd' => 'nullable|numeric|min:0',
-            'hr_smp' => 'nullable|numeric|min:0',
-            'hr_sma' => 'nullable|numeric|min:0',
-            'uang_makan' => 'nullable|numeric|min:0',
-            'uang_transport' => 'nullable|numeric|min:0',
-            'email' => 'required|email|unique:ms_user,email,' . $tentor->id_user . ',id_user',
-            'username' => 'required|string|unique:ms_user,username,' . $tentor->id_user . ',id_user',
+            'grade' => 'nullable|in:A,B',
+            'hr_sd' => 'nullable|integer|min:0',
+            'hr_smp' => 'nullable|integer|min:0',
+            'hr_sma' => 'nullable|integer|min:0',
+            'uang_makan' => 'nullable|integer|min:0',
+            'uang_transport' => 'nullable|integer|min:0',
+            'email' => 'required|email|unique:ms_user,email,' . $tentor->user->id_user . ',id_user',
+            'username' => 'required|string|unique:ms_user,username,' . $tentor->user->id_user . ',id_user',
             'password' => 'nullable|string|min:6',
         ]);
         
         try {
+            // Update user
             $userData = [
                 'email' => $request->email,
                 'username' => $request->username,
@@ -170,11 +174,13 @@ class KelolaTentorController extends Controller
             }
             $tentor->user->update($userData);
             
+            // Update pegawai
             $tentor->update([
-                'nama_lengkap_tentor' => $request->nama_lengkap_tentor,
-                'alamat_tentor' => $request->alamat_tentor,
-                'no_hp_tentor' => $request->no_hp_tentor,
+                'nama_lengkap' => $request->nama_lengkap,
+                'alamat' => $request->alamat,
+                'no_hp' => $request->no_hp,
                 'mapel' => $request->mapel,
+                'gaji_pokok' => null,  // ✅ Tetap null untuk tentor
                 'grade' => $request->grade,
                 'hr_sd' => $request->hr_sd ?? 0,
                 'hr_smp' => $request->hr_smp ?? 0,
@@ -193,22 +199,21 @@ class KelolaTentorController extends Controller
         }
     }
     
-    // Hapus tentor (HANYA UNTUK SUPERADMIN)
+    // Hapus tentor
     public function destroy($id)
     {
-        // Cegah admin mengakses
         if (auth()->user()->peran != 'superadmin') {
             abort(403, 'Unauthorized action.');
         }
         
         try {
-            $tentor = Tentor::findOrFail($id);
-            $userId = $tentor->id_user;
-            $tentor->delete();
+            $tentor = Pegawai::where('jenis_pegawai', 'tentor')->findOrFail($id);
             
-            if ($userId) {
-                User::where('id_user', $userId)->delete();
+            if ($tentor->user) {
+                $tentor->user->delete();
             }
+            
+            $tentor->delete();
             
             return redirect()->route('superadmin.kelola-tentor')
                 ->with('success', 'Data tentor berhasil dihapus');
@@ -219,22 +224,21 @@ class KelolaTentorController extends Controller
         }
     }
     
-    // Aktifkan/Nonaktifkan tentor (HANYA UNTUK SUPERADMIN)
+    // Toggle status
     public function toggleStatus($id)
     {
-        // Cegah admin mengakses
         if (auth()->user()->peran != 'superadmin') {
             abort(403, 'Unauthorized action.');
         }
         
         try {
-            $tentor = Tentor::findOrFail($id);
-            $user = User::findOrFail($tentor->id_user);
+            $tentor = Pegawai::with('user')->where('jenis_pegawai', 'tentor')->findOrFail($id);
+            $user = $tentor->user;
             
-            $newStatus = $user->status_akun == 'Aktif' ? 'Nonaktif' : 'Aktif';
-            $user->update(['status_akun' => $newStatus]);
+            $newStatus = $user->status == 1 ? 0 : 1;
+            $user->update(['status' => $newStatus]);
             
-            $message = $newStatus == 'Aktif' ? 'diaktifkan' : 'dinonaktifkan';
+            $message = $newStatus == 1 ? 'diaktifkan' : 'dinonaktifkan';
             return redirect()->route('superadmin.kelola-tentor')
                 ->with('success', 'Status tentor berhasil ' . $message);
                 
