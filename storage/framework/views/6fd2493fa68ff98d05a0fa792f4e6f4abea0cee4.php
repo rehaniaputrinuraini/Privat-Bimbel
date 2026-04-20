@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bimbel Privat - Company Profile</title>
     
-    <link rel="stylesheet" href="{{ asset('css/companyprofile.css') }}">
+    <link rel="stylesheet" href="<?php echo e(asset('css/companyprofile.css')); ?>">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    {{-- --- TAMBAHAN: CSS UNTUK ANIMASI AOS --- --}}
+    
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
         /* Mengaktifkan scroll halus saat navigasi diklik */
@@ -47,7 +47,7 @@
     <nav class="navbar">
         <div class="container">
             <div class="logo">
-                <img src="{{ asset('images/logo/foto_logo.png') }}" alt="Logo Bimbel Privat" class="h-12 w-auto">
+                <img src="<?php echo e(asset('images/logo/foto_logo.png')); ?>" alt="Logo Bimbel Privat" class="h-12 w-auto">
             </div>
             <ul class="nav-links">
                 <li><a href="#beranda">Beranda</a></li>
@@ -56,7 +56,7 @@
                 <li><a href="#galeri">Galeri</a></li>
                 <li><a href="#kontak">Kontak</a></li>
             </ul>
-            <a href="{{ route('login') }}">
+            <a href="<?php echo e(route('login')); ?>">
                 <button class="btn-login">LOGIN</button>
             </a>
         </div>
@@ -64,7 +64,7 @@
 
     <section id="beranda" class="hero">
         <div class="container hero-content">
-            {{-- Animasi: Muncul dari kiri --}}
+            
             <div class="hero-text" data-aos="fade-right" data-aos-duration="1000">
                 <h1>Bimbel Privat</h1>
                 <h2 class="text-purple">Prestasi Lebih Baik</h2>
@@ -74,15 +74,15 @@
                 <i class="fas fa-phone-alt"></i> 
                 <span>Daftar atau Hubungi Kami</span></a> 
             </div>
-            {{-- Animasi: Muncul dari kanan --}}
+            
             <div class="hero-image" data-aos="fade-left" data-aos-duration="1000">
-                <img src="{{ asset('images/companyprofile/galeri/gambar_utama.jpeg') }}" alt="Aktivitas Belajar"> </div>
+                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar_utama.jpeg')); ?>" alt="Aktivitas Belajar"> </div>
         </div>
     </section>
 
     <section class="stats">
         <div class="container stats-container">
-            {{-- Animasi: Muncul satu per satu (delay bergantian) --}}
+            
             <div class="stat-card" data-aos="zoom-in" data-aos-delay="100">
                 <i class="fas fa-users"></i>
                 <h3>21</h3>
@@ -127,7 +127,7 @@
             <h2 class="section-title" data-aos="fade-up">Fasilitas Kami</h2>
             <p class="section-subtitle" data-aos="fade-up">Fasilitas yang kami tawarkan</p>
             <div class="fasilitas-grid">
-                {{-- Fasilitas menggunakan data-aos fade-up agar muncul meluncur dari bawah --}}
+                
                 <div class="fasilitas-card" data-aos="fade-up">
                     <div class="icon-box"><i class="fas fa-snowflake"></i></div>
                     <h4>Ruang AC</h4>
@@ -183,7 +183,7 @@
             <p class="section-subtitle" data-aos="fade-down">Pilih program yang paling sesuai dengan kebutuhan belajar Anda</p>
             <div class="program-container">
 
-                {{-- Animasi Flip (berputar) untuk kartu program --}}
+                
                 <div class="program-card" data-aos="flip-left" data-aos-duration="1000">
                     <div class="program-icon reguler-icon">
                         <i class="fas fa-users"></i> </div>
@@ -314,12 +314,12 @@
             <h2 class="section-title" data-aos="fade-up">Galeri Kegiatan</h2>
             <p class="section-subtitle" data-aos="fade-up">Dokumentasi kegiatan belajar mengajar kami</p>
             <div class="galeri-grid">
-                <img src="{{ asset('images/companyprofile/galeri/gambar_1.jpeg') }}" alt="Galeri 1" data-aos="zoom-in"> 
-                <img src="{{ asset('images/companyprofile/galeri/gambar_7.jpeg') }}" alt="Galeri 2" data-aos="zoom-in" data-aos-delay="100">
-                <img src="{{ asset('images/companyprofile/galeri/gambar_3.jpeg') }}" alt="Galeri 3" data-aos="zoom-in" data-aos-delay="200">
-                <img src="{{ asset('images/companyprofile/galeri/gambar_4.jpeg') }}" alt="Galeri 4" data-aos="zoom-in">
-                <img src="{{ asset('images/companyprofile/galeri/gambar_5.jpeg') }}" alt="Galeri 5" data-aos="zoom-in" data-aos-delay="100">
-                <img src="{{ asset('images/companyprofile/galeri/gambar_6.jpeg') }}" alt="Galeri 6" data-aos="zoom-in" data-aos-delay="200">
+                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar_1.jpeg')); ?>" alt="Galeri 1" data-aos="zoom-in"> 
+                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar_7.jpeg')); ?>" alt="Galeri 2" data-aos="zoom-in" data-aos-delay="100">
+                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar_3.jpeg')); ?>" alt="Galeri 3" data-aos="zoom-in" data-aos-delay="200">
+                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar_4.jpeg')); ?>" alt="Galeri 4" data-aos="zoom-in">
+                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar_5.jpeg')); ?>" alt="Galeri 5" data-aos="zoom-in" data-aos-delay="100">
+                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar_6.jpeg')); ?>" alt="Galeri 6" data-aos="zoom-in" data-aos-delay="200">
             </div>
         </div>
     </section>
@@ -383,13 +383,13 @@
                 <div class="footer-section">
                     <h4><i class="fas fa-book-open"></i> Bimbel Privat</h4>
                     <p>Prestasi lebih baik.</p>
-                    {{-- REVISI: Ikon Berdampingan 30px --}}
+                    
                     <div class="social-icons-img">
                         <a href="https://www.instagram.com/bimbelprivatmadiun_" target="_blank" title="Instagram">
-                            <img src="{{ asset('images/companyprofile/instagram.png') }}" alt="Instagram">
+                            <img src="<?php echo e(asset('images/companyprofile/instagram.png')); ?>" alt="Instagram">
                         </a>
                         <a href="https://www.tiktok.com/@bimbelprivatmadiun_" target="_blank" title="TikTok">
-                            <img src="{{ asset('images/companyprofile/tiktok.png') }}" alt="TikTok">
+                            <img src="<?php echo e(asset('images/companyprofile/tiktok.png')); ?>" alt="TikTok">
                         </a>
                     </div>
                 </div>
@@ -415,7 +415,7 @@
         </div>
     </footer>
 
-    {{-- --- TAMBAHAN: JS UNTUK ANIMASI AOS --- --}}
+    
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
         // Inisialisasi AOS agar animasi berjalan saat di-scroll
@@ -426,4 +426,4 @@
         });
     </script>
 </body>
-</html>
+</html><?php /**PATH C:\xampp\htdocs\privat-bimbel\resources\views/companyprofile/landing.blade.php ENDPATH**/ ?>

@@ -12,7 +12,9 @@ class GoogleAuthController extends Controller
     // Redirect ke Google
     public function redirect()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')
+            ->with(['prompt' => 'select_account'])  // ✅ TAMBAHKAN INI
+            ->redirect();
     }
 
     // Callback dari Google
@@ -25,14 +27,20 @@ class GoogleAuthController extends Controller
             $user = User::where('email', $googleUser->getEmail())->first();
             
             if (!$user) {
-                // Buat user baru
+                // Buat user baru dengan data dari Google
                 $user = User::create([
-                    'username' => $googleUser->getName(),
+                    'username' => $this->generateUsername($googleUser->getName()),
                     'email' => $googleUser->getEmail(),
                     'password' => bcrypt(uniqid()),
-                    'peran' => 'admin', // default role (bisa diubah nanti)
-                    'status_akun' => 'Aktif',
+                    'peran' => 'tentor', // Default role untuk user baru
+                    'status' => 1, // Aktif
                 ]);
+            }
+            
+            // Cek status user
+            if ($user->status != 1) {
+                return redirect()->route('login')
+                    ->withErrors(['error' => 'Akun Anda tidak aktif. Silakan hubungi admin.']);
             }
             
             // Login user
@@ -45,5 +53,26 @@ class GoogleAuthController extends Controller
             return redirect()->route('login')
                 ->withErrors(['error' => 'Google login gagal: ' . $e->getMessage()]);
         }
+    }
+
+    /**
+     * Generate username dari nama Google
+     */
+    private function generateUsername($name)
+    {
+        // Hapus spasi dan karakter khusus
+        $username = preg_replace('/[^a-zA-Z0-9]/', '', $name);
+        $username = strtolower($username);
+        
+        // Cek apakah username sudah ada
+        $originalUsername = $username;
+        $counter = 1;
+        
+        while (User::where('username', $username)->exists()) {
+            $username = $originalUsername . $counter;
+            $counter++;
+        }
+        
+        return $username;
     }
 }

@@ -1,8 +1,8 @@
-@extends('layouts.app')
 
-@section('title', 'Laporan Keuangan')
 
-@push('styles')
+<?php $__env->startSection('title', 'Laporan Keuangan'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <style>
     .filter-select {
         -webkit-appearance: none;
@@ -15,16 +15,17 @@
         padding-right: 36px !important;
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div style="width: 100%;">
 
-    @php $role = $role ?? (Auth::user()->peran); @endphp
+    <?php $role = $role ?? (Auth::user()->peran); ?>
 
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
-            {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+            <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?>
+
         </p>
         <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
             Laporan Keuangan
@@ -32,47 +33,49 @@
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Data Laporan Arus Kas Masuk dan Keluar</p>
     </div>
 
-    @if(session('success'))
+    <?php if(session('success')): ?>
         <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
-        </div>
-    @endif
+            <i class="fas fa-check-circle"></i> <?php echo e(session('success')); ?>
 
-    @if(session('error'))
+        </div>
+    <?php endif; ?>
+
+    <?php if(session('error')): ?>
         <div style="background: #FEE2E2; color: #EF4444; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
-            <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
-        </div>
-    @endif
+            <i class="fas fa-exclamation-circle"></i> <?php echo e(session('error')); ?>
 
-    {{-- CARD RINGKASAN --}}
+        </div>
+    <?php endif; ?>
+
+    
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
         <div style="background: white; padding: 20px; border-radius: 15px; border-left: 8px solid #4472DF; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
             <p style="margin: 0; color: #4472DF; font-weight: 700; font-size: 13px;">Pemasukan (Pendaftaran + Manual)</p>
-            <h3 style="margin: 10px 0 0; font-size: 20px; font-weight: 800; color: #4472DF;">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</h3>
+            <h3 style="margin: 10px 0 0; font-size: 20px; font-weight: 800; color: #4472DF;">Rp <?php echo e(number_format($totalPemasukan, 0, ',', '.')); ?></h3>
         </div>
         <div style="background: white; padding: 20px; border-radius: 15px; border-left: 8px solid #D74E4E; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
             <p style="margin: 0; color: #D74E4E; font-weight: 700; font-size: 13px;">Pengeluaran</p>
-            <h3 style="margin: 10px 0 0; font-size: 20px; font-weight: 800; color: #D74E4E;">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</h3>
+            <h3 style="margin: 10px 0 0; font-size: 20px; font-weight: 800; color: #D74E4E;">Rp <?php echo e(number_format($totalPengeluaran, 0, ',', '.')); ?></h3>
         </div>
         <div style="background: white; padding: 20px; border-radius: 15px; border-left: 8px solid #E7C255; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
             <p style="margin: 0; color: #E7C255; font-weight: 700; font-size: 13px;">Piutang (Tunggakan)</p>
-            <h3 style="margin: 10px 0 0; font-size: 20px; font-weight: 800; color: #E7C255;">Rp {{ number_format($totalPiutang, 0, ',', '.') }}</h3>
+            <h3 style="margin: 10px 0 0; font-size: 20px; font-weight: 800; color: #E7C255;">Rp <?php echo e(number_format($totalPiutang, 0, ',', '.')); ?></h3>
         </div>
         <div style="background: white; padding: 20px; border-radius: 15px; border-left: 8px solid #4AB462; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
             <p style="margin: 0; color: #4AB462; font-weight: 700; font-size: 13px;">Uang Muka</p>
-            <h3 style="margin: 10px 0 0; font-size: 20px; font-weight: 800; color: #4AB462;">Rp {{ number_format($totalUangMuka, 0, ',', '.') }}</h3>
+            <h3 style="margin: 10px 0 0; font-size: 20px; font-weight: 800; color: #4AB462;">Rp <?php echo e(number_format($totalUangMuka, 0, ',', '.')); ?></h3>
         </div>
         <div style="background: white; padding: 20px; border-radius: 15px; border-left: 8px solid #ACB2AD; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
             <p style="margin: 0; color: #ACB2AD; font-weight: 700; font-size: 13px;">Total Pemasukan Kas</p>
-            <h3 style="margin: 10px 0 0; font-size: 20px; font-weight: 800; color: #ACB2AD;">Rp {{ number_format($totalPemasukanKas, 0, ',', '.') }}</h3>
+            <h3 style="margin: 10px 0 0; font-size: 20px; font-weight: 800; color: #ACB2AD;">Rp <?php echo e(number_format($totalPemasukanKas, 0, ',', '.')); ?></h3>
         </div>
         <div style="background: white; padding: 20px; border-radius: 15px; border-left: 8px solid #4D0B87; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
             <p style="margin: 0; color: #4D0B87; font-weight: 700; font-size: 13px;">Saldo Kas</p>
-            <h3 style="margin: 10px 0 0; font-size: 20px; font-weight: 800; color: #4D0B87;">Rp {{ number_format($saldoKas, 0, ',', '.') }}</h3>
+            <h3 style="margin: 10px 0 0; font-size: 20px; font-weight: 800; color: #4D0B87;">Rp <?php echo e(number_format($saldoKas, 0, ',', '.')); ?></h3>
         </div>
     </div>
 
-    {{-- FILTER BAR DENGAN TOMBOL TAMBAH --}}
+    
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 15px; flex-wrap: wrap;">
         <div style="display: flex; align-items: center; gap: 12px; flex: 1; flex-wrap: wrap;">
             <div style="position: relative; width: 280px;">
@@ -81,37 +84,37 @@
                        style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
             </div>
 
-            <form method="GET" action="{{ route($role . '.laporan-keuangan') }}" style="display: flex; gap: 12px; flex-wrap: wrap;" id="filterForm">
+            <form method="GET" action="<?php echo e(route($role . '.laporan-keuangan')); ?>" style="display: flex; gap: 12px; flex-wrap: wrap;" id="filterForm">
                 <select name="bulan" class="filter-select" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 140px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
                     <option value="">--- Pilih Bulan ---</option>
-                    @foreach($bulanList as $key => $bulan)
-                        <option value="{{ $key }}" {{ $filterBulan == $key ? 'selected' : '' }}>{{ $bulan }}</option>
-                    @endforeach
+                    <?php $__currentLoopData = $bulanList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $bulan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($key); ?>" <?php echo e($filterBulan == $key ? 'selected' : ''); ?>><?php echo e($bulan); ?></option>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
 
                 <select name="tahun" class="filter-select" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 120px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
                     <option value="">--- Tahun ---</option>
-                    @foreach($tahunList as $tahun)
-                        <option value="{{ $tahun }}" {{ $filterTahun == $tahun ? 'selected' : '' }}>{{ $tahun }}</option>
-                    @endforeach
+                    <?php $__currentLoopData = $tahunList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tahun): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($tahun); ?>" <?php echo e($filterTahun == $tahun ? 'selected' : ''); ?>><?php echo e($tahun); ?></option>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
 
-                @if($filterBulan || $filterTahun)
-                    <a href="{{ route($role . '.laporan-keuangan') }}" style="padding: 10px 15px; background: #F3F4F6; color: #374151; border-radius: 12px; text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 5px;">
+                <?php if($filterBulan || $filterTahun): ?>
+                    <a href="<?php echo e(route($role . '.laporan-keuangan')); ?>" style="padding: 10px 15px; background: #F3F4F6; color: #374151; border-radius: 12px; text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 5px;">
                         <i class="fas fa-times"></i> Reset
                     </a>
-                @endif
+                <?php endif; ?>
             </form>
         </div>
 
-        <a href="{{ route($role . '.laporan-keuangan.create') }}" style="text-decoration: none;">
+        <a href="<?php echo e(route($role . '.laporan-keuangan.create')); ?>" style="text-decoration: none;">
             <button style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px;">
                 <i class="fas fa-plus"></i> Tambah Manual
             </button>
         </a>
     </div>
 
-    {{-- TABEL PEMASUKAN --}}
+    
     <div class="table-container" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
         <div style="padding: 20px 20px 15px;">
             <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #111827;">Riwayat Pemasukan</h4>
@@ -129,40 +132,41 @@
                     </tr>
                 </thead>
                 <tbody id="tbodyPemasukan" style="color: #374151;">
-                    @forelse($pemasukan as $index => $p)
+                    <?php $__empty_1 = true; $__currentLoopData = $pemasukan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr style="border-bottom: 1px solid #F3F4F6; background: #F0F4FF;">
-                        <td style="padding: 15px; text-align: center;">{{ $loop->iteration }}</td>
-                        <td style="padding: 15px;">{{ $p->tanggal ? \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d M Y') : '-' }}</td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($loop->iteration); ?></td>
+                        <td style="padding: 15px;"><?php echo e($p->tanggal ? \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d M Y') : '-'); ?></td>
                         <td style="padding: 15px;">
-                            {{ $p->rincian }}
-                            @if($p->sumber == 'pendaftaran')
+                            <?php echo e($p->rincian); ?>
+
+                            <?php if($p->sumber == 'pendaftaran'): ?>
                                 <span style="background: #4472DF; color: white; padding: 2px 8px; border-radius: 20px; font-size: 10px; margin-left: 8px;">Auto</span>
-                            @else
+                            <?php else: ?>
                                 <span style="background: #9CA3AF; color: white; padding: 2px 8px; border-radius: 20px; font-size: 10px; margin-left: 8px;">Manual</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
-                        <td style="padding: 15px;">{{ $p->jenis_pembayaran ?? '-' }}</td>
-                        <td style="padding: 15px; text-align: right; font-weight: 700; color: #4472DF;">Rp {{ number_format($p->jumlah, 0, ',', '.') }}</td>
+                        <td style="padding: 15px;"><?php echo e($p->jenis_pembayaran ?? '-'); ?></td>
+                        <td style="padding: 15px; text-align: right; font-weight: 700; color: #4472DF;">Rp <?php echo e(number_format($p->jumlah, 0, ',', '.')); ?></td>
                         <td style="padding: 15px; text-align: center;">
-                            <button type="button" onclick="bukaModalHapus('{{ route($role . '.laporan-keuangan.destroy', $p->id) }}', '{{ addslashes($p->rincian) }}')" 
+                            <button type="button" onclick="bukaModalHapus('<?php echo e(route($role . '.laporan-keuangan.destroy', $p->id)); ?>', '<?php echo e(addslashes($p->rincian)); ?>')" 
                                     style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
                                 <i class="fas fa-trash"></i> Hapus
                             </button>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr><td colspan="6" style="padding: 40px; text-align: center; color: #9CA3AF;">Belum ada data pemasukan</td></tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
         <div style="display: flex; justify-content: space-between; padding: 15px 20px; background: #F9FAFB; border-top: 1px solid #F3F4F6;">
             <span style="font-size: 14px; font-weight: 700; color: #111827;">Total Pemasukan</span>
-            <span style="font-size: 15px; font-weight: 800; color: #4472DF;">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</span>
+            <span style="font-size: 15px; font-weight: 800; color: #4472DF;">Rp <?php echo e(number_format($totalPemasukan, 0, ',', '.')); ?></span>
         </div>
     </div>
 
-    {{-- TABEL PENGELUARAN --}}
+    
     <div class="table-container" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
         <div style="padding: 20px 20px 15px;">
             <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #111827;">Riwayat Pengeluaran</h4>
@@ -180,33 +184,33 @@
                     </tr>
                 </thead>
                 <tbody id="tbodyPengeluaran" style="color: #374151;">
-                    @forelse($pengeluaran as $index => $p)
+                    <?php $__empty_1 = true; $__currentLoopData = $pengeluaran; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr style="border-bottom: 1px solid #F3F4F6; background: #FFF0F0;">
-                        <td style="padding: 15px; text-align: center;">{{ $loop->iteration }}</td>
-                        <td style="padding: 15px;">{{ $p->tanggal ? \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d M Y') : '-' }}</td>
-                        <td style="padding: 15px;">{{ $p->rincian }}</td>
-                        <td style="padding: 15px;">{{ $p->jenis_pembayaran ?? '-' }}</td>
-                        <td style="padding: 15px; text-align: right; font-weight: 700; color: #D74E4E;">Rp {{ number_format($p->jumlah, 0, ',', '.') }}</td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($loop->iteration); ?></td>
+                        <td style="padding: 15px;"><?php echo e($p->tanggal ? \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d M Y') : '-'); ?></td>
+                        <td style="padding: 15px;"><?php echo e($p->rincian); ?></td>
+                        <td style="padding: 15px;"><?php echo e($p->jenis_pembayaran ?? '-'); ?></td>
+                        <td style="padding: 15px; text-align: right; font-weight: 700; color: #D74E4E;">Rp <?php echo e(number_format($p->jumlah, 0, ',', '.')); ?></td>
                         <td style="padding: 15px; text-align: center;">
-                            <button type="button" onclick="bukaModalHapus('{{ route($role . '.laporan-keuangan.destroy', $p->id) }}', '{{ addslashes($p->rincian) }}')" 
+                            <button type="button" onclick="bukaModalHapus('<?php echo e(route($role . '.laporan-keuangan.destroy', $p->id)); ?>', '<?php echo e(addslashes($p->rincian)); ?>')" 
                                     style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
                                 <i class="fas fa-trash"></i> Hapus
                             </button>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr><td colspan="6" style="padding: 40px; text-align: center; color: #9CA3AF;">Belum ada data pengeluaran</td></tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
         <div style="display: flex; justify-content: space-between; padding: 15px 20px; background: #F9FAFB; border-top: 1px solid #F3F4F6;">
             <span style="font-size: 14px; font-weight: 700; color: #111827;">Total Pengeluaran</span>
-            <span style="font-size: 15px; font-weight: 800; color: #D74E4E;">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</span>
+            <span style="font-size: 15px; font-weight: 800; color: #D74E4E;">Rp <?php echo e(number_format($totalPengeluaran, 0, ',', '.')); ?></span>
         </div>
     </div>
 
-    {{-- TABEL PIUTANG --}}
+    
     <div class="table-container" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
         <div style="padding: 20px 20px 15px;">
             <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #111827;">Riwayat Piutang (Tunggakan)</h4>
@@ -224,36 +228,37 @@
                     </tr>
                 </thead>
                 <tbody id="tbodyPiutang" style="color: #374151;">
-                    @forelse($piutang as $index => $p)
+                    <?php $__empty_1 = true; $__currentLoopData = $piutang; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr style="border-bottom: 1px solid #F3F4F6; background: #FFFDF0;">
-                        <td style="padding: 15px; text-align: center;">{{ $loop->iteration }}</td>
-                        <td style="padding: 15px;">{{ $p->tanggal ? \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d M Y') : '-' }}</td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($loop->iteration); ?></td>
+                        <td style="padding: 15px;"><?php echo e($p->tanggal ? \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d M Y') : '-'); ?></td>
                         <td style="padding: 15px;">
-                            {{ $p->nama_murid ?? '-' }}
+                            <?php echo e($p->nama_murid ?? '-'); ?>
+
                             <span style="background: #E7C255; color: white; padding: 2px 8px; border-radius: 20px; font-size: 10px; margin-left: 8px;">Auto</span>
                         </td>
-                        <td style="padding: 15px;">{{ $p->bulan_periode ?? '-' }}</td>
-                        <td style="padding: 15px; text-align: right; font-weight: 700; color: #E7C255;">Rp {{ number_format($p->jumlah, 0, ',', '.') }}</td>
+                        <td style="padding: 15px;"><?php echo e($p->bulan_periode ?? '-'); ?></td>
+                        <td style="padding: 15px; text-align: right; font-weight: 700; color: #E7C255;">Rp <?php echo e(number_format($p->jumlah, 0, ',', '.')); ?></td>
                         <td style="padding: 15px; text-align: center;">
-                            <button type="button" onclick="bukaModalHapus('{{ route($role . '.laporan-keuangan.destroy', $p->id) }}', '{{ addslashes($p->nama_murid) }} - {{ addslashes($p->bulan_periode) }}')" 
+                            <button type="button" onclick="bukaModalHapus('<?php echo e(route($role . '.laporan-keuangan.destroy', $p->id)); ?>', '<?php echo e(addslashes($p->nama_murid)); ?> - <?php echo e(addslashes($p->bulan_periode)); ?>')" 
                                     style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
                                 <i class="fas fa-trash"></i> Hapus
                             </button>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr><td colspan="6" style="padding: 40px; text-align: center; color: #9CA3AF;">Belum ada data piutang</td></tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
         <div style="display: flex; justify-content: space-between; padding: 15px 20px; background: #F9FAFB; border-top: 1px solid #F3F4F6;">
             <span style="font-size: 14px; font-weight: 700; color: #111827;">Total Piutang</span>
-            <span style="font-size: 15px; font-weight: 800; color: #E7C255;">Rp {{ number_format($totalPiutang, 0, ',', '.') }}</span>
+            <span style="font-size: 15px; font-weight: 800; color: #E7C255;">Rp <?php echo e(number_format($totalPiutang, 0, ',', '.')); ?></span>
         </div>
     </div>
 
-    {{-- TABEL UANG MUKA --}}
+    
     <div class="table-container" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
         <div style="padding: 20px 20px 15px;">
             <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #111827;">Riwayat Uang Muka</h4>
@@ -271,43 +276,44 @@
                     </tr>
                 </thead>
                 <tbody id="tbodyUangMuka" style="color: #374151;">
-                    @forelse($uang_muka as $index => $u)
+                    <?php $__empty_1 = true; $__currentLoopData = $uang_muka; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr style="border-bottom: 1px solid #F3F4F6; background: #F0FFF4;">
-                        <td style="padding: 15px; text-align: center;">{{ $loop->iteration }}</td>
-                        <td style="padding: 15px;">{{ $u->tanggal ? \Carbon\Carbon::parse($u->tanggal)->translatedFormat('d M Y') : '-' }}</td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($loop->iteration); ?></td>
+                        <td style="padding: 15px;"><?php echo e($u->tanggal ? \Carbon\Carbon::parse($u->tanggal)->translatedFormat('d M Y') : '-'); ?></td>
                         <td style="padding: 15px;">
-                            {{ $u->nama_murid ?? '-' }}
+                            <?php echo e($u->nama_murid ?? '-'); ?>
+
                             <span style="background: #4AB462; color: white; padding: 2px 8px; border-radius: 20px; font-size: 10px; margin-left: 8px;">Auto</span>
                         </td>
-                        <td style="padding: 15px;">{{ $u->bulan_periode ?? '-' }}</td>
-                        <td style="padding: 15px; text-align: right; font-weight: 700; color: #4AB462;">Rp {{ number_format($u->jumlah, 0, ',', '.') }}</td>
+                        <td style="padding: 15px;"><?php echo e($u->bulan_periode ?? '-'); ?></td>
+                        <td style="padding: 15px; text-align: right; font-weight: 700; color: #4AB462;">Rp <?php echo e(number_format($u->jumlah, 0, ',', '.')); ?></td>
                         <td style="padding: 15px; text-align: center;">
-                            <button type="button" onclick="bukaModalHapus('{{ route($role . '.laporan-keuangan.destroy', $u->id) }}', '{{ addslashes($u->nama_murid) }} - {{ addslashes($u->bulan_periode) }}')" 
+                            <button type="button" onclick="bukaModalHapus('<?php echo e(route($role . '.laporan-keuangan.destroy', $u->id)); ?>', '<?php echo e(addslashes($u->nama_murid)); ?> - <?php echo e(addslashes($u->bulan_periode)); ?>')" 
                                     style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
                                 <i class="fas fa-trash"></i> Hapus
                             </button>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr><td colspan="6" style="padding: 40px; text-align: center; color: #9CA3AF;">Belum ada data uang muka</td></tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
         <div style="display: flex; justify-content: space-between; padding: 15px 20px; background: #F9FAFB; border-top: 1px solid #F3F4F6;">
             <span style="font-size: 14px; font-weight: 700; color: #111827;">Total Uang Muka</span>
-            <span style="font-size: 15px; font-weight: 800; color: #4AB462;">Rp {{ number_format($totalUangMuka, 0, ',', '.') }}</span>
+            <span style="font-size: 15px; font-weight: 800; color: #4AB462;">Rp <?php echo e(number_format($totalUangMuka, 0, ',', '.')); ?></span>
         </div>
     </div>
 
-    {{-- ✅ EXPORT PDF BUTTON --}}
+    
     <button style="width: 100%; background: #6F2DA8; color: white; border: none; padding: 18px; border-radius: 15px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px; margin-bottom: 20px;" onclick="window.print()">
         <i class="fas fa-file-pdf" style="font-size: 20px;"></i> EXPORT PDF
     </button>
 
 </div>
 
-{{-- MODAL KONFIRMASI HAPUS --}}
+
 <div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center;">
         <div style="color: #E35D5D; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-trash-alt"></i></div>
@@ -316,8 +322,8 @@
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalHapus()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
             <form id="formHapus" method="POST" style="flex: 1;">
-                @csrf
-                @method('DELETE')
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('DELETE'); ?>
                 <button type="submit" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #E35D5D; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Hapus</button>
             </form>
         </div>
@@ -368,4 +374,5 @@
         }
     }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\privat-bimbel\resources\views/dashboard/shared/laporan-keuangan/laporan-keuangan.blade.php ENDPATH**/ ?>
