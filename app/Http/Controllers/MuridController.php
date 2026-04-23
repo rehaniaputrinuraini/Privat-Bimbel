@@ -38,13 +38,12 @@ class MuridController extends Controller
             
         $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
         
-        // Ambil periode aktif (tanggal sekarang di antara tanggal_mulai dan tanggal_selesai)
-        $tanggalSekarang = date('Y-m-d');
-        $periodeAktif = Periode::where('tanggal_mulai', '<=', $tanggalSekarang)
-            ->where('tanggal_selesai', '>=', $tanggalSekarang)
+        // ✅ Ambil periode aktif berdasarkan tanggal_mulai dan tanggal_selesai
+        $today = date('Y-m-d');
+        $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
+            ->where('tanggal_selesai', '>=', $today)
             ->first();
         
-        // Kalau tidak ada periode aktif, ambil periode terakhir
         if (!$periodeAktif) {
             $periodeAktif = Periode::orderBy('id_periode', 'desc')->first();
         }
@@ -68,7 +67,7 @@ class MuridController extends Controller
             'no_hp' => 'nullable|string|max:15',
             'nama_orang_tua' => 'nullable|string|max:35',
             'no_hp_orang_tua' => 'nullable|string|max:15',
-            'tahun_masuk' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'tahun_masuk' => 'nullable|integer|min:2000|max:' . date('Y'),
             
             // Data Transaksi
             'id_kelas' => 'required|exists:ms_kelas,id_kelas',
@@ -79,17 +78,22 @@ class MuridController extends Controller
         DB::beginTransaction();
         
         try {
+            $tanggalDaftar = date('Y-m-d');
+            
             // 1. Insert ke ms_murid
-            $murid = Murid::create([
-                'nama_lengkap' => $request->nama_lengkap,
-                'asal_sekolah' => $request->asal_sekolah,
-                'alamat' => $request->alamat,
-                'no_hp' => $request->no_hp,
-                'nama_orang_tua' => $request->nama_orang_tua,
-                'no_hp_orang_tua' => $request->no_hp_orang_tua,
-                'tahun_masuk' => $request->tahun_masuk,
-                'tanggal_daftar' => date('Y-m-d'),
+            $dataMurid = $request->only([
+                'nama_lengkap',
+                'asal_sekolah',
+                'alamat',
+                'no_hp',
+                'nama_orang_tua',
+                'no_hp_orang_tua',
+                'tahun_masuk',
             ]);
+            
+            $dataMurid['tanggal_daftar'] = $tanggalDaftar;
+            
+            $murid = Murid::create($dataMurid);
             
             // 2. Insert ke tr_kelas
             TransaksiKelas::create([
@@ -98,15 +102,13 @@ class MuridController extends Controller
             ]);
             
             // 3. Insert ke tr_paket
-            $paket = HargaPaket::find($request->id_paket);
-            
             TransaksiPaket::create([
                 'id_periode' => $request->id_periode,
                 'id_murid' => $murid->id_murid,
                 'id_paket' => $request->id_paket,
-                'tanggal_daftar' => date('Y-m-d'),
+                'tanggal_daftar' => $tanggalDaftar,
                 'paket_awal' => 1,
-                'biaya_pendaftaran' => $paket ? $paket->harga : 100000,
+                'biaya_pendaftaran' => 100000,
             ]);
             
             // 4. Tambah jumlah_murid di ms_kelas
@@ -120,7 +122,7 @@ class MuridController extends Controller
             $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
             
             return redirect()->route($role . '.kelola-murid')
-                ->with('success', 'Data murid berhasil ditambahkan beserta kelas dan paket');
+                ->with('success', 'Data murid berhasil ditambahkan');
                 
         } catch (\Exception $e) {
             DB::rollback();
@@ -136,43 +138,9 @@ class MuridController extends Controller
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $murid = Murid::findOrFail($id);
         
-        // Ambil data kelas murid saat ini
-        $kelasSekarang = TransaksiKelas::where('id_murid', $id)
-            ->orderBy('created_at', 'desc')
-            ->first();
-        
-        // Ambil data paket murid saat ini
-        $paketSekarang = TransaksiPaket::where('id_murid', $id)
-            ->orderBy('created_at', 'desc')
-            ->first();
-        
-        // Ambil kelas yang belum penuh + kelas murid saat ini
-        $kelasList = Kelas::where('jumlah_murid', '<', 10)
-            ->orWhere('id_kelas', $kelasSekarang->id_kelas ?? 0)
-            ->orderBy('jenjang', 'asc')
-            ->orderBy('nama_kelas', 'asc')
-            ->get();
-            
-        $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
-        
-        // Ambil periode aktif
-        $tanggalSekarang = date('Y-m-d');
-        $periodeAktif = Periode::where('tanggal_mulai', '<=', $tanggalSekarang)
-            ->where('tanggal_selesai', '>=', $tanggalSekarang)
-            ->first();
-        
-        if (!$periodeAktif) {
-            $periodeAktif = Periode::orderBy('id_periode', 'desc')->first();
-        }
-        
         return view('dashboard.shared.kelola-murid.edit-murid', [
             'role' => $role,
             'murid' => $murid,
-            'kelasList' => $kelasList,
-            'paketList' => $paketList,
-            'periodeAktif' => $periodeAktif,
-            'kelasSekarang' => $kelasSekarang,
-            'paketSekarang' => $paketSekarang,
         ]);
     }
 
@@ -180,91 +148,33 @@ class MuridController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            // Data Murid
             'nama_lengkap' => 'required|string|max:35',
             'asal_sekolah' => 'nullable|string|max:20',
             'alamat' => 'nullable|string|max:100',
             'no_hp' => 'nullable|string|max:15',
             'nama_orang_tua' => 'nullable|string|max:35',
             'no_hp_orang_tua' => 'nullable|string|max:15',
-            'tahun_masuk' => 'nullable|integer|min:1900|max:' . date('Y'),
-            
-            // Data Transaksi (opsional untuk update)
-            'id_kelas' => 'nullable|exists:ms_kelas,id_kelas',
-            'id_paket' => 'nullable|exists:ms_paket,id_paket',
-            'id_periode' => 'nullable|exists:ms_periode,id_periode',
+            'tahun_masuk' => 'nullable|integer|min:2000|max:' . date('Y'),
         ]);
 
-        DB::beginTransaction();
+        $murid = Murid::findOrFail($id);
         
-        try {
-            $murid = Murid::findOrFail($id);
-            
-            // 1. Update data murid
-            $murid->update([
-                'nama_lengkap' => $request->nama_lengkap,
-                'asal_sekolah' => $request->asal_sekolah,
-                'alamat' => $request->alamat,
-                'no_hp' => $request->no_hp,
-                'nama_orang_tua' => $request->nama_orang_tua,
-                'no_hp_orang_tua' => $request->no_hp_orang_tua,
-                'tahun_masuk' => $request->tahun_masuk,
-            ]);
-            
-            // 2. Update kelas jika ada perubahan
-            if ($request->id_kelas) {
-                $kelasLama = TransaksiKelas::where('id_murid', $id)
-                    ->orderBy('created_at', 'desc')
-                    ->first();
-                
-                // Kurangi jumlah_murid di kelas lama
-                if ($kelasLama) {
-                    $kelas = Kelas::find($kelasLama->id_kelas);
-                    if ($kelas && $kelas->jumlah_murid > 0) {
-                        $kelas->decrement('jumlah_murid');
-                    }
-                }
-                
-                // Tambah ke kelas baru
-                TransaksiKelas::create([
-                    'id_kelas' => $request->id_kelas,
-                    'id_murid' => $id,
-                ]);
-                
-                // Tambah jumlah_murid di kelas baru
-                $kelasBaru = Kelas::find($request->id_kelas);
-                if ($kelasBaru) {
-                    $kelasBaru->increment('jumlah_murid');
-                }
-            }
-            
-            // 3. Update paket jika ada perubahan
-            if ($request->id_paket && $request->id_periode) {
-                $paket = HargaPaket::find($request->id_paket);
-                
-                TransaksiPaket::create([
-                    'id_periode' => $request->id_periode,
-                    'id_murid' => $id,
-                    'id_paket' => $request->id_paket,
-                    'tanggal_daftar' => date('Y-m-d'),
-                    'paket_awal' => 0, // 0 = bukan paket pertama (perpanjangan)
-                    'biaya_pendaftaran' => $paket ? $paket->harga : 100000,
-                ]);
-            }
-            
-            DB::commit();
-            
-            $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-            
-            return redirect()->route($role . '.kelola-murid')
-                ->with('success', 'Data murid berhasil diperbarui');
-                
-        } catch (\Exception $e) {
-            DB::rollback();
-            
-            return back()->withInput()
-                ->with('error', 'Gagal mengupdate data: ' . $e->getMessage());
-        }
+        $dataMurid = $request->only([
+            'nama_lengkap',
+            'asal_sekolah',
+            'alamat',
+            'no_hp',
+            'nama_orang_tua',
+            'no_hp_orang_tua',
+            'tahun_masuk',
+        ]);
+        
+        $murid->update($dataMurid);
+
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        
+        return redirect()->route($role . '.kelola-murid')
+            ->with('success', 'Data murid berhasil diperbarui');
     }
 
     // Hapus data
@@ -309,7 +219,7 @@ class MuridController extends Controller
         }
     }
 
-    // Search murid (untuk AJAX)
+    // ✅ TAMBAHAN: Search murid untuk autocomplete
     public function search(Request $request)
     {
         $query = $request->get('q');
@@ -318,28 +228,10 @@ class MuridController extends Controller
             return response()->json([]);
         }
         
-        $murids = Murid::where('nama_lengkap', 'like', "%{$query}%")
+        $murids = Murid::where('nama_lengkap', 'like', '%' . $query . '%')
             ->limit(10)
             ->get(['id_murid', 'nama_lengkap', 'asal_sekolah', 'no_hp']);
         
         return response()->json($murids);
-    }
-    
-    // API untuk get harga paket (untuk AJAX)
-    public function getHargaPaket($id)
-    {
-        $paket = HargaPaket::find($id);
-        
-        if ($paket) {
-            return response()->json([
-                'success' => true,
-                'harga' => $paket->harga
-            ]);
-        }
-        
-        return response()->json([
-            'success' => false,
-            'harga' => 0
-        ]);
     }
 }

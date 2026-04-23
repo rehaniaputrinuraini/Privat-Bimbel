@@ -3,111 +3,88 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class TransaksiUmum extends Model
 {
-    protected $table = 'ms_transaksi';
+    protected $table = 'ms_transaksi';  // tabelnya ms_transaksi
     protected $primaryKey = 'id_transaksi';
-    
-    public $timestamps = true;
-    const CREATED_AT = 'created_at';
-    const UPDATED_AT = 'updated_at';
+    public $timestamps = false; // karena pakai created_at & updated_at manual
     
     protected $fillable = [
+        'id_periode',
+        'id_murid',
+        'id_pegawai',
         'tanggal_bayar',
         'bulan',
         'jenis_pembayaran',
-        'kategori',
-        'status_bayar',
         'keterangan',
+        'debit',
+        'kredit',
+        'created_at',
+        'updated_at'
     ];
-
+    
     protected $casts = [
         'tanggal_bayar' => 'date',
-        'bulan' => 'date',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'debit' => 'integer',
+        'kredit' => 'integer',
+        'bulan' => 'integer'
     ];
-
-    /**
-     * Relasi ke tr_transaksi (one-to-many)
-     */
-    public function transaksiPembayaran()
+    
+    // Relasi ke tabel murid
+    public function murid()
     {
-        return $this->hasMany(Pembayaran::class, 'id_transaksi', 'id_transaksi');
+        return $this->belongsTo(Murid::class, 'id_murid', 'id_murid');
     }
-
-    // ✅ TAMBAHAN: Relasi one-to-one ke Pembayaran (untuk input manual)
-    public function pembayaran()
+    
+    // Relasi ke tabel pegawai
+    public function pegawai()
     {
-        return $this->hasOne(Pembayaran::class, 'id_transaksi', 'id_transaksi');
+        return $this->belongsTo(Pegawai::class, 'id_pegawai', 'id_pegawai');
     }
-
-    /**
-     * Accessor untuk format tanggal bayar
-     */
-    public function getTanggalBayarFormattedAttribute()
+    
+    // Relasi ke tabel periode
+    public function periode()
     {
-        return $this->tanggal_bayar ? date('d/m/Y', strtotime($this->tanggal_bayar)) : '-';
+        return $this->belongsTo(Periode::class, 'id_periode', 'id_periode');
     }
-
-    /**
-     * Accessor untuk badge kategori
-     */
-    public function getBadgeKategoriAttribute()
+    
+    // Accessor untuk format tanggal Indonesia
+    public function getTanggalFormattedAttribute()
     {
-        $badges = [
-            'pemasukan' => '<span class="badge bg-success">Pemasukan</span>',
-            'pengeluaran' => '<span class="badge bg-danger">Pengeluaran</span>',
-            'uang_muka' => '<span class="badge bg-info">Uang Muka</span>',
-            'piutang' => '<span class="badge bg-warning">Piutang</span>',
-        ];
-        
-        return $badges[$this->kategori] ?? '<span class="badge bg-secondary">-</span>';
+        if (!$this->tanggal_bayar) return '-';
+        return date('d/m/Y', strtotime($this->tanggal_bayar));
     }
-
-    /**
-     * Accessor untuk badge status bayar
-     */
-    public function getBadgeStatusAttribute()
+    
+    // Accessor untuk format total pembayaran (debit)
+    public function getTotalPembayaranFormattedAttribute()
     {
-        $badges = [
-            'Sudah' => '<span class="badge bg-success">Sudah</span>',
-            'Belum' => '<span class="badge bg-danger">Belum</span>',
-        ];
-        
-        return $badges[$this->status_bayar] ?? '<span class="badge bg-secondary">-</span>';
+        return 'Rp ' . number_format($this->debit ?? 0, 0, ',', '.');
     }
-
-    /**
-     * Scope untuk filter kategori
-     */
-    public function scopeKategori($query, $kategori)
+    
+    // Accessor untuk nama bulan dibayar
+    public function getBulanDibayarFormattedAttribute()
     {
-        return $query->where('kategori', $kategori);
+        if ($this->bulan) {
+            $bulan = Carbon::create()->month($this->bulan)->translatedFormat('F');
+            $tahun = $this->tanggal_bayar ? Carbon::parse($this->tanggal_bayar)->year : Carbon::now()->year;
+            return $bulan . ' ' . $tahun;
+        }
+        return '-';
     }
-
-    /**
-     * Scope untuk filter status bayar
-     */
-    public function scopeStatusBayar($query, $status)
+    
+    // Cek apakah ini pembayaran pendaftaran
+    public function isPendaftaran()
     {
-        return $query->where('status_bayar', $status);
+        return str_contains($this->keterangan, 'Pendaftaran');
     }
-
-    /**
-     * Scope untuk filter tanggal
-     */
-    public function scopeTanggal($query, $tanggal)
+    
+    // Cek apakah ini pembayaran SPP bulanan
+    public function isSpp()
     {
-        return $query->whereDate('tanggal_bayar', $tanggal);
-    }
-
-    /**
-     * Scope untuk filter bulan
-     */
-    public function scopeBulan($query, $bulan, $tahun = null)
-    {
-        $tahun = $tahun ?? date('Y');
-        return $query->whereMonth('tanggal_bayar', $bulan)
-                     ->whereYear('tanggal_bayar', $tahun);
+        return str_contains($this->keterangan, 'SPP');
     }
 }

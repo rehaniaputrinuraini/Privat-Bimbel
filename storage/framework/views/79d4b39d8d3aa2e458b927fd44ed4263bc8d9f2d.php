@@ -41,7 +41,7 @@
                     // Ambil paket unik dari data yang ditampilkan
                     $paketList = [];
                     foreach($murids as $m) {
-                        $paket = $m->transaksiPaket()->orderBy('created_at', 'desc')->first();
+                        $paket = $m->transaksiPaket()->orderBy('id_paket_murid', 'desc')->first();
                         if($paket && $paket->paket) {
                             $paketList[$paket->paket->tingkat] = $paket->paket->tingkat;
                         }
@@ -114,7 +114,7 @@
                             <?php
                                 // Ambil paket TERBARU berdasarkan created_at
                                 $paketTerbaru = $m->transaksiPaket()
-                                    ->orderBy('created_at', 'desc')
+                                    ->orderBy('id_paket_murid', 'desc')
                                     ->first();
                             ?>
                             <?php echo e($paketTerbaru && $paketTerbaru->paket ? $paketTerbaru->paket->tingkat : '-'); ?>

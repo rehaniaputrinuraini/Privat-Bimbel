@@ -36,7 +36,10 @@ unset($__errorArgs, $__bag); ?>
                         <?php
                             $sisaKursi = 10 - $kelas->jumlah_murid;
                         ?>
-                        <option value="<?php echo e($kelas->id_kelas); ?>" <?php echo e(old('id_kelas') == $kelas->id_kelas ? 'selected' : ''); ?>>
+                        <option value="<?php echo e($kelas->id_kelas); ?>" 
+                                data-jenjang="<?php echo e($kelas->jenjang); ?>" 
+                                data-nama="<?php echo e($kelas->nama_kelas); ?>"
+                                <?php echo e(old('id_kelas') == $kelas->id_kelas ? 'selected' : ''); ?>>
                             <?php echo e($kelas->jenjang); ?> - <?php echo e($kelas->nama_kelas); ?> (<?php echo e($sisaKursi); ?> kursi tersedia)
                         </option>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -151,7 +154,10 @@ unset($__errorArgs, $__bag); ?>
                                 style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                             <option value="">-- Pilih Paket --</option>
                             <?php $__currentLoopData = $paketList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $paket): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <option value="<?php echo e($paket->id_paket); ?>" data-harga="<?php echo e($paket->harga); ?>" <?php echo e(old('id_paket') == $paket->id_paket ? 'selected' : ''); ?>>
+                                <option value="<?php echo e($paket->id_paket); ?>" 
+                                        data-tingkat="<?php echo e($paket->tingkat); ?>" 
+                                        data-harga="<?php echo e($paket->harga); ?>"
+                                        <?php echo e(old('id_paket') == $paket->id_paket ? 'selected' : ''); ?>>
                                     <?php echo e($paket->tingkat); ?> - Rp <?php echo e(number_format($paket->harga, 0, ',', '.')); ?>
 
                                 </option>
@@ -220,7 +226,7 @@ unset($__errorArgs, $__bag); ?>
         <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Data yang Anda masukkan tidak akan disimpan. Yakin ingin keluar?</p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalBatal()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Tidak</button>
-            <a href="#" id="confirmKeluarLink" style="flex: 1; text-decoration: none;">
+            <a href="<?php echo e(route($role . '.kelola-murid')); ?>" id="confirmKeluarLink" style="flex: 1; text-decoration: none;">
                 <button type="button" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Keluar</button>
             </a>
         </div>
@@ -241,35 +247,84 @@ unset($__errorArgs, $__bag); ?>
 </div>
 
 <script>
-    // ========== DYNAMIC FORM HANDLING ==========
+    // ========== MAPPING JENJANG KE KELAS ==========
+    const jenjangKelasMap = {
+        'SD': ['1', '2', '3', '4', '5', '6'],
+        'SMP': ['7', '8', '9'],
+        'SMA': ['10', '11', '12']
+    };
     
-    // Event listener untuk dropdown paket
-    document.getElementById('id_paket').addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const harga = selectedOption.getAttribute('data-harga');
-        
-        if (harga) {
-            document.getElementById('hargaPaket').innerHTML = 'Rp ' + new Intl.NumberFormat('id-ID').format(harga);
-            document.getElementById('deskripsiPaket').innerHTML = selectedOption.text.split(' - ')[0];
-        } else {
-            document.getElementById('hargaPaket').innerHTML = '-';
-            document.getElementById('deskripsiPaket').innerHTML = '';
-        }
-    });
-    
-    // Event listener untuk dropdown kelas
+    // ========== EVENT: PILIH KELAS → AUTO PILIH PAKET ==========
     document.getElementById('id_kelas').addEventListener('change', function() {
-        const selectedText = this.options[this.selectedIndex].text;
+        const selectedOption = this.options[this.selectedIndex];
+        const jenjang = selectedOption.getAttribute('data-jenjang');
         const infoKelas = document.getElementById('infoKelas');
         
         if (this.value) {
-            infoKelas.innerHTML = 'Kelas terpilih: ' + selectedText;
+            infoKelas.innerHTML = 'Kelas terpilih: ' + selectedOption.text;
+            
+            // Auto pilih paket sesuai jenjang
+            if (jenjang) {
+                const paketSelect = document.getElementById('id_paket');
+                for (let i = 0; i < paketSelect.options.length; i++) {
+                    if (paketSelect.options[i].getAttribute('data-tingkat') === jenjang) {
+                        paketSelect.value = paketSelect.options[i].value;
+                        paketSelect.dispatchEvent(new Event('change'));
+                        break;
+                    }
+                }
+            }
         } else {
             infoKelas.innerHTML = 'Pilih kelas yang tersedia';
         }
     });
     
-    // Trigger event saat halaman load
+    // ========== EVENT: PILIH PAKET → FILTER KELAS ==========
+    document.getElementById('id_paket').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const tingkat = selectedOption.getAttribute('data-tingkat');
+        const harga = selectedOption.getAttribute('data-harga');
+        
+        // Update info harga
+        if (harga) {
+            document.getElementById('hargaPaket').innerHTML = 'Rp ' + new Intl.NumberFormat('id-ID').format(harga);
+            document.getElementById('deskripsiPaket').innerHTML = 'Paket ' + tingkat;
+        } else {
+            document.getElementById('hargaPaket').innerHTML = '-';
+            document.getElementById('deskripsiPaket').innerHTML = '';
+        }
+        
+        // Filter kelas berdasarkan tingkat paket
+        const kelasSelect = document.getElementById('id_kelas');
+        
+        if (tingkat) {
+            // Reset semua opsi
+            for (let i = 0; i < kelasSelect.options.length; i++) {
+                const opt = kelasSelect.options[i];
+                if (opt.value === '') {
+                    opt.style.display = ''; // Opsi default selalu tampil
+                    continue;
+                }
+                
+                const jenjangKelas = opt.getAttribute('data-jenjang');
+                opt.style.display = (jenjangKelas === tingkat) ? '' : 'none';
+            }
+            
+            // Reset pilihan kelas jika tidak sesuai
+            const selectedKelas = kelasSelect.options[kelasSelect.selectedIndex];
+            if (selectedKelas && selectedKelas.getAttribute('data-jenjang') !== tingkat) {
+                kelasSelect.value = '';
+                document.getElementById('infoKelas').innerHTML = 'Pilih kelas yang tersedia';
+            }
+        } else {
+            // Tampilkan semua kelas
+            for (let i = 0; i < kelasSelect.options.length; i++) {
+                kelasSelect.options[i].style.display = '';
+            }
+        }
+    });
+    
+    // ========== TRIGGER SAAT HALAMAN LOAD ==========
     document.addEventListener('DOMContentLoaded', function() {
         const paketSelect = document.getElementById('id_paket');
         const kelasSelect = document.getElementById('id_kelas');
@@ -289,7 +344,7 @@ unset($__errorArgs, $__bag); ?>
     const form = document.getElementById('mainForm');
     
     if (form) {
-        const inputs = form.querySelectorAll('input, select, textarea');
+        const inputs = form.querySelectorAll('input:not([type="hidden"]), select, textarea');
         inputs.forEach(input => {
             input.addEventListener('change', () => formChanged = true);
             input.addEventListener('keyup', () => formChanged = true);
@@ -307,7 +362,6 @@ unset($__errorArgs, $__bag); ?>
             };
         } else {
             document.getElementById('modalBatal').style.display = 'flex';
-            document.getElementById('confirmKeluarLink').href = "<?php echo e(route($role . '.kelola-murid')); ?>";
         }
     }
     

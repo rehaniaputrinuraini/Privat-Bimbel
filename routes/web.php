@@ -303,3 +303,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/get-murid-paket/{id}', [PembayaranController::class, 'getMuridPaket'])->name('get.murid.paket');
     Route::get('/cek-status-pembayaran/{id}', [PembayaranController::class, 'cekStatusPembayaran'])->name('cek.status.pembayaran');
 });
+
+// ✅ TAMBAHAN: Route search murid TANPA middleware auth (untuk autocomplete di form)
+Route::get('/search-murid', [MuridController::class, 'search'])->name('search.murid.public');

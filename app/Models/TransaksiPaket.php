@@ -9,19 +9,20 @@ class TransaksiPaket extends Model
     protected $table = 'tr_paket';
     protected $primaryKey = 'id_paket_murid';
     
-    public $timestamps = true;
-    const CREATED_AT = 'created_at';
-    const UPDATED_AT = 'updated_at';
+    // ✅ MATIKAN TIMESTAMPS karena tabel tidak punya created_at & updated_at
+    public $timestamps = false;
 
     protected $fillable = [
         'id_periode',
         'id_murid',
         'id_paket',
+        'tanggal_daftar',
         'paket_awal',
         'biaya_pendaftaran',
     ];
 
     protected $casts = [
+        'tanggal_daftar' => 'date',
         'paket_awal' => 'boolean',
         'biaya_pendaftaran' => 'integer',
     ];

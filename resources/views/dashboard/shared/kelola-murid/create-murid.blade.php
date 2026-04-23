@@ -29,7 +29,10 @@
                         @php
                             $sisaKursi = 10 - $kelas->jumlah_murid;
                         @endphp
-                        <option value="{{ $kelas->id_kelas }}" {{ old('id_kelas') == $kelas->id_kelas ? 'selected' : '' }}>
+                        <option value="{{ $kelas->id_kelas }}" 
+                                data-jenjang="{{ $kelas->jenjang }}" 
+                                data-nama="{{ $kelas->nama_kelas }}"
+                                {{ old('id_kelas') == $kelas->id_kelas ? 'selected' : '' }}>
                             {{ $kelas->jenjang }} - {{ $kelas->nama_kelas }} ({{ $sisaKursi }} kursi tersedia)
                         </option>
                     @endforeach
@@ -102,7 +105,10 @@
                                 style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                             <option value="">-- Pilih Paket --</option>
                             @foreach($paketList as $paket)
-                                <option value="{{ $paket->id_paket }}" data-harga="{{ $paket->harga }}" {{ old('id_paket') == $paket->id_paket ? 'selected' : '' }}>
+                                <option value="{{ $paket->id_paket }}" 
+                                        data-tingkat="{{ $paket->tingkat }}" 
+                                        data-harga="{{ $paket->harga }}"
+                                        {{ old('id_paket') == $paket->id_paket ? 'selected' : '' }}>
                                     {{ $paket->tingkat }} - Rp {{ number_format($paket->harga, 0, ',', '.') }}
                                 </option>
                             @endforeach
@@ -111,7 +117,7 @@
                         @error('id_paket') <small style="color: red;">{{ $message }}</small> @enderror
                     </div>
 
-                    {{-- INFO HARGA PAKET (DINAMIS) --}}
+                    {{-- INFO HARGA PAKET --}}
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Detail Paket</label>
                         <div style="padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6;">
@@ -156,7 +162,7 @@
         <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;">Data yang Anda masukkan tidak akan disimpan. Yakin ingin keluar?</p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalBatal()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Tidak</button>
-            <a href="#" id="confirmKeluarLink" style="flex: 1; text-decoration: none;">
+            <a href="{{ route($role . '.kelola-murid') }}" id="confirmKeluarLink" style="flex: 1; text-decoration: none;">
                 <button type="button" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Keluar</button>
             </a>
         </div>
@@ -177,35 +183,84 @@
 </div>
 
 <script>
-    // ========== DYNAMIC FORM HANDLING ==========
+    // ========== MAPPING JENJANG KE KELAS ==========
+    const jenjangKelasMap = {
+        'SD': ['1', '2', '3', '4', '5', '6'],
+        'SMP': ['7', '8', '9'],
+        'SMA': ['10', '11', '12']
+    };
     
-    // Event listener untuk dropdown paket
-    document.getElementById('id_paket').addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const harga = selectedOption.getAttribute('data-harga');
-        
-        if (harga) {
-            document.getElementById('hargaPaket').innerHTML = 'Rp ' + new Intl.NumberFormat('id-ID').format(harga);
-            document.getElementById('deskripsiPaket').innerHTML = selectedOption.text.split(' - ')[0];
-        } else {
-            document.getElementById('hargaPaket').innerHTML = '-';
-            document.getElementById('deskripsiPaket').innerHTML = '';
-        }
-    });
-    
-    // Event listener untuk dropdown kelas
+    // ========== EVENT: PILIH KELAS → AUTO PILIH PAKET ==========
     document.getElementById('id_kelas').addEventListener('change', function() {
-        const selectedText = this.options[this.selectedIndex].text;
+        const selectedOption = this.options[this.selectedIndex];
+        const jenjang = selectedOption.getAttribute('data-jenjang');
         const infoKelas = document.getElementById('infoKelas');
         
         if (this.value) {
-            infoKelas.innerHTML = 'Kelas terpilih: ' + selectedText;
+            infoKelas.innerHTML = 'Kelas terpilih: ' + selectedOption.text;
+            
+            // Auto pilih paket sesuai jenjang
+            if (jenjang) {
+                const paketSelect = document.getElementById('id_paket');
+                for (let i = 0; i < paketSelect.options.length; i++) {
+                    if (paketSelect.options[i].getAttribute('data-tingkat') === jenjang) {
+                        paketSelect.value = paketSelect.options[i].value;
+                        paketSelect.dispatchEvent(new Event('change'));
+                        break;
+                    }
+                }
+            }
         } else {
             infoKelas.innerHTML = 'Pilih kelas yang tersedia';
         }
     });
     
-    // Trigger event saat halaman load
+    // ========== EVENT: PILIH PAKET → FILTER KELAS ==========
+    document.getElementById('id_paket').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const tingkat = selectedOption.getAttribute('data-tingkat');
+        const harga = selectedOption.getAttribute('data-harga');
+        
+        // Update info harga
+        if (harga) {
+            document.getElementById('hargaPaket').innerHTML = 'Rp ' + new Intl.NumberFormat('id-ID').format(harga);
+            document.getElementById('deskripsiPaket').innerHTML = 'Paket ' + tingkat;
+        } else {
+            document.getElementById('hargaPaket').innerHTML = '-';
+            document.getElementById('deskripsiPaket').innerHTML = '';
+        }
+        
+        // Filter kelas berdasarkan tingkat paket
+        const kelasSelect = document.getElementById('id_kelas');
+        
+        if (tingkat) {
+            // Reset semua opsi
+            for (let i = 0; i < kelasSelect.options.length; i++) {
+                const opt = kelasSelect.options[i];
+                if (opt.value === '') {
+                    opt.style.display = ''; // Opsi default selalu tampil
+                    continue;
+                }
+                
+                const jenjangKelas = opt.getAttribute('data-jenjang');
+                opt.style.display = (jenjangKelas === tingkat) ? '' : 'none';
+            }
+            
+            // Reset pilihan kelas jika tidak sesuai
+            const selectedKelas = kelasSelect.options[kelasSelect.selectedIndex];
+            if (selectedKelas && selectedKelas.getAttribute('data-jenjang') !== tingkat) {
+                kelasSelect.value = '';
+                document.getElementById('infoKelas').innerHTML = 'Pilih kelas yang tersedia';
+            }
+        } else {
+            // Tampilkan semua kelas
+            for (let i = 0; i < kelasSelect.options.length; i++) {
+                kelasSelect.options[i].style.display = '';
+            }
+        }
+    });
+    
+    // ========== TRIGGER SAAT HALAMAN LOAD ==========
     document.addEventListener('DOMContentLoaded', function() {
         const paketSelect = document.getElementById('id_paket');
         const kelasSelect = document.getElementById('id_kelas');
@@ -225,7 +280,7 @@
     const form = document.getElementById('mainForm');
     
     if (form) {
-        const inputs = form.querySelectorAll('input, select, textarea');
+        const inputs = form.querySelectorAll('input:not([type="hidden"]), select, textarea');
         inputs.forEach(input => {
             input.addEventListener('change', () => formChanged = true);
             input.addEventListener('keyup', () => formChanged = true);
@@ -243,7 +298,6 @@
             };
         } else {
             document.getElementById('modalBatal').style.display = 'flex';
-            document.getElementById('confirmKeluarLink').href = "{{ route($role . '.kelola-murid') }}";
         }
     }
     
