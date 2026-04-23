@@ -10,6 +10,7 @@ use App\Models\Ruang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class PresensiController extends Controller
@@ -28,6 +29,15 @@ class PresensiController extends Controller
         return Pegawai::where('jenis_pegawai', 'tentor')
             ->where('id_pegawai', $user->id_pegawai)
             ->first();
+    }
+
+    /**
+     * Generate ID Mengajar baru (manual)
+     */
+    private function generateIdMengajar()
+    {
+        $lastId = Mengajar::max('id_mengajar') ?? 0;
+        return $lastId + 1;
     }
 
     public function index()
@@ -72,6 +82,7 @@ class PresensiController extends Controller
                 ], 404);
             }
             
+            // Cek apakah sudah presensi masuk hari ini
             $existing = Mengajar::where('id_pegawai', $tentor->id_pegawai)
                 ->whereDate('tanggal', today())
                 ->whereNull('jam_selesai')
@@ -84,7 +95,9 @@ class PresensiController extends Controller
                 ], 400);
             }
             
-            Mengajar::create([
+            // ✅ INSERT DENGAN MANUAL ID
+            DB::table('ms_mengajar')->insert([
+                'id_mengajar' => $this->generateIdMengajar(),
                 'id_pegawai' => $tentor->id_pegawai,
                 'tanggal' => today(),
                 'jam_mulai' => Carbon::now('Asia/Jakarta')->format('H:i:s'),
@@ -95,6 +108,8 @@ class PresensiController extends Controller
                 'murid_hadir' => null,
                 'keterangan' => null,
                 'bukti_mengajar' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
             
             return response()->json([
@@ -143,15 +158,20 @@ class PresensiController extends Controller
                 ], 400);
             }
             
+            // Upload foto
             $fotoPath = $request->file('foto')->store('bukti-mengajar', 'public');
             
-            $presensi->update([
-                'id_kelas' => $request->id_kelas,
-                'id_ruang' => $request->id_ruang,
-                'murid_hadir' => $request->murid_hadir,
-                'keterangan' => $request->keterangan,
-                'bukti_mengajar' => $fotoPath,
-            ]);
+            // ✅ UPDATE DATA
+            DB::table('ms_mengajar')
+                ->where('id_mengajar', $presensi->id_mengajar)
+                ->update([
+                    'id_kelas' => $request->id_kelas,
+                    'id_ruang' => $request->id_ruang,
+                    'murid_hadir' => $request->murid_hadir,
+                    'keterangan' => $request->keterangan,
+                    'bukti_mengajar' => $fotoPath,
+                    'updated_at' => now(),
+                ]);
             
             return response()->json([
                 'success' => true, 
@@ -201,10 +221,14 @@ class PresensiController extends Controller
             $jamMulai = Carbon::parse($presensi->jam_mulai);
             $lamaMengajar = $jamMulai->diffInMinutes($jamKeluar);
             
-            $presensi->update([
-                'jam_selesai' => $jamKeluar->format('H:i:s'),
-                'lama_mengajar' => $lamaMengajar,
-            ]);
+            // ✅ UPDATE JAM KELUAR
+            DB::table('ms_mengajar')
+                ->where('id_mengajar', $presensi->id_mengajar)
+                ->update([
+                    'jam_selesai' => $jamKeluar->format('H:i:s'),
+                    'lama_mengajar' => $lamaMengajar,
+                    'updated_at' => now(),
+                ]);
             
             $jam = floor($lamaMengajar / 60);
             $menit = $lamaMengajar % 60;

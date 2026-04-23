@@ -13,7 +13,7 @@
             
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Ruang <span style="color: red;">*</span></label>
-                <input type="text" name="nama_ruang" value="<?php echo e(old('nama_ruang')); ?>" placeholder="Contoh: R1, R2, Lab" required maxlength="2"
+                <input type="text" name="nama_ruang" value="<?php echo e(old('nama_ruang')); ?>" placeholder="Masukkan nama ruang" required maxlength="2"
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                 <?php $__errorArgs = ['nama_ruang'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');

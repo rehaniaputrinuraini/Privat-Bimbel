@@ -76,7 +76,7 @@
             </div>
             
             <div class="hero-image" data-aos="fade-left" data-aos-duration="1000">
-                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar1.jpg')); ?>" alt="Aktivitas Belajar"> </div>
+                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar_utama.jpeg')); ?>" alt="Aktivitas Belajar"> </div>
         </div>
     </section>
 
@@ -314,12 +314,12 @@
             <h2 class="section-title" data-aos="fade-up">Galeri Kegiatan</h2>
             <p class="section-subtitle" data-aos="fade-up">Dokumentasi kegiatan belajar mengajar kami</p>
             <div class="galeri-grid">
-                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar_1.jpg')); ?>" alt="Galeri 1" data-aos="zoom-in"> 
-                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar2.jpg')); ?>" alt="Galeri 2" data-aos="zoom-in" data-aos-delay="100">
-                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar3.jpg')); ?>" alt="Galeri 3" data-aos="zoom-in" data-aos-delay="200">
-                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar1.jpg')); ?>" alt="Galeri 4" data-aos="zoom-in">
-                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar2.jpg')); ?>" alt="Galeri 5" data-aos="zoom-in" data-aos-delay="100">
-                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar3.jpg')); ?>" alt="Galeri 6" data-aos="zoom-in" data-aos-delay="200">
+                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar_1.jpeg')); ?>" alt="Galeri 1" data-aos="zoom-in"> 
+                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar_7.jpeg')); ?>" alt="Galeri 2" data-aos="zoom-in" data-aos-delay="100">
+                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar_3.jpeg')); ?>" alt="Galeri 3" data-aos="zoom-in" data-aos-delay="200">
+                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar_4.jpeg')); ?>" alt="Galeri 4" data-aos="zoom-in">
+                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar_5.jpeg')); ?>" alt="Galeri 5" data-aos="zoom-in" data-aos-delay="100">
+                <img src="<?php echo e(asset('images/companyprofile/galeri/gambar_6.jpeg')); ?>" alt="Galeri 6" data-aos="zoom-in" data-aos-delay="200">
             </div>
         </div>
     </section>

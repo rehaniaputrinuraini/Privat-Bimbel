@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\Pegawai;
 use App\Models\Mengajar;
 use App\Models\Murid;
@@ -155,119 +156,102 @@ class DashboardController extends Controller
         ]);
     }
     
-    // FUNGSI PRIVATE UNTUK AMBIL DATA KEUANGAN
     private function getDataKeuangan()
     {
-        // 1. PEMASUKAN = Pendaftaran + Pemasukan Manual
-        $pemasukanPendaftaran = Pembayaran::whereNotNull('paket_awal')
-            ->whereNull('paket_selanjutnya')
-            ->sum('paket_awal');
+        // =============================================
+        // 1. PEMASUKAN = Total debit dari ms_transaksi
+        // =============================================
+        $totalPemasukan = DB::table('ms_transaksi')
+            ->where('debit', '>', 0)
+            ->sum('debit');
         
-        $pemasukanManual = Pembayaran::whereHas('transaksiUmum', function($q) {
-            $q->where('kategori', 'pemasukan');
-        })->sum('total_pembayaran');
+        // =============================================
+        // 2. PENGELUARAN = kredit (ms_transaksi) + jumlah (tr_transaksi)
+        // =============================================
+        $pengeluaranKredit = DB::table('ms_transaksi')
+            ->where('kredit', '>', 0)
+            ->sum('kredit');
         
-        $totalPemasukan = $pemasukanPendaftaran + $pemasukanManual;
+        $pengeluaranGaji = DB::table('tr_transaksi')
+            ->sum('jumlah');
         
-        // 2. PENGELUARAN = Dari transaksiUmum kategori pengeluaran
-        $totalPengeluaran = Pembayaran::whereHas('transaksiUmum', function($q) {
-            $q->where('kategori', 'pengeluaran');
-        })->sum('total_pembayaran');
+        $totalPengeluaran = $pengeluaranKredit + $pengeluaranGaji;
         
+        // =============================================
         // 3. LABA BERSIH
+        // =============================================
         $labaBersih = $totalPemasukan - $totalPengeluaran;
         
-        // 4. RIWAYAT KEUANGAN TERAKHIR (10 data)
+        // =============================================
+        // 4. RIWAYAT KEUANGAN (Gabungan)
+        // =============================================
         $riwayat = collect();
         
-        // Pemasukan Pendaftaran
-        $pendaftaran = Pembayaran::whereNotNull('paket_awal')
-            ->whereNull('paket_selanjutnya')
-            ->with('murid')
-            ->orderBy('tanggal', 'desc')
-            ->limit(5)
+        // Riwayat dari ms_transaksi (Pemasukan & Pengeluaran Umum)
+        $msTransaksi = DB::table('ms_transaksi')
+            ->leftJoin('ms_murid', 'ms_transaksi.id_murid', '=', 'ms_murid.id_murid')
+            ->select(
+                'ms_transaksi.tanggal_bayar as tanggal',
+                'ms_murid.nama_lengkap as nama_murid',
+                'ms_transaksi.keterangan',
+                'ms_transaksi.debit',
+                'ms_transaksi.kredit'
+            )
+            ->orderBy('ms_transaksi.tanggal_bayar', 'desc')
+            ->limit(10)
             ->get();
         
-        foreach ($pendaftaran as $item) {
-            $riwayat->push((object)[
-                'tanggal' => $item->tanggal,
-                'rincian' => 'Pendaftaran - ' . ($item->murid->nama_lengkap ?? 'Tidak Diketahui'),
-                'jumlah' => $item->paket_awal ?? 100000,
-                'kategori' => 'pemasukan',
-            ]);
+        foreach ($msTransaksi as $item) {
+            if ($item->debit > 0) {
+                $rincian = $item->keterangan ?? 'Pemasukan';
+                if ($item->nama_murid) {
+                    $rincian .= ' - ' . $item->nama_murid;
+                }
+                $riwayat->push((object)[
+                    'tanggal' => $item->tanggal,
+                    'rincian' => $rincian,
+                    'jumlah' => $item->debit,
+                    'kategori' => 'pemasukan',
+                ]);
+            }
+            if ($item->kredit > 0) {
+                $rincian = $item->keterangan ?? 'Pengeluaran';
+                if ($item->nama_murid) {
+                    $rincian .= ' - ' . $item->nama_murid;
+                }
+                $riwayat->push((object)[
+                    'tanggal' => $item->tanggal,
+                    'rincian' => $rincian,
+                    'jumlah' => $item->kredit,
+                    'kategori' => 'pengeluaran',
+                ]);
+            }
         }
         
-        // Pemasukan Manual
-        $manualMasuk = Pembayaran::whereHas('transaksiUmum', function($q) {
-            $q->where('kategori', 'pemasukan');
-        })->with('transaksiUmum')
-          ->orderBy('tanggal', 'desc')
-          ->limit(5)
-          ->get();
+        // Riwayat dari tr_transaksi (Gaji Tutor)
+        $trTransaksi = DB::table('tr_transaksi')
+            ->join('ms_transaksi', 'tr_transaksi.id_transaksi', '=', 'ms_transaksi.id_transaksi')
+            ->leftJoin('ms_pegawai', 'ms_transaksi.id_pegawai', '=', 'ms_pegawai.id_pegawai')
+            ->select(
+                'ms_transaksi.tanggal_bayar as tanggal',
+                'ms_pegawai.nama_lengkap as nama_pegawai',
+                'tr_transaksi.keterangan',
+                'tr_transaksi.jumlah'
+            )
+            ->orderBy('ms_transaksi.tanggal_bayar', 'desc')
+            ->limit(10)
+            ->get();
         
-        foreach ($manualMasuk as $item) {
+        foreach ($trTransaksi as $item) {
+            $rincian = $item->keterangan ?? 'Gaji Tutor';
+            if ($item->nama_pegawai) {
+                $rincian .= ' - ' . $item->nama_pegawai;
+            }
             $riwayat->push((object)[
-                'tanggal' => $item->tanggal,
-                'rincian' => $item->transaksiUmum->keterangan ?? 'Pemasukan Manual',
-                'jumlah' => $item->total_pembayaran ?? 0,
-                'kategori' => 'pemasukan',
-            ]);
-        }
-        
-        // Pengeluaran
-        $pengeluaran = Pembayaran::whereHas('transaksiUmum', function($q) {
-            $q->where('kategori', 'pengeluaran');
-        })->with('transaksiUmum')
-          ->orderBy('tanggal', 'desc')
-          ->limit(5)
-          ->get();
-        
-        foreach ($pengeluaran as $item) {
-            $riwayat->push((object)[
-                'tanggal' => $item->tanggal,
-                'rincian' => $item->transaksiUmum->keterangan ?? 'Pengeluaran',
-                'jumlah' => $item->total_pembayaran ?? 0,
+                'tanggal' => $item->tanggal ?? now()->format('Y-m-d'),
+                'rincian' => $rincian,
+                'jumlah' => $item->jumlah,
                 'kategori' => 'pengeluaran',
-            ]);
-        }
-        
-        // Piutang (Tunggakan)
-        $piutang = Pembayaran::whereNotNull('paket_selanjutnya')
-            ->where('status_tagihan', 'tunggak')
-            ->with('murid')
-            ->orderBy('tanggal', 'desc')
-            ->limit(5)
-            ->get();
-        
-        foreach ($piutang as $item) {
-            $bulanPeriode = $item->bulan_dibayar 
-                ? Carbon::create()->month($item->bulan_dibayar)->translatedFormat('F') . ' ' . $item->tahun_dibayar
-                : '-';
-            $riwayat->push((object)[
-                'tanggal' => $item->tanggal,
-                'rincian' => 'Piutang - ' . ($item->murid->nama_lengkap ?? 'Tidak Diketahui') . ' (' . $bulanPeriode . ')',
-                'jumlah' => $item->total_piutang ?? 0,
-                'kategori' => 'piutang',
-            ]);
-        }
-        
-        // Uang Muka
-        $uangMuka = Pembayaran::whereNotNull('paket_selanjutnya')
-            ->where('status_tagihan', 'uang_muka')
-            ->with('murid')
-            ->orderBy('tanggal', 'desc')
-            ->limit(5)
-            ->get();
-        
-        foreach ($uangMuka as $item) {
-            $bulanPeriode = $item->bulan_dibayar 
-                ? Carbon::create()->month($item->bulan_dibayar)->translatedFormat('F') . ' ' . $item->tahun_dibayar
-                : '-';
-            $riwayat->push((object)[
-                'tanggal' => $item->tanggal,
-                'rincian' => 'Uang Muka - ' . ($item->murid->nama_lengkap ?? 'Tidak Diketahui') . ' (' . $bulanPeriode . ')',
-                'jumlah' => $item->total_uang_muka ?? 0,
-                'kategori' => 'uang_muka',
             ]);
         }
         

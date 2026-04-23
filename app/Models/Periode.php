@@ -9,19 +9,18 @@ class Periode extends Model
     protected $table = 'ms_periode';
     protected $primaryKey = 'id_periode';
     
-    public $timestamps = true;
-    const CREATED_AT = 'created_at';
-    const UPDATED_AT = 'updated_at';
+    public $incrementing = true;
+    public $timestamps = false; // Karena tabel ms_periode TIDAK punya created_at & updated_at
 
     protected $fillable = [
         'tahun_periode',
-        'tahun_mulai',
-        'tahun_selesai',
+        'tanggal_mulai',
+        'tanggal_selesai',
     ];
 
     protected $casts = [
-        'tahun_mulai' => 'integer',
-        'tahun_selesai' => 'integer',
+        'tanggal_mulai' => 'date',
+        'tanggal_selesai' => 'date',
     ];
 
     /**
@@ -33,13 +32,13 @@ class Periode extends Model
     }
 
     /**
-     * Scope untuk periode aktif (default: tahun sekarang)
+     * Scope untuk periode aktif (berdasarkan tanggal sekarang)
      */
     public function scopeAktif($query)
     {
-        $tahunSekarang = date('Y');
-        return $query->where('tahun_mulai', '<=', $tahunSekarang)
-                     ->where('tahun_selesai', '>=', $tahunSekarang);
+        $sekarang = now();
+        return $query->where('tanggal_mulai', '<=', $sekarang)
+                     ->where('tanggal_selesai', '>=', $sekarang);
     }
 
     /**
@@ -47,8 +46,8 @@ class Periode extends Model
      */
     public function getStatusAttribute()
     {
-        $tahunSekarang = date('Y');
-        if ($this->tahun_mulai <= $tahunSekarang && $this->tahun_selesai >= $tahunSekarang) {
+        $sekarang = now();
+        if ($this->tanggal_mulai <= $sekarang && $this->tanggal_selesai >= $sekarang) {
             return '<span class="badge bg-success">Aktif</span>';
         }
         return '<span class="badge bg-secondary">Tidak Aktif</span>';

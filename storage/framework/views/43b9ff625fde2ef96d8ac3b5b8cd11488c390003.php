@@ -306,6 +306,11 @@
         </div>
     </div>
 
+    
+    <button style="width: 100%; background: #6F2DA8; color: white; border: none; padding: 18px; border-radius: 15px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px; margin-bottom: 20px;" onclick="window.print()">
+        <i class="fas fa-file-pdf" style="font-size: 20px;"></i> EXPORT PDF
+    </button>
+
 </div>
 
 

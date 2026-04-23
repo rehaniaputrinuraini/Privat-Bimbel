@@ -32,7 +32,7 @@ class MasterDataController extends Controller
         $ruang = Ruang::orderBy('nama_ruang', 'asc')->get();
         
         // Data untuk Tab 4: Periode
-        $periode = Periode::orderBy('tahun_mulai', 'desc')->get();
+        $periode = Periode::orderBy('tanggal_mulai', 'desc')->get();
         
         return view('dashboard.shared.master-data.master-data', 
             compact('role', 'paket', 'kelas', 'ruang', 'periode'));
@@ -66,7 +66,10 @@ class MasterDataController extends Controller
             return redirect()->back()->withErrors(['tingkat' => 'Tingkat sudah ada.'])->withInput();
         }
 
-        HargaPaket::create(['tingkat' => $request->tingkat, 'harga' => $request->harga]);
+        HargaPaket::create([
+            'tingkat' => $request->tingkat, 
+            'harga' => $request->harga
+        ]);
 
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         return redirect()->route($role . '.master-data')->with('success_paket', 'Harga paket berhasil ditambahkan');
@@ -105,7 +108,7 @@ class MasterDataController extends Controller
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $jenjangOptions = $this->jenjangOptions;
-        $periodeList = Periode::orderBy('tahun_mulai', 'desc')->get();
+        $periodeList = Periode::orderBy('tanggal_mulai', 'desc')->get();
         return view('dashboard.shared.master-data.kelas.create', compact('role', 'jenjangOptions', 'periodeList'));
     }
 
@@ -133,7 +136,7 @@ class MasterDataController extends Controller
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $kelas = Kelas::findOrFail($id);
         $jenjangOptions = $this->jenjangOptions;
-        $periodeList = Periode::orderBy('tahun_mulai', 'desc')->get();
+        $periodeList = Periode::orderBy('tanggal_mulai', 'desc')->get();
         return view('dashboard.shared.master-data.kelas.edit', compact('role', 'kelas', 'jenjangOptions', 'periodeList'));
     }
 
@@ -215,7 +218,7 @@ class MasterDataController extends Controller
     }
 
     // =============================================
-    // CRUD PERIODE
+    // CRUD PERIODE (SUDAH DIPERBAIKI)
     // =============================================
     
     public function createPeriode(Request $request)
@@ -227,16 +230,15 @@ class MasterDataController extends Controller
     public function storePeriode(Request $request)
     {
         $request->validate([
-            'tahun_mulai' => 'required|integer|min:2020|max:2030',
-            'tahun_selesai' => 'required|integer|min:2020|max:2030|gt:tahun_mulai',
+            'tahun_periode' => 'required|string|max:9',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after:tanggal_mulai',
         ]);
 
-        $tahun_periode = $request->tahun_mulai . '/' . $request->tahun_selesai;
-
         Periode::create([
-            'tahun_periode' => $tahun_periode,
-            'tahun_mulai' => $request->tahun_mulai,
-            'tahun_selesai' => $request->tahun_selesai,
+            'tahun_periode' => $request->tahun_periode,
+            'tanggal_mulai' => $request->tanggal_mulai,
+            'tanggal_selesai' => $request->tanggal_selesai,
         ]);
 
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
@@ -254,17 +256,16 @@ class MasterDataController extends Controller
     public function updatePeriode(Request $request, $id)
     {
         $request->validate([
-            'tahun_mulai' => 'required|integer|min:2020|max:2030',
-            'tahun_selesai' => 'required|integer|min:2020|max:2030|gt:tahun_mulai',
+            'tahun_periode' => 'required|string|max:9',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after:tanggal_mulai',
         ]);
 
         $periode = Periode::findOrFail($id);
-        $tahun_periode = $request->tahun_mulai . '/' . $request->tahun_selesai;
-
         $periode->update([
-            'tahun_periode' => $tahun_periode,
-            'tahun_mulai' => $request->tahun_mulai,
-            'tahun_selesai' => $request->tahun_selesai,
+            'tahun_periode' => $request->tahun_periode,
+            'tanggal_mulai' => $request->tanggal_mulai,
+            'tanggal_selesai' => $request->tanggal_selesai,
         ]);
 
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';

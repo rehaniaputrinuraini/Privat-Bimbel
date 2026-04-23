@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Pembayaran;
 use App\Models\TransaksiUmum;
-use Illuminate\Support\Facades\DB;
+use App\Models\Murid;
+use App\Models\HargaPaket;
 use Carbon\Carbon;
 
 class LaporanKeuanganController extends Controller
@@ -18,124 +18,108 @@ class LaporanKeuanganController extends Controller
         $filterBulan = $request->bulan;
         $filterTahun = $request->tahun;
         
-        // ========== DATA DARI tr_transaksi ==========
+        // ========== QUERY DASAR ==========
+        $query = TransaksiUmum::with('murid');
         
-        // 1. PEMASUKAN PENDaftaran
-        $queryPemasukanPendaftaran = Pembayaran::whereNotNull('paket_awal')
-            ->whereNull('paket_selanjutnya');
-        
-        // 2. PEMASUKAN MANUAL (dari ms_transaksi via transaksiUmum)
-        $queryPemasukanManual = Pembayaran::whereHas('transaksiUmum', function($q) {
-            $q->where('kategori', 'pemasukan');
-        });
-        
-        // 3. PENGELUARAN MANUAL
-        $queryPengeluaran = Pembayaran::whereHas('transaksiUmum', function($q) {
-            $q->where('kategori', 'pengeluaran');
-        });
-        
-        // 4. PIUTANG (Tunggakan)
-        $queryPiutang = Pembayaran::whereNotNull('paket_selanjutnya')
-            ->where('status_tagihan', 'tunggak');
-        
-        // 5. UANG MUKA (dari pembayaran bulanan)
-        $queryUangMuka = Pembayaran::whereNotNull('paket_selanjutnya')
-            ->where('status_tagihan', 'uang_muka');
-        
-        // Filter Bulan & Tahun
         if ($filterBulan) {
-            $queryPemasukanPendaftaran->whereMonth('tanggal', $filterBulan);
-            $queryPemasukanManual->whereMonth('tanggal', $filterBulan);
-            $queryPengeluaran->whereMonth('tanggal', $filterBulan);
-            $queryPiutang->whereMonth('tanggal', $filterBulan);
-            $queryUangMuka->whereMonth('tanggal', $filterBulan);
+            $query->whereMonth('tanggal_bayar', $filterBulan);
         }
         
         if ($filterTahun) {
-            $queryPemasukanPendaftaran->whereYear('tanggal', $filterTahun);
-            $queryPemasukanManual->whereYear('tanggal', $filterTahun);
-            $queryPengeluaran->whereYear('tanggal', $filterTahun);
-            $queryPiutang->whereYear('tanggal', $filterTahun);
-            $queryUangMuka->whereYear('tanggal', $filterTahun);
+            $query->whereYear('tanggal_bayar', $filterTahun);
         }
         
-        // ========== GABUNGKAN DATA PEMASUKAN ==========
-        $pemasukan = collect();
-        
-        // A. Pemasukan dari Pendaftaran
-        $pendaftaranMurid = $queryPemasukanPendaftaran->with('murid')->orderBy('tanggal', 'desc')->get();
-        foreach ($pendaftaranMurid as $item) {
-            $pemasukan->push((object)[
-                'id' => 'P' . $item->id_pembayaran,
-                'tanggal' => $item->tanggal,
-                'rincian' => 'Pendaftaran - ' . ($item->murid->nama_lengkap ?? 'Tidak Diketahui'),
-                'jenis_pembayaran' => '-',
-                'jumlah' => $item->paket_awal ?? 100000,
-                'sumber' => 'pendaftaran',
-            ]);
-        }
-        
-        // B. Pemasukan Manual
-        $pemasukanManual = $queryPemasukanManual->with('transaksiUmum')->orderBy('tanggal', 'desc')->get();
-        foreach ($pemasukanManual as $item) {
-            $pemasukan->push((object)[
-                'id' => 'M' . $item->id_pembayaran,
-                'tanggal' => $item->tanggal,
-                'rincian' => $item->transaksiUmum->keterangan ?? 'Pemasukan Manual',
-                'jenis_pembayaran' => $item->transaksiUmum->jenis_pembayaran ?? '-',
-                'jumlah' => $item->total_pembayaran ?? 0,
-                'sumber' => 'manual',
-            ]);
-        }
-        
-        $pemasukan = $pemasukan->sortByDesc('tanggal')->values();
-        
-        // ========== PENGELUARAN ==========
-        $pengeluaran = $queryPengeluaran->with('transaksiUmum')->orderBy('tanggal', 'desc')->get()->map(function($item) {
+        // ========== PEMASUKAN (SEMUA DEBIT) ==========
+        $pemasukan = (clone $query)->orderBy('tanggal_bayar', 'desc')->get()->map(function($item) {
+            $isPendaftaran = str_contains($item->keterangan, 'Pendaftaran');
+            $isManual = !$isPendaftaran && !str_contains($item->keterangan, 'SPP');
+            
             return (object)[
-                'id' => 'K' . $item->id_pembayaran,
-                'tanggal' => $item->tanggal,
-                'rincian' => $item->transaksiUmum->keterangan ?? 'Pengeluaran',
-                'jenis_pembayaran' => $item->transaksiUmum->jenis_pembayaran ?? '-',
-                'jumlah' => $item->total_pembayaran ?? 0,
+                'id' => ($isPendaftaran ? 'P' : 'M') . $item->id_transaksi,
+                'tanggal' => $item->tanggal_bayar,
+                'rincian' => $item->keterangan ?? 'Pemasukan',
+                'jenis_pembayaran' => $item->jenis_pembayaran ?? '-',
+                'jumlah' => $item->debit ?? 0,
+                'sumber' => $isPendaftaran ? 'pendaftaran' : ($isManual ? 'manual' : 'pembayaran'),
+            ];
+        })->filter(function($item) {
+            return $item->jumlah > 0;
+        })->values();
+        
+        // ========== PENGELUARAN (SEMUA KREDIT) ==========
+        $pengeluaran = (clone $query)->where('kredit', '>', 0)->orderBy('tanggal_bayar', 'desc')->get()->map(function($item) {
+            return (object)[
+                'id' => 'K' . $item->id_transaksi,
+                'tanggal' => $item->tanggal_bayar,
+                'rincian' => $item->keterangan ?? 'Pengeluaran',
+                'jenis_pembayaran' => $item->jenis_pembayaran ?? '-',
+                'jumlah' => $item->kredit ?? 0,
             ];
         });
         
-        // ========== PIUTANG ==========
-        $piutang = $queryPiutang->with('murid')->orderBy('tanggal', 'desc')->get()->map(function($item) {
-            $bulanPeriode = $item->bulan_dibayar 
-                ? Carbon::create()->month($item->bulan_dibayar)->translatedFormat('F') . ' ' . $item->tahun_dibayar
-                : '-';
-            return (object)[
-                'id' => 'T' . $item->id_pembayaran,
-                'tanggal' => $item->tanggal,
-                'nama_murid' => $item->murid->nama_lengkap ?? 'Tidak Diketahui',
-                'bulan_periode' => $bulanPeriode,
-                'jumlah' => $item->total_piutang ?? 0,
-                'sumber' => 'pembayaran',
-            ];
-        });
+        // ========== PIUTANG & UANG MUKA (DARI SPP) ==========
+        $piutang = collect();
+        $uang_muka = collect();
         
-        // ========== UANG MUKA ==========
-        $uang_muka = $queryUangMuka->with('murid')->orderBy('tanggal', 'desc')->get()->map(function($item) {
-            $bulanPeriode = $item->bulan_dibayar 
-                ? Carbon::create()->month($item->bulan_dibayar)->translatedFormat('F') . ' ' . $item->tahun_dibayar
-                : '-';
-            return (object)[
-                'id' => 'W' . $item->id_pembayaran,
-                'tanggal' => $item->tanggal,
-                'nama_murid' => $item->murid->nama_lengkap ?? 'Tidak Diketahui',
-                'bulan_periode' => $bulanPeriode,
-                'jumlah' => $item->total_uang_muka ?? 0, // ✅ AMBIL DARI total_uang_muka
-                'sumber' => 'pembayaran',
-            ];
-        });
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+        
+        $sppTransactions = TransaksiUmum::with('murid')
+            ->where('keterangan', 'like', '%SPP%')
+            ->get();
+        
+        foreach ($sppTransactions as $item) {
+            // Extract bulan dan tahun dari keterangan
+            // Format: "Pembayaran SPP May 2026 - Nama Murid"
+            preg_match('/SPP\s+(\w+)\s+(\d+)/', $item->keterangan, $matches);
+            
+            if (isset($matches[1]) && isset($matches[2])) {
+                try {
+                    $bulanDibayar = Carbon::parse($matches[1])->month;
+                    $tahunDibayar = (int)$matches[2];
+                    
+                    $data = (object)[
+                        'id' => ($bulanDibayar > $currentMonth ? 'W' : 'T') . $item->id_transaksi,
+                        'tanggal' => $item->tanggal_bayar,
+                        'nama_murid' => $item->murid->nama_lengkap ?? 'Tidak Diketahui',
+                        'bulan_periode' => $matches[1] . ' ' . $matches[2],
+                        'jumlah' => $item->debit ?? 0,
+                        'sumber' => 'pembayaran',
+                    ];
+                    
+                    // Bulan depan = Uang Muka
+                    if ($tahunDibayar > $currentYear || 
+                        ($tahunDibayar == $currentYear && $bulanDibayar > $currentMonth)) {
+                        $uang_muka->push($data);
+                    }
+                    // Bulan lalu = Piutang (jika belum lunas)
+                    elseif ($tahunDibayar < $currentYear || 
+                        ($tahunDibayar == $currentYear && $bulanDibayar < $currentMonth)) {
+                        // Cek apakah sudah lunas (bandingkan dengan harga paket)
+                        $murid = $item->murid;
+                        if ($murid) {
+                            $paketAktif = \App\Models\TransaksiPaket::where('id_murid', $murid->id_murid)->first();
+                            if ($paketAktif) {
+                                $hargaPaket = HargaPaket::find($paketAktif->id_paket);
+                                if ($hargaPaket && $item->debit < $hargaPaket->harga) {
+                                    $data->jumlah = $hargaPaket->harga - $item->debit;
+                                    $piutang->push($data);
+                                }
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // Skip jika parsing gagal
+                    continue;
+                }
+            }
+        }
         
         // ========== HITUNG TOTAL ==========
         $totalPemasukan = $pemasukan->sum('jumlah');
         $totalPengeluaran = $pengeluaran->sum('jumlah');
         $totalPiutang = $piutang->sum('jumlah');
-        $totalUangMuka = $uang_muka->sum('jumlah'); // ✅ TOTAL DARI UANG MUKA
+        $totalUangMuka = $uang_muka->sum('jumlah');
         $totalPemasukanKas = $totalPemasukan + $totalPiutang + $totalUangMuka;
         $saldoKas = $totalPemasukanKas - $totalPengeluaran;
         
@@ -147,15 +131,9 @@ class LaporanKeuanganController extends Controller
         ];
         
         // ========== TAHUN LIST ==========
-        $tahunPembayaran = Pembayaran::selectRaw('YEAR(tanggal) as tahun')
+        $tahunList = TransaksiUmum::selectRaw('YEAR(tanggal_bayar) as tahun')
             ->distinct()
-            ->whereNotNull('tanggal');
-            
-        $tahunTransaksiUmum = TransaksiUmum::selectRaw('YEAR(tanggal_bayar) as tahun')
-            ->distinct()
-            ->whereNotNull('tanggal_bayar');
-            
-        $tahunList = $tahunPembayaran->union($tahunTransaksiUmum)
+            ->whereNotNull('tanggal_bayar')
             ->orderBy('tahun', 'desc')
             ->pluck('tahun');
         
@@ -201,41 +179,21 @@ class LaporanKeuanganController extends Controller
 
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
-        DB::beginTransaction();
+        // Pemasukan = debit, Pengeluaran = kredit
+        $debit = $request->kategori == 'pemasukan' ? $request->jumlah : 0;
+        $kredit = $request->kategori == 'pengeluaran' ? $request->jumlah : 0;
         
-        try {
-            // 1. Insert ke ms_transaksi (DETAIL)
-            $idTransaksi = DB::table('ms_transaksi')->insertGetId([
-                'tanggal_bayar' => $request->tanggal,
-                'kategori' => $request->kategori,
-                'jenis_pembayaran' => $request->jenis_pembayaran,
-                'keterangan' => $request->rincian,
-                'status_bayar' => 'Sudah',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-            
-            // 2. Insert ke tr_transaksi (TOTAL)
-            Pembayaran::create([
-                'id_transaksi' => $idTransaksi,
-                'tanggal' => $request->tanggal,
-                'paket_awal' => null,
-                'paket_selanjutnya' => null,
-                'total_pembayaran' => $request->jumlah,
-                'status_tagihan' => 'lunas',
-            ]);
-            
-            DB::commit();
-            
-            return redirect()->route($role . '.laporan-keuangan')
-                ->with('success', 'Data berhasil ditambahkan');
-                
-        } catch (\Exception $e) {
-            DB::rollback();
-            
-            return back()->withInput()
-                ->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
-        }
+        TransaksiUmum::create([
+            'tanggal_bayar' => $request->tanggal,
+            'bulan' => $request->tanggal,
+            'jenis_pembayaran' => $request->jenis_pembayaran,
+            'keterangan' => $request->rincian,
+            'debit' => $debit,
+            'kredit' => $kredit,
+        ]);
+        
+        return redirect()->route($role . '.laporan-keuangan')
+            ->with('success', 'Data berhasil ditambahkan');
     }
 
     // ========== DESTROY ==========
@@ -246,17 +204,7 @@ class LaporanKeuanganController extends Controller
         $prefix = substr($id, 0, 1);
         $realId = substr($id, 1);
         
-        if (in_array($prefix, ['M', 'K'])) {
-            // Hapus dari tr_transaksi dan ms_transaksi
-            $pembayaran = Pembayaran::find($realId);
-            if ($pembayaran) {
-                DB::table('ms_transaksi')->where('id_transaksi', $pembayaran->id_transaksi)->delete();
-                $pembayaran->delete();
-            }
-        } elseif (in_array($prefix, ['P', 'T', 'W'])) {
-            // Hapus dari tr_transaksi (pembayaran murid)
-            Pembayaran::where('id_pembayaran', $realId)->delete();
-        }
+        TransaksiUmum::where('id_transaksi', $realId)->delete();
         
         return redirect()->route($role . '.laporan-keuangan')
             ->with('success', 'Data berhasil dihapus');

@@ -18,26 +18,30 @@
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px;">
             </div>
 
-            {{-- Tahun Mulai --}}
+            {{-- Tahun Periode --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tahun Mulai <span style="color: red;">*</span></label>
-                <select name="tahun_mulai" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB;">
-                    @for($i = date('Y') - 2; $i <= date('Y') + 5; $i++)
-                        <option value="{{ $i }}" {{ old('tahun_mulai', $periode->tahun_mulai) == $i ? 'selected' : '' }}>{{ $i }}</option>
-                    @endfor
-                </select>
-                @error('tahun_mulai') <small style="color: red;">{{ $message }}</small> @enderror
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tahun Periode <span style="color: red;">*</span></label>
+                <input type="text" name="tahun_periode" value="{{ old('tahun_periode', $periode->tahun_periode) }}" 
+                       placeholder="Contoh: 2024/2025" maxlength="9" required
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none;">
+                <small style="color: #6B7280;">Format: YYYY/YYYY (contoh: 2024/2025)</small>
+                @error('tahun_periode') <br><small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
-            {{-- Tahun Selesai --}}
+            {{-- Tanggal Mulai --}}
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tahun Selesai <span style="color: red;">*</span></label>
-                <select name="tahun_selesai" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB;">
-                    @for($i = date('Y') - 2; $i <= date('Y') + 5; $i++)
-                        <option value="{{ $i }}" {{ old('tahun_selesai', $periode->tahun_selesai) == $i ? 'selected' : '' }}>{{ $i }}</option>
-                    @endfor
-                </select>
-                @error('tahun_selesai') <small style="color: red;">{{ $message }}</small> @enderror
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tanggal Mulai <span style="color: red;">*</span></label>
+                <input type="date" name="tanggal_mulai" value="{{ old('tanggal_mulai', $periode->tanggal_mulai) }}" required
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none;">
+                @error('tanggal_mulai') <small style="color: red;">{{ $message }}</small> @enderror
+            </div>
+
+            {{-- Tanggal Selesai --}}
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Tanggal Selesai <span style="color: red;">*</span></label>
+                <input type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai', $periode->tanggal_selesai) }}" required
+                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none;">
+                @error('tanggal_selesai') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
             {{-- Tombol --}}

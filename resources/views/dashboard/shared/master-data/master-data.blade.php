@@ -299,46 +299,46 @@
                                 <th style="padding: 15px; text-align: center;">No</th>
                                 <th style="padding: 15px; text-align: center;">ID</th>
                                 <th style="padding: 15px; text-align: center;">Tahun Periode</th>
-                                <th style="padding: 15px; text-align: center;">Tahun Mulai</th>
-                                <th style="padding: 15px; text-align: center;">Tahun Selesai</th>
+                                <th style="padding: 15px; text-align: center;">Tanggal Mulai</th>
+                                <th style="padding: 15px; text-align: center;">Tanggal Selesai</th>
                                 <th style="padding: 15px; text-align: center;">Status</th>
                                 <th style="padding: 15px; text-align: center;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="tableBodyPeriode" style="color: #374151;">
-                            @forelse($periode as $index => $item)
-                            <tr style="border-bottom: 1px solid #F3F4F6;">
-                                <td style="padding: 15px; text-align: center;">{{ $loop->iteration }}</td>
-                                <td style="padding: 15px; text-align: center;">PR{{ str_pad($item->id_periode, 4, '0', STR_PAD_LEFT) }}</td>
-                                <td style="padding: 15px; text-align: center;">{{ $item->tahun_periode }}</td>
-                                <td style="padding: 15px; text-align: center;">{{ $item->tahun_mulai }}</td>
-                                <td style="padding: 15px; text-align: center;">{{ $item->tahun_selesai }}</td>
-                                <td style="padding: 15px; text-align: center;">
-                                    @php
-                                        $tahunSekarang = date('Y');
-                                        $aktif = ($item->tahun_mulai <= $tahunSekarang && $item->tahun_selesai >= $tahunSekarang);
-                                    @endphp
-                                    @if($aktif)
-                                        <span style="background: #D1FAE5; color: #065F46; padding: 4px 10px; border-radius: 20px; font-size: 12px;">Aktif</span>
-                                    @else
-                                        <span style="background: #F3F4F6; color: #6B7280; padding: 4px 10px; border-radius: 20px; font-size: 12px;">Nonaktif</span>
-                                    @endif
-                                </td>
-                                <td style="padding: 15px; text-align: center;">
-                                    <div style="display: flex; gap: 8px; justify-content: center;">
-                                        <a href="{{ route($role . '.periode.edit', $item->id_periode) }}" style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none;">
-                                            <i class="far fa-edit"></i> Edit
-                                        </a>
-                                        <button type="button" onclick="bukaModalHapusPeriode('{{ $item->id_periode }}', '{{ $item->tahun_periode }}')" style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
-                                            <i class="fas fa-trash"></i> Hapus
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr><td colspan="7" style="padding: 40px; text-align: center; color: #9CA3AF;">Belum ada data periode.</td></tr>
-                            @endforelse
-                        </tbody>
+                        @forelse($periode as $index => $item)
+                        <tr style="border-bottom: 1px solid #F3F4F6;">
+                            <td style="padding: 15px; text-align: center;">{{ $loop->iteration }}</td>
+                            <td style="padding: 15px; text-align: center;">PR{{ str_pad($item->id_periode, 4, '0', STR_PAD_LEFT) }}</td>
+                            <td style="padding: 15px; text-align: center;">{{ $item->tahun_periode }}</td>
+                            <td style="padding: 15px; text-align: center;">{{ $item->tanggal_mulai ? date('d/m/Y', strtotime($item->tanggal_mulai)) : '-' }}</td>
+                            <td style="padding: 15px; text-align: center;">{{ $item->tanggal_selesai ? date('d/m/Y', strtotime($item->tanggal_selesai)) : '-' }}</td>
+                            <td style="padding: 15px; text-align: center;">
+                                @php
+                                    $sekarang = date('Y-m-d');
+                                    $aktif = ($item->tanggal_mulai <= $sekarang && $item->tanggal_selesai >= $sekarang);
+                                @endphp
+                                @if($aktif)
+                                    <span style="background: #D1FAE5; color: #065F46; padding: 4px 10px; border-radius: 20px; font-size: 12px;">Aktif</span>
+                                @else
+                                    <span style="background: #F3F4F6; color: #6B7280; padding: 4px 10px; border-radius: 20px; font-size: 12px;">Nonaktif</span>
+                                @endif
+                            </td>
+                            <td style="padding: 15px; text-align: center;">
+                                <div style="display: flex; gap: 8px; justify-content: center;">
+                                    <a href="{{ route($role . '.periode.edit', $item->id_periode) }}" style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none;">
+                                        <i class="far fa-edit"></i> Edit
+                                    </a>
+                                    <button type="button" onclick="bukaModalHapusPeriode('{{ $item->id_periode }}', '{{ $item->tahun_periode }}')" style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
+                                        <i class="fas fa-trash"></i> Hapus
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="7" style="padding: 40px; text-align: center; color: #9CA3AF;">Belum ada data periode.</td></tr>
+                        @endforelse
+                    </tbody>
                     </table>
                 </div>
 

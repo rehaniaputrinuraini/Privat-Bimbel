@@ -21,7 +21,7 @@
             
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Nama Kelas <span style="color: red;">*</span></label>
-                <input type="text" name="nama_kelas" value="<?php echo e(old('nama_kelas', $kelas->nama_kelas)); ?>" placeholder="Contoh: 7A, 8B, 9C" required
+                <input type="text" name="nama_kelas" value="<?php echo e(old('nama_kelas', $kelas->nama_kelas)); ?>" placeholder="Masukkan nama kelas" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
                 <?php $__errorArgs = ['nama_kelas'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
