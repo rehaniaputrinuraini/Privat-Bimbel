@@ -57,12 +57,37 @@
                         <img src="<?php echo e(asset('images/dashboard/icons/icon_kelolamurid.png')); ?>" class="sidebar-icon"> Kelola Murid
                     </a>
                 </li>
-                <li>
-                    
-                    <a href="<?php echo e(route('admin.master-data')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('admin.master-data*') ? 'nav-active' : ''); ?>">
+
+                
+                <li class="has-submenu">
+                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle <?php echo e(request()->is('*master-data*') ? 'nav-active' : ''); ?>" onclick="toggleSubmenu(this)">
                         <img src="<?php echo e(asset('images/dashboard/icons/icon_hargapaket.png')); ?>" class="sidebar-icon"> Master Data
+                        <i class="fas fa-chevron-down submenu-arrow" style="float: right; margin-top: 3px;"></i>
                     </a>
+                    <ul class="submenu-list" style="display: <?php echo e(request()->is('*master-data*') ? 'block' : 'none'); ?>; list-style: none; padding-left: 30px; background: rgba(0,0,0,0.03);">
+                        <li>
+                            <a href="<?php echo e(route('admin.master-data.harga-paket')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('admin.master-data.harga-paket*') ? 'nav-active' : ''); ?>" style="font-size: 13px; padding: 8px 15px;">
+                                <i class="far fa-circle" style="font-size: 8px; margin-right: 8px;"></i> Harga Paket
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo e(route('admin.master-data.kelas')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('admin.master-data.kelas*') ? 'nav-active' : ''); ?>" style="font-size: 13px; padding: 8px 15px;">
+                                <i class="far fa-circle" style="font-size: 8px; margin-right: 8px;"></i> Kelas
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo e(route('admin.master-data.ruang')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('admin.master-data.ruang*') ? 'nav-active' : ''); ?>" style="font-size: 13px; padding: 8px 15px;">
+                                <i class="far fa-circle" style="font-size: 8px; margin-right: 8px;"></i> Ruang
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo e(route('admin.master-data.periode')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('admin.master-data.periode*') ? 'nav-active' : ''); ?>" style="font-size: 13px; padding: 8px 15px;">
+                                <i class="far fa-circle" style="font-size: 8px; margin-right: 8px;"></i> Periode
+                            </a>
+                        </li>
+                    </ul>
                 </li>
+
                 <li>
                     <a href="<?php echo e(route('admin.kelola-presensi')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('admin.kelola-presensi*') ? 'nav-active' : ''); ?>">
                         <img src="<?php echo e(asset('images/dashboard/icons/icon_riwayatpresensi.png')); ?>" class="sidebar-icon"> Riwayat Presensi
@@ -107,12 +132,37 @@
                         <img src="<?php echo e(asset('images/dashboard/icons/icon_kelolamurid.png')); ?>" class="sidebar-icon"> Kelola Murid
                     </a>
                 </li>
-                <li>
-                    
-                    <a href="<?php echo e(route('superadmin.master-data')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.master-data*') ? 'nav-active' : ''); ?>">
+
+                
+                <li class="has-submenu">
+                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle <?php echo e(request()->is('*master-data*') ? 'nav-active' : ''); ?>" onclick="toggleSubmenu(this)">
                         <img src="<?php echo e(asset('images/dashboard/icons/icon_hargapaket.png')); ?>" class="sidebar-icon"> Master Data
+                        <i class="fas fa-chevron-down submenu-arrow" style="float: right; margin-top: 3px;"></i>
                     </a>
+                    <ul class="submenu-list" style="display: <?php echo e(request()->is('*master-data*') ? 'block' : 'none'); ?>; list-style: none; padding-left: 30px; background: rgba(0,0,0,0.03);">
+                        <li>
+                            <a href="<?php echo e(route('superadmin.master-data.harga-paket')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.master-data.harga-paket*') ? 'nav-active' : ''); ?>" style="font-size: 13px; padding: 8px 15px;">
+                                <i class="far fa-circle" style="font-size: 8px; margin-right: 8px;"></i> Harga Paket
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo e(route('superadmin.master-data.kelas')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.master-data.kelas*') ? 'nav-active' : ''); ?>" style="font-size: 13px; padding: 8px 15px;">
+                                <i class="far fa-circle" style="font-size: 8px; margin-right: 8px;"></i> Kelas
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo e(route('superadmin.master-data.ruang')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.master-data.ruang*') ? 'nav-active' : ''); ?>" style="font-size: 13px; padding: 8px 15px;">
+                                <i class="far fa-circle" style="font-size: 8px; margin-right: 8px;"></i> Ruang
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo e(route('superadmin.master-data.periode')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.master-data.periode*') ? 'nav-active' : ''); ?>" style="font-size: 13px; padding: 8px 15px;">
+                                <i class="far fa-circle" style="font-size: 8px; margin-right: 8px;"></i> Periode
+                            </a>
+                        </li>
+                    </ul>
                 </li>
+
                <li>
                     <a href="<?php echo e(route('superadmin.kelola-presensi')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.kelola-presensi*') ? 'nav-active' : ''); ?>">
                        <img src="<?php echo e(asset('images/dashboard/icons/icon_riwayatpresensi.png')); ?>" class="sidebar-icon"> Riwayat Presensi
@@ -146,6 +196,22 @@
     </div>
 
 </aside>
+
+
+<script>
+    function toggleSubmenu(element) {
+        const submenu = element.nextElementSibling;
+        const arrow = element.querySelector('.submenu-arrow');
+        
+        if (submenu.style.display === 'none' || submenu.style.display === '') {
+            submenu.style.display = 'block';
+            arrow.style.transform = 'rotate(180deg)';
+        } else {
+            submenu.style.display = 'none';
+            arrow.style.transform = 'rotate(0deg)';
+        }
+    }
+</script>
 
 
 <script>

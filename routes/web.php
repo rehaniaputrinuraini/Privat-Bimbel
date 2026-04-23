@@ -31,12 +31,10 @@ Route::get('/companyprofile', function () {
 // ========== 2. AUTHENTICATION (Tanpa Login) ==========
 Route::middleware(['guest'])->group(function () {
     
-    // Halaman Login
     Route::get('/login', function () {
         return view('auth.login');
     })->name('login');
     
-    // Proses Login
     Route::post('/login', function (Request $request) {
         $request->validate([
             'login' => 'required|string',
@@ -55,7 +53,6 @@ Route::middleware(['guest'])->group(function () {
         return back()->withErrors(['login' => 'Email/Username atau password salah.'])->withInput();
     })->name('login.post');
     
-    // Halaman Register
     Route::get('/register', function () {
         return view('auth.register');
     })->name('register');
@@ -97,7 +94,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
     Route::get('/tentor/dashboard', [DashboardController::class, 'tentor'])->name('tentor.dashboard');
     
-    // ========== PROFIL (Semua Role) ==========
+    // ========== PROFIL ==========
     Route::get('/profil', function () {
         return view('dashboard.shared.profil.index');
     })->name('profile.index');
@@ -129,36 +126,39 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/kelola-murid/update/{id}', [MuridController::class, 'update'])->name('murid.update');
         Route::delete('/kelola-murid/destroy/{id}', [MuridController::class, 'destroy'])->name('murid.destroy');
         
-        // MASTER DATA (Halaman Utama dengan 3 Tab)
-        Route::get('/master-data', [MasterDataController::class, 'index'])->name('master-data');
+        // ========== MASTER DATA (SUB MENU) ==========
         
-        // HARGA PAKET (CRUD Routes)
-        Route::get('/harga-paket/create', [MasterDataController::class, 'createPaket'])->name('harga-paket.create');
-        Route::post('/harga-paket/store', [MasterDataController::class, 'storePaket'])->name('harga-paket.store');
-        Route::get('/harga-paket/edit/{id}', [MasterDataController::class, 'editPaket'])->name('harga-paket.edit');
-        Route::put('/harga-paket/update/{id}', [MasterDataController::class, 'updatePaket'])->name('harga-paket.update');
-        Route::delete('/harga-paket/destroy/{id}', [MasterDataController::class, 'destroyPaket'])->name('harga-paket.destroy');
+        // Master Data - Harga Paket
+        Route::get('/master-data/harga-paket', [MasterDataController::class, 'indexPaket'])->name('master-data.harga-paket');
+        Route::get('/master-data/harga-paket/create', [MasterDataController::class, 'createPaket'])->name('master-data.harga-paket.create');
+        Route::post('/master-data/harga-paket/store', [MasterDataController::class, 'storePaket'])->name('master-data.harga-paket.store');
+        Route::get('/master-data/harga-paket/edit/{id}', [MasterDataController::class, 'editPaket'])->name('master-data.harga-paket.edit');
+        Route::put('/master-data/harga-paket/update/{id}', [MasterDataController::class, 'updatePaket'])->name('master-data.harga-paket.update');
+        Route::delete('/master-data/harga-paket/destroy/{id}', [MasterDataController::class, 'destroyPaket'])->name('master-data.harga-paket.destroy');
         
-        // KELAS (CRUD Routes)
-        Route::get('/kelas/create', [MasterDataController::class, 'createKelas'])->name('kelas.create');
-        Route::post('/kelas/store', [MasterDataController::class, 'storeKelas'])->name('kelas.store');
-        Route::get('/kelas/edit/{id}', [MasterDataController::class, 'editKelas'])->name('kelas.edit');
-        Route::put('/kelas/update/{id}', [MasterDataController::class, 'updateKelas'])->name('kelas.update');
-        Route::delete('/kelas/destroy/{id}', [MasterDataController::class, 'destroyKelas'])->name('kelas.destroy');
+        // Master Data - Kelas
+        Route::get('/master-data/kelas', [MasterDataController::class, 'indexKelas'])->name('master-data.kelas');
+        Route::get('/master-data/kelas/create', [MasterDataController::class, 'createKelas'])->name('master-data.kelas.create');
+        Route::post('/master-data/kelas/store', [MasterDataController::class, 'storeKelas'])->name('master-data.kelas.store');
+        Route::get('/master-data/kelas/edit/{id}', [MasterDataController::class, 'editKelas'])->name('master-data.kelas.edit');
+        Route::put('/master-data/kelas/update/{id}', [MasterDataController::class, 'updateKelas'])->name('master-data.kelas.update');
+        Route::delete('/master-data/kelas/destroy/{id}', [MasterDataController::class, 'destroyKelas'])->name('master-data.kelas.destroy');
         
-        // RUANG (CRUD Routes)
-        Route::get('/ruang/create', [MasterDataController::class, 'createRuang'])->name('ruang.create');
-        Route::post('/ruang/store', [MasterDataController::class, 'storeRuang'])->name('ruang.store');
-        Route::get('/ruang/edit/{id}', [MasterDataController::class, 'editRuang'])->name('ruang.edit');
-        Route::put('/ruang/update/{id}', [MasterDataController::class, 'updateRuang'])->name('ruang.update');
-        Route::delete('/ruang/destroy/{id}', [MasterDataController::class, 'destroyRuang'])->name('ruang.destroy');
+        // Master Data - Ruang
+        Route::get('/master-data/ruang', [MasterDataController::class, 'indexRuang'])->name('master-data.ruang');
+        Route::get('/master-data/ruang/create', [MasterDataController::class, 'createRuang'])->name('master-data.ruang.create');
+        Route::post('/master-data/ruang/store', [MasterDataController::class, 'storeRuang'])->name('master-data.ruang.store');
+        Route::get('/master-data/ruang/edit/{id}', [MasterDataController::class, 'editRuang'])->name('master-data.ruang.edit');
+        Route::put('/master-data/ruang/update/{id}', [MasterDataController::class, 'updateRuang'])->name('master-data.ruang.update');
+        Route::delete('/master-data/ruang/destroy/{id}', [MasterDataController::class, 'destroyRuang'])->name('master-data.ruang.destroy');
         
-        // PERIODE (CRUD Routes)
-        Route::get('/periode/create', [MasterDataController::class, 'createPeriode'])->name('periode.create');
-        Route::post('/periode/store', [MasterDataController::class, 'storePeriode'])->name('periode.store');
-        Route::get('/periode/edit/{id}', [MasterDataController::class, 'editPeriode'])->name('periode.edit');
-        Route::put('/periode/update/{id}', [MasterDataController::class, 'updatePeriode'])->name('periode.update');
-        Route::delete('/periode/destroy/{id}', [MasterDataController::class, 'destroyPeriode'])->name('periode.destroy');
+        // Master Data - Periode
+        Route::get('/master-data/periode', [MasterDataController::class, 'indexPeriode'])->name('master-data.periode');
+        Route::get('/master-data/periode/create', [MasterDataController::class, 'createPeriode'])->name('master-data.periode.create');
+        Route::post('/master-data/periode/store', [MasterDataController::class, 'storePeriode'])->name('master-data.periode.store');
+        Route::get('/master-data/periode/edit/{id}', [MasterDataController::class, 'editPeriode'])->name('master-data.periode.edit');
+        Route::put('/master-data/periode/update/{id}', [MasterDataController::class, 'updatePeriode'])->name('master-data.periode.update');
+        Route::delete('/master-data/periode/destroy/{id}', [MasterDataController::class, 'destroyPeriode'])->name('master-data.periode.destroy');
 
         // PEMBAYARAN
         Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran');
@@ -214,38 +214,41 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/kelola-murid/store', [MuridController::class, 'store'])->name('murid.store');
         Route::get('/kelola-murid/edit/{id}', [MuridController::class, 'edit'])->name('murid.edit');
         Route::put('/kelola-murid/update/{id}', [MuridController::class, 'update'])->name('murid.update');
-        Route::delete('/kelola-murid/destroy/{id}', [MuridController::class, '69'])->name('murid.destroy');
+        Route::delete('/kelola-murid/destroy/{id}', [MuridController::class, 'destroy'])->name('murid.destroy');
         
-        // MASTER DATA (Halaman Utama dengan 3 Tab)
-        Route::get('/master-data', [MasterDataController::class, 'index'])->name('master-data');
+        // ========== MASTER DATA (SUB MENU) ==========
         
-        // HARGA PAKET (CRUD Routes)
-        Route::get('/harga-paket/create', [MasterDataController::class, 'createPaket'])->name('harga-paket.create');
-        Route::post('/harga-paket/store', [MasterDataController::class, 'storePaket'])->name('harga-paket.store');
-        Route::get('/harga-paket/edit/{id}', [MasterDataController::class, 'editPaket'])->name('harga-paket.edit');
-        Route::put('/harga-paket/update/{id}', [MasterDataController::class, 'updatePaket'])->name('harga-paket.update');
-        Route::delete('/harga-paket/destroy/{id}', [MasterDataController::class, 'destroyPaket'])->name('harga-paket.destroy');
+        // Master Data - Harga Paket
+        Route::get('/master-data/harga-paket', [MasterDataController::class, 'indexPaket'])->name('master-data.harga-paket');
+        Route::get('/master-data/harga-paket/create', [MasterDataController::class, 'createPaket'])->name('master-data.harga-paket.create');
+        Route::post('/master-data/harga-paket/store', [MasterDataController::class, 'storePaket'])->name('master-data.harga-paket.store');
+        Route::get('/master-data/harga-paket/edit/{id}', [MasterDataController::class, 'editPaket'])->name('master-data.harga-paket.edit');
+        Route::put('/master-data/harga-paket/update/{id}', [MasterDataController::class, 'updatePaket'])->name('master-data.harga-paket.update');
+        Route::delete('/master-data/harga-paket/destroy/{id}', [MasterDataController::class, 'destroyPaket'])->name('master-data.harga-paket.destroy');
         
-        // KELAS (CRUD Routes)
-        Route::get('/kelas/create', [MasterDataController::class, 'createKelas'])->name('kelas.create');
-        Route::post('/kelas/store', [MasterDataController::class, 'storeKelas'])->name('kelas.store');
-        Route::get('/kelas/edit/{id}', [MasterDataController::class, 'editKelas'])->name('kelas.edit');
-        Route::put('/kelas/update/{id}', [MasterDataController::class, 'updateKelas'])->name('kelas.update');
-        Route::delete('/kelas/destroy/{id}', [MasterDataController::class, 'destroyKelas'])->name('kelas.destroy');
+        // Master Data - Kelas
+        Route::get('/master-data/kelas', [MasterDataController::class, 'indexKelas'])->name('master-data.kelas');
+        Route::get('/master-data/kelas/create', [MasterDataController::class, 'createKelas'])->name('master-data.kelas.create');
+        Route::post('/master-data/kelas/store', [MasterDataController::class, 'storeKelas'])->name('master-data.kelas.store');
+        Route::get('/master-data/kelas/edit/{id}', [MasterDataController::class, 'editKelas'])->name('master-data.kelas.edit');
+        Route::put('/master-data/kelas/update/{id}', [MasterDataController::class, 'updateKelas'])->name('master-data.kelas.update');
+        Route::delete('/master-data/kelas/destroy/{id}', [MasterDataController::class, 'destroyKelas'])->name('master-data.kelas.destroy');
         
-        // RUANG (CRUD Routes)
-        Route::get('/ruang/create', [MasterDataController::class, 'createRuang'])->name('ruang.create');
-        Route::post('/ruang/store', [MasterDataController::class, 'storeRuang'])->name('ruang.store');
-        Route::get('/ruang/edit/{id}', [MasterDataController::class, 'editRuang'])->name('ruang.edit');
-        Route::put('/ruang/update/{id}', [MasterDataController::class, '70'])->name('ruang.update');
-        Route::delete('/ruang/destroy/{id}', [MasterDataController::class, 'destroyRuang'])->name('ruang.destroy');
+        // Master Data - Ruang
+        Route::get('/master-data/ruang', [MasterDataController::class, 'indexRuang'])->name('master-data.ruang');
+        Route::get('/master-data/ruang/create', [MasterDataController::class, 'createRuang'])->name('master-data.ruang.create');
+        Route::post('/master-data/ruang/store', [MasterDataController::class, 'storeRuang'])->name('master-data.ruang.store');
+        Route::get('/master-data/ruang/edit/{id}', [MasterDataController::class, 'editRuang'])->name('master-data.ruang.edit');
+        Route::put('/master-data/ruang/update/{id}', [MasterDataController::class, 'updateRuang'])->name('master-data.ruang.update');
+        Route::delete('/master-data/ruang/destroy/{id}', [MasterDataController::class, 'destroyRuang'])->name('master-data.ruang.destroy');
         
-        // PERIODE (CRUD Routes)
-        Route::get('/periode/create', [MasterDataController::class, 'createPeriode'])->name('periode.create');
-        Route::post('/periode/store', [MasterDataController::class, 'storePeriode'])->name('periode.store');
-        Route::get('/periode/edit/{id}', [MasterDataController::class, 'editPeriode'])->name('periode.edit');
-        Route::put('/periode/update/{id}', [MasterDataController::class, 'updatePeriode'])->name('periode.update');
-        Route::delete('/periode/destroy/{id}', [MasterDataController::class, 'destroyPeriode'])->name('periode.destroy');
+        // Master Data - Periode
+        Route::get('/master-data/periode', [MasterDataController::class, 'indexPeriode'])->name('master-data.periode');
+        Route::get('/master-data/periode/create', [MasterDataController::class, 'createPeriode'])->name('master-data.periode.create');
+        Route::post('/master-data/periode/store', [MasterDataController::class, 'storePeriode'])->name('master-data.periode.store');
+        Route::get('/master-data/periode/edit/{id}', [MasterDataController::class, 'editPeriode'])->name('master-data.periode.edit');
+        Route::put('/master-data/periode/update/{id}', [MasterDataController::class, 'updatePeriode'])->name('master-data.periode.update');
+        Route::delete('/master-data/periode/destroy/{id}', [MasterDataController::class, 'destroyPeriode'])->name('master-data.periode.destroy');
         
         // PEMBAYARAN
         Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran');

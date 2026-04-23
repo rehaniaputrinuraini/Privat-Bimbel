@@ -15,27 +15,35 @@ class MasterDataController extends Controller
     private $jenjangOptions = ['SD', 'SMP', 'SMA'];
 
     // =============================================
-    // HALAMAN UTAMA MASTER DATA (4 TAB)
+    // HALAMAN INDEX PER MODUL (SUB MENU)
     // =============================================
-    public function index(Request $request)
+    
+    public function indexPaket(Request $request)
     {
-        // ✅ DETEKSI ROLE DARI URL
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        
-        // Data untuk Tab 1: Harga Paket
         $paket = HargaPaket::orderBy('id_paket', 'asc')->get();
-        
-        // Data untuk Tab 2: Kelas
+        return view('dashboard.shared.master-data.harga-paket.index', compact('role', 'paket'));
+    }
+
+    public function indexKelas(Request $request)
+    {
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $kelas = Kelas::orderBy('nama_kelas', 'asc')->get();
-        
-        // Data untuk Tab 3: Ruang
+        return view('dashboard.shared.master-data.kelas.index', compact('role', 'kelas'));
+    }
+
+    public function indexRuang(Request $request)
+    {
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $ruang = Ruang::orderBy('nama_ruang', 'asc')->get();
-        
-        // Data untuk Tab 4: Periode
+        return view('dashboard.shared.master-data.ruang.index', compact('role', 'ruang'));
+    }
+
+    public function indexPeriode(Request $request)
+    {
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $periode = Periode::orderBy('tanggal_mulai', 'desc')->get();
-        
-        return view('dashboard.shared.master-data.master-data', 
-            compact('role', 'paket', 'kelas', 'ruang', 'periode'));
+        return view('dashboard.shared.master-data.periode.index', compact('role', 'periode'));
     }
 
     // =============================================
@@ -72,7 +80,7 @@ class MasterDataController extends Controller
         ]);
 
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data')->with('success_paket', 'Harga paket berhasil ditambahkan');
+        return redirect()->route($role . '.master-data.harga-paket')->with('success_paket', 'Harga paket berhasil ditambahkan');
     }
 
     public function editPaket(Request $request, $id)
@@ -89,7 +97,7 @@ class MasterDataController extends Controller
         $paket->update(['harga' => $request->harga]);
         
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data')->with('success_paket', 'Harga paket berhasil diperbarui');
+        return redirect()->route($role . '.master-data.harga-paket')->with('success_paket', 'Harga paket berhasil diperbarui');
     }
 
     public function destroyPaket(Request $request, $id)
@@ -97,7 +105,7 @@ class MasterDataController extends Controller
         HargaPaket::destroy($id);
         
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data')->with('success_paket', 'Harga paket berhasil dihapus');
+        return redirect()->route($role . '.master-data.harga-paket')->with('success_paket', 'Harga paket berhasil dihapus');
     }
 
     // =============================================
@@ -128,7 +136,7 @@ class MasterDataController extends Controller
         ]);
 
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data')->with('success_kelas', 'Kelas berhasil ditambahkan');
+        return redirect()->route($role . '.master-data.kelas')->with('success_kelas', 'Kelas berhasil ditambahkan');
     }
 
     public function editKelas(Request $request, $id)
@@ -156,7 +164,7 @@ class MasterDataController extends Controller
         ]);
 
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data')->with('success_kelas', 'Kelas berhasil diperbarui');
+        return redirect()->route($role . '.master-data.kelas')->with('success_kelas', 'Kelas berhasil diperbarui');
     }
 
     public function destroyKelas(Request $request, $id)
@@ -164,7 +172,7 @@ class MasterDataController extends Controller
         Kelas::destroy($id);
         
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data')->with('success_kelas', 'Kelas berhasil dihapus');
+        return redirect()->route($role . '.master-data.kelas')->with('success_kelas', 'Kelas berhasil dihapus');
     }
 
     // =============================================
@@ -186,7 +194,7 @@ class MasterDataController extends Controller
         Ruang::create(['nama_ruang' => $request->nama_ruang]);
 
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data')->with('success_ruang', 'Ruang berhasil ditambahkan');
+        return redirect()->route($role . '.master-data.ruang')->with('success_ruang', 'Ruang berhasil ditambahkan');
     }
 
     public function editRuang(Request $request, $id)
@@ -206,7 +214,7 @@ class MasterDataController extends Controller
         $ruang->update(['nama_ruang' => $request->nama_ruang]);
 
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data')->with('success_ruang', 'Ruang berhasil diperbarui');
+        return redirect()->route($role . '.master-data.ruang')->with('success_ruang', 'Ruang berhasil diperbarui');
     }
 
     public function destroyRuang(Request $request, $id)
@@ -214,11 +222,11 @@ class MasterDataController extends Controller
         Ruang::destroy($id);
         
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data')->with('success_ruang', 'Ruang berhasil dihapus');
+        return redirect()->route($role . '.master-data.ruang')->with('success_ruang', 'Ruang berhasil dihapus');
     }
 
     // =============================================
-    // CRUD PERIODE (SUDAH DIPERBAIKI)
+    // CRUD PERIODE
     // =============================================
     
     public function createPeriode(Request $request)
@@ -242,7 +250,7 @@ class MasterDataController extends Controller
         ]);
 
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data')
+        return redirect()->route($role . '.master-data.periode')
             ->with('success_periode', 'Periode berhasil ditambahkan');
     }
 
@@ -269,7 +277,7 @@ class MasterDataController extends Controller
         ]);
 
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data')
+        return redirect()->route($role . '.master-data.periode')
             ->with('success_periode', 'Periode berhasil diperbarui');
     }
 
@@ -278,7 +286,7 @@ class MasterDataController extends Controller
         Periode::destroy($id);
         
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data')
+        return redirect()->route($role . '.master-data.periode')
             ->with('success_periode', 'Periode berhasil dihapus');
     }
 }
