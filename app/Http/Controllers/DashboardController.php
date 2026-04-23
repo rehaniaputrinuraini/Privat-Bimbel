@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use App\Models\Pegawai;
 use App\Models\Mengajar;
 use App\Models\Murid;
@@ -21,7 +20,7 @@ class DashboardController extends Controller
         $totalTentor = Pegawai::where('jenis_pegawai', 'tentor')->count();
         $totalAdmin = Pegawai::where('jenis_pegawai', 'admin')->count();
         
-        // AMBIL DATA KEUANGAN DARI tr_transaksi & ms_transaksi
+        // AMBIL DATA KEUANGAN (QUICK FIX)
         $keuangan = $this->getDataKeuangan();
         
         $stats = [
@@ -33,12 +32,7 @@ class DashboardController extends Controller
             'laba_bersih' => $keuangan['labaBersih'],
         ];
         
-        $chartData = [
-            'months' => [],
-            'incomes' => [],
-            'expenses' => []
-        ];
-        
+        $chartData = $this->getChartData();
         $riwayatKeuangan = $keuangan['riwayat'];
         
         return view('dashboard.shared.halaman-utama.index', compact('stats', 'riwayatKeuangan', 'chartData'));
@@ -50,7 +44,7 @@ class DashboardController extends Controller
         $totalMurid = Murid::count();
         $totalTentor = Pegawai::where('jenis_pegawai', 'tentor')->count();
         
-        // AMBIL DATA KEUANGAN DARI tr_transaksi & ms_transaksi
+        // AMBIL DATA KEUANGAN (QUICK FIX)
         $keuangan = $this->getDataKeuangan();
         
         $stats = [
@@ -61,9 +55,10 @@ class DashboardController extends Controller
             'laba_bersih' => $keuangan['labaBersih'],
         ];
         
+        $chartData = $this->getChartData();
         $riwayatKeuangan = $keuangan['riwayat'];
         
-        return view('dashboard.shared.halaman-utama.index', compact('stats', 'riwayatKeuangan'));
+        return view('dashboard.shared.halaman-utama.index', compact('stats', 'riwayatKeuangan', 'chartData'));
     }
     
     // Tentor Dashboard
@@ -156,113 +151,28 @@ class DashboardController extends Controller
         ]);
     }
     
+    // QUICK FIX - FUNGSI DATA KEUANGAN SEMENTARA
     private function getDataKeuangan()
     {
-        // =============================================
-        // 1. PEMASUKAN = Total debit dari ms_transaksi
-        // =============================================
-        $totalPemasukan = DB::table('ms_transaksi')
-            ->where('debit', '>', 0)
-            ->sum('debit');
-        
-        // =============================================
-        // 2. PENGELUARAN = kredit (ms_transaksi) + jumlah (tr_transaksi)
-        // =============================================
-        $pengeluaranKredit = DB::table('ms_transaksi')
-            ->where('kredit', '>', 0)
-            ->sum('kredit');
-        
-        $pengeluaranGaji = DB::table('tr_transaksi')
-            ->sum('jumlah');
-        
-        $totalPengeluaran = $pengeluaranKredit + $pengeluaranGaji;
-        
-        // =============================================
-        // 3. LABA BERSIH
-        // =============================================
-        $labaBersih = $totalPemasukan - $totalPengeluaran;
-        
-        // =============================================
-        // 4. RIWAYAT KEUANGAN (Gabungan)
-        // =============================================
-        $riwayat = collect();
-        
-        // Riwayat dari ms_transaksi (Pemasukan & Pengeluaran Umum)
-        $msTransaksi = DB::table('ms_transaksi')
-            ->leftJoin('ms_murid', 'ms_transaksi.id_murid', '=', 'ms_murid.id_murid')
-            ->select(
-                'ms_transaksi.tanggal_bayar as tanggal',
-                'ms_murid.nama_lengkap as nama_murid',
-                'ms_transaksi.keterangan',
-                'ms_transaksi.debit',
-                'ms_transaksi.kredit'
-            )
-            ->orderBy('ms_transaksi.tanggal_bayar', 'desc')
-            ->limit(10)
-            ->get();
-        
-        foreach ($msTransaksi as $item) {
-            if ($item->debit > 0) {
-                $rincian = $item->keterangan ?? 'Pemasukan';
-                if ($item->nama_murid) {
-                    $rincian .= ' - ' . $item->nama_murid;
-                }
-                $riwayat->push((object)[
-                    'tanggal' => $item->tanggal,
-                    'rincian' => $rincian,
-                    'jumlah' => $item->debit,
-                    'kategori' => 'pemasukan',
-                ]);
-            }
-            if ($item->kredit > 0) {
-                $rincian = $item->keterangan ?? 'Pengeluaran';
-                if ($item->nama_murid) {
-                    $rincian .= ' - ' . $item->nama_murid;
-                }
-                $riwayat->push((object)[
-                    'tanggal' => $item->tanggal,
-                    'rincian' => $rincian,
-                    'jumlah' => $item->kredit,
-                    'kategori' => 'pengeluaran',
-                ]);
-            }
-        }
-        
-        // Riwayat dari tr_transaksi (Gaji Tutor)
-        $trTransaksi = DB::table('tr_transaksi')
-            ->join('ms_transaksi', 'tr_transaksi.id_transaksi', '=', 'ms_transaksi.id_transaksi')
-            ->leftJoin('ms_pegawai', 'ms_transaksi.id_pegawai', '=', 'ms_pegawai.id_pegawai')
-            ->select(
-                'ms_transaksi.tanggal_bayar as tanggal',
-                'ms_pegawai.nama_lengkap as nama_pegawai',
-                'tr_transaksi.keterangan',
-                'tr_transaksi.jumlah'
-            )
-            ->orderBy('ms_transaksi.tanggal_bayar', 'desc')
-            ->limit(10)
-            ->get();
-        
-        foreach ($trTransaksi as $item) {
-            $rincian = $item->keterangan ?? 'Gaji Tutor';
-            if ($item->nama_pegawai) {
-                $rincian .= ' - ' . $item->nama_pegawai;
-            }
-            $riwayat->push((object)[
-                'tanggal' => $item->tanggal ?? now()->format('Y-m-d'),
-                'rincian' => $rincian,
-                'jumlah' => $item->jumlah,
-                'kategori' => 'pengeluaran',
-            ]);
-        }
-        
-        // Sortir dan ambil 10 terbaru
-        $riwayat = $riwayat->sortByDesc('tanggal')->take(10)->values();
+        // Return data kosong dulu untuk hindari error
+        // Nanti setelah tau struktur tabel yang bener, kita update
         
         return [
-            'totalPemasukan' => $totalPemasukan,
-            'totalPengeluaran' => $totalPengeluaran,
-            'labaBersih' => $labaBersih,
-            'riwayat' => $riwayat,
+            'totalPemasukan' => 0,
+            'totalPengeluaran' => 0,
+            'labaBersih' => 0,
+            'riwayat' => collect([]),
+        ];
+    }
+    
+    // QUICK FIX - FUNGSI CHART DATA SEMENTARA
+    private function getChartData()
+    {
+        // Return data kosong dulu untuk hindari error
+        return [
+            'months' => [],
+            'incomes' => [],
+            'expenses' => []
         ];
     }
 }
