@@ -7,87 +7,99 @@ use Carbon\Carbon;
 
 class Pembayaran extends Model
 {
-    protected $table = 'tr_transaksi';
-    protected $primaryKey = 'id_pembayaran';
+    protected $table = 'ms_transaksi';           // 👈 BENAR: tabel transaksi umum
+    protected $primaryKey = 'id_transaksi';      // 👈 BENAR: primary key ms_transaksi
+    
+    public $timestamps = true;
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = 'updated_at';
     
     protected $fillable = [
+        'id_periode',
         'id_murid',
-        'id_paket',
-        'id_transaksi',
-        'tanggal',
-        'paket_awal',
-        'paket_selanjutnya',
-        'bulan_dibayar',
-        'tahun_dibayar',
-        'status_tagihan',
-        'total_piutang',
-        'total_uang_muka',
-        'total_pembayaran',
+        'id_pegawai',
+        'tanggal_bayar',
+        'bulan',
+        'jenis_pembayaran',
+        'keterangan',
+        'debit',
+        'kredit',
     ];
     
-    // Relasi ke tabel murid
+    protected $casts = [
+        'tanggal_bayar' => 'date',
+        'debit' => 'integer',
+        'kredit' => 'integer',
+        'bulan' => 'integer',
+    ];
+    
+    // Relasi ke murid
     public function murid()
     {
         return $this->belongsTo(Murid::class, 'id_murid', 'id_murid');
     }
     
-    // Relasi ke tabel harga paket
-    public function paket()
+    // Relasi ke pegawai
+    public function pegawai()
     {
-        return $this->belongsTo(HargaPaket::class, 'id_paket', 'id_paket');
+        return $this->belongsTo(Pegawai::class, 'id_pegawai', 'id_pegawai');
     }
     
-    // Relasi ke transaksi umum (ms_transaksi)
-    public function transaksiUmum()
+    // Relasi ke periode
+    public function periode()
     {
-        return $this->belongsTo(TransaksiUmum::class, 'id_transaksi', 'id_transaksi');
+        return $this->belongsTo(Periode::class, 'id_periode', 'id_periode');
     }
     
-    // Accessor untuk format tanggal Indonesia
-    public function getTanggalFormattedAttribute()
+    // Accessor format tanggal Indonesia
+    public function getTanggalBayarFormattedAttribute()
     {
-        if (!$this->tanggal) return '-';
-        return date('d/m/Y', strtotime($this->tanggal));
+        if (!$this->tanggal_bayar) return '-';
+        return $this->tanggal_bayar->format('d/m/Y');
     }
     
-    // Accessor untuk format total pembayaran
-    public function getTotalPembayaranFormattedAttribute()
+    // Accessor format debit (pemasukan)
+    public function getDebitFormattedAttribute()
     {
-        return 'Rp ' . number_format($this->total_pembayaran ?? 0, 0, ',', '.');
+        return 'Rp ' . number_format($this->debit ?? 0, 0, ',', '.');
     }
     
-    // Accessor untuk format paket awal
-    public function getPaketAwalFormattedAttribute()
+    // Accessor format kredit (pengeluaran)
+    public function getKreditFormattedAttribute()
     {
-        return $this->paket_awal ? 'Rp ' . number_format($this->paket_awal, 0, ',', '.') : '-';
+        return 'Rp ' . number_format($this->kredit ?? 0, 0, ',', '.');
     }
     
-    // Accessor untuk nama bulan dibayar
-    public function getBulanDibayarFormattedAttribute()
+    // Accessor nama bulan
+    public function getNamaBulanAttribute()
     {
-        if ($this->bulan_dibayar) {
-            $bulan = Carbon::create()->month($this->bulan_dibayar)->translatedFormat('F');
-            $tahun = $this->tahun_dibayar ?? Carbon::now()->year;
-            return $bulan . ' ' . $tahun;
+        if ($this->bulan) {
+            return Carbon::create()->month($this->bulan)->translatedFormat('F');
         }
         return '-';
     }
     
-    // Method untuk cek apakah ini pembayaran pendaftaran
+    // Cek apakah ini transaksi pemasukan
+    public function isPemasukan()
+    {
+        return $this->debit > 0;
+    }
+    
+    // Cek apakah ini transaksi pengeluaran
+    public function isPengeluaran()
+    {
+        return $this->kredit > 0;
+    }
+    
+    // Cek apakah ini pembayaran pendaftaran
     public function isPendaftaran()
     {
-        return is_null($this->paket_selanjutnya);
+        return str_contains($this->keterangan, 'Pendaftaran');
     }
     
-    // Method untuk cek apakah ini pembayaran bulanan
-    public function isBulanan()
+    // Cek apakah ini pembayaran SPP
+    public function isSPP()
     {
-        return !is_null($this->paket_selanjutnya);
-    }
-    
-    // Method untuk cek apakah status lunas
-    public function isLunas()
-    {
-        return strtolower($this->status_tagihan) == 'lunas';
+        return str_contains($this->keterangan, 'SPP');
     }
 }

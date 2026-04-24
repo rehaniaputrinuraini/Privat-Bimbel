@@ -13,8 +13,10 @@ use Carbon\Carbon;
 
 class PembayaranController extends Controller
 {
-    // Halaman utama pembayaran
-    public function index(Request $request)
+    // =============================================
+    // TAGIHAN MURID
+    // =============================================
+    public function indexTagihan(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
@@ -22,10 +24,8 @@ class PembayaranController extends Controller
         $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;
         
-        // AMBIL SEMUA MURID
         $murids = Murid::all();
         
-        // Ambil periode aktif
         $today = date('Y-m-d');
         $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
             ->where('tanggal_selesai', '>=', $today)
@@ -58,13 +58,13 @@ class PembayaranController extends Controller
                 }
             }
             
-            // Cek sudah bayar pendaftaran dari tabel transaksi
+            // Cek sudah bayar pendaftaran
             $sudahBayarPendaftaran = TransaksiUmum::where('id_murid', $murid->id_murid)
                 ->where('keterangan', 'like', '%Pendaftaran%')
                 ->exists();
             $statusPendaftaran = $sudahBayarPendaftaran ? 'Lunas' : 'Belum';
             
-            // Ambil semua pembayaran SPP murid ini (debit > 0 untuk pemasukan)
+            // Ambil semua pembayaran SPP
             $semuaPembayaranSPP = TransaksiUmum::where('id_murid', $murid->id_murid)
                 ->where('keterangan', 'like', '%SPP%')
                 ->where('debit', '>', 0)
@@ -86,7 +86,7 @@ class PembayaranController extends Controller
                 return false;
             })->first();
             
-            // Hitung Uang Muka (pembayaran untuk bulan depan)
+            // Hitung Uang Muka
             $totalUangMuka = 0;
             $uangMukaBulanList = [];
             
@@ -102,14 +102,12 @@ class PembayaranController extends Controller
                         $tahunDibayar = (int)$matches[2];
                         $bulanTahun = $matches[1] . ' ' . $matches[2];
                         
-                        // Bulan depan = UANG MUKA
                         if ($tahunDibayar > $currentYear || 
                             ($tahunDibayar == $currentYear && $bulanDibayar > $currentMonth)) {
                             $totalUangMuka += $pemb->debit;
                             $uangMukaBulanList[] = $bulanTahun;
                         }
                         
-                        // Bulan lalu = PIUTANG
                         if ($tahunDibayar < $currentYear || 
                             ($tahunDibayar == $currentYear && $bulanDibayar < $currentMonth)) {
                             $kekurangan = $hargaPerBulan - $pemb->debit;
@@ -124,11 +122,20 @@ class PembayaranController extends Controller
                 }
             }
             
-            // Cek bulan yang belum dibayar sama sekali
+            // Bulan belum dibayar (mulai dari TANGGAL DAFTAR murid)
             $bulanBelumDibayar = [];
-            for ($i = 1; $i < $currentMonth; $i++) {
+            $bulanMulai = 1;
+            if ($murid->tanggal_daftar) {
+                $bulanMulai = (int) date('m', strtotime($murid->tanggal_daftar));
+            }
+            for ($i = $bulanMulai; $i <= $currentMonth; $i++) {
                 $bulanTahun = Carbon::create()->month($i)->translatedFormat('F') . ' ' . $currentYear;
                 $sudahDibayar = false;
+                
+                // Skip bulan pendaftaran (bulan pertama gak dihitung piutang)
+                if ($i == $bulanMulai && !$sudahBayarPendaftaran == false) {
+                    continue;
+                }
                 
                 foreach ($semuaPembayaranSPP as $pemb) {
                     if (str_contains($pemb->keterangan, $bulanTahun)) {
@@ -196,7 +203,21 @@ class PembayaranController extends Controller
             ]);
         }
         
-        // Riwayat - Ambil dari tabel transaksi
+        return view('dashboard.shared.pembayaran.tagihan', [
+            'role' => $role,
+            'tagihan' => $tagihan,
+            'paketList' => $paketList,
+        ]);
+    }
+    
+    // =============================================
+    // RIWAYAT PEMBAYARAN
+    // =============================================
+    public function indexRiwayat(Request $request)
+    {
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
+        
         $riwayat = TransaksiUmum::with('murid')
             ->orderBy('tanggal_bayar', 'desc')
             ->get()
@@ -236,14 +257,16 @@ class PembayaranController extends Controller
                 ];
             });
         
-        return view('dashboard.shared.pembayaran.pembayaran', [
+        return view('dashboard.shared.pembayaran.riwayat', [
             'role' => $role,
-            'tagihan' => $tagihan,
             'riwayat' => $riwayat,
             'paketList' => $paketList,
         ]);
     }
     
+    // =============================================
+    // CREATE
+    // =============================================
     public function create(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
@@ -257,6 +280,9 @@ class PembayaranController extends Controller
         ]);
     }
     
+    // =============================================
+    // STORE
+    // =============================================
     public function store(Request $request)
     {
         $request->validate([
@@ -278,17 +304,16 @@ class PembayaranController extends Controller
         
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
-        // Ambil periode aktif
         $today = date('Y-m-d');
         $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
             ->where('tanggal_selesai', '>=', $today)
             ->first();
         
         if (!$periodeAktif) {
-            return redirect()->back()->withErrors(['error' => 'Tidak ada periode aktif! Silakan hubungi admin.']);
+            return redirect()->back()->withErrors(['error' => 'Tidak ada periode aktif!']);
         }
         
-        // KASUS 1: BELUM BAYAR PENDAFTARAN
+        // BELUM BAYAR PENDAFTARAN
         if (!$sudahBayarPendaftaran) {
             TransaksiUmum::create([
                 'id_periode' => (int) $periodeAktif->id_periode,
@@ -306,11 +331,11 @@ class PembayaranController extends Controller
             
             $murid->update(['tanggal_daftar' => $request->tanggal]);
             
-            return redirect()->route($role . '.pembayaran')
+            return redirect()->route($role . '.pembayaran.tagihan')
                 ->with('success', 'Pembayaran pendaftaran berhasil disimpan');
         }
         
-        // KASUS 2: PEMBAYARAN BULANAN (SPP)
+        // PEMBAYARAN SPP
         $request->validate([
             'paket_selanjutnya' => 'required|string',
             'bulan_dibayar' => 'nullable|integer|min:1|max:12',
@@ -334,7 +359,6 @@ class PembayaranController extends Controller
             'updated_at' => now(),
         ]);
         
-        // Update paket murid
         $hargaPaket = HargaPaket::where('tingkat', $request->paket_selanjutnya)->first();
         if ($hargaPaket) {
             TransaksiPaket::where('id_murid', $request->id_murid)->delete();
@@ -348,20 +372,26 @@ class PembayaranController extends Controller
             ]);
         }
         
-        return redirect()->route($role . '.pembayaran')
+        return redirect()->route($role . '.pembayaran.tagihan')
             ->with('success', 'Pembayaran SPP berhasil disimpan');
     }
     
+    // =============================================
+    // DESTROY
+    // =============================================
     public function destroy(Request $request, $id)
     {
-        Transaksi::where('id_transaksi', $id)->delete();
+        TransaksiUmum::where('id_transaksi', $id)->delete();
         
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
-        return redirect()->route($role . '.pembayaran')
+        return redirect()->route($role . '.pembayaran.tagihan')
             ->with('success', 'Data pembayaran berhasil dihapus');
     }
 
+    // =============================================
+    // API CEK STATUS
+    // =============================================
     public function cekStatusPembayaran($id)
     {
         $murid = Murid::find($id);
@@ -370,7 +400,7 @@ class PembayaranController extends Controller
             return response()->json(['error' => 'Murid tidak ditemukan'], 404);
         }
         
-        $sudahBayarPendaftaran = Transaksi::where('id_murid', $id)
+        $sudahBayarPendaftaran = TransaksiUmum::where('id_murid', $id)
             ->where('keterangan', 'like', '%Pendaftaran%')
             ->exists();
         
@@ -391,7 +421,7 @@ class PembayaranController extends Controller
             $currentMonth = Carbon::now()->month;
             $currentYear = Carbon::now()->year;
             
-            $pembayaranBulanIni = Transaksi::where('id_murid', $id)
+            $pembayaranBulanIni = TransaksiUmum::where('id_murid', $id)
                 ->where('keterangan', 'like', '%SPP%')
                 ->where('debit', '>', 0)
                 ->get()

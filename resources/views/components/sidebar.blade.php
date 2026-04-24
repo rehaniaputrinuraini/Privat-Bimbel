@@ -64,28 +64,31 @@
                 {{-- MASTER DATA DENGAN SUB MENU (ADMIN) --}}
                 <li class="has-submenu">
                     <a href="javascript:void(0)" class="nav-link-custom submenu-toggle {{ request()->is('*master-data*') ? 'nav-active' : '' }}" onclick="toggleSubmenu(this)">
-                        <img src="{{ asset('images/dashboard/icons/icon_hargapaket.png') }}" class="sidebar-icon"> Master Data
-                        <i class="fas fa-chevron-down submenu-arrow" style="float: right; margin-top: 3px;"></i>
+                        <div style="display: flex; align-items: center; flex: 1;">
+                            <img src="{{ asset('images/dashboard/icons/icon_hargapaket.png') }}" class="sidebar-icon"> 
+                            Master Data
+                        </div>
+                        <i class="fas fa-caret-down submenu-arrow"></i>
                     </a>
-                    <ul class="submenu-list" style="display: {{ request()->is('*master-data*') ? 'block' : 'none' }}; list-style: none; padding-left: 30px; background: rgba(0,0,0,0.03);">
+                    <ul class="submenu-list" style="display: {{ request()->is('*master-data*') ? 'block' : 'none' }};">
                         <li>
-                            <a href="{{ route('admin.master-data.harga-paket') }}" class="nav-link-custom {{ request()->routeIs('admin.master-data.harga-paket*') ? 'nav-active' : '' }}" style="font-size: 13px; padding: 8px 15px;">
-                                <i class="far fa-circle" style="font-size: 8px; margin-right: 8px;"></i> Harga Paket
+                            <a href="{{ route('admin.master-data.harga-paket') }}" class="submenu-link {{ request()->routeIs('admin.master-data.harga-paket*') ? 'sub-active' : '' }}">
+                                <i class="fas fa-tag submenu-icon"></i> Harga Paket
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.master-data.kelas') }}" class="nav-link-custom {{ request()->routeIs('admin.master-data.kelas*') ? 'nav-active' : '' }}" style="font-size: 13px; padding: 8px 15px;">
-                                <i class="far fa-circle" style="font-size: 8px; margin-right: 8px;"></i> Kelas
+                            <a href="{{ route('admin.master-data.kelas') }}" class="submenu-link {{ request()->routeIs('admin.master-data.kelas*') ? 'sub-active' : '' }}">
+                                <i class="fas fa-users submenu-icon"></i> Kelas
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.master-data.ruang') }}" class="nav-link-custom {{ request()->routeIs('admin.master-data.ruang*') ? 'nav-active' : '' }}" style="font-size: 13px; padding: 8px 15px;">
-                                <i class="far fa-circle" style="font-size: 8px; margin-right: 8px;"></i> Ruang
+                            <a href="{{ route('admin.master-data.ruang') }}" class="submenu-link {{ request()->routeIs('admin.master-data.ruang*') ? 'sub-active' : '' }}">
+                                <i class="fas fa-door-open submenu-icon"></i> Ruang
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.master-data.periode') }}" class="nav-link-custom {{ request()->routeIs('admin.master-data.periode*') ? 'nav-active' : '' }}" style="font-size: 13px; padding: 8px 15px;">
-                                <i class="far fa-circle" style="font-size: 8px; margin-right: 8px;"></i> Periode
+                            <a href="{{ route('admin.master-data.periode') }}" class="submenu-link {{ request()->routeIs('admin.master-data.periode*') ? 'sub-active' : '' }}">
+                                <i class="fas fa-calendar-alt submenu-icon"></i> Periode
                             </a>
                         </li>
                     </ul>
@@ -96,11 +99,30 @@
                         <img src="{{ asset('images/dashboard/icons/icon_riwayatpresensi.png') }}" class="sidebar-icon"> Riwayat Presensi
                     </a>
                 </li>
-                <li>
-                    <a href="{{ route('admin.pembayaran') }}" class="nav-link-custom {{ request()->routeIs('admin.pembayaran*') ? 'nav-active' : '' }}">
-                        <img src="{{ asset('images/dashboard/icons/icon_pembayaran.png') }}" class="sidebar-icon"> Pembayaran
+
+                {{-- PEMBAYARAN DENGAN SUB MENU (ADMIN) --}}
+                <li class="has-submenu">
+                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle {{ request()->is('*pembayaran*') ? 'nav-active' : '' }}" onclick="toggleSubmenu(this)">
+                        <div style="display: flex; align-items: center; flex: 1;">
+                            <img src="{{ asset('images/dashboard/icons/icon_pembayaran.png') }}" class="sidebar-icon"> 
+                            Pembayaran
+                        </div>
+                        <i class="fas fa-caret-down submenu-arrow"></i>
                     </a>
+                    <ul class="submenu-list" style="display: {{ request()->is('*pembayaran*') ? 'block' : 'none' }};">
+                        <li>
+                            <a href="{{ route('admin.pembayaran.tagihan') }}" class="submenu-link {{ request()->routeIs('admin.pembayaran.tagihan*') ? 'sub-active' : '' }}">
+                                <i class="fas fa-file-invoice submenu-icon"></i> Tagihan Murid
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.pembayaran.riwayat') }}" class="submenu-link {{ request()->routeIs('admin.pembayaran.riwayat*') ? 'sub-active' : '' }}">
+                                <i class="fas fa-history submenu-icon"></i> Riwayat Pembayaran
+                            </a>
+                        </li>
+                    </ul>
                 </li>
+
                 <li>
                     <a href="{{ route('admin.rekap-gaji') }}" class="nav-link-custom {{ request()->routeIs('admin.rekap-gaji*') ? 'nav-active' : '' }}">
                         <img src="{{ asset('images/dashboard/icons/icon_rekapgaji.png') }}" class="sidebar-icon"> Rekap Gaji
@@ -139,28 +161,31 @@
                 {{-- MASTER DATA DENGAN SUB MENU (SUPERADMIN) --}}
                 <li class="has-submenu">
                     <a href="javascript:void(0)" class="nav-link-custom submenu-toggle {{ request()->is('*master-data*') ? 'nav-active' : '' }}" onclick="toggleSubmenu(this)">
-                        <img src="{{ asset('images/dashboard/icons/icon_hargapaket.png') }}" class="sidebar-icon"> Master Data
-                        <i class="fas fa-chevron-down submenu-arrow" style="float: right; margin-top: 3px;"></i>
+                        <div style="display: flex; align-items: center; flex: 1;">
+                            <img src="{{ asset('images/dashboard/icons/icon_hargapaket.png') }}" class="sidebar-icon"> 
+                            Master Data
+                        </div>
+                        <i class="fas fa-caret-down submenu-arrow"></i>
                     </a>
-                    <ul class="submenu-list" style="display: {{ request()->is('*master-data*') ? 'block' : 'none' }}; list-style: none; padding-left: 30px; background: rgba(0,0,0,0.03);">
+                    <ul class="submenu-list" style="display: {{ request()->is('*master-data*') ? 'block' : 'none' }};">
                         <li>
-                            <a href="{{ route('superadmin.master-data.harga-paket') }}" class="nav-link-custom {{ request()->routeIs('superadmin.master-data.harga-paket*') ? 'nav-active' : '' }}" style="font-size: 13px; padding: 8px 15px;">
-                                <i class="far fa-circle" style="font-size: 8px; margin-right: 8px;"></i> Harga Paket
+                            <a href="{{ route('superadmin.master-data.harga-paket') }}" class="submenu-link {{ request()->routeIs('superadmin.master-data.harga-paket*') ? 'sub-active' : '' }}">
+                                <i class="fas fa-tag submenu-icon"></i> Harga Paket
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('superadmin.master-data.kelas') }}" class="nav-link-custom {{ request()->routeIs('superadmin.master-data.kelas*') ? 'nav-active' : '' }}" style="font-size: 13px; padding: 8px 15px;">
-                                <i class="far fa-circle" style="font-size: 8px; margin-right: 8px;"></i> Kelas
+                            <a href="{{ route('superadmin.master-data.kelas') }}" class="submenu-link {{ request()->routeIs('superadmin.master-data.kelas*') ? 'sub-active' : '' }}">
+                                <i class="fas fa-users submenu-icon"></i> Kelas
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('superadmin.master-data.ruang') }}" class="nav-link-custom {{ request()->routeIs('superadmin.master-data.ruang*') ? 'nav-active' : '' }}" style="font-size: 13px; padding: 8px 15px;">
-                                <i class="far fa-circle" style="font-size: 8px; margin-right: 8px;"></i> Ruang
+                            <a href="{{ route('superadmin.master-data.ruang') }}" class="submenu-link {{ request()->routeIs('superadmin.master-data.ruang*') ? 'sub-active' : '' }}">
+                                <i class="fas fa-door-open submenu-icon"></i> Ruang
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('superadmin.master-data.periode') }}" class="nav-link-custom {{ request()->routeIs('superadmin.master-data.periode*') ? 'nav-active' : '' }}" style="font-size: 13px; padding: 8px 15px;">
-                                <i class="far fa-circle" style="font-size: 8px; margin-right: 8px;"></i> Periode
+                            <a href="{{ route('superadmin.master-data.periode') }}" class="submenu-link {{ request()->routeIs('superadmin.master-data.periode*') ? 'sub-active' : '' }}">
+                                <i class="fas fa-calendar-alt submenu-icon"></i> Periode
                             </a>
                         </li>
                     </ul>
@@ -171,11 +196,30 @@
                        <img src="{{ asset('images/dashboard/icons/icon_riwayatpresensi.png') }}" class="sidebar-icon"> Riwayat Presensi
                      </a>
                 </li>
-                <li>
-                    <a href="{{ route('superadmin.pembayaran') }}" class="nav-link-custom {{ request()->routeIs('superadmin.pembayaran*') ? 'nav-active' : '' }}">
-                        <img src="{{ asset('images/dashboard/icons/icon_pembayaran.png') }}" class="sidebar-icon"> Pembayaran
+
+                {{-- PEMBAYARAN DENGAN SUB MENU (SUPERADMIN) --}}
+                <li class="has-submenu">
+                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle {{ request()->is('*pembayaran*') ? 'nav-active' : '' }}" onclick="toggleSubmenu(this)">
+                        <div style="display: flex; align-items: center; flex: 1;">
+                            <img src="{{ asset('images/dashboard/icons/icon_pembayaran.png') }}" class="sidebar-icon"> 
+                            Pembayaran
+                        </div>
+                        <i class="fas fa-caret-down submenu-arrow"></i>
                     </a>
+                    <ul class="submenu-list" style="display: {{ request()->is('*pembayaran*') ? 'block' : 'none' }};">
+                        <li>
+                            <a href="{{ route('superadmin.pembayaran.tagihan') }}" class="submenu-link {{ request()->routeIs('superadmin.pembayaran.tagihan*') ? 'sub-active' : '' }}">
+                                <i class="fas fa-file-invoice submenu-icon"></i> Tagihan Murid
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('superadmin.pembayaran.riwayat') }}" class="submenu-link {{ request()->routeIs('superadmin.pembayaran.riwayat*') ? 'sub-active' : '' }}">
+                                <i class="fas fa-history submenu-icon"></i> Riwayat Pembayaran
+                            </a>
+                        </li>
+                    </ul>
                 </li>
+
                 <li>
                     <a href="{{ route('superadmin.rekap-gaji') }}" class="nav-link-custom {{ request()->routeIs('superadmin.rekap-gaji*') ? 'nav-active' : '' }}">
                         <img src="{{ asset('images/dashboard/icons/icon_rekapgaji.png') }}" class="sidebar-icon"> Rekap Gaji

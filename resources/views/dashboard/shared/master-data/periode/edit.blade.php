@@ -7,11 +7,11 @@
     <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Edit Periode</h1>
 
     <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB;">
-        <form action="{{ route($role . '.periode.update', $periode->id_periode) }}" method="POST" id="mainForm">
+        <form action="{{ route($role . '.master-data.periode.update', $periode->id_periode) }}" method="POST" id="mainForm">
             @csrf
             @method('PUT')
             
-            {{-- ID Periode (Readonly) --}}
+            {{-- ID Periode --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">ID Periode</label>
                 <input type="text" value="PR{{ str_pad($periode->id_periode, 4, '0', STR_PAD_LEFT) }}" readonly 
@@ -24,8 +24,7 @@
                 <input type="text" name="tahun_periode" value="{{ old('tahun_periode', $periode->tahun_periode) }}" 
                        placeholder="Contoh: 2024/2025" maxlength="9" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none;">
-                <small style="color: #6B7280;">Format: YYYY/YYYY (contoh: 2024/2025)</small>
-                @error('tahun_periode') <br><small style="color: red;">{{ $message }}</small> @enderror
+                @error('tahun_periode') <small style="color: red;">{{ $message }}</small> @enderror
             </div>
 
             {{-- Tanggal Mulai --}}
@@ -46,7 +45,7 @@
 
             {{-- Tombol --}}
             <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">
-                <a href="{{ route($role . '.master-data') }}" style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; text-decoration: none;">Keluar</a>
+                <a href="{{ route($role . '.master-data.periode') }}" style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; text-decoration: none;">Keluar</a>
                 <button type="submit" style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600;">Simpan</button>
             </div>
         </form>

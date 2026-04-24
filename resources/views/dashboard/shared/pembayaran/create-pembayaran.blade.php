@@ -101,7 +101,7 @@
 
             <div id="infoStatusMurid" style="display: none;"></div>
 
-            {{-- Paket Awal (Pendaftaran) - FIX 100.000 --}}
+            {{-- Paket Awal (Pendaftaran) --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Paket Awal (Pendaftaran)</label>
                 <input type="text" id="paket_awal_display" readonly 
@@ -110,7 +110,7 @@
                 <input type="hidden" name="paket_awal" id="paket_awal" value="100000">
             </div>
 
-            {{-- Paket Belajar (Dinamis dari database) --}}
+            {{-- Paket Belajar --}}
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Paket Belajar <span style="color: red;">*</span></label>
                 <select name="paket_selanjutnya" id="paket_selanjutnya" 
@@ -129,7 +129,7 @@
                 <i class="fas fa-info-circle"></i> Harga: <strong id="hargaPaketValue">Rp 0</strong> / bulan
             </div>
 
-            {{-- Untuk Bulan (jika pembayaran bulanan) --}}
+            {{-- Untuk Bulan --}}
             <div id="bulanGroup" style="margin-bottom: 15px; display: none;">
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">Untuk Bulan</label>
                 <select name="bulan_dibayar" id="bulan_dibayar" style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
@@ -227,11 +227,11 @@
             document.getElementById('modalPindahHalaman').style.display = 'flex';
             document.getElementById('confirmPindahBtn').onclick = () => {
                 formChanged = false;
-                window.location.href = "{{ route($role . '.pembayaran') }}";
+                window.location.href = "{{ route($role . '.pembayaran.tagihan') }}";
             };
         } else {
             document.getElementById('modalBatal').style.display = 'flex';
-            document.getElementById('confirmKeluarLink').href = "{{ route($role . '.pembayaran') }}";
+            document.getElementById('confirmKeluarLink').href = "{{ route($role . '.pembayaran.tagihan') }}";
         }
     }
     function tutupModalBatal() { document.getElementById('modalBatal').style.display = 'none'; }

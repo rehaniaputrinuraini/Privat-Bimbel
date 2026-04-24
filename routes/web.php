@@ -160,8 +160,9 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/master-data/periode/update/{id}', [MasterDataController::class, 'updatePeriode'])->name('master-data.periode.update');
         Route::delete('/master-data/periode/destroy/{id}', [MasterDataController::class, 'destroyPeriode'])->name('master-data.periode.destroy');
 
-        // PEMBAYARAN
-        Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran');
+        // ========== PEMBAYARAN (SUB MENU) ==========
+        Route::get('/pembayaran/tagihan', [PembayaranController::class, 'indexTagihan'])->name('pembayaran.tagihan');
+        Route::get('/pembayaran/riwayat', [PembayaranController::class, 'indexRiwayat'])->name('pembayaran.riwayat');
         Route::get('/pembayaran/create', [PembayaranController::class, 'create'])->name('pembayaran.create');
         Route::post('/pembayaran/store', [PembayaranController::class, 'store'])->name('pembayaran.store');
         Route::get('/pembayaran/edit/{id}', [PembayaranController::class, 'edit'])->name('pembayaran.edit');
@@ -250,8 +251,9 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/master-data/periode/update/{id}', [MasterDataController::class, 'updatePeriode'])->name('master-data.periode.update');
         Route::delete('/master-data/periode/destroy/{id}', [MasterDataController::class, 'destroyPeriode'])->name('master-data.periode.destroy');
         
-        // PEMBAYARAN
-        Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran');
+        // ========== PEMBAYARAN (SUB MENU) ==========
+        Route::get('/pembayaran/tagihan', [PembayaranController::class, 'indexTagihan'])->name('pembayaran.tagihan');
+        Route::get('/pembayaran/riwayat', [PembayaranController::class, 'indexRiwayat'])->name('pembayaran.riwayat');
         Route::get('/pembayaran/create', [PembayaranController::class, 'create'])->name('pembayaran.create');
         Route::post('/pembayaran/store', [PembayaranController::class, 'store'])->name('pembayaran.store');
         Route::get('/pembayaran/edit/{id}', [PembayaranController::class, 'edit'])->name('pembayaran.edit');
@@ -303,6 +305,3 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/get-murid-paket/{id}', [PembayaranController::class, 'getMuridPaket'])->name('get.murid.paket');
     Route::get('/cek-status-pembayaran/{id}', [PembayaranController::class, 'cekStatusPembayaran'])->name('cek.status.pembayaran');
 });
-
-// ✅ TAMBAHAN: Route search murid TANPA middleware auth (untuk autocomplete di form)
-Route::get('/search-murid', [MuridController::class, 'search'])->name('search.murid.public');

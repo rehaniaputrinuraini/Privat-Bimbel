@@ -7,7 +7,7 @@
     <h1 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 20px;">Tambah Periode</h1>
 
     <div style="background: #F9FAFB; border-radius: 15px; padding: 30px; border: 1.5px solid #E5E7EB;">
-        <form action="<?php echo e(route($role . '.periode.store')); ?>" method="POST" id="mainForm">
+        <form action="<?php echo e(route($role . '.master-data.periode.store')); ?>" method="POST" id="mainForm">
             <?php echo csrf_field(); ?>
             
             
@@ -59,7 +59,7 @@ unset($__errorArgs, $__bag); ?>
 
             
             <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">
-                <a href="<?php echo e(route($role . '.master-data')); ?>" style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; text-decoration: none;">Keluar</a>
+                <a href="<?php echo e(route($role . '.master-data.periode')); ?>" style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; text-decoration: none;">Keluar</a>
                 <button type="submit" style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600;">Simpan</button>
             </div>
         </form>

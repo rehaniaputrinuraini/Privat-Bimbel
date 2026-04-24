@@ -69,8 +69,6 @@ class LaporanKeuanganController extends Controller
             ->get();
         
         foreach ($sppTransactions as $item) {
-            // Extract bulan dan tahun dari keterangan
-            // Format: "Pembayaran SPP May 2026 - Nama Murid"
             preg_match('/SPP\s+(\w+)\s+(\d+)/', $item->keterangan, $matches);
             
             if (isset($matches[1]) && isset($matches[2])) {
@@ -95,7 +93,6 @@ class LaporanKeuanganController extends Controller
                     // Bulan lalu = Piutang (jika belum lunas)
                     elseif ($tahunDibayar < $currentYear || 
                         ($tahunDibayar == $currentYear && $bulanDibayar < $currentMonth)) {
-                        // Cek apakah sudah lunas (bandingkan dengan harga paket)
                         $murid = $item->murid;
                         if ($murid) {
                             $paketAktif = \App\Models\TransaksiPaket::where('id_murid', $murid->id_murid)->first();
@@ -109,7 +106,6 @@ class LaporanKeuanganController extends Controller
                         }
                     }
                 } catch (\Exception $e) {
-                    // Skip jika parsing gagal
                     continue;
                 }
             }
@@ -185,7 +181,7 @@ class LaporanKeuanganController extends Controller
         
         TransaksiUmum::create([
             'tanggal_bayar' => $request->tanggal,
-            'bulan' => $request->tanggal,
+            'bulan' => (int) date('m', strtotime($request->tanggal)), // 👈 PERBAIKI: ambil bulan dari tanggal
             'jenis_pembayaran' => $request->jenis_pembayaran,
             'keterangan' => $request->rincian,
             'debit' => $debit,
@@ -201,10 +197,12 @@ class LaporanKeuanganController extends Controller
     {
         $role = request()->is('superadmin*') ? 'superadmin' : 'admin';
         
-        $prefix = substr($id, 0, 1);
-        $realId = substr($id, 1);
+        // Hapus prefix (P/K/M/W/T) untuk dapatkan id asli
+        $realId = (int) substr($id, 1); // 👈 PASTIKAN jadi integer
         
-        TransaksiUmum::where('id_transaksi', $realId)->delete();
+        if ($realId > 0) {
+            TransaksiUmum::where('id_transaksi', $realId)->delete();
+        }
         
         return redirect()->route($role . '.laporan-keuangan')
             ->with('success', 'Data berhasil dihapus');

@@ -21,28 +21,28 @@ class MasterDataController extends Controller
     public function indexPaket(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        $paket = HargaPaket::orderBy('id_paket', 'asc')->get();
+        $paket = HargaPaket::orderBy('id_paket', 'asc')->paginate(10);
         return view('dashboard.shared.master-data.harga-paket.index', compact('role', 'paket'));
     }
 
     public function indexKelas(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        $kelas = Kelas::orderBy('nama_kelas', 'asc')->get();
+        $kelas = Kelas::orderBy('nama_kelas', 'asc')->paginate(10); // 👈 GANTI get() JADI paginate(10)
         return view('dashboard.shared.master-data.kelas.index', compact('role', 'kelas'));
     }
 
     public function indexRuang(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        $ruang = Ruang::orderBy('nama_ruang', 'asc')->get();
+        $ruang = Ruang::orderBy('nama_ruang', 'asc')->paginate(10); // 👈 GANTI get() JADI paginate(10)
         return view('dashboard.shared.master-data.ruang.index', compact('role', 'ruang'));
     }
 
     public function indexPeriode(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        $periode = Periode::orderBy('tanggal_mulai', 'desc')->get();
+        $periode = Periode::orderBy('tanggal_mulai', 'desc')->paginate(10); // 👈 GANTI get() JADI paginate(10)
         return view('dashboard.shared.master-data.periode.index', compact('role', 'periode'));
     }
 

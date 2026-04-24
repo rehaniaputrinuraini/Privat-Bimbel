@@ -229,11 +229,11 @@
             document.getElementById('modalPindahHalaman').style.display = 'flex';
             document.getElementById('confirmPindahBtn').onclick = () => {
                 formChanged = false;
-                window.location.href = "<?php echo e(route($role . '.pembayaran')); ?>";
+                window.location.href = "<?php echo e(route($role . '.pembayaran.tagihan')); ?>";
             };
         } else {
             document.getElementById('modalBatal').style.display = 'flex';
-            document.getElementById('confirmKeluarLink').href = "<?php echo e(route($role . '.pembayaran')); ?>";
+            document.getElementById('confirmKeluarLink').href = "<?php echo e(route($role . '.pembayaran.tagihan')); ?>";
         }
     }
     function tutupModalBatal() { document.getElementById('modalBatal').style.display = 'none'; }
