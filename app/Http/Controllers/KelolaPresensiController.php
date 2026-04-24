@@ -68,6 +68,9 @@ class KelolaPresensiController extends Controller
         // Ambil daftar tentor untuk filter
         $tentors = Pegawai::where('jenis_pegawai', 'tentor')->get();
         
+        // ✅ AMBIL DATA VERIFIKASI DARI SESSION
+        $verifiedIds = session('verified_presensi', []);
+        
         $bulan = $request->bulan;
         $tahun = $request->tahun;
         $search = $request->search;
@@ -81,15 +84,21 @@ class KelolaPresensiController extends Controller
             'tahun', 
             'search', 
             'tentorFilter',
-            'tahunList'
+            'tahunList',
+            'verifiedIds'
         ));
     }
     
     public function verify($id)
     {
         try {
-            $presensi = Mengajar::findOrFail($id);
-            $presensi->update(['murid_hadir' => 'Hadir']);
+            // ✅ SIMPAN ID KE SESSION (TIDAK UBAH DATABASE)
+            $verifiedIds = session('verified_presensi', []);
+            if (!in_array($id, $verifiedIds)) {
+                $verifiedIds[] = $id;
+                session(['verified_presensi' => $verifiedIds]);
+            }
+            
             return redirect()->back()->with('success', '✅ Presensi berhasil diverifikasi!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', '❌ Gagal verifikasi: ' . $e->getMessage());
@@ -99,8 +108,11 @@ class KelolaPresensiController extends Controller
     public function unverify($id)
     {
         try {
-            $presensi = Mengajar::findOrFail($id);
-            $presensi->update(['murid_hadir' => 'Tidak Hadir']);
+            // ✅ HAPUS ID DARI SESSION (TIDAK UBAH DATABASE)
+            $verifiedIds = session('verified_presensi', []);
+            $verifiedIds = array_diff($verifiedIds, [$id]);
+            session(['verified_presensi' => $verifiedIds]);
+            
             return redirect()->back()->with('success', '✅ Verifikasi dibatalkan!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', '❌ Gagal: ' . $e->getMessage());
@@ -124,6 +136,11 @@ class KelolaPresensiController extends Controller
             $namaTentor = $presensi->pegawai->nama_lengkap ?? 'Tentor';
             $tanggal = Carbon::parse($presensi->tanggal)->translatedFormat('d F Y');
             $presensi->delete();
+            
+            // ✅ HAPUS JUGA DARI SESSION
+            $verifiedIds = session('verified_presensi', []);
+            $verifiedIds = array_diff($verifiedIds, [$id]);
+            session(['verified_presensi' => $verifiedIds]);
             
             return redirect()->back()->with('success', "✅ Data presensi {$namaTentor} ({$tanggal}) berhasil dihapus!");
         } catch (\Exception $e) {
@@ -157,6 +174,10 @@ class KelolaPresensiController extends Controller
         $presensi = Mengajar::with(['pegawai', 'kelas', 'ruang'])->findOrFail($id);
         $role = auth()->user()->peran;
         
-        return view('dashboard.shared.riwayat presensi.detail-presensi', compact('presensi', 'role'));
+        // ✅ KIRIM JUGA STATUS VERIFIKASI
+        $verifiedIds = session('verified_presensi', []);
+        $isVerified = in_array($id, $verifiedIds);
+        
+        return view('dashboard.shared.riwayat presensi.detail-presensi', compact('presensi', 'role', 'isVerified'));
     }
 }

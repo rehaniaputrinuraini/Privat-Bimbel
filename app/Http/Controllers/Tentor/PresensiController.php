@@ -15,9 +15,6 @@ use Carbon\Carbon;
 
 class PresensiController extends Controller
 {
-    /**
-     * Get tentor yang sedang login
-     */
     private function getTentorLogin()
     {
         $user = Auth::user();
@@ -31,9 +28,6 @@ class PresensiController extends Controller
             ->first();
     }
 
-    /**
-     * Generate ID Mengajar baru (manual)
-     */
     private function generateIdMengajar()
     {
         $lastId = Mengajar::max('id_mengajar') ?? 0;
@@ -70,7 +64,7 @@ class PresensiController extends Controller
         ));
     }
 
-    public function masuk(Request $request)
+    public function masuk()
     {
         try {
             $tentor = $this->getTentorLogin();
@@ -82,7 +76,6 @@ class PresensiController extends Controller
                 ], 404);
             }
             
-            // Cek apakah sudah presensi masuk hari ini
             $existing = Mengajar::where('id_pegawai', $tentor->id_pegawai)
                 ->whereDate('tanggal', today())
                 ->whereNull('jam_selesai')
@@ -95,7 +88,10 @@ class PresensiController extends Controller
                 ], 400);
             }
             
-            // ✅ INSERT DENGAN MANUAL ID
+            // ✅ AMBIL DEFAULT KELAS & RUANG
+            $defaultKelas = Kelas::first();
+            $defaultRuang = Ruang::first();
+            
             DB::table('ms_mengajar')->insert([
                 'id_mengajar' => $this->generateIdMengajar(),
                 'id_pegawai' => $tentor->id_pegawai,
@@ -103,8 +99,8 @@ class PresensiController extends Controller
                 'jam_mulai' => Carbon::now('Asia/Jakarta')->format('H:i:s'),
                 'jam_selesai' => null,
                 'lama_mengajar' => null,
-                'id_kelas' => null,
-                'id_ruang' => null,
+                'id_kelas' => $defaultKelas ? $defaultKelas->id_kelas : 1,
+                'id_ruang' => $defaultRuang ? $defaultRuang->id_ruang : 1,
                 'murid_hadir' => null,
                 'keterangan' => null,
                 'bukti_mengajar' => null,
@@ -128,6 +124,7 @@ class PresensiController extends Controller
     public function simpanLaporan(Request $request)
     {
         try {
+            // ✅ VALIDASI HANYA UNTUK LAPORAN
             $request->validate([
                 'id_kelas' => 'required|exists:ms_kelas,id_kelas',
                 'id_ruang' => 'required|exists:ms_ruang,id_ruang',
@@ -161,7 +158,7 @@ class PresensiController extends Controller
             // Upload foto
             $fotoPath = $request->file('foto')->store('bukti-mengajar', 'public');
             
-            // ✅ UPDATE DATA
+            // UPDATE DATA
             DB::table('ms_mengajar')
                 ->where('id_mengajar', $presensi->id_mengajar)
                 ->update([
@@ -178,6 +175,11 @@ class PresensiController extends Controller
                 'message' => '✅ Laporan berhasil disimpan! Silakan presensi keluar.'
             ]);
             
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Gagal: ' . implode(', ', $e->validator->errors()->all())
+            ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false, 
@@ -186,7 +188,7 @@ class PresensiController extends Controller
         }
     }
     
-    public function keluar(Request $request)
+    public function keluar()
     {
         try {
             $tentor = $this->getTentorLogin();
@@ -210,7 +212,7 @@ class PresensiController extends Controller
                 ], 400);
             }
             
-            if (!$presensi->id_kelas) {
+            if (!$presensi->bukti_mengajar) {
                 return response()->json([
                     'success' => false, 
                     'message' => 'Silakan isi laporan terlebih dahulu!'
@@ -221,7 +223,6 @@ class PresensiController extends Controller
             $jamMulai = Carbon::parse($presensi->jam_mulai);
             $lamaMengajar = $jamMulai->diffInMinutes($jamKeluar);
             
-            // ✅ UPDATE JAM KELUAR
             DB::table('ms_mengajar')
                 ->where('id_mengajar', $presensi->id_mengajar)
                 ->update([
@@ -264,7 +265,7 @@ class PresensiController extends Controller
         
         return response()->json([
             'has_presensi_masuk' => $presensi ? true : false,
-            'has_laporan' => $presensi && $presensi->id_kelas ? true : false,
+            'has_laporan' => $presensi && $presensi->bukti_mengajar ? true : false,
             'data' => $presensi
         ]);
     }

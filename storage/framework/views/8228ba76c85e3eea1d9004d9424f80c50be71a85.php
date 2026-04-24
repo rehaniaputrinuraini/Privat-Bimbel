@@ -1,8 +1,8 @@
-@extends('layouts.app')
 
-@section('title', 'Presensi Tentor')
 
-@section('content')
+<?php $__env->startSection('title', 'Presensi Tentor'); ?>
+
+<?php $__env->startSection('content'); ?>
 <style>
     .presensi-flex { 
         display: flex; 
@@ -225,7 +225,8 @@
 
         <div style="margin-bottom: 25px;">
             <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
-                {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+                <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?>
+
             </p>
             <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
                 Presensi
@@ -240,23 +241,24 @@
             <i class="fas fa-exclamation-circle"></i> <span id="errorMessage"></span>
         </div>
 
-        @if(isset($error))
+        <?php if(isset($error)): ?>
             <div style="background: #FEE2E2; color: #EF4444; padding: 12px; border-radius: 10px; margin-bottom: 20px; font-family: 'Poppins', sans-serif;">
-                <i class="fas fa-exclamation-circle"></i> {{ $error }}
+                <i class="fas fa-exclamation-circle"></i> <?php echo e($error); ?>
+
             </div>
-        @endif
+        <?php endif; ?>
 
         <div class="presensi-flex">
-            {{-- KARTU PRESENSI MASUK/KELUAR (TAMPIL FULL) --}}
+            
             <div class="presensi-card">
                 <div class="card-header-custom">
                     <h3>Presensi Hari Ini</h3>
-                    <p>{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</p>
+                    <p><?php echo e(\Carbon\Carbon::now()->translatedFormat('l, d F Y')); ?></p>
                 </div>
 
                 <div class="button-group-presensi">
                     <button type="button" class="btn-presensi btn-masuk" id="btnMasuk" 
-                        {{ $presensiHariIni ? 'disabled' : '' }}>
+                        <?php echo e($presensiHariIni ? 'disabled' : ''); ?>>
                         <i class="fas fa-sign-in-alt"></i> Masuk
                     </button>
 
@@ -271,7 +273,7 @@
                 </div>
             </div>
 
-            {{-- KARTU LAPORAN KEGIATAN (MUNCUL SETELAH KLIK MASUK) --}}
+            
             <div class="presensi-card" id="formPresensi" style="display: none;">
                 <div class="card-header-custom">
                     <h3>Laporan Kegiatan</h3>
@@ -279,37 +281,39 @@
                 </div>
 
                 <form id="formLaporan" enctype="multipart/form-data">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     
-                    {{-- DROPDOWN KELAS --}}
+                    
                     <div class="form-group">
                         <label>Kelas <span style="color: #EF4444;">*</span></label>
                         <select class="form-control-custom" id="id_kelas" name="id_kelas" required>
                             <option value="">-- Pilih Kelas --</option>
-                            @foreach($kelasList as $kelas)
-                                <option value="{{ $kelas->id_kelas }}" data-jenjang="{{ $kelas->jenjang }}">
-                                    {{ $kelas->jenjang }} - {{ $kelas->nama_kelas }}
+                            <?php $__currentLoopData = $kelasList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $kelas): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($kelas->id_kelas); ?>" data-jenjang="<?php echo e($kelas->jenjang); ?>">
+                                    <?php echo e($kelas->jenjang); ?> - <?php echo e($kelas->nama_kelas); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                         <small style="font-size: 12px; color: #6B7280;">Pilih kelas yang diajar</small>
                     </div>
 
-                    {{-- DROPDOWN RUANG --}}
+                    
                     <div class="form-group">
                         <label>Ruang <span style="color: #EF4444;">*</span></label>
                         <select class="form-control-custom" id="id_ruang" name="id_ruang" required>
                             <option value="">-- Pilih Ruang --</option>
-                            @foreach($ruangList as $ruang)
-                                <option value="{{ $ruang->id_ruang }}">
-                                    {{ $ruang->nama_ruang }}
+                            <?php $__currentLoopData = $ruangList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ruang): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($ruang->id_ruang); ?>">
+                                    <?php echo e($ruang->nama_ruang); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                         <small style="font-size: 12px; color: #6B7280;">Pilih ruang tempat mengajar</small>
                     </div>
 
-                    {{-- JENJANG (AUTO-FILL) --}}
+                    
                     <input type="hidden" id="jenjang" name="jenjang">
 
                     <div class="form-group">
@@ -353,7 +357,7 @@
     </div>
 </div>
 
-{{-- ================== SCRIPT ================== --}}
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const btnMasuk = document.getElementById('btnMasuk');
@@ -418,10 +422,10 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // ✅ BTN MASUK - TANPA KIRIM KELAS & RUANG
     btnMasuk.addEventListener('click', function() {
-        fetch('{{ route("tentor.presensi.masuk") }}', {
+        fetch('<?php echo e(route("tentor.presensi.masuk")); ?>', {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                 'Content-Type': 'application/json'
             }
         })
@@ -470,10 +474,10 @@ document.addEventListener("DOMContentLoaded", function() {
         btnSubmit.disabled = true;
         btnSubmit.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Mengirim...';
         
-        fetch('{{ route("tentor.presensi.laporan") }}', {
+        fetch('<?php echo e(route("tentor.presensi.laporan")); ?>', {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
             },
             body: formData
         })
@@ -510,10 +514,10 @@ document.addEventListener("DOMContentLoaded", function() {
         btnKeluar.disabled = true;
         btnKeluar.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
         
-        fetch('{{ route("tentor.presensi.keluar") }}', {
+        fetch('<?php echo e(route("tentor.presensi.keluar")); ?>', {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                 'Content-Type': 'application/json'
             }
         })
@@ -566,7 +570,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     
     // Cek status saat halaman load
-    fetch('{{ route("tentor.presensi.cek-status") }}')
+    fetch('<?php echo e(route("tentor.presensi.cek-status")); ?>')
         .then(response => response.json())
         .then(data => {
             if (data.has_presensi_masuk) {
@@ -611,4 +615,5 @@ document.addEventListener("DOMContentLoaded", function() {
         });
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/tentor/presensi.blade.php ENDPATH**/ ?>
