@@ -1,8 +1,8 @@
 <div style="padding: 20px; font-family: 'Poppins', sans-serif; background: #FFFFFF; border-radius: 16px;">
     
     <div style="margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1.5px solid #F3F4F6;">
-        <h2 style="font-size: 19px; font-weight: 700; color: #111827; margin: 0;">Edit Kelas</h2>
-        <p style="color: #9CA3AF; font-size: 12px; margin: 2px 0 0 0;">Perbarui data kelas</p>
+        <h2 style="font-size: 19px; font-weight: 700; color: #111827; margin: 0;">Edit Harga Paket</h2>
+        <p style="color: #9CA3AF; font-size: 12px; margin: 2px 0 0 0;">Perbarui data paket</p>
     </div>
 
     <div id="alertError" style="display: none; background: #FEE2E2; color: #991B1B; padding: 12px 15px; border-radius: 10px; margin-bottom: 15px; align-items: center; gap: 10px;">
@@ -10,35 +10,28 @@
         <span id="alertErrorText"></span>
     </div>
 
-    <form action="{{ route($role . '.master-data.kelas.update', $kelas->id_kelas) }}" method="POST">
-        @csrf
-        @method('PUT')
+    <form action="<?php echo e(route($role . '.master-data.harga-paket.update', $paket->id_paket)); ?>" method="POST">
+        <?php echo csrf_field(); ?>
+        <?php echo method_field('PUT'); ?>
         
         <div style="margin-bottom: 15px;">
-            <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">ID Kelas</label>
-            <input type="text" value="KLS{{ str_pad($kelas->id_kelas, 4, '0', STR_PAD_LEFT) }}" readonly 
+            <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">ID Paket</label>
+            <input type="text" value="PK<?php echo e(str_pad($paket->id_paket, 4, '0', STR_PAD_LEFT)); ?>" readonly 
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px; font-family: 'Poppins', sans-serif;">
         </div>
 
         <div style="margin-bottom: 15px;">
-            <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Nama Kelas <span style="color: #EF4444;">*</span></label>
-            <input type="text" name="nama_kelas" value="{{ old('nama_kelas', $kelas->nama_kelas) }}" required
+            <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Harga Paket <span style="color: #EF4444;">*</span></label>
+            <input type="text" name="harga" value="<?php echo e(old('harga', $paket->harga)); ?>" placeholder="Masukkan Harga Paket" required
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif;">
         </div>
 
         <div style="margin-bottom: 15px;">
-            <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Jenjang <span style="color: #EF4444;">*</span></label>
-            <select name="jenjang" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; cursor: pointer;">
-                <option value="SD" {{ old('jenjang', $kelas->jenjang) == 'SD' ? 'selected' : '' }}>SD</option>
-                <option value="SMP" {{ old('jenjang', $kelas->jenjang) == 'SMP' ? 'selected' : '' }}>SMP</option>
-                <option value="SMA" {{ old('jenjang', $kelas->jenjang) == 'SMA' ? 'selected' : '' }}>SMA</option>
-            </select>
-        </div>
-
-        <div style="margin-bottom: 15px;">
-            <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Jumlah Murid</label>
-            <input type="text" value="{{ $kelas->jumlah_murid ?? 0 }}" readonly 
+            <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Tingkat</label>
+            <input type="text" value="<?php echo e($paket->tingkat); ?>" readonly 
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px; font-family: 'Poppins', sans-serif;">
+            <small style="color: #9CA3AF;"><i class="fas fa-lock"></i> Tingkat tidak dapat diubah.</small>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px; padding-top: 16px; border-top: 1.5px solid #F3F4F6;">
@@ -48,13 +41,12 @@
             </button>
             <button type="submit" id="btnUpdate"
                     style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
-                Simpan
+                Update
             </button>
         </div>
     </form>
 </div>
 
-{{-- MODALS --}}
 <div id="modalBatal" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -86,4 +78,4 @@
         <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;" id="pesanSukses">Data berhasil diupdate.</p>
         <button type="button" id="btnOkSukses" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #10B981; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">OK</button>
     </div>
-</div>
+</div><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/master-data/harga-paket/edit.blade.php ENDPATH**/ ?>

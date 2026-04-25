@@ -38,41 +38,43 @@ class KelolaAdminController extends Controller
         $request->validate([
             'username' => 'required|string|max:15|unique:ms_user,username',
             'email' => 'required|email|max:35|unique:ms_user,email',
-            'password' => 'required|string|min:6',  // ✅ TAMBAHKAN VALIDASI PASSWORD
+            'password' => 'required|string|min:6',
             'nama_lengkap' => 'required|string|max:35',
             'alamat' => 'nullable|string|max:100',
             'no_hp' => 'nullable|string|max:15',
             'gaji_pokok' => 'nullable|integer', 
         ]);
 
-        // Insert ke ms_pegawai dulu
-        $pegawai = Pegawai::create([
-            'jenis_pegawai' => 'admin',
-            'nama_lengkap' => $request->nama_lengkap,
-            'alamat' => $request->alamat,
-            'no_hp' => $request->no_hp,
-            'gaji_pokok' => $request->gaji_pokok,
-            'grade' => null,
-            'hr_sd' => null,
-            'hr_smp' => null,
-            'hr_sma' => null,
-            'uang_makan' => null,
-            'uang_transport' => null,
-        ]);
+        try {
+            // Insert ke ms_pegawai dulu
+            $pegawai = Pegawai::create([
+                'jenis_pegawai' => 'admin',
+                'nama_lengkap' => $request->nama_lengkap,
+                'alamat' => $request->alamat,
+                'no_hp' => $request->no_hp,
+                'gaji_pokok' => $request->gaji_pokok,
+                'grade' => null,
+                'hr_sd' => null,
+                'hr_smp' => null,
+                'hr_sma' => null,
+                'uang_makan' => null,
+                'uang_transport' => null,
+            ]);
 
-        // Insert ke ms_user
-        User::create([
-            'id_pegawai' => $pegawai->id_pegawai,
-            'username' => $request->username,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'peran' => 'admin',
-            'status' => 1,
-        ]);
+            // Insert ke ms_user
+            User::create([
+                'id_pegawai' => $pegawai->id_pegawai,
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'peran' => 'admin',
+                'status' => 1,
+            ]);
 
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        
-        return redirect()->route($role . '.kelola-admin')->with('success', 'Admin berhasil ditambahkan');
+            return response()->json(['success' => true, 'message' => 'Admin berhasil ditambahkan']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal: ' . $e->getMessage()]);
+        }
     }
 
     // Form edit admin
@@ -105,41 +107,62 @@ class KelolaAdminController extends Controller
             'password' => 'nullable|string|min:6',
         ]);
 
-        // Update user
-        $userData = [
-            'username' => $request->username,
-            'email' => $request->email,
-        ];
-        
-        // Update password jika diisi
-        if ($request->filled('password')) {
-            $userData['password'] = Hash::make($request->password);
-        }
-        
-        $user->update($userData);
+        try {
+            // Update user
+            $userData = [
+                'username' => $request->username,
+                'email' => $request->email,
+            ];
+            
+            // Update password jika diisi
+            if ($request->filled('password')) {
+                $userData['password'] = Hash::make($request->password);
+            }
+            
+            $user->update($userData);
 
-        // Update data pegawai
-        if ($user->pegawai) {
-            $user->pegawai->update([
-                'nama_lengkap' => $request->nama_lengkap,
-                'alamat' => $request->alamat,
-                'no_hp' => $request->no_hp,
-                'gaji_pokok' => $request->gaji_pokok,
-            ]);
-        } else {
-            Pegawai::create([
-                'id_pegawai' => $user->id_pegawai,
-                'jenis_pegawai' => 'admin',
-                'nama_lengkap' => $request->nama_lengkap,
-                'alamat' => $request->alamat,
-                'no_hp' => $request->no_hp,
-                'gaji_pokok' => $request->gaji_pokok,
-            ]);
-        }
+            // Update data pegawai
+            if ($user->pegawai) {
+                $user->pegawai->update([
+                    'nama_lengkap' => $request->nama_lengkap,
+                    'alamat' => $request->alamat,
+                    'no_hp' => $request->no_hp,
+                    'gaji_pokok' => $request->gaji_pokok,
+                ]);
+            } else {
+                Pegawai::create([
+                    'id_pegawai' => $user->id_pegawai,
+                    'jenis_pegawai' => 'admin',
+                    'nama_lengkap' => $request->nama_lengkap,
+                    'alamat' => $request->alamat,
+                    'no_hp' => $request->no_hp,
+                    'gaji_pokok' => $request->gaji_pokok,
+                ]);
+            }
 
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+            return response()->json(['success' => true, 'message' => 'Admin berhasil diperbarui']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal: ' . $e->getMessage()]);
+        }
+    }
+
+    // Update password admin
+    public function updatePassword(Request $request, $id)
+    {
+        $request->validate([
+            'password' => 'required|string|min:6|confirmed',
+        ]);
         
-        return redirect()->route($role . '.kelola-admin')->with('success', 'Admin berhasil diperbarui');
+        try {
+            $user = User::findOrFail($id);
+            $user->update([
+                'password' => Hash::make($request->password),
+            ]);
+            
+            return response()->json(['success' => true, 'message' => 'Password berhasil diubah']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal: ' . $e->getMessage()]);
+        }
     }
 
     // Hapus data admin

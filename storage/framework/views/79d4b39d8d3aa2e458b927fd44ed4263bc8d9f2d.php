@@ -126,6 +126,26 @@
             </table>
         </div>
     </div>
+    
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <option value="10">10 baris</option>
+                <option value="25">25 baris</option>
+                <option value="50">50 baris</option>
+            </select>
+            <span style="color: #374151; font-size: 13px;">Menampilkan <?php echo e($murids->count()); ?> data</span>
+        </div>
+
+        <div style="display: flex; gap: 5px;">
+            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-double-left"></i></button>
+            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-left"></i></button>
+            <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">1</button>
+            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-right"></i></button>
+        </div>
+    </div>
+
 </div>
 
 
@@ -152,26 +172,35 @@
 </div>
 
 <script>
+    // =============================================
+    // BUKA MODAL CREATE
+    // =============================================
     function bukaModalCreate() {
         fetch("<?php echo e(route($role . '.murid.create')); ?>")
             .then(r => r.text())
             .then(html => {
                 document.getElementById('modalContent').innerHTML = html;
                 document.getElementById('modalForm').style.display = 'flex';
-                initFormScript();
+                setTimeout(() => pasangEventHandler(), 100);
             });
     }
 
+    // =============================================
+    // BUKA MODAL EDIT
+    // =============================================
     function bukaModalEdit(id) {
         fetch("<?php echo e(route($role . '.murid.edit', '')); ?>/" + id)
             .then(r => r.text())
             .then(html => {
                 document.getElementById('modalContent').innerHTML = html;
                 document.getElementById('modalForm').style.display = 'flex';
-                initFormScript();
+                setTimeout(() => pasangEventHandler(), 100);
             });
     }
 
+    // =============================================
+    // TUTUP MODAL FORM
+    // =============================================
     function tutupModalForm() {
         document.getElementById('modalForm').style.display = 'none';
         document.getElementById('modalContent').innerHTML = '';
@@ -181,58 +210,126 @@
         if (e.target === this) tutupModalForm();
     });
 
-    function initFormScript() {
-        const form = document.querySelector('#modalContent form');
-        if (!form) return;
-
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(form);
-            const action = form.getAttribute('action');
-            const method = form.querySelector('input[name="_method"]')?.value || 'POST';
-
-            fetch(action, {
-                method: method,
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || formData.get('_token')
-                }
-            })
-            .then(r => {
-                if (r.redirected) window.location.href = r.url;
-                else return r.json().then(data => {
-                    if (data.success) window.location.reload();
-                    else alert(data.message || 'Gagal menyimpan');
-                });
-            })
-            .catch(err => { console.error(err); window.location.reload(); });
-        });
-
-        const kelasSelect = document.getElementById('id_kelas');
-        const paketSelect = document.getElementById('id_paket');
-        if (kelasSelect && paketSelect) {
-            kelasSelect.addEventListener('change', function() {
-                const jenjang = this.options[this.selectedIndex]?.getAttribute('data-jenjang');
-                if (jenjang) {
-                    for (let i = 0; i < paketSelect.options.length; i++) {
-                        if (paketSelect.options[i].getAttribute('data-tingkat') === jenjang) {
-                            paketSelect.value = paketSelect.options[i].value;
-                            paketSelect.dispatchEvent(new Event('change'));
-                            break;
-                        }
-                    }
-                }
+    // =============================================
+    // PASANG EVENT HANDLER UNTUK FORM DI DALAM MODAL
+    // =============================================
+    function pasangEventHandler() {
+        const modalContent = document.getElementById('modalContent');
+        if (!modalContent) return;
+        
+        const form = modalContent.querySelector('form');
+        const btnKeluar = modalContent.querySelector('#btnKeluar');
+        const btnSimpan = modalContent.querySelector('#btnSimpan');
+        const btnUpdate = modalContent.querySelector('#btnUpdate');
+        const modalBatal = modalContent.querySelector('#modalBatal');
+        const modalPindahHalaman = modalContent.querySelector('#modalPindahHalaman');
+        const modalSukses = modalContent.querySelector('#modalSukses');
+        const btnTidakBatal = modalContent.querySelector('#btnTidakBatal');
+        const btnYaKeluar = modalContent.querySelector('#btnYaKeluar');
+        const btnTidakPindah = modalContent.querySelector('#btnTidakPindah');
+        const btnYaPindah = modalContent.querySelector('#btnYaPindah');
+        const btnOkSukses = modalContent.querySelector('#btnOkSukses');
+        const alertError = modalContent.querySelector('#alertError');
+        const alertErrorText = modalContent.querySelector('#alertErrorText');
+        const pesanSukses = modalContent.querySelector('#pesanSukses');
+        
+        let formChanged = false;
+        let formSubmitted = false;
+        
+        if (form) {
+            const inputs = form.querySelectorAll('input:not([readonly]), select, textarea');
+            inputs.forEach(function(input) {
+                input.addEventListener('input', function() { if (!formSubmitted) formChanged = true; });
+                input.addEventListener('change', function() { if (!formSubmitted) formChanged = true; });
             });
-            paketSelect.addEventListener('change', function() {
-                const harga = this.options[this.selectedIndex]?.getAttribute('data-harga');
-                if (harga) {
-                    document.getElementById('hargaPaket').innerHTML = 'Rp ' + new Intl.NumberFormat('id-ID').format(harga);
+        }
+        
+        // BUTTON KELUAR
+        if (btnKeluar) {
+            btnKeluar.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (formChanged && !formSubmitted) {
+                    if (modalPindahHalaman) modalPindahHalaman.style.display = 'flex';
+                } else {
+                    if (modalBatal) modalBatal.style.display = 'flex';
                 }
             });
         }
+        
+        // MODAL BATAL
+        if (btnTidakBatal) btnTidakBatal.addEventListener('click', () => { if (modalBatal) modalBatal.style.display = 'none'; });
+        if (btnYaKeluar) btnYaKeluar.addEventListener('click', () => { formChanged = false; if (modalBatal) modalBatal.style.display = 'none'; tutupModalForm(); });
+        if (modalBatal) modalBatal.addEventListener('click', function(e) { if (e.target === modalBatal) modalBatal.style.display = 'none'; });
+        
+        // MODAL PINDAH
+        if (btnTidakPindah) btnTidakPindah.addEventListener('click', () => { if (modalPindahHalaman) modalPindahHalaman.style.display = 'none'; });
+        if (btnYaPindah) btnYaPindah.addEventListener('click', () => { formChanged = false; if (modalPindahHalaman) modalPindahHalaman.style.display = 'none'; tutupModalForm(); });
+        if (modalPindahHalaman) modalPindahHalaman.addEventListener('click', function(e) { if (e.target === modalPindahHalaman) modalPindahHalaman.style.display = 'none'; });
+        
+        // MODAL SUKSES
+        if (btnOkSukses) btnOkSukses.addEventListener('click', () => { if (modalSukses) modalSukses.style.display = 'none'; tutupModalForm(); window.location.reload(); });
+        if (modalSukses) modalSukses.addEventListener('click', function(e) { if (e.target === modalSukses) { modalSukses.style.display = 'none'; tutupModalForm(); window.location.reload(); } });
+        
+        // SUBMIT FORM
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                const submitBtn = btnSimpan || btnUpdate;
+                const originalText = submitBtn ? submitBtn.innerHTML : 'Simpan';
+                if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...'; }
+                
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        formChanged = false;
+                        formSubmitted = true;
+                        if (pesanSukses) pesanSukses.textContent = data.message || 'Data berhasil disimpan.';
+                        if (modalSukses) modalSukses.style.display = 'flex';
+                    } else {
+                        let errorMsg = data.message || 'Gagal menyimpan data';
+                        if (data.errors) { errorMsg = ''; for (let field in data.errors) { errorMsg += data.errors[field].join('\n') + '\n'; } }
+                        if (alertError && alertErrorText) { alertErrorText.textContent = errorMsg; alertError.style.display = 'flex'; setTimeout(() => { alertError.style.display = 'none'; }, 5000); }
+                        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalText; }
+                    }
+                })
+                .catch(err => {
+                    if (alertError && alertErrorText) { alertErrorText.textContent = 'Terjadi kesalahan: ' + err.message; alertError.style.display = 'flex'; setTimeout(() => { alertError.style.display = 'none'; }, 5000); }
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalText; }
+                });
+            });
+        }
+        
+        // SELECT KELAS & PAKET
+        const kelasSelect = modalContent.querySelector('#id_kelas');
+        const paketSelect = modalContent.querySelector('#id_paket');
+        const hargaPaket = modalContent.querySelector('#hargaPaket');
+        if (kelasSelect && paketSelect) {
+            kelasSelect.addEventListener('change', function() {
+                const jenjang = this.options[this.selectedIndex]?.getAttribute('data-jenjang');
+                if (jenjang) { for (let i = 0; i < paketSelect.options.length; i++) { if (paketSelect.options[i].getAttribute('data-tingkat') === jenjang) { paketSelect.value = paketSelect.options[i].value; paketSelect.dispatchEvent(new Event('change')); break; } } }
+            });
+            paketSelect.addEventListener('change', function() {
+                const harga = this.options[this.selectedIndex]?.getAttribute('data-harga');
+                if (harga && hargaPaket) hargaPaket.innerHTML = 'Rp ' + new Intl.NumberFormat('id-ID').format(harga);
+            });
+            if (paketSelect.value) paketSelect.dispatchEvent(new Event('change'));
+        }
     }
 
+    // =============================================
+    // SEARCH & FILTER
+    // =============================================
     document.getElementById('searchInput').addEventListener('keyup', function() {
         let val = this.value.toLowerCase();
         document.querySelectorAll('#tableBody tr').forEach(row => {
@@ -260,6 +357,9 @@
         });
     });
 
+    // =============================================
+    // MODAL HAPUS
+    // =============================================
     function bukaModalHapus(id, nama) {
         document.getElementById('formHapus').action = "<?php echo e(route($role . '.murid.destroy', '')); ?>/" + id;
         document.getElementById('pesanHapus').innerHTML = `Yakin ingin menghapus data murid <strong>${nama}</strong>?`;
@@ -269,6 +369,28 @@
     function tutupModalHapus() {
         document.getElementById('modalHapus').style.display = 'none';
     }
+    
+    document.getElementById('modalHapus').addEventListener('click', function(e) {
+        if (e.target === this) tutupModalHapus();
+    });
+
+    // =============================================
+    // PAGE SELECT (PAGINATION)
+    // =============================================
+    document.getElementById('pageSelect').addEventListener('change', function() {
+        let perPage = this.value;
+        let url = new URL(window.location.href);
+        url.searchParams.set('per_page', perPage);
+        window.location.href = url.toString();
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const perPage = urlParams.get('per_page');
+        if (perPage && document.getElementById('pageSelect')) {
+            document.getElementById('pageSelect').value = perPage;
+        }
+    });
 </script>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/kelola-murid/kelola-murid.blade.php ENDPATH**/ ?>

@@ -10,34 +10,34 @@
         <span id="alertErrorText"></span>
     </div>
 
-    <form action="{{ route($role . '.master-data.kelas.update', $kelas->id_kelas) }}" method="POST">
-        @csrf
-        @method('PUT')
+    <form action="<?php echo e(route($role . '.master-data.kelas.update', $kelas->id_kelas)); ?>" method="POST">
+        <?php echo csrf_field(); ?>
+        <?php echo method_field('PUT'); ?>
         
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">ID Kelas</label>
-            <input type="text" value="KLS{{ str_pad($kelas->id_kelas, 4, '0', STR_PAD_LEFT) }}" readonly 
+            <input type="text" value="KLS<?php echo e(str_pad($kelas->id_kelas, 4, '0', STR_PAD_LEFT)); ?>" readonly 
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px; font-family: 'Poppins', sans-serif;">
         </div>
 
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Nama Kelas <span style="color: #EF4444;">*</span></label>
-            <input type="text" name="nama_kelas" value="{{ old('nama_kelas', $kelas->nama_kelas) }}" required
+            <input type="text" name="nama_kelas" value="<?php echo e(old('nama_kelas', $kelas->nama_kelas)); ?>" required
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif;">
         </div>
 
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Jenjang <span style="color: #EF4444;">*</span></label>
             <select name="jenjang" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; cursor: pointer;">
-                <option value="SD" {{ old('jenjang', $kelas->jenjang) == 'SD' ? 'selected' : '' }}>SD</option>
-                <option value="SMP" {{ old('jenjang', $kelas->jenjang) == 'SMP' ? 'selected' : '' }}>SMP</option>
-                <option value="SMA" {{ old('jenjang', $kelas->jenjang) == 'SMA' ? 'selected' : '' }}>SMA</option>
+                <option value="SD" <?php echo e(old('jenjang', $kelas->jenjang) == 'SD' ? 'selected' : ''); ?>>SD</option>
+                <option value="SMP" <?php echo e(old('jenjang', $kelas->jenjang) == 'SMP' ? 'selected' : ''); ?>>SMP</option>
+                <option value="SMA" <?php echo e(old('jenjang', $kelas->jenjang) == 'SMA' ? 'selected' : ''); ?>>SMA</option>
             </select>
         </div>
 
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Jumlah Murid</label>
-            <input type="text" value="{{ $kelas->jumlah_murid ?? 0 }}" readonly 
+            <input type="text" value="<?php echo e($kelas->jumlah_murid ?? 0); ?>" readonly 
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px; font-family: 'Poppins', sans-serif;">
         </div>
 
@@ -54,7 +54,7 @@
     </form>
 </div>
 
-{{-- MODALS --}}
+
 <div id="modalBatal" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -86,4 +86,4 @@
         <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;" id="pesanSukses">Data berhasil diupdate.</p>
         <button type="button" id="btnOkSukses" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #10B981; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">OK</button>
     </div>
-</div>
+</div><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/master-data/kelas/edit.blade.php ENDPATH**/ ?>

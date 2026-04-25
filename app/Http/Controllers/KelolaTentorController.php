@@ -6,24 +6,22 @@ use Illuminate\Http\Request;
 use App\Models\Pegawai;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class KelolaTentorController extends Controller
 {
-    // Menampilkan semua data tentor
     public function index(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
         $query = Pegawai::with('user')->where('jenis_pegawai', 'tentor');
         
-        // Filter berdasarkan status
         if ($request->has('status') && $request->status != '') {
             $query->whereHas('user', function($q) use ($request) {
                 $q->where('status', $request->status);
             });
         }
         
-        // Pencarian
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -53,19 +51,15 @@ class KelolaTentorController extends Controller
         }
     }
     
-    // Form tambah tentor
     public function create()
     {
         if (auth()->user()->peran != 'superadmin') {
             abort(403, 'Unauthorized action.');
         }
         
-        return view('dashboard.superadmin.kelola-tentor.create-tentor', [
-            'role' => 'superadmin'
-        ]);
+        return view('dashboard.superadmin.kelola-tentor.create-tentor');
     }
     
-    // Simpan tentor baru
     public function store(Request $request)
     {
         if (auth()->user()->peran != 'superadmin') {
@@ -74,10 +68,10 @@ class KelolaTentorController extends Controller
         
         $request->validate([
             'nama_lengkap' => 'required|string|max:35',
-            'alamat' => 'nullable|string|max:100',
-            'no_hp' => 'nullable|string|max:15',
-            'mapel' => 'nullable|string|max:50',
-            'grade' => 'nullable|in:A,B',
+            'alamat' => 'required|string|max:100',
+            'no_hp' => 'required|string|max:15',
+            'mapel' => 'required|string|max:50',
+            'grade' => 'required|in:A,B',
             'hr_sd' => 'nullable|integer|min:0',
             'hr_smp' => 'nullable|integer|min:0',
             'hr_sma' => 'nullable|integer|min:0',
@@ -88,6 +82,7 @@ class KelolaTentorController extends Controller
             'password' => 'required|string|min:6',
         ]);
         
+        DB::beginTransaction();
         try {
             $pegawai = Pegawai::create([
                 'jenis_pegawai' => 'tentor',
@@ -95,7 +90,7 @@ class KelolaTentorController extends Controller
                 'alamat' => $request->alamat,
                 'no_hp' => $request->no_hp,
                 'mapel' => $request->mapel,
-                'gaji_pokok' => null,  // ✅ Tentor tidak punya gaji pokok
+                'gaji_pokok' => null,
                 'grade' => $request->grade,
                 'hr_sd' => $request->hr_sd ?? 0,
                 'hr_smp' => $request->hr_smp ?? 0,
@@ -113,17 +108,16 @@ class KelolaTentorController extends Controller
                 'peran' => 'tentor',
             ]);
             
-            return redirect()->route('superadmin.kelola-tentor')
-                ->with('success', 'Data tentor berhasil ditambahkan');
+            DB::commit();
+            
+            return response()->json(['success' => true, 'message' => 'Data tentor berhasil ditambahkan']);
                 
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()])
-                ->withInput();
+            DB::rollback();
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
     
-    // Form edit tentor
     public function edit($id)
     {
         if (auth()->user()->peran != 'superadmin') {
@@ -133,12 +127,10 @@ class KelolaTentorController extends Controller
         $tentor = Pegawai::with('user')->where('jenis_pegawai', 'tentor')->findOrFail($id);
         
         return view('dashboard.superadmin.kelola-tentor.edit-tentor', [
-            'role' => 'superadmin',
             'tentor' => $tentor,
         ]);
     }
     
-    // Update tentor
     public function update(Request $request, $id)
     {
         if (auth()->user()->peran != 'superadmin') {
@@ -149,10 +141,10 @@ class KelolaTentorController extends Controller
         
         $request->validate([
             'nama_lengkap' => 'required|string|max:35',
-            'alamat' => 'nullable|string|max:100',
-            'no_hp' => 'nullable|string|max:15',
-            'mapel' => 'nullable|string|max:50',
-            'grade' => 'nullable|in:A,B',
+            'alamat' => 'required|string|max:100',
+            'no_hp' => 'required|string|max:15',
+            'mapel' => 'required|string|max:50',
+            'grade' => 'required|in:A,B',
             'hr_sd' => 'nullable|integer|min:0',
             'hr_smp' => 'nullable|integer|min:0',
             'hr_sma' => 'nullable|integer|min:0',
@@ -163,8 +155,8 @@ class KelolaTentorController extends Controller
             'password' => 'nullable|string|min:6',
         ]);
         
+        DB::beginTransaction();
         try {
-            // Update user
             $userData = [
                 'email' => $request->email,
                 'username' => $request->username,
@@ -174,13 +166,12 @@ class KelolaTentorController extends Controller
             }
             $tentor->user->update($userData);
             
-            // Update pegawai
             $tentor->update([
                 'nama_lengkap' => $request->nama_lengkap,
                 'alamat' => $request->alamat,
                 'no_hp' => $request->no_hp,
                 'mapel' => $request->mapel,
-                'gaji_pokok' => null,  // ✅ Tetap null untuk tentor
+                'gaji_pokok' => null,
                 'grade' => $request->grade,
                 'hr_sd' => $request->hr_sd ?? 0,
                 'hr_smp' => $request->hr_smp ?? 0,
@@ -189,23 +180,45 @@ class KelolaTentorController extends Controller
                 'uang_transport' => $request->uang_transport ?? 0,
             ]);
             
-            return redirect()->route('superadmin.kelola-tentor')
-                ->with('success', 'Data tentor berhasil diperbarui');
+            DB::commit();
+            
+            return response()->json(['success' => true, 'message' => 'Data tentor berhasil diperbarui']);
                 
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()])
-                ->withInput();
+            DB::rollback();
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
     
-    // Hapus tentor
+    public function updatePassword(Request $request, $id)
+    {
+        if (auth()->user()->peran != 'superadmin') {
+            abort(403, 'Unauthorized action.');
+        }
+        
+        $request->validate([
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+        
+        try {
+            $tentor = Pegawai::with('user')->where('jenis_pegawai', 'tentor')->findOrFail($id);
+            $tentor->user->update([
+                'password' => Hash::make($request->password),
+            ]);
+            
+            return response()->json(['success' => true, 'message' => 'Password berhasil diubah']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal: ' . $e->getMessage()]);
+        }
+    }
+    
     public function destroy($id)
     {
         if (auth()->user()->peran != 'superadmin') {
             abort(403, 'Unauthorized action.');
         }
         
+        DB::beginTransaction();
         try {
             $tentor = Pegawai::where('jenis_pegawai', 'tentor')->findOrFail($id);
             
@@ -215,16 +228,18 @@ class KelolaTentorController extends Controller
             
             $tentor->delete();
             
+            DB::commit();
+            
             return redirect()->route('superadmin.kelola-tentor')
                 ->with('success', 'Data tentor berhasil dihapus');
                 
         } catch (\Exception $e) {
+            DB::rollback();
             return redirect()->back()
                 ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
     
-    // Toggle status
     public function toggleStatus($id)
     {
         if (auth()->user()->peran != 'superadmin') {

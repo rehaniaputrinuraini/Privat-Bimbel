@@ -175,6 +175,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/kelola-tentor/store', [KelolaTentorController::class, 'store'])->name('kelola-tentor.store');
         Route::get('/kelola-tentor/edit/{id}', [KelolaTentorController::class, 'edit'])->name('kelola-tentor.edit');
         Route::put('/kelola-tentor/update/{id}', [KelolaTentorController::class, 'update'])->name('kelola-tentor.update');
+        Route::put('/kelola-tentor/password/{id}', [KelolaTentorController::class, 'updatePassword'])->name('kelola-tentor.updatePassword');
         Route::delete('/kelola-tentor/destroy/{id}', [KelolaTentorController::class, 'destroy'])->name('kelola-tentor.destroy');
         Route::patch('/kelola-tentor/toggle-status/{id}', [KelolaTentorController::class, 'toggleStatus'])->name('kelola-tentor.toggle-status');
         
@@ -184,6 +185,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/kelola-admin/store', [KelolaAdminController::class, 'store'])->name('kelola-admin.store');
         Route::get('/kelola-admin/edit/{id}', [KelolaAdminController::class, 'edit'])->name('kelola-admin.edit');
         Route::put('/kelola-admin/update/{id}', [KelolaAdminController::class, 'update'])->name('kelola-admin.update');
+        Route::put('/kelola-admin/password/{id}', [KelolaAdminController::class, 'updatePassword'])->name('kelola-admin.updatePassword');
         Route::delete('/kelola-admin/destroy/{id}', [KelolaAdminController::class, 'destroy'])->name('kelola-admin.destroy');
         
         // LAPORAN KEUANGAN
