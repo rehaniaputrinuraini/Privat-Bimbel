@@ -109,8 +109,8 @@
         </button>
     </div>
 
-    {{-- TABEL PEMASUKAN --}}
-    <div class="table-container" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
+    {{-- ========== TABEL PEMASUKAN ========== --}}
+    <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
         <div style="padding: 20px 20px 15px;">
             <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #111827;">Riwayat Pemasukan</h4>
         </div>
@@ -118,12 +118,12 @@
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
                 <thead>
                     <tr style="background: #A2B9EE; color: #111827;">
-                        <th style="padding: 15px; font-weight: 700; text-align: center; width: 50px;">No</th>
-                        <th style="padding: 15px; font-weight: 700;">Tanggal</th>
-                        <th style="padding: 15px; font-weight: 700;">Rincian</th>
-                        <th style="padding: 15px; font-weight: 700;">Jenis Pembayaran</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: right;">Jumlah</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Aksi</th>
+                        <th style="padding: 15px; text-align: center; width: 50px;">No</th>
+                        <th style="padding: 15px;">Tanggal</th>
+                        <th style="padding: 15px;">Rincian</th>
+                        <th style="padding: 15px;">Jenis Pembayaran</th>
+                        <th style="padding: 15px; text-align: right;">Jumlah</th>
+                        <th style="padding: 15px; text-align: center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tbodyPemasukan" style="color: #374151;">
@@ -133,9 +133,9 @@
                         <td style="padding: 15px;">{{ $p->tanggal ? \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d M Y') : '-' }}</td>
                         <td style="padding: 15px;">
                             {{ $p->rincian }}
-                            @if($p->sumber == 'pendaftaran')
+                            @if(isset($p->sumber) && $p->sumber == 'pendaftaran')
                                 <span style="background: #4472DF; color: white; padding: 2px 8px; border-radius: 20px; font-size: 10px; margin-left: 8px;">Auto</span>
-                            @else
+                            @elseif(isset($p->sumber) && $p->sumber == 'manual')
                                 <span style="background: #9CA3AF; color: white; padding: 2px 8px; border-radius: 20px; font-size: 10px; margin-left: 8px;">Manual</span>
                             @endif
                         </td>
@@ -154,30 +154,47 @@
                 </tbody>
             </table>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #F9FAFB; border-top: 1px solid #F3F4F6;">
-            <span style="font-size: 13px; color: #374151;">Menampilkan {{ $pemasukan->firstItem() ?? 0 }} - {{ $pemasukan->lastItem() ?? 0 }} dari {{ $pemasukan->total() ?? 0 }} data</span>
-            <div style="display: flex; gap: 5px;">
-                @if ($pemasukan->onFirstPage())
-                    <button disabled style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-left"></i></button>
-                @else
-                    <a href="{{ $pemasukan->previousPageUrl() }}" style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #4472DF; background: white; color: #4472DF; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
-                @endif
-                <button style="width: 30px; height: 30px; border-radius: 6px; background: #4472DF; color: white; border: none; font-weight: 600; font-size: 12px;">{{ $pemasukan->currentPage() }}</button>
-                @if ($pemasukan->hasMorePages())
-                    <a href="{{ $pemasukan->nextPageUrl() }}" style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #4472DF; background: white; color: #4472DF; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
-                @else
-                    <button disabled style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-right"></i></button>
-                @endif
-            </div>
-        </div>
-        <div style="display: flex; justify-content: space-between; padding: 10px 20px; background: #F0F4FF; border-top: 1px solid #F3F4F6;">
+        {{-- TOTAL --}}
+        <div style="display: flex; justify-content: space-between; padding: 12px 20px; background: #F0F4FF; border-top: 2px solid #4472DF;">
             <span style="font-size: 14px; font-weight: 700; color: #111827;">Total Pemasukan</span>
             <span style="font-size: 15px; font-weight: 800; color: #4472DF;">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</span>
         </div>
+        {{-- PAGINATION (SAMA PERSIS ADMIN) --}}
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #F9FAFB; border-top: 1px solid #F3F4F6;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <select onchange="changePerPage(this.value, 'page_pemasukan')" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
+                    <option value="10" {{ request('per_page_pemasukan', 10) == 10 ? 'selected' : '' }}>10 baris</option>
+                    <option value="25" {{ request('per_page_pemasukan') == 25 ? 'selected' : '' }}>25 baris</option>
+                    <option value="50" {{ request('per_page_pemasukan') == 50 ? 'selected' : '' }}>50 baris</option>
+                </select>
+                <span style="color: #374151; font-size: 13px;">Menampilkan {{ $pemasukan->count() }} data</span>
+            </div>
+            <div style="display: flex; gap: 5px;">
+                @if ($pemasukan->onFirstPage())
+                    <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-double-left"></i></button>
+                    <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-left"></i></button>
+                @else
+                    <a href="{{ request()->fullUrlWithQuery(['page_pemasukan' => 1]) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #4472DF; background: white; color: #4472DF; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
+                    <a href="{{ $pemasukan->previousPageUrl() }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #4472DF; background: white; color: #4472DF; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
+                @endif
+                @foreach ($pemasukan->getUrlRange(1, $pemasukan->lastPage()) as $page => $url)
+                    @if ($page == $pemasukan->currentPage())
+                        <button style="width: 35px; height: 35px; border-radius: 8px; background: #4472DF; color: white; border: none; font-weight: 600; cursor: pointer;">{{ $page }}</button>
+                    @else
+                        <a href="{{ $url }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #4472DF; background: white; color: #4472DF; display: flex; align-items: center; justify-content: center; text-decoration: none;">{{ $page }}</a>
+                    @endif
+                @endforeach
+                @if ($pemasukan->hasMorePages())
+                    <a href="{{ $pemasukan->nextPageUrl() }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #4472DF; background: white; color: #4472DF; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
+                @else
+                    <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-right"></i></button>
+                @endif
+            </div>
+        </div>
     </div>
 
-    {{-- TABEL PENGELUARAN --}}
-    <div class="table-container" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
+    {{-- ========== TABEL PENGELUARAN ========== --}}
+    <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
         <div style="padding: 20px 20px 15px;">
             <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #111827;">Riwayat Pengeluaran</h4>
         </div>
@@ -185,12 +202,12 @@
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
                 <thead>
                     <tr style="background: #EEA2A2; color: #111827;">
-                        <th style="padding: 15px; font-weight: 700; text-align: center; width: 50px;">No</th>
-                        <th style="padding: 15px; font-weight: 700;">Tanggal</th>
-                        <th style="padding: 15px; font-weight: 700;">Rincian</th>
-                        <th style="padding: 15px; font-weight: 700;">Jenis Pembayaran</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: right;">Jumlah</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Aksi</th>
+                        <th style="padding: 15px; text-align: center; width: 50px;">No</th>
+                        <th style="padding: 15px;">Tanggal</th>
+                        <th style="padding: 15px;">Rincian</th>
+                        <th style="padding: 15px;">Jenis Pembayaran</th>
+                        <th style="padding: 15px; text-align: right;">Jumlah</th>
+                        <th style="padding: 15px; text-align: center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tbodyPengeluaran" style="color: #374151;">
@@ -214,30 +231,47 @@
                 </tbody>
             </table>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #F9FAFB; border-top: 1px solid #F3F4F6;">
-            <span style="font-size: 13px; color: #374151;">Menampilkan {{ $pengeluaran->firstItem() ?? 0 }} - {{ $pengeluaran->lastItem() ?? 0 }} dari {{ $pengeluaran->total() ?? 0 }} data</span>
-            <div style="display: flex; gap: 5px;">
-                @if ($pengeluaran->onFirstPage())
-                    <button disabled style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-left"></i></button>
-                @else
-                    <a href="{{ $pengeluaran->previousPageUrl() }}" style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #D74E4E; background: white; color: #D74E4E; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
-                @endif
-                <button style="width: 30px; height: 30px; border-radius: 6px; background: #D74E4E; color: white; border: none; font-weight: 600; font-size: 12px;">{{ $pengeluaran->currentPage() }}</button>
-                @if ($pengeluaran->hasMorePages())
-                    <a href="{{ $pengeluaran->nextPageUrl() }}" style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #D74E4E; background: white; color: #D74E4E; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
-                @else
-                    <button disabled style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-right"></i></button>
-                @endif
-            </div>
-        </div>
-        <div style="display: flex; justify-content: space-between; padding: 10px 20px; background: #FFF0F0; border-top: 1px solid #F3F4F6;">
+        {{-- TOTAL --}}
+        <div style="display: flex; justify-content: space-between; padding: 12px 20px; background: #FFF0F0; border-top: 2px solid #D74E4E;">
             <span style="font-size: 14px; font-weight: 700; color: #111827;">Total Pengeluaran</span>
             <span style="font-size: 15px; font-weight: 800; color: #D74E4E;">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</span>
         </div>
+        {{-- PAGINATION --}}
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #F9FAFB; border-top: 1px solid #F3F4F6;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <select onchange="changePerPage(this.value, 'page_pengeluaran')" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
+                    <option value="10" {{ request('per_page_pengeluaran', 10) == 10 ? 'selected' : '' }}>10 baris</option>
+                    <option value="25" {{ request('per_page_pengeluaran') == 25 ? 'selected' : '' }}>25 baris</option>
+                    <option value="50" {{ request('per_page_pengeluaran') == 50 ? 'selected' : '' }}>50 baris</option>
+                </select>
+                <span style="color: #374151; font-size: 13px;">Menampilkan {{ $pengeluaran->count() }} data</span>
+            </div>
+            <div style="display: flex; gap: 5px;">
+                @if ($pengeluaran->onFirstPage())
+                    <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-double-left"></i></button>
+                    <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-left"></i></button>
+                @else
+                    <a href="{{ request()->fullUrlWithQuery(['page_pengeluaran' => 1]) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #D74E4E; background: white; color: #D74E4E; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
+                    <a href="{{ $pengeluaran->previousPageUrl() }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #D74E4E; background: white; color: #D74E4E; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
+                @endif
+                @foreach ($pengeluaran->getUrlRange(1, $pengeluaran->lastPage()) as $page => $url)
+                    @if ($page == $pengeluaran->currentPage())
+                        <button style="width: 35px; height: 35px; border-radius: 8px; background: #D74E4E; color: white; border: none; font-weight: 600; cursor: pointer;">{{ $page }}</button>
+                    @else
+                        <a href="{{ $url }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #D74E4E; background: white; color: #D74E4E; display: flex; align-items: center; justify-content: center; text-decoration: none;">{{ $page }}</a>
+                    @endif
+                @endforeach
+                @if ($pengeluaran->hasMorePages())
+                    <a href="{{ $pengeluaran->nextPageUrl() }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #D74E4E; background: white; color: #D74E4E; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
+                @else
+                    <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-right"></i></button>
+                @endif
+            </div>
+        </div>
     </div>
 
-    {{-- TABEL PIUTANG --}}
-    <div class="table-container" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
+    {{-- ========== TABEL PIUTANG ========== --}}
+    <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
         <div style="padding: 20px 20px 15px;">
             <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #111827;">Riwayat Piutang (Tunggakan)</h4>
         </div>
@@ -245,12 +279,12 @@
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
                 <thead>
                     <tr style="background: #EEDCA2; color: #111827;">
-                        <th style="padding: 15px; font-weight: 700; text-align: center; width: 50px;">No</th>
-                        <th style="padding: 15px; font-weight: 700;">Tanggal</th>
-                        <th style="padding: 15px; font-weight: 700;">Nama Murid</th>
-                        <th style="padding: 15px; font-weight: 700;">Bulan Tagihan</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: right;">Jumlah</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Aksi</th>
+                        <th style="padding: 15px; text-align: center; width: 50px;">No</th>
+                        <th style="padding: 15px;">Tanggal</th>
+                        <th style="padding: 15px;">Nama Murid</th>
+                        <th style="padding: 15px;">Bulan Tagihan</th>
+                        <th style="padding: 15px; text-align: right;">Jumlah</th>
+                        <th style="padding: 15px; text-align: center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tbodyPiutang" style="color: #374151;">
@@ -265,7 +299,7 @@
                         <td style="padding: 15px;">{{ $p->bulan_periode ?? '-' }}</td>
                         <td style="padding: 15px; text-align: right; font-weight: 700; color: #E7C255;">Rp {{ number_format($p->jumlah, 0, ',', '.') }}</td>
                         <td style="padding: 15px; text-align: center;">
-                            <button type="button" onclick="bukaModalHapus('{{ route($role . '.laporan-keuangan.destroy', $p->id) }}', '{{ addslashes($p->nama_murid) }} - {{ addslashes($p->bulan_periode) }}')" 
+                            <button type="button" onclick="bukaModalHapus('{{ route($role . '.laporan-keuangan.destroy', $p->id) }}', '{{ addslashes($p->nama_murid ?? '') }} - {{ addslashes($p->bulan_periode ?? '') }}')" 
                                     style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
                                 <i class="fas fa-trash"></i> Hapus
                             </button>
@@ -277,30 +311,47 @@
                 </tbody>
             </table>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #F9FAFB; border-top: 1px solid #F3F4F6;">
-            <span style="font-size: 13px; color: #374151;">Menampilkan {{ $piutang->firstItem() ?? 0 }} - {{ $piutang->lastItem() ?? 0 }} dari {{ $piutang->total() ?? 0 }} data</span>
-            <div style="display: flex; gap: 5px;">
-                @if ($piutang->onFirstPage())
-                    <button disabled style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-left"></i></button>
-                @else
-                    <a href="{{ $piutang->previousPageUrl() }}" style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E7C255; background: white; color: #E7C255; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
-                @endif
-                <button style="width: 30px; height: 30px; border-radius: 6px; background: #E7C255; color: white; border: none; font-weight: 600; font-size: 12px;">{{ $piutang->currentPage() }}</button>
-                @if ($piutang->hasMorePages())
-                    <a href="{{ $piutang->nextPageUrl() }}" style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E7C255; background: white; color: #E7C255; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
-                @else
-                    <button disabled style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-right"></i></button>
-                @endif
-            </div>
-        </div>
-        <div style="display: flex; justify-content: space-between; padding: 10px 20px; background: #FFFDF0; border-top: 1px solid #F3F4F6;">
+        {{-- TOTAL --}}
+        <div style="display: flex; justify-content: space-between; padding: 12px 20px; background: #FFFDF0; border-top: 2px solid #E7C255;">
             <span style="font-size: 14px; font-weight: 700; color: #111827;">Total Piutang</span>
             <span style="font-size: 15px; font-weight: 800; color: #E7C255;">Rp {{ number_format($totalPiutang, 0, ',', '.') }}</span>
         </div>
+        {{-- PAGINATION --}}
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #F9FAFB; border-top: 1px solid #F3F4F6;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <select onchange="changePerPage(this.value, 'page_piutang')" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
+                    <option value="10" {{ request('per_page_piutang', 10) == 10 ? 'selected' : '' }}>10 baris</option>
+                    <option value="25" {{ request('per_page_piutang') == 25 ? 'selected' : '' }}>25 baris</option>
+                    <option value="50" {{ request('per_page_piutang') == 50 ? 'selected' : '' }}>50 baris</option>
+                </select>
+                <span style="color: #374151; font-size: 13px;">Menampilkan {{ $piutang->count() }} data</span>
+            </div>
+            <div style="display: flex; gap: 5px;">
+                @if ($piutang->onFirstPage())
+                    <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-double-left"></i></button>
+                    <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-left"></i></button>
+                @else
+                    <a href="{{ request()->fullUrlWithQuery(['page_piutang' => 1]) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E7C255; background: white; color: #E7C255; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
+                    <a href="{{ $piutang->previousPageUrl() }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E7C255; background: white; color: #E7C255; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
+                @endif
+                @foreach ($piutang->getUrlRange(1, $piutang->lastPage()) as $page => $url)
+                    @if ($page == $piutang->currentPage())
+                        <button style="width: 35px; height: 35px; border-radius: 8px; background: #E7C255; color: white; border: none; font-weight: 600; cursor: pointer;">{{ $page }}</button>
+                    @else
+                        <a href="{{ $url }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E7C255; background: white; color: #E7C255; display: flex; align-items: center; justify-content: center; text-decoration: none;">{{ $page }}</a>
+                    @endif
+                @endforeach
+                @if ($piutang->hasMorePages())
+                    <a href="{{ $piutang->nextPageUrl() }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E7C255; background: white; color: #E7C255; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
+                @else
+                    <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-right"></i></button>
+                @endif
+            </div>
+        </div>
     </div>
 
-    {{-- TABEL UANG MUKA --}}
-    <div class="table-container" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
+    {{-- ========== TABEL UANG MUKA ========== --}}
+    <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6; margin-bottom: 25px;">
         <div style="padding: 20px 20px 15px;">
             <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #111827;">Riwayat Uang Muka</h4>
         </div>
@@ -308,12 +359,12 @@
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
                 <thead>
                     <tr style="background: #A2EEB9; color: #111827;">
-                        <th style="padding: 15px; font-weight: 700; text-align: center; width: 50px;">No</th>
-                        <th style="padding: 15px; font-weight: 700;">Tanggal</th>
-                        <th style="padding: 15px; font-weight: 700;">Nama Murid</th>
-                        <th style="padding: 15px; font-weight: 700;">Periode</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: right;">Jumlah</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Aksi</th>
+                        <th style="padding: 15px; text-align: center; width: 50px;">No</th>
+                        <th style="padding: 15px;">Tanggal</th>
+                        <th style="padding: 15px;">Nama Murid</th>
+                        <th style="padding: 15px;">Periode</th>
+                        <th style="padding: 15px; text-align: right;">Jumlah</th>
+                        <th style="padding: 15px; text-align: center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tbodyUangMuka" style="color: #374151;">
@@ -328,7 +379,7 @@
                         <td style="padding: 15px;">{{ $u->bulan_periode ?? '-' }}</td>
                         <td style="padding: 15px; text-align: right; font-weight: 700; color: #4AB462;">Rp {{ number_format($u->jumlah, 0, ',', '.') }}</td>
                         <td style="padding: 15px; text-align: center;">
-                            <button type="button" onclick="bukaModalHapus('{{ route($role . '.laporan-keuangan.destroy', $u->id) }}', '{{ addslashes($u->nama_murid) }} - {{ addslashes($u->bulan_periode) }}')" 
+                            <button type="button" onclick="bukaModalHapus('{{ route($role . '.laporan-keuangan.destroy', $u->id) }}', '{{ addslashes($u->nama_murid ?? '') }} - {{ addslashes($u->bulan_periode ?? '') }}')" 
                                     style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer;">
                                 <i class="fas fa-trash"></i> Hapus
                             </button>
@@ -340,25 +391,42 @@
                 </tbody>
             </table>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #F9FAFB; border-top: 1px solid #F3F4F6;">
-            <span style="font-size: 13px; color: #374151;">Menampilkan {{ $uang_muka->firstItem() ?? 0 }} - {{ $uang_muka->lastItem() ?? 0 }} dari {{ $uang_muka->total() ?? 0 }} data</span>
-            <div style="display: flex; gap: 5px;">
-                @if ($uang_muka->onFirstPage())
-                    <button disabled style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-left"></i></button>
-                @else
-                    <a href="{{ $uang_muka->previousPageUrl() }}" style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #4AB462; background: white; color: #4AB462; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
-                @endif
-                <button style="width: 30px; height: 30px; border-radius: 6px; background: #4AB462; color: white; border: none; font-weight: 600; font-size: 12px;">{{ $uang_muka->currentPage() }}</button>
-                @if ($uang_muka->hasMorePages())
-                    <a href="{{ $uang_muka->nextPageUrl() }}" style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #4AB462; background: white; color: #4AB462; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
-                @else
-                    <button disabled style="width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-right"></i></button>
-                @endif
-            </div>
-        </div>
-        <div style="display: flex; justify-content: space-between; padding: 10px 20px; background: #F0FFF4; border-top: 1px solid #F3F4F6;">
+        {{-- TOTAL --}}
+        <div style="display: flex; justify-content: space-between; padding: 12px 20px; background: #F0FFF4; border-top: 2px solid #4AB462;">
             <span style="font-size: 14px; font-weight: 700; color: #111827;">Total Uang Muka</span>
             <span style="font-size: 15px; font-weight: 800; color: #4AB462;">Rp {{ number_format($totalUangMuka, 0, ',', '.') }}</span>
+        </div>
+        {{-- PAGINATION --}}
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #F9FAFB; border-top: 1px solid #F3F4F6;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <select onchange="changePerPage(this.value, 'page_uangmuka')" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
+                    <option value="10" {{ request('per_page_uangmuka', 10) == 10 ? 'selected' : '' }}>10 baris</option>
+                    <option value="25" {{ request('per_page_uangmuka') == 25 ? 'selected' : '' }}>25 baris</option>
+                    <option value="50" {{ request('per_page_uangmuka') == 50 ? 'selected' : '' }}>50 baris</option>
+                </select>
+                <span style="color: #374151; font-size: 13px;">Menampilkan {{ $uang_muka->count() }} data</span>
+            </div>
+            <div style="display: flex; gap: 5px;">
+                @if ($uang_muka->onFirstPage())
+                    <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-double-left"></i></button>
+                    <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-left"></i></button>
+                @else
+                    <a href="{{ request()->fullUrlWithQuery(['page_uangmuka' => 1]) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #4AB462; background: white; color: #4AB462; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
+                    <a href="{{ $uang_muka->previousPageUrl() }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #4AB462; background: white; color: #4AB462; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
+                @endif
+                @foreach ($uang_muka->getUrlRange(1, $uang_muka->lastPage()) as $page => $url)
+                    @if ($page == $uang_muka->currentPage())
+                        <button style="width: 35px; height: 35px; border-radius: 8px; background: #4AB462; color: white; border: none; font-weight: 600; cursor: pointer;">{{ $page }}</button>
+                    @else
+                        <a href="{{ $url }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #4AB462; background: white; color: #4AB462; display: flex; align-items: center; justify-content: center; text-decoration: none;">{{ $page }}</a>
+                    @endif
+                @endforeach
+                @if ($uang_muka->hasMorePages())
+                    <a href="{{ $uang_muka->nextPageUrl() }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #4AB462; background: white; color: #4AB462; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
+                @else
+                    <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-right"></i></button>
+                @endif
+            </div>
         </div>
     </div>
 
@@ -391,7 +459,13 @@
 </div>
 
 <script>
-    // ========== BUKA MODAL CREATE ==========
+    function changePerPage(value, pageName) {
+        let url = new URL(window.location.href);
+        url.searchParams.set('per_page_' + pageName, value);
+        url.searchParams.set(pageName, 1);
+        window.location.href = url.toString();
+    }
+
     function bukaModalCreate() {
         fetch("{{ route($role . '.laporan-keuangan.create') }}")
             .then(r => r.text())
@@ -409,11 +483,9 @@
 
     document.getElementById('modalForm').addEventListener('click', function(e) { if (e.target === this) tutupModalForm(); });
 
-    // ========== PASANG EVENT HANDLER ==========
     function pasangEventHandler() {
         const mc = document.getElementById('modalContent');
         if (!mc) return;
-
         const form = mc.querySelector('#mainForm');
         const btnKeluar = mc.querySelector('#btnKeluar');
         const btnSimpan = mc.querySelector('#btnSimpan');
@@ -428,7 +500,6 @@
         const alertError = mc.querySelector('#alertError');
         const alertErrorText = mc.querySelector('#alertErrorText');
         const pesanSukses = mc.querySelector('#pesanSukses');
-
         let formChanged = false, formSubmitted = false;
 
         if (form) {
@@ -437,21 +508,17 @@
                 el.addEventListener('change', () => { if (!formSubmitted) formChanged = true; });
             });
         }
-
         if (btnKeluar) btnKeluar.addEventListener('click', function(e) {
             e.preventDefault();
             if (formChanged && !formSubmitted) { if (modalPindah) modalPindah.style.display = 'flex'; }
             else { if (modalBatal) modalBatal.style.display = 'flex'; }
         });
-
         if (btnTidakBatal) btnTidakBatal.addEventListener('click', () => { if (modalBatal) modalBatal.style.display = 'none'; });
         if (btnYaKeluar) btnYaKeluar.addEventListener('click', () => { formChanged = false; if (modalBatal) modalBatal.style.display = 'none'; tutupModalForm(); });
         if (modalBatal) modalBatal.addEventListener('click', e => { if (e.target === modalBatal) modalBatal.style.display = 'none'; });
-
         if (btnTidakPindah) btnTidakPindah.addEventListener('click', () => { if (modalPindah) modalPindah.style.display = 'none'; });
         if (btnYaPindah) btnYaPindah.addEventListener('click', () => { formChanged = false; if (modalPindah) modalPindah.style.display = 'none'; tutupModalForm(); });
         if (modalPindah) modalPindah.addEventListener('click', e => { if (e.target === modalPindah) modalPindah.style.display = 'none'; });
-
         if (btnOkSukses) btnOkSukses.addEventListener('click', () => { if (modalSukses) modalSukses.style.display = 'none'; tutupModalForm(); window.location.reload(); });
         if (modalSukses) modalSukses.addEventListener('click', e => { if (e.target === modalSukses) { modalSukses.style.display = 'none'; tutupModalForm(); window.location.reload(); } });
 
@@ -462,7 +529,6 @@
                 const btn = btnSimpan;
                 const orig = btn ? btn.innerHTML : 'Simpan';
                 if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...'; }
-
                 fetch(form.action, {
                     method: 'POST', body: fd,
                     headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '', 'Accept': 'application/json' }
@@ -488,29 +554,18 @@
         }
     }
 
-    // ========== SEARCH ==========
     document.getElementById('searchInput').addEventListener('keyup', function() {
-        let searchValue = this.value.toLowerCase();
-        let tbodyIds = ['tbodyPemasukan', 'tbodyPengeluaran', 'tbodyPiutang', 'tbodyUangMuka'];
-        tbodyIds.forEach(tbodyId => {
-            let rows = document.querySelectorAll('#' + tbodyId + ' tr');
-            rows.forEach(row => {
+        let v = this.value.toLowerCase();
+        ['tbodyPemasukan','tbodyPengeluaran','tbodyPiutang','tbodyUangMuka'].forEach(id => {
+            document.querySelectorAll('#' + id + ' tr').forEach(row => {
                 if (row.cells) {
-                    let text = '';
-                    if (tbodyId === 'tbodyPemasukan' || tbodyId === 'tbodyPengeluaran') {
-                        text = row.cells[2]?.innerText.toLowerCase() || '';
-                    } else {
-                        let namaMurid = row.cells[2]?.innerText.toLowerCase() || '';
-                        let bulanPeriode = row.cells[3]?.innerText.toLowerCase() || '';
-                        text = namaMurid + ' ' + bulanPeriode;
-                    }
-                    row.style.display = text.includes(searchValue) ? '' : 'none';
+                    let txt = id === 'tbodyPemasukan' || id === 'tbodyPengeluaran' ? (row.cells[2]?.innerText||'') : ((row.cells[2]?.innerText||'') + ' ' + (row.cells[3]?.innerText||''));
+                    row.style.display = txt.toLowerCase().includes(v) ? '' : 'none';
                 }
             });
         });
     });
 
-    // ========== MODAL HAPUS ==========
     function bukaModalHapus(url, nama) {
         document.getElementById('formHapus').action = url;
         document.getElementById('pesanHapus').innerHTML = `Apakah Anda yakin ingin menghapus data <strong>${nama}</strong>?`;

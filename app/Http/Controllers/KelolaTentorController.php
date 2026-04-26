@@ -13,6 +13,7 @@ class KelolaTentorController extends Controller
     public function index(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        $perPage = $request->get('per_page', 10);
         
         $query = Pegawai::with('user')->where('jenis_pegawai', 'tentor');
         
@@ -35,8 +36,7 @@ class KelolaTentorController extends Controller
             });
         }
         
-        $perPage = $request->get('per_page', 10);
-        $tentors = $query->orderBy('id_pegawai', 'asc')->paginate($perPage);
+        $tentors = $query->orderBy('id_pegawai', 'asc')->paginate($perPage)->appends($request->query());
         
         if ($role == 'superadmin') {
             return view('dashboard.superadmin.kelola-tentor.kelola-tentor', [
@@ -212,6 +212,29 @@ class KelolaTentorController extends Controller
         }
     }
     
+    public function toggleStatus($id)
+    {
+        if (auth()->user()->peran != 'superadmin') {
+            abort(403, 'Unauthorized action.');
+        }
+        
+        try {
+            $tentor = Pegawai::with('user')->where('jenis_pegawai', 'tentor')->findOrFail($id);
+            $user = $tentor->user;
+            
+            $newStatus = $user->status == 1 ? 0 : 1;
+            $user->update(['status' => $newStatus]);
+            
+            $message = $newStatus == 1 ? 'diaktifkan' : 'dinonaktifkan';
+            return redirect()->route('superadmin.kelola-tentor')
+                ->with('success', 'Status tentor berhasil ' . $message);
+                
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
+    }
+    
     public function destroy($id)
     {
         if (auth()->user()->peran != 'superadmin') {
@@ -235,29 +258,6 @@ class KelolaTentorController extends Controller
                 
         } catch (\Exception $e) {
             DB::rollback();
-            return redirect()->back()
-                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
-        }
-    }
-    
-    public function toggleStatus($id)
-    {
-        if (auth()->user()->peran != 'superadmin') {
-            abort(403, 'Unauthorized action.');
-        }
-        
-        try {
-            $tentor = Pegawai::with('user')->where('jenis_pegawai', 'tentor')->findOrFail($id);
-            $user = $tentor->user;
-            
-            $newStatus = $user->status == 1 ? 0 : 1;
-            $user->update(['status' => $newStatus]);
-            
-            $message = $newStatus == 1 ? 'diaktifkan' : 'dinonaktifkan';
-            return redirect()->route('superadmin.kelola-tentor')
-                ->with('success', 'Status tentor berhasil ' . $message);
-                
-        } catch (\Exception $e) {
             return redirect()->back()
                 ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }

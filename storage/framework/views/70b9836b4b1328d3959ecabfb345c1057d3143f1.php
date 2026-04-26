@@ -48,22 +48,23 @@
                 <tr style="background: #F3E8FF; color: #111827;">
                     <th style="padding: 15px; font-weight: 700; text-align: center; width: 40px;">No</th>
                     <th style="padding: 15px; font-weight: 700; width: 80px;">ID</th>
-                    <th style="padding: 15px; font-weight: 700; width: 150px;">Nama Lengkap</th>
-                    <th style="padding: 15px; font-weight: 700; max-width: 120px;">Alamat</th>
-                    <th style="padding: 15px; font-weight: 700; width: 110px;">No HP</th>
-                    <th style="padding: 15px; font-weight: 700; width: 120px;">Gaji Pokok</th>
-                    <th style="padding: 15px; font-weight: 700; width: 180px;">Email</th>
-                    <th style="padding: 15px; font-weight: 700; width: 100px;">Username</th>
-                    <th style="padding: 15px; font-weight: 700; text-align: center; width: 170px;">Aksi</th>
+                    <th style="padding: 15px; font-weight: 700; width: 130px;">Nama Lengkap</th>
+                    <th style="padding: 15px; font-weight: 700; max-width: 100px;">Alamat</th>
+                    <th style="padding: 15px; font-weight: 700; width: 100px;">No HP</th>
+                    <th style="padding: 15px; font-weight: 700; width: 110px;">Gaji Pokok</th>
+                    <th style="padding: 15px; font-weight: 700; width: 150px;">Email</th>
+                    <th style="padding: 15px; font-weight: 700; width: 90px;">Username</th>
+                    <th style="padding: 15px; font-weight: 700; text-align: center; width: 70px;">Status</th>
+                    <th style="padding: 15px; font-weight: 700; text-align: center; width: 185px;">Aksi</th>
                 </tr>
             </thead>
             <tbody id="tableBody" style="color: #374151;">
                 <?php $__empty_1 = true; $__currentLoopData = $admin; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                    <td style="padding: 15px; text-align: center;"><?php echo e($loop->iteration); ?></td>
+                    <td style="padding: 15px; text-align: center;"><?php echo e($admin->firstItem() + $index); ?></td>
                     <td style="padding: 15px;">AD<?php echo e(str_pad($item->id_user, 4, '0', STR_PAD_LEFT)); ?></td>
-                    <td style="padding: 15px; max-width: 150px; overflow: hidden; text-overflow: ellipsis;"><?php echo e($item->pegawai->nama_lengkap ?? '-'); ?></td>
-                    <td style="padding: 15px; max-width: 120px; overflow: hidden; text-overflow: ellipsis;" title="<?php echo e($item->pegawai->alamat ?? '-'); ?>"><?php echo e($item->pegawai->alamat ?? '-'); ?></td>
+                    <td style="padding: 15px; max-width: 130px; overflow: hidden; text-overflow: ellipsis;"><?php echo e($item->pegawai->nama_lengkap ?? '-'); ?></td>
+                    <td style="padding: 15px; max-width: 100px; overflow: hidden; text-overflow: ellipsis;" title="<?php echo e($item->pegawai->alamat ?? '-'); ?>"><?php echo e($item->pegawai->alamat ?? '-'); ?></td>
                     <td style="padding: 15px;"><?php echo e($item->pegawai->no_hp ?? '-'); ?></td>
                     <td style="padding: 15px;">
                         <?php if($item->pegawai && $item->pegawai->gaji_pokok): ?>
@@ -73,28 +74,40 @@
                             -
                         <?php endif; ?>
                     </td>
-                    <td style="padding: 15px; max-width: 180px; overflow: hidden; text-overflow: ellipsis;"><?php echo e($item->email); ?></td>
+                    <td style="padding: 15px; max-width: 150px; overflow: hidden; text-overflow: ellipsis;"><?php echo e($item->email); ?></td>
                     <td style="padding: 15px;"><?php echo e($item->username); ?></td>
-                    <td style="padding: 15px; white-space: nowrap;">
-                        <div style="display: flex; gap: 5px; justify-content: center;">
-                            <button onclick="bukaModalEdit(<?php echo e($item->id_user); ?>)" 
-                               style="background: #5EB37E; color: white; padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; font-size: 11px; white-space: nowrap;">
-                                <i class="far fa-edit"></i> Edit
-                            </button>
-                            <button onclick="bukaModalPassword(<?php echo e($item->id_user); ?>, '<?php echo e($item->pegawai->nama_lengkap ?? $item->username); ?>')" 
-                               style="background: #F59E0B; color: white; padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; font-size: 11px; white-space: nowrap;">
-                                <i class="fas fa-key"></i> Password
-                            </button>
-                            <button type="button" onclick="bukaModalHapus('<?php echo e($item->id_user); ?>', '<?php echo e($item->pegawai->nama_lengkap ?? $item->username); ?>')" 
-                                    style="background: #E35D5D; color: white; padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; font-size: 11px; white-space: nowrap;">
-                                <i class="fas fa-trash"></i> Hapus
-                            </button>
-                        </div>
+                    <td style="padding: 15px; text-align: center;">
+                        <?php if($item->status == 1): ?>
+                            <span style="padding: 5px 12px; border-radius: 20px; background: #E1F7E3; color: #0E7490; font-size: 11px;">Aktif</span>
+                        <?php else: ?>
+                            <span style="padding: 5px 12px; border-radius: 20px; background: #FEE2E2; color: #EF4444; font-size: 11px;">Nonaktif</span>
+                        <?php endif; ?>
                     </td>
+                    <td style="padding: 15px; white-space: nowrap;">
+                    <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: nowrap;">
+                        <button onclick="bukaModalEdit(<?php echo e($item->id_user); ?>)" 
+                        style="background: #5EB37E; color: white; padding: 5px 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 10px; white-space: nowrap;">
+                            <i class="far fa-edit"></i> Edit
+                        </button>
+                        <button onclick="bukaModalPassword(<?php echo e($item->id_user); ?>, '<?php echo e($item->pegawai->nama_lengkap ?? $item->username); ?>')" 
+                        style="background: #F59E0B; color: white; padding: 5px 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 10px; white-space: nowrap;">
+                            <i class="fas fa-key"></i> Password
+                        </button>
+                        <button type="button" onclick="bukaModalHapus('<?php echo e($item->id_user); ?>', '<?php echo e($item->pegawai->nama_lengkap ?? $item->username); ?>')" 
+                                style="background: #E35D5D; color: white; padding: 5px 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 10px; white-space: nowrap;">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                        <button type="button" onclick="bukaModalToggle('<?php echo e($item->id_user); ?>', '<?php echo e($item->pegawai->nama_lengkap ?? $item->username); ?>', '<?php echo e($item->status); ?>')" 
+                                style="background: <?php echo e($item->status == 1 ? '#EF4444' : '#10B981'); ?>; color: white; padding: 5px 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 10px; white-space: nowrap;">
+                            <i class="fas <?php echo e($item->status == 1 ? 'fa-ban' : 'fa-check'); ?>"></i> <?php echo e($item->status == 1 ? 'Nonaktifkan' : 'Aktifkan'); ?>
+
+                        </button>
+                    </div>
+                </td>
                 </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
-                    <td colspan="9" style="padding: 40px; text-align: center; color: #9CA3AF;">
+                    <td colspan="10" style="padding: 40px; text-align: center; color: #9CA3AF;">
                         <i class="fas fa-database" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
                         Belum ada data admin. Silakan tambah data baru.
                     </td>
@@ -109,17 +122,35 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
             <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
-                <option value="10">10 baris</option>
-                <option value="25">25 baris</option>
-                <option value="50">50 baris</option>
+                <option value="10" <?php echo e(request('per_page', 10) == 10 ? 'selected' : ''); ?>>10 baris</option>
+                <option value="25" <?php echo e(request('per_page') == 25 ? 'selected' : ''); ?>>25 baris</option>
+                <option value="50" <?php echo e(request('per_page') == 50 ? 'selected' : ''); ?>>50 baris</option>
             </select>
-            <span style="color: #374151; font-size: 13px;">Menampilkan <?php echo e($admin->count()); ?> data</span>
+            <span style="color: #374151; font-size: 13px;">Menampilkan <?php echo e($admin->total() ?? 0); ?> data</span>
         </div>
         <div style="display: flex; gap: 5px;">
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-double-left"></i></button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-left"></i></button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">1</button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-right"></i></button>
+            <?php if($admin->onFirstPage()): ?>
+                <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-double-left"></i></button>
+                <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-left"></i></button>
+            <?php else: ?>
+                <a href="<?php echo e($admin->url(1)); ?>&per_page=<?php echo e(request('per_page', 10)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
+                <a href="<?php echo e($admin->previousPageUrl()); ?>&per_page=<?php echo e(request('per_page', 10)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
+            <?php endif; ?>
+
+            <?php $start = max(1, $admin->currentPage() - 2); $end = min($admin->lastPage(), $admin->currentPage() + 2); ?>
+            <?php for($i = $start; $i <= $end; $i++): ?>
+                <?php if($i == $admin->currentPage()): ?>
+                    <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;"><?php echo e($i); ?></button>
+                <?php else: ?>
+                    <a href="<?php echo e($admin->url($i)); ?>&per_page=<?php echo e(request('per_page', 10)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><?php echo e($i); ?></a>
+                <?php endif; ?>
+            <?php endfor; ?>
+
+            <?php if($admin->hasMorePages()): ?>
+                <a href="<?php echo e($admin->nextPageUrl()); ?>&per_page=<?php echo e(request('per_page', 10)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
+            <?php else: ?>
+                <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-right"></i></button>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -132,15 +163,31 @@
 
 
 <div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
-    <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
+    <div style="background: white; padding: 25px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #E35D5D; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-trash-alt"></i></div>
         <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Hapus Admin?</h2>
-        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;" id="pesanHapus">Apakah Anda yakin ingin menghapus data admin ini?</p>
+        <p style="color: #6B7280; font-size: 12px; margin: 8px 0 20px 0; line-height: 1.5;" id="pesanHapus">Apakah Anda yakin ingin menghapus data admin ini?</p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalHapus()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
             <form id="formHapus" method="POST" style="flex: 1;">
                 <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                 <button type="submit" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #E35D5D; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Hapus</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<div id="modalToggle" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; font-family: 'Poppins', sans-serif;">
+    <div style="background: white; padding: 25px; border-radius: 20px; width: 350px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15);">
+        <div style="font-size: 40px; margin-bottom: 10px;" id="toggleIcon"></div>
+        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;" id="toggleJudul"></h2>
+        <p style="color: #6B7280; font-size: 12px; margin: 8px 0 20px 0; line-height: 1.5;" id="togglePesan"></p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button onclick="tutupModalToggle()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
+            <form id="formToggle" method="POST" style="flex: 1;">
+                <?php echo csrf_field(); ?> <?php echo method_field('PATCH'); ?>
+                <button type="submit" style="width: 100%; padding: 10px; border-radius: 10px; border: none; color: white; font-weight: 600; font-size: 13px; cursor: pointer;" id="btnToggle"></button>
             </form>
         </div>
     </div>
@@ -277,7 +324,7 @@
         }
     }
 
-    // ========== MODAL UBAH PASSWORD (terpisah) ==========
+    // ========== MODAL UBAH PASSWORD ==========
     function bukaModalPassword(id, nama) {
         const html = `
         <div style="padding:20px;font-family:'Poppins',sans-serif;background:#FFF;border-radius:16px">
@@ -392,6 +439,30 @@
         }, 150);
     }
 
+    // ========== MODAL TOGGLE STATUS ==========
+    function bukaModalToggle(id, nama, status) {
+        document.getElementById('formToggle').action = "<?php echo e(route('superadmin.kelola-admin.toggleStatus', ':id')); ?>".replace(':id', id);
+        
+        if (status == 1) {
+            document.getElementById('toggleIcon').innerHTML = '<i class="fas fa-ban" style="color:#EF4444;"></i>';
+            document.getElementById('toggleJudul').textContent = 'Nonaktifkan Admin?';
+            document.getElementById('togglePesan').innerHTML = `Apakah Anda yakin ingin <strong>menonaktifkan</strong> admin <strong>${nama}</strong>?<br><small style="color:#EF4444;">Admin tidak akan bisa login sampai diaktifkan kembali.</small>`;
+            document.getElementById('btnToggle').textContent = 'Ya, Nonaktifkan';
+            document.getElementById('btnToggle').style.background = '#EF4444';
+        } else {
+            document.getElementById('toggleIcon').innerHTML = '<i class="fas fa-check-circle" style="color:#10B981;"></i>';
+            document.getElementById('toggleJudul').textContent = 'Aktifkan Admin?';
+            document.getElementById('togglePesan').innerHTML = `Apakah Anda yakin ingin <strong>mengaktifkan</strong> admin <strong>${nama}</strong>?<br><small style="color:#10B981;">Admin akan bisa login kembali.</small>`;
+            document.getElementById('btnToggle').textContent = 'Ya, Aktifkan';
+            document.getElementById('btnToggle').style.background = '#10B981';
+        }
+        
+        document.getElementById('modalToggle').style.display = 'flex';
+    }
+
+    function tutupModalToggle() { document.getElementById('modalToggle').style.display = 'none'; }
+    document.getElementById('modalToggle').addEventListener('click', function(e) { if (e.target === this) tutupModalToggle(); });
+
     // ========== SEARCH ==========
     document.getElementById('searchInput').addEventListener('keyup', function() {
         const v = this.value.toLowerCase();
@@ -402,10 +473,18 @@
         });
     });
 
+    // ========== PAGE SELECT ==========
+    document.getElementById('pageSelect').addEventListener('change', function() {
+        let url = new URL(window.location.href);
+        url.searchParams.set('per_page', this.value);
+        url.searchParams.delete('page');
+        window.location.href = url.toString();
+    });
+
     // ========== MODAL HAPUS ==========
     function bukaModalHapus(id, nama) {
         document.getElementById('formHapus').action = "<?php echo e(route('superadmin.kelola-admin.destroy', ':id')); ?>".replace(':id', id);
-        document.getElementById('pesanHapus').innerHTML = `Yakin ingin menghapus data admin <strong>${nama}</strong>?`;
+        document.getElementById('pesanHapus').innerHTML = `Apakah Anda <strong>benar-benar yakin</strong> ingin menghapus data admin <strong>${nama}</strong>?<br><br><small style="color:#EF4444;">⚠️ <strong>PERINGATAN:</strong> Data akan dihapus <strong>secara permanen</strong> dari database. Semua data yang berhubungan dengan admin ini juga akan <strong>tidak dapat dikembalikan</strong>.</small>`;
         document.getElementById('modalHapus').style.display = 'flex';
     }
     function tutupModalHapus() { document.getElementById('modalHapus').style.display = 'none'; }

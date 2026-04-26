@@ -13,11 +13,13 @@ class KelolaAdminController extends Controller
     public function index(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        $perPage = $request->get('per_page', 10);
         
         $admin = User::where('peran', 'admin')
                      ->with('pegawai')
                      ->orderBy('id_user', 'desc')
-                     ->get();
+                     ->paginate($perPage)
+                     ->appends($request->query());
         
         return view('dashboard.superadmin.kelola-admin.kelola-admin', [
             'role' => $role,
@@ -163,6 +165,18 @@ class KelolaAdminController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Gagal: ' . $e->getMessage()]);
         }
+    }
+
+    // Toggle status admin (Aktif/Nonaktif)
+    public function toggleStatus($id)
+    {
+        $user = User::findOrFail($id);
+        $user->update(['status' => $user->status == 1 ? 0 : 1]);
+        
+        $referer = request()->headers->get('referer');
+        $role = str_contains($referer, 'superadmin') ? 'superadmin' : 'admin';
+        
+        return redirect()->route($role . '.kelola-admin')->with('success', 'Status admin berhasil diubah');
     }
 
     // Hapus data admin

@@ -55,6 +55,25 @@ class KelolaPresensiController extends Controller
                           ->paginate($perPage)
                           ->appends($request->all());
         
+        // ✅ CARI SESI PERTAMA SETIAP TENTOR PER HARI
+        // Sesi pertama = jam_mulai paling awal di hari itu
+        $sesiPertamaIds = [];
+        foreach ($presensi as $item) {
+            $tanggal = $item->tanggal;
+            $idPegawai = $item->id_pegawai;
+            
+            // Cari jam_mulai paling awal untuk tentor ini di tanggal ini
+            $sesiPertama = Mengajar::where('id_pegawai', $idPegawai)
+                ->whereDate('tanggal', $tanggal)
+                ->orderBy('jam_mulai', 'asc')
+                ->first();
+            
+            if ($sesiPertama && $sesiPertama->id_mengajar == $item->id_mengajar) {
+                $sesiPertamaIds[] = $item->id_mengajar;
+            }
+        }
+        $sesiPertamaIds = array_unique($sesiPertamaIds);
+        
         // Ambil daftar tahun dari data yang ada
         $tahunList = Mengajar::selectRaw('YEAR(tanggal) as tahun')
             ->distinct()
@@ -85,14 +104,14 @@ class KelolaPresensiController extends Controller
             'search', 
             'tentorFilter',
             'tahunList',
-            'verifiedIds'
+            'verifiedIds',
+            'sesiPertamaIds'   // ✅ KIRIM KE VIEW
         ));
     }
     
     public function verify($id)
     {
         try {
-            // ✅ SIMPAN ID KE SESSION (TIDAK UBAH DATABASE)
             $verifiedIds = session('verified_presensi', []);
             if (!in_array($id, $verifiedIds)) {
                 $verifiedIds[] = $id;
@@ -108,7 +127,6 @@ class KelolaPresensiController extends Controller
     public function unverify($id)
     {
         try {
-            // ✅ HAPUS ID DARI SESSION (TIDAK UBAH DATABASE)
             $verifiedIds = session('verified_presensi', []);
             $verifiedIds = array_diff($verifiedIds, [$id]);
             session(['verified_presensi' => $verifiedIds]);
@@ -128,7 +146,6 @@ class KelolaPresensiController extends Controller
         try {
             $presensi = Mengajar::findOrFail($id);
             
-            // Hapus foto bukti jika ada
             if ($presensi->bukti_mengajar && Storage::exists('public/' . $presensi->bukti_mengajar)) {
                 Storage::delete('public/' . $presensi->bukti_mengajar);
             }
@@ -137,7 +154,6 @@ class KelolaPresensiController extends Controller
             $tanggal = Carbon::parse($presensi->tanggal)->translatedFormat('d F Y');
             $presensi->delete();
             
-            // ✅ HAPUS JUGA DARI SESSION
             $verifiedIds = session('verified_presensi', []);
             $verifiedIds = array_diff($verifiedIds, [$id]);
             session(['verified_presensi' => $verifiedIds]);
@@ -174,7 +190,6 @@ class KelolaPresensiController extends Controller
         $presensi = Mengajar::with(['pegawai', 'kelas', 'ruang'])->findOrFail($id);
         $role = auth()->user()->peran;
         
-        // ✅ KIRIM JUGA STATUS VERIFIKASI
         $verifiedIds = session('verified_presensi', []);
         $isVerified = in_array($id, $verifiedIds);
         

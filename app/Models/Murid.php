@@ -146,7 +146,7 @@ class Murid extends Model
     }
 
     /**
-     * Accessor untuk ID Periode terbaru
+     * Accessor untuk ID Periode dari transaksi paket terbaru
      */
     public function getIdPeriodeAktifAttribute()
     {
@@ -155,6 +155,21 @@ class Murid extends Model
             ->first();
             
         return $paketTerbaru ? $paketTerbaru->id_periode : null;
+    }
+
+    /**
+     * Accessor untuk mendapatkan tahun periode dari transaksi paket terbaru
+     */
+    public function getTahunPeriodeAttribute()
+    {
+        $paketTerbaru = $this->transaksiPaket()
+            ->orderBy('created_at', 'desc')
+            ->with('periode')
+            ->first();
+            
+        return ($paketTerbaru && $paketTerbaru->periode) 
+            ? $paketTerbaru->periode->tahun_periode 
+            : '-';
     }
 
     /**
@@ -194,6 +209,18 @@ class Murid extends Model
     {
         return $query->whereHas('transaksiKelas', function($q) use ($idKelas) {
             $q->where('id_kelas', $idKelas);
+        });
+    }
+
+    /**
+     * Scope untuk filter by tahun periode (dari tr_paket)
+     */
+    public function scopeByTahunPeriode($query, $tahunPeriode)
+    {
+        return $query->whereHas('transaksiPaket', function($q) use ($tahunPeriode) {
+            $q->whereHas('periode', function($subQ) use ($tahunPeriode) {
+                $subQ->where('tahun_periode', $tahunPeriode);
+            });
         });
     }
 }

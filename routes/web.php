@@ -126,6 +126,10 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/kelola-murid/update/{id}', [MuridController::class, 'update'])->name('murid.update');
         Route::delete('/kelola-murid/destroy/{id}', [MuridController::class, 'destroy'])->name('murid.destroy');
         
+        // LANJUT PERIODE
+        Route::get('/kelola-murid/lanjut-periode/{id}', [MuridController::class, 'lanjutPeriodeForm'])->name('murid.lanjut-periode-form');
+        Route::post('/kelola-murid/lanjut-periode', [MuridController::class, 'lanjutPeriode'])->name('murid.lanjut-periode');
+        
         // ========== MASTER DATA (SUB MENU) ==========
         
         // Master Data - Harga Paket
@@ -177,7 +181,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/kelola-tentor/update/{id}', [KelolaTentorController::class, 'update'])->name('kelola-tentor.update');
         Route::put('/kelola-tentor/password/{id}', [KelolaTentorController::class, 'updatePassword'])->name('kelola-tentor.updatePassword');
         Route::delete('/kelola-tentor/destroy/{id}', [KelolaTentorController::class, 'destroy'])->name('kelola-tentor.destroy');
-        Route::patch('/kelola-tentor/toggle-status/{id}', [KelolaTentorController::class, 'toggleStatus'])->name('kelola-tentor.toggle-status');
+        Route::patch('/kelola-tentor/toggle-status/{id}', [KelolaTentorController::class, 'toggleStatus'])->name('kelola-tentor.toggleStatus');
         
         // KELOLA ADMIN
         Route::get('/kelola-admin', [KelolaAdminController::class, 'index'])->name('kelola-admin');
@@ -186,8 +190,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kelola-admin/edit/{id}', [KelolaAdminController::class, 'edit'])->name('kelola-admin.edit');
         Route::put('/kelola-admin/update/{id}', [KelolaAdminController::class, 'update'])->name('kelola-admin.update');
         Route::put('/kelola-admin/password/{id}', [KelolaAdminController::class, 'updatePassword'])->name('kelola-admin.updatePassword');
+        Route::patch('/kelola-admin/toggle-status/{id}', [KelolaAdminController::class, 'toggleStatus'])->name('kelola-admin.toggleStatus');
         Route::delete('/kelola-admin/destroy/{id}', [KelolaAdminController::class, 'destroy'])->name('kelola-admin.destroy');
-        
+
         // LAPORAN KEUANGAN
         Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan-keuangan');
         Route::get('/laporan-keuangan/create', [LaporanKeuanganController::class, 'create'])->name('laporan-keuangan.create');
@@ -218,6 +223,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kelola-murid/edit/{id}', [MuridController::class, 'edit'])->name('murid.edit');
         Route::put('/kelola-murid/update/{id}', [MuridController::class, 'update'])->name('murid.update');
         Route::delete('/kelola-murid/destroy/{id}', [MuridController::class, 'destroy'])->name('murid.destroy');
+        
+        // LANJUT PERIODE
+        Route::get('/kelola-murid/lanjut-periode/{id}', [MuridController::class, 'lanjutPeriodeForm'])->name('murid.lanjut-periode-form');
+        Route::post('/kelola-murid/lanjut-periode', [MuridController::class, 'lanjutPeriode'])->name('murid.lanjut-periode');
         
         // ========== MASTER DATA (SUB MENU) ==========
         

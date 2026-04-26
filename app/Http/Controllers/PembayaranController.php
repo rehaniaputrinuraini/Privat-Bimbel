@@ -202,6 +202,19 @@ class PembayaranController extends Controller
             ]);
         }
         
+        // Pagination
+        $perPage = $request->get('per_page', 10);
+        $currentPage = $request->get('page', 1);
+        $total = $tagihan->count();
+
+        $tagihan = new \Illuminate\Pagination\LengthAwarePaginator(
+            $tagihan->forPage($currentPage, $perPage),
+            $total,
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
         return view('dashboard.shared.pembayaran.tagihan', [
             'role' => $role,
             'tagihan' => $tagihan,
@@ -217,10 +230,12 @@ class PembayaranController extends Controller
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
         
+        $perPage = $request->get('per_page', 10);
+
         $riwayat = TransaksiUmum::with('murid')
             ->orderBy('tanggal_bayar', 'desc')
-            ->get()
-            ->map(function ($item) {
+            ->paginate($perPage)
+            ->through(function ($item) {
                 $nama_murid = $item->murid ? $item->murid->nama_lengkap : 'Tidak Diketahui';
                 $isPendaftaran = str_contains($item->keterangan, 'Pendaftaran');
                 $isSPP = str_contains($item->keterangan, 'SPP');
@@ -255,7 +270,7 @@ class PembayaranController extends Controller
                     'keterangan' => $isPendaftaran ? 'Pembayaran Pendaftaran' : ($isSPP ? 'Pembayaran SPP' : $item->keterangan),
                 ];
             });
-        
+
         return view('dashboard.shared.pembayaran.riwayat', [
             'role' => $role,
             'riwayat' => $riwayat,
@@ -404,39 +419,72 @@ class PembayaranController extends Controller
             ->first();
         
         $paketTingkat = null;
+        $hargaPaket = null;
         if ($paketAktif) {
             $paket = HargaPaket::find($paketAktif->id_paket);
             if ($paket) {
                 $paketTingkat = $paket->tingkat;
+                $hargaPaket = $paket->harga;
             }
         }
         
+        // Bulan tunggakan
         $bulanTunggakan = null;
+        
+        // Bulan yang sudah lunas
+        $bulanLunas = [];
+        
+        // Bulan berikutnya
+        $bulanBerikutnya = null;
+        
         if ($sudahBayarPendaftaran) {
             $currentMonth = Carbon::now()->month;
             $currentYear = Carbon::now()->year;
             
-            $pembayaranBulanIni = TransaksiUmum::where('id_murid', $id)
+            // Ambil semua SPP
+            $semuaSPP = TransaksiUmum::where('id_murid', $id)
                 ->where('keterangan', 'like', '%SPP%')
                 ->where('debit', '>', 0)
-                ->get()
-                ->filter(function($item) use ($currentMonth, $currentYear) {
-                    preg_match('/SPP\s+(\w+)\s+(\d+)/', $item->keterangan, $matches);
-                    if (isset($matches[1]) && isset($matches[2])) {
-                        try {
-                            $bulanDibayar = Carbon::parse($matches[1])->month;
-                            $tahunDibayar = (int)$matches[2];
-                            return $bulanDibayar == $currentMonth && $tahunDibayar == $currentYear;
-                        } catch (\Exception $e) {
-                            return false;
-                        }
+                ->get();
+            
+            // Cek pembayaran bulan ini
+            $pembayaranBulanIni = $semuaSPP->filter(function($item) use ($currentMonth, $currentYear) {
+                preg_match('/SPP\s+(\w+)\s+(\d+)/', $item->keterangan, $matches);
+                if (isset($matches[1]) && isset($matches[2])) {
+                    try {
+                        $bulanDibayar = Carbon::parse($matches[1])->month;
+                        $tahunDibayar = (int)$matches[2];
+                        return $bulanDibayar == $currentMonth && $tahunDibayar == $currentYear;
+                    } catch (\Exception $e) {
+                        return false;
                     }
-                    return false;
-                })
-                ->first();
+                }
+                return false;
+            })->first();
             
             if (!$pembayaranBulanIni) {
                 $bulanTunggakan = $currentMonth;
+            }
+            
+            // Cari bulan yang sudah lunas
+            foreach ($semuaSPP as $spp) {
+                preg_match('/SPP\s+(\w+)\s+(\d+)/', $spp->keterangan, $matches);
+                if (isset($matches[1])) {
+                    try {
+                        $bulan = Carbon::parse($matches[1])->month;
+                        $tahun = (int)$matches[2];
+                        // Hanya cek tahun yang sama
+                        if ($tahun == $currentYear && $hargaPaket && $spp->debit >= $hargaPaket) {
+                            $bulanLunas[] = $bulan;
+                        }
+                    } catch (\Exception $e) {}
+                }
+            }
+            
+            // Bulan berikutnya (kalau bulan ini sudah lunas)
+            if (in_array($currentMonth, $bulanLunas)) {
+                $bulanBerikutnya = $currentMonth + 1;
+                if ($bulanBerikutnya > 12) $bulanBerikutnya = 1;
             }
         }
         
@@ -445,6 +493,8 @@ class PembayaranController extends Controller
             'paket_awal' => 100000,
             'paket_aktif' => $paketTingkat,
             'bulan_tunggakan' => $bulanTunggakan,
+            'bulan_berikutnya' => $bulanBerikutnya,   // ← TAMBAHAN
+            'bulan_lunas' => $bulanLunas,             // ← TAMBAHAN
         ]);
     }
 }

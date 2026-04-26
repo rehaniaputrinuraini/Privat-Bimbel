@@ -20,7 +20,7 @@ class DashboardController extends Controller
         $totalTentor = Pegawai::where('jenis_pegawai', 'tentor')->count();
         $totalAdmin = Pegawai::where('jenis_pegawai', 'admin')->count();
         
-        // AMBIL DATA KEUANGAN (QUICK FIX)
+        // AMBIL DATA KEUANGAN DARI TRANSAKSI UMUM
         $keuangan = $this->getDataKeuangan();
         
         $stats = [
@@ -44,7 +44,7 @@ class DashboardController extends Controller
         $totalMurid = Murid::count();
         $totalTentor = Pegawai::where('jenis_pegawai', 'tentor')->count();
         
-        // AMBIL DATA KEUANGAN (QUICK FIX)
+        // AMBIL DATA KEUANGAN DARI TRANSAKSI UMUM
         $keuangan = $this->getDataKeuangan();
         
         $stats = [
@@ -151,28 +151,74 @@ class DashboardController extends Controller
         ]);
     }
     
-    // QUICK FIX - FUNGSI DATA KEUANGAN SEMENTARA
+    // FUNGSI DATA KEUANGAN DARI TRANSAKSI UMUM
     private function getDataKeuangan()
     {
-        // Return data kosong dulu untuk hindari error
-        // Nanti setelah tau struktur tabel yang bener, kita update
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+        
+        // Total Pemasukan (debit) bulan ini
+        $totalPemasukan = TransaksiUmum::whereMonth('tanggal_bayar', $currentMonth)
+            ->whereYear('tanggal_bayar', $currentYear)
+            ->sum('debit');
+        
+        // Total Pengeluaran (kredit) bulan ini
+        $totalPengeluaran = TransaksiUmum::whereMonth('tanggal_bayar', $currentMonth)
+            ->whereYear('tanggal_bayar', $currentYear)
+            ->sum('kredit');
+        
+        // Laba Bersih
+        $labaBersih = $totalPemasukan - $totalPengeluaran;
+        
+        // Riwayat 5 transaksi terbaru
+        $riwayat = TransaksiUmum::with('murid')
+            ->orderBy('tanggal_bayar', 'desc')
+            ->orderBy('id_transaksi', 'desc')
+            ->limit(3)
+            ->get()
+            ->map(function($item) {
+                $isPemasukan = $item->debit > 0;
+                
+                return (object)[
+                    'rincian' => $item->keterangan ?? ($isPemasukan ? 'Pemasukan' : 'Pengeluaran'),
+                    'tanggal' => $item->tanggal_bayar,
+                    'jumlah' => $isPemasukan ? $item->debit : $item->kredit,
+                    'kategori' => $isPemasukan ? 'pemasukan' : 'pengeluaran',
+                ];
+            });
         
         return [
-            'totalPemasukan' => 0,
-            'totalPengeluaran' => 0,
-            'labaBersih' => 0,
-            'riwayat' => collect([]),
+            'totalPemasukan' => $totalPemasukan,
+            'totalPengeluaran' => $totalPengeluaran,
+            'labaBersih' => $labaBersih,
+            'riwayat' => $riwayat,
         ];
     }
     
-    // QUICK FIX - FUNGSI CHART DATA SEMENTARA
+    // FUNGSI CHART DATA
     private function getChartData()
     {
-        // Return data kosong dulu untuk hindari error
+        $months = [];
+        $incomes = [];
+        $expenses = [];
+        
+        for ($i = 5; $i >= 0; $i--) {
+            $date = Carbon::now()->subMonths($i);
+            $months[] = $date->translatedFormat('M');
+            
+            $incomes[] = TransaksiUmum::whereMonth('tanggal_bayar', $date->month)
+                ->whereYear('tanggal_bayar', $date->year)
+                ->sum('debit');
+                
+            $expenses[] = TransaksiUmum::whereMonth('tanggal_bayar', $date->month)
+                ->whereYear('tanggal_bayar', $date->year)
+                ->sum('kredit');
+        }
+        
         return [
-            'months' => [],
-            'incomes' => [],
-            'expenses' => []
+            'months' => $months,
+            'incomes' => $incomes,
+            'expenses' => $expenses
         ];
     }
 }

@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TransaksiPaket extends Model
 {
+    use HasFactory;
+
     protected $table = 'tr_paket';
     protected $primaryKey = 'id_paket_murid';
     
-    // ✅ MATIKAN TIMESTAMPS karena tabel tidak punya created_at & updated_at
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
         'id_periode',
@@ -19,12 +21,6 @@ class TransaksiPaket extends Model
         'tanggal_daftar',
         'paket_awal',
         'biaya_pendaftaran',
-    ];
-
-    protected $casts = [
-        'tanggal_daftar' => 'date',
-        'paket_awal' => 'boolean',
-        'biaya_pendaftaran' => 'integer',
     ];
 
     /**
@@ -36,7 +32,7 @@ class TransaksiPaket extends Model
     }
 
     /**
-     * Relasi ke Paket (HargaPaket)
+     * Relasi ke Paket
      */
     public function paket()
     {

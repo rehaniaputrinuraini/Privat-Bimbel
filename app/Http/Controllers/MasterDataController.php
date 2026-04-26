@@ -116,8 +116,17 @@ class MasterDataController extends Controller
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $jenjangOptions = $this->jenjangOptions;
-        $periodeList = Periode::orderBy('tanggal_mulai', 'desc')->get();
-        return view('dashboard.shared.master-data.kelas.create', compact('role', 'jenjangOptions', 'periodeList'));
+        
+        // Ambil periode aktif
+        $today = date('Y-m-d');
+        $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
+            ->where('tanggal_selesai', '>=', $today)
+            ->first();
+        if (!$periodeAktif) {
+            $periodeAktif = Periode::orderBy('id_periode', 'desc')->first();
+        }
+        
+        return view('dashboard.shared.master-data.kelas.create', compact('role', 'jenjangOptions', 'periodeAktif'));
     }
 
     public function storeKelas(Request $request)
@@ -135,8 +144,7 @@ class MasterDataController extends Controller
             'jumlah_murid' => 0,
         ]);
 
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data.kelas')->with('success_kelas', 'Kelas berhasil ditambahkan');
+        return response()->json(['success' => true, 'message' => 'Kelas berhasil ditambahkan']);
     }
 
     public function editKelas(Request $request, $id)
@@ -144,8 +152,17 @@ class MasterDataController extends Controller
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $kelas = Kelas::findOrFail($id);
         $jenjangOptions = $this->jenjangOptions;
-        $periodeList = Periode::orderBy('tanggal_mulai', 'desc')->get();
-        return view('dashboard.shared.master-data.kelas.edit', compact('role', 'kelas', 'jenjangOptions', 'periodeList'));
+        
+        // Ambil periode aktif
+        $today = date('Y-m-d');
+        $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
+            ->where('tanggal_selesai', '>=', $today)
+            ->first();
+        if (!$periodeAktif) {
+            $periodeAktif = Periode::orderBy('id_periode', 'desc')->first();
+        }
+        
+        return view('dashboard.shared.master-data.kelas.edit', compact('role', 'kelas', 'jenjangOptions', 'periodeAktif'));
     }
 
     public function updateKelas(Request $request, $id)
@@ -163,8 +180,7 @@ class MasterDataController extends Controller
             'id_periode' => $request->id_periode,
         ]);
 
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data.kelas')->with('success_kelas', 'Kelas berhasil diperbarui');
+        return response()->json(['success' => true, 'message' => 'Kelas berhasil diperbarui']);
     }
 
     public function destroyKelas(Request $request, $id)
@@ -193,8 +209,7 @@ class MasterDataController extends Controller
 
         Ruang::create(['nama_ruang' => $request->nama_ruang]);
 
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data.ruang')->with('success_ruang', 'Ruang berhasil ditambahkan');
+        return response()->json(['success' => true, 'message' => 'Ruang berhasil ditambahkan']);
     }
 
     public function editRuang(Request $request, $id)
@@ -213,8 +228,7 @@ class MasterDataController extends Controller
         $ruang = Ruang::findOrFail($id);
         $ruang->update(['nama_ruang' => $request->nama_ruang]);
 
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data.ruang')->with('success_ruang', 'Ruang berhasil diperbarui');
+        return response()->json(['success' => true, 'message' => 'Ruang berhasil diperbarui']);
     }
 
     public function destroyRuang(Request $request, $id)
@@ -249,9 +263,7 @@ class MasterDataController extends Controller
             'tanggal_selesai' => $request->tanggal_selesai,
         ]);
 
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data.periode')
-            ->with('success_periode', 'Periode berhasil ditambahkan');
+        return response()->json(['success' => true, 'message' => 'Periode berhasil ditambahkan']);
     }
 
     public function editPeriode(Request $request, $id)
@@ -276,9 +288,7 @@ class MasterDataController extends Controller
             'tanggal_selesai' => $request->tanggal_selesai,
         ]);
 
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        return redirect()->route($role . '.master-data.periode')
-            ->with('success_periode', 'Periode berhasil diperbarui');
+        return response()->json(['success' => true, 'message' => 'Periode berhasil diperbarui']);
     }
 
     public function destroyPeriode(Request $request, $id)

@@ -129,10 +129,10 @@
 
 {{-- MODAL HAPUS --}}
 <div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
-    <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
+    <div style="background: white; padding: 25px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #E35D5D; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-trash-alt"></i></div>
         <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Hapus Paket?</h2>
-        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;" id="pesanHapus"></p>
+        <p style="color: #6B7280; font-size: 12px; margin: 8px 0 20px 0; line-height: 1.5;" id="pesanHapus"></p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalHapus()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
             <form id="formHapus" method="POST" style="flex: 1;">
@@ -276,7 +276,7 @@
 
     function bukaModalHapus(id, nama) {
         document.getElementById('formHapus').action = "{{ route($role . '.master-data.harga-paket.destroy', '') }}/" + id;
-        document.getElementById('pesanHapus').innerHTML = `Yakin ingin menghapus <strong>${nama}</strong>?`;
+        document.getElementById('pesanHapus').innerHTML = `Apakah Anda <strong>yakin</strong> ingin menghapus paket <strong>${nama}</strong>?<br><br><small style="color:#EF4444;">⚠️ <strong>PERINGATAN:</strong> Jika paket ini masih digunakan oleh data murid atau transaksi, maka <strong>tidak dapat dihapus</strong>. Data paket ini terhubung dengan sistem pembayaran dan data murid.</small>`;
         document.getElementById('modalHapus').style.display = 'flex';
     }
 

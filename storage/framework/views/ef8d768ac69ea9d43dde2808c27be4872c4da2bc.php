@@ -23,6 +23,44 @@
         font-size: 11px;
         font-weight: 600;
     }
+    .badge-verified {
+        background: #D1FAE5 !important;
+        color: #065F46 !important;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .btn-verifikasi {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #9CA3AF;
+        font-size: 13px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        transition: 0.2s;
+    }
+    .btn-verifikasi:hover {
+        background: #F3E8FF;
+        color: #4D0B87;
+    }
+    .badge-sesi-pertama {
+        background: #E0E7FF !important;
+        color: #3730A3 !important;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: 600;
+    }
+    .badge-sesi-lain {
+        background: #F3F4F6 !important;
+        color: #6B7280 !important;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 10px;
+    }
 </style>
 <?php $__env->stopPush(); ?>
 
@@ -149,10 +187,16 @@
                         $namaRuang = $item->ruang ? $item->ruang->nama_ruang : '-';
                         $jenjang = $item->kelas->jenjang ?? 'SD';
                         
-                        // Status murid
+                        // Status murid (DARI INPUT TENTOR)
                         $isHadir = $item->murid_hadir == 'Hadir';
                         $statusText = $isHadir ? 'Hadir' : 'Tidak Hadir';
                         $statusClass = $isHadir ? 'badge-hadir' : 'badge-tidak-hadir';
+                        
+                        // ✅ STATUS VERIFIKASI DARI SESSION
+                        $isVerified = in_array($item->id_mengajar, $verifiedIds ?? []);
+                        
+                        // ✅ SESI PERTAMA? (Uang makan & transport cuma di sesi pertama)
+                        $isSesiPertama = in_array($item->id_mengajar, $sesiPertamaIds ?? []);
                         
                         // Jam
                         $jamMasuk = $item->jam_mulai ? \Carbon\Carbon::parse($item->jam_mulai)->format('H:i') : '-';
@@ -182,19 +226,29 @@
                             $honorAkhir = $honorDasar;
                         }
                         
-                        $uangMakan = $item->pegawai->uang_makan ?? 0;
-                        $transport = $item->pegawai->uang_transport ?? 0;
+                        // ✅ UANG MAKAN & TRANSPORT HANYA SESI PERTAMA
+                        if ($isSesiPertama) {
+                            $uangMakan = $item->pegawai->uang_makan ?? 0;
+                            $transport = $item->pegawai->uang_transport ?? 0;
+                        } else {
+                            $uangMakan = 0;
+                            $transport = 0;
+                        }
+                        
                         $totalHonorItem = $honorAkhir + $uangMakan + $transport;
                         
                         // Tambahkan ke total keseluruhan
                         $totalHonorKeseluruhan += $totalHonorItem;
-                        
-                        // Verifikasi = jika Hadir maka verified
-                        $isVerified = $isHadir;
                     ?>
                     <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                         <td style="padding: 15px;"><?php echo e($presensi->firstItem() + $index); ?></td>
-                        <td style="padding: 15px; font-weight: 500;"><?php echo e($namaTentor); ?></td>
+                        <td style="padding: 15px; font-weight: 500;">
+                            <?php echo e($namaTentor); ?>
+
+                            <?php if($isSesiPertama): ?>
+                                <br><span class="badge-sesi-pertama">Sesi 1</span>
+                            <?php endif; ?>
+                        </td>
                         <td style="padding: 15px;"><?php echo e(\Carbon\Carbon::parse($item->tanggal)->format('d/m/Y')); ?></td>
                         <td style="padding: 15px;"><?php echo e($jamMasuk); ?></td>
                         <td style="padding: 15px;"><?php echo e($jamKeluar); ?></td>
@@ -214,8 +268,22 @@
                             <?php endif; ?>
                         </td>
                         <td style="padding: 15px; text-align: right; font-weight: 600; color: #4D0B87;">Rp <?php echo e(number_format($honorAkhir, 0, ',', '.')); ?></td>
-                        <td style="padding: 15px; text-align: right;">Rp <?php echo e(number_format($uangMakan, 0, ',', '.')); ?></td>
-                        <td style="padding: 15px; text-align: right;">Rp <?php echo e(number_format($transport, 0, ',', '.')); ?></td>
+                        <td style="padding: 15px; text-align: right;">
+                            <?php if($isSesiPertama): ?>
+                                Rp <?php echo e(number_format($uangMakan, 0, ',', '.')); ?>
+
+                            <?php else: ?>
+                                <span style="color: #9CA3AF;">-</span>
+                            <?php endif; ?>
+                        </td>
+                        <td style="padding: 15px; text-align: right;">
+                            <?php if($isSesiPertama): ?>
+                                Rp <?php echo e(number_format($transport, 0, ',', '.')); ?>
+
+                            <?php else: ?>
+                                <span style="color: #9CA3AF;">-</span>
+                            <?php endif; ?>
+                        </td>
                         <td style="padding: 15px; text-align: right; font-weight: 700; color: #111827;">Rp <?php echo e(number_format($totalHonorItem, 0, ',', '.')); ?></td>
                         <td style="padding: 15px; text-align: left; white-space: normal; word-break: break-word; max-width: 200px;" title="<?php echo e($item->keterangan ?? ''); ?>">
                             <?php echo e($item->keterangan ?: '-'); ?>
@@ -233,16 +301,27 @@
                         </td>
                         <td style="padding: 15px; text-align: center;">
                             <?php if($role == 'superadmin' || $role == 'admin'): ?>
-                                <form method="POST" action="<?php echo e(route($role . '.kelola-presensi.' . ($isVerified ? 'unverify' : 'verify'), $item->id_mengajar)); ?>" style="display: inline;">
-                                    <?php echo csrf_field(); ?>
-                                    <button type="submit" style="background: none; border: none; cursor: pointer;">
-                                        <input type="checkbox" <?php echo e($isVerified ? 'checked' : ''); ?> 
-                                               style="accent-color: #4D0B87; width: 18px; height: 18px; pointer-events: none;">
-                                    </button>
-                                </form>
+                                <?php if($isVerified): ?>
+                                    <form method="POST" action="<?php echo e(route($role . '.kelola-presensi.unverify', $item->id_mengajar)); ?>" style="display: inline;">
+                                        <?php echo csrf_field(); ?>
+                                        <button type="submit" style="background: none; border: none; cursor: pointer;" title="Klik untuk batal verifikasi">
+                                            <span class="badge-verified">✅ Verified</span>
+                                        </button>
+                                    </form>
+                                <?php else: ?>
+                                    <form method="POST" action="<?php echo e(route($role . '.kelola-presensi.verify', $item->id_mengajar)); ?>" style="display: inline;">
+                                        <?php echo csrf_field(); ?>
+                                        <button type="submit" class="btn-verifikasi" title="Klik untuk verifikasi">
+                                            <i class="far fa-check-circle"></i> Verifikasi
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
                             <?php else: ?>
-                                <input type="checkbox" <?php echo e($isVerified ? 'checked' : ''); ?> 
-                                       style="accent-color: #4D0B87; width: 18px; height: 18px;" disabled>
+                                <?php if($isVerified): ?>
+                                    <span class="badge-verified">✅ Verified</span>
+                                <?php else: ?>
+                                    <span style="color: #9CA3AF; font-size: 13px;">⏳ Pending</span>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </td>
                         <?php if($role == 'superadmin'): ?>
@@ -280,23 +359,48 @@
     <?php endif; ?>
 
     
+    <?php if($presensi->hasPages()): ?>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <option value="10">10 baris</option>
-                <option value="25">25 baris</option>
-                <option value="50">50 baris</option>
+            <select id="perPageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
+                <option value="10" <?php echo e(request('perPage', 10) == 10 ? 'selected' : ''); ?>>10 baris</option>
+                <option value="25" <?php echo e(request('perPage', 10) == 25 ? 'selected' : ''); ?>>25 baris</option>
+                <option value="50" <?php echo e(request('perPage', 10) == 50 ? 'selected' : ''); ?>>50 baris</option>
             </select>
-            <span style="color: #374151; font-size: 13px;">Menampilkan <?php echo e($presensi->count()); ?> data</span>
+            <span style="color: #374151; font-size: 13px;">
+                Menampilkan <?php echo e($presensi->firstItem()); ?> - <?php echo e($presensi->lastItem()); ?> dari <?php echo e($presensi->total()); ?> data
+            </span>
         </div>
 
         <div style="display: flex; gap: 5px;">
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-double-left"></i></button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-left"></i></button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">1</button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-right"></i></button>
+            <?php if($presensi->onFirstPage()): ?>
+                <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled><i class="fas fa-angle-double-left"></i></button>
+            <?php else: ?>
+                <a href="<?php echo e($presensi->url(1)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
+            <?php endif; ?>
+
+            <?php if($presensi->onFirstPage()): ?>
+                <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled><i class="fas fa-angle-left"></i></button>
+            <?php else: ?>
+                <a href="<?php echo e($presensi->previousPageUrl()); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
+            <?php endif; ?>
+
+            <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: default;"><?php echo e($presensi->currentPage()); ?></button>
+
+            <?php if($presensi->hasMorePages()): ?>
+                <a href="<?php echo e($presensi->nextPageUrl()); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
+            <?php else: ?>
+                <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled><i class="fas fa-angle-right"></i></button>
+            <?php endif; ?>
+
+            <?php if($presensi->hasMorePages()): ?>
+                <a href="<?php echo e($presensi->url($presensi->lastPage())); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-right"></i></a>
+            <?php else: ?>
+                <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled><i class="fas fa-angle-double-right"></i></button>
+            <?php endif; ?>
         </div>
     </div>
+    <?php endif; ?>
 
 </div>
 
@@ -318,7 +422,7 @@
 </div>
 
 <script>
-    // Pagination Show Entries
+    // PerPage Select
     document.getElementById('perPageSelect')?.addEventListener('change', function() {
         document.getElementById('perPageInput').value = this.value;
         document.getElementById('filterForm').submit();
@@ -339,6 +443,13 @@
     function tutupModalHapus() {
         document.getElementById('modalHapus').style.display = 'none';
     }
+
+    window.addEventListener('click', function(event) {
+        let modal = document.getElementById('modalHapus');
+        if (event.target == modal) {
+            tutupModalHapus();
+        }
+    });
 </script>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/riwayat presensi/riwayat-presensi.blade.php ENDPATH**/ ?>

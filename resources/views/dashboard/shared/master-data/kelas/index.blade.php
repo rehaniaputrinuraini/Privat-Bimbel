@@ -54,7 +54,7 @@
                 <tbody id="tableBody" style="color: #374151;">
                     @forelse($kelas as $index => $item)
                     <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 15px; text-align: center;">{{ $loop->iteration }}</td>
+                        <td style="padding: 15px; text-align: center;">{{ $kelas->firstItem() + $index }}</td>
                         <td style="padding: 15px; text-align: center;">{{ $item->nama_kelas }}</td>
                         <td style="padding: 15px; text-align: center;">{{ $item->jenjang }}</td>
                         <td style="padding: 15px; text-align: center;">{{ $item->jumlah_murid ?? 0 }}</td>
@@ -87,27 +87,34 @@
     {{-- PAGINATION --}}
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="color: #374151; font-size: 13px;">Menampilkan {{ $kelas->count() }} data</span>
+            <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 baris</option>
+                <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 baris</option>
+                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 baris</option>
+            </select>
+            <span style="color: #374151; font-size: 13px;">Menampilkan {{ $kelas->total() ?? 0 }} data</span>
         </div>
+
         <div style="display: flex; gap: 5px;">
             @if ($kelas->onFirstPage())
                 <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-double-left"></i></button>
                 <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-left"></i></button>
             @else
-                <a href="{{ $kelas->url(1) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
-                <a href="{{ $kelas->previousPageUrl() }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
+                <a href="{{ $kelas->url(1) }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
+                <a href="{{ $kelas->previousPageUrl() }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
             @endif
 
-            @foreach ($kelas->getUrlRange(1, $kelas->lastPage()) as $page => $url)
-                @if ($page == $kelas->currentPage())
-                    <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">{{ $page }}</button>
+            @php $start = max(1, $kelas->currentPage() - 2); $end = min($kelas->lastPage(), $kelas->currentPage() + 2); @endphp
+            @for ($i = $start; $i <= $end; $i++)
+                @if ($i == $kelas->currentPage())
+                    <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">{{ $i }}</button>
                 @else
-                    <a href="{{ $url }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">{{ $page }}</a>
+                    <a href="{{ $kelas->url($i) }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">{{ $i }}</a>
                 @endif
-            @endforeach
+            @endfor
 
             @if ($kelas->hasMorePages())
-                <a href="{{ $kelas->nextPageUrl() }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
+                <a href="{{ $kelas->nextPageUrl() }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
             @else
                 <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-right"></i></button>
             @endif
@@ -123,10 +130,10 @@
 
 {{-- MODAL HAPUS --}}
 <div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
-    <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
+    <div style="background: white; padding: 25px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #E35D5D; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-trash-alt"></i></div>
         <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Hapus Kelas?</h2>
-        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;" id="pesanHapus"></p>
+        <p style="color: #6B7280; font-size: 12px; margin: 8px 0 20px 0; line-height: 1.5;" id="pesanHapus"></p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalHapus()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
             <form id="formHapus" method="POST" style="flex: 1;">
@@ -168,24 +175,24 @@
     });
 
     function pasangEventHandler() {
-        const modalContent = document.getElementById('modalContent');
-        if (!modalContent) return;
+        const mc = document.getElementById('modalContent');
+        if (!mc) return;
         
-        const form = modalContent.querySelector('form');
-        const btnKeluar = modalContent.querySelector('#btnKeluar');
-        const btnSimpan = modalContent.querySelector('#btnSimpan');
-        const btnUpdate = modalContent.querySelector('#btnUpdate');
-        const modalBatal = modalContent.querySelector('#modalBatal');
-        const modalPindahHalaman = modalContent.querySelector('#modalPindahHalaman');
-        const modalSukses = modalContent.querySelector('#modalSukses');
-        const btnTidakBatal = modalContent.querySelector('#btnTidakBatal');
-        const btnYaKeluar = modalContent.querySelector('#btnYaKeluar');
-        const btnTidakPindah = modalContent.querySelector('#btnTidakPindah');
-        const btnYaPindah = modalContent.querySelector('#btnYaPindah');
-        const btnOkSukses = modalContent.querySelector('#btnOkSukses');
-        const alertError = modalContent.querySelector('#alertError');
-        const alertErrorText = modalContent.querySelector('#alertErrorText');
-        const pesanSukses = modalContent.querySelector('#pesanSukses');
+        const form = mc.querySelector('form');
+        const btnKeluar = mc.querySelector('#btnKeluar');
+        const btnSimpan = mc.querySelector('#btnSimpan');
+        const btnUpdate = mc.querySelector('#btnUpdate');
+        const modalBatal = mc.querySelector('#modalBatal');
+        const modalPindahHalaman = mc.querySelector('#modalPindahHalaman');
+        const modalSukses = mc.querySelector('#modalSukses');
+        const btnTidakBatal = mc.querySelector('#btnTidakBatal');
+        const btnYaKeluar = mc.querySelector('#btnYaKeluar');
+        const btnTidakPindah = mc.querySelector('#btnTidakPindah');
+        const btnYaPindah = mc.querySelector('#btnYaPindah');
+        const btnOkSukses = mc.querySelector('#btnOkSukses');
+        const alertError = mc.querySelector('#alertError');
+        const alertErrorText = mc.querySelector('#alertErrorText');
+        const pesanSukses = mc.querySelector('#pesanSukses');
         
         let formChanged = false;
         let formSubmitted = false;
@@ -201,7 +208,6 @@
         if (btnKeluar) {
             btnKeluar.addEventListener('click', function(e) {
                 e.preventDefault();
-                e.stopPropagation();
                 if (formChanged && !formSubmitted) {
                     if (modalPindahHalaman) modalPindahHalaman.style.display = 'flex';
                 } else {
@@ -258,6 +264,29 @@
                 });
             });
         }
+
+        // ========== AUTO-DETECT JENJANG ==========
+        const namaKelasInput = mc.querySelector('#nama_kelas');
+        const jenjangSelect = mc.querySelector('#jenjang');
+        
+        if (namaKelasInput && jenjangSelect) {
+            namaKelasInput.addEventListener('input', function() {
+                var nama = this.value.trim();
+                var match = nama.match(/^(\d+)/);
+                
+                if (match) {
+                    var angka = parseInt(match[1]);
+                    
+                    if (angka >= 1 && angka <= 6) {
+                        jenjangSelect.value = 'SD';
+                    } else if (angka >= 7 && angka <= 9) {
+                        jenjangSelect.value = 'SMP';
+                    } else if (angka >= 10 && angka <= 12) {
+                        jenjangSelect.value = 'SMA';
+                    }
+                }
+            });
+        }
     }
 
     document.getElementById('searchInput').addEventListener('keyup', function() {
@@ -270,7 +299,7 @@
 
     function bukaModalHapus(id, nama) {
         document.getElementById('formHapus').action = "{{ route($role . '.master-data.kelas.destroy', '') }}/" + id;
-        document.getElementById('pesanHapus').innerHTML = `Yakin ingin menghapus <strong>${nama}</strong>?`;
+        document.getElementById('pesanHapus').innerHTML = `Apakah Anda <strong>benar-benar yakin</strong> ingin menghapus kelas <strong>${nama}</strong>?<br><br><small style="color:#EF4444;">⚠️ <strong>PERINGATAN:</strong> Data akan dihapus <strong>secara permanen</strong> dari database. Semua data murid yang terdaftar di kelas ini akan <strong>kehilangan data kelas</strong> dan tidak dapat dikembalikan.</small>`;
         document.getElementById('modalHapus').style.display = 'flex';
     }
 
@@ -280,6 +309,21 @@
 
     document.getElementById('modalHapus').addEventListener('click', function(e) {
         if (e.target === this) tutupModalHapus();
+    });
+
+    document.getElementById('pageSelect').addEventListener('change', function() {
+        let url = new URL(window.location.href);
+        url.searchParams.set('per_page', this.value);
+        url.searchParams.delete('page');
+        window.location.href = url.toString();
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const perPage = urlParams.get('per_page');
+        if (perPage && document.getElementById('pageSelect')) {
+            document.getElementById('pageSelect').value = perPage;
+        }
     });
 </script>
 @endsection

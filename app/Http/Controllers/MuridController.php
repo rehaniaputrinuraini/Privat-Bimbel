@@ -19,15 +19,41 @@ class MuridController extends Controller
      */
     public function index(Request $request)
     {
-        // Deteksi role berdasarkan URL
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
-        // Ambil semua data murid
-        $murids = Murid::orderBy('id_murid', 'asc')->get();
+        // Ambil data murid dengan PAGINATION
+        $perPage = $request->get('per_page', 10);
         
-        // Kumpulkan daftar paket yang digunakan
+        $query = Murid::with([
+            'transaksiPaket.periode',
+            'transaksiPaket.paket',
+            'transaksiKelas.kelas'
+        ])->orderBy('id_murid', 'asc');
+        
+        // Filter berdasarkan tahun periode
+        if ($request->has('tahun_periode') && $request->tahun_periode != '') {
+            $query->whereHas('transaksiPaket', function($q) use ($request) {
+                $q->whereHas('periode', function($subQ) use ($request) {
+                    $subQ->where('tahun_periode', $request->tahun_periode);
+                });
+            });
+        }
+        
+        // Filter berdasarkan paket
+        if ($request->has('paket') && $request->paket != '') {
+            $query->whereHas('transaksiPaket', function($q) use ($request) {
+                $q->whereHas('paket', function($subQ) use ($request) {
+                    $subQ->where('tingkat', $request->paket);
+                });
+            });
+        }
+        
+        $murids = $query->paginate($perPage)->appends($request->except('page'));
+        
+        // Kumpulkan daftar paket dari SEMUA data (bukan hanya halaman saat ini)
+        $allMurids = Murid::with('transaksiPaket.paket')->get();
         $paketList = [];
-        foreach($murids as $m) {
+        foreach($allMurids as $m) {
             $paket = $m->transaksiPaket()->orderBy('id_paket_murid', 'desc')->first();
             if($paket && $paket->paket) {
                 $paketList[$paket->paket->tingkat] = $paket->paket->tingkat;
@@ -35,10 +61,24 @@ class MuridController extends Controller
         }
         sort($paketList);
         
+        // Ambil daftar tahun periode dari ms_periode
+        $tahunPeriodeList = Periode::orderBy('tahun_periode', 'desc')
+            ->pluck('tahun_periode')
+            ->unique()
+            ->toArray();
+        
+        // Ambil periode aktif
+        $today = date('Y-m-d');
+        $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
+            ->where('tanggal_selesai', '>=', $today)
+            ->first();
+        
         return view('dashboard.shared.kelola-murid.kelola-murid', [
             'role' => $role,
             'murids' => $murids,
             'paketList' => $paketList,
+            'tahunPeriodeList' => $tahunPeriodeList,
+            'periodeAktif' => $periodeAktif,
         ]);
     }
 
@@ -47,25 +87,21 @@ class MuridController extends Controller
      */
     public function create(Request $request)
     {
-        // Deteksi role berdasarkan URL
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
-        // Ambil data kelas yang masih tersedia (maks 10 murid per kelas)
         $kelasList = Kelas::where('jumlah_murid', '<', 10)
             ->orderBy('jenjang', 'asc')
             ->orderBy('nama_kelas', 'asc')
             ->get();
             
-        // Ambil semua data paket
         $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
         
-        // Cari periode aktif berdasarkan tanggal hari ini
+        // Cari periode aktif
         $today = date('Y-m-d');
         $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
             ->where('tanggal_selesai', '>=', $today)
             ->first();
             
-        // Jika tidak ada periode aktif, ambil periode terakhir
         if (!$periodeAktif) {
             $periodeAktif = Periode::orderBy('id_periode', 'desc')->first();
         }
@@ -83,10 +119,8 @@ class MuridController extends Controller
      */
     public function store(Request $request)
     {
-        // Deteksi role
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
-        // Validasi input
         $validator = Validator::make($request->all(), [
             'nama_lengkap' => 'required|string|max:35',
             'asal_sekolah' => 'nullable|string|max:20',
@@ -117,7 +151,6 @@ class MuridController extends Controller
             'id_periode.exists' => 'Periode tidak valid',
         ]);
 
-        // Jika validasi gagal
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -130,8 +163,8 @@ class MuridController extends Controller
         try {
             $tanggalDaftar = date('Y-m-d');
             
-            // Siapkan data murid
-            $dataMurid = [
+            // Simpan data murid
+            $murid = Murid::create([
                 'nama_lengkap' => $request->nama_lengkap,
                 'asal_sekolah' => $request->asal_sekolah,
                 'alamat' => $request->alamat,
@@ -140,10 +173,7 @@ class MuridController extends Controller
                 'no_hp_orang_tua' => $request->no_hp_orang_tua,
                 'tahun_masuk' => $request->tahun_masuk,
                 'tanggal_daftar' => $tanggalDaftar,
-            ];
-            
-            // Simpan data murid
-            $murid = Murid::create($dataMurid);
+            ]);
             
             // Simpan ke transaksi kelas
             TransaksiKelas::create([
@@ -151,7 +181,7 @@ class MuridController extends Controller
                 'id_murid' => $murid->id_murid
             ]);
             
-            // Simpan ke transaksi paket
+            // Simpan ke transaksi paket DENGAN id_periode
             TransaksiPaket::create([
                 'id_periode' => $request->id_periode,
                 'id_murid' => $murid->id_murid,
@@ -189,11 +219,8 @@ class MuridController extends Controller
      */
     public function edit(Request $request, $id)
     {
-        // Deteksi role berdasarkan URL
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        
-        // Cari data murid berdasarkan ID
-        $murid = Murid::findOrFail($id);
+        $murid = Murid::with('transaksiPaket.periode')->findOrFail($id);
         
         return view('dashboard.shared.kelola-murid.edit-murid', [
             'role' => $role,
@@ -206,10 +233,8 @@ class MuridController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Deteksi role
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
-        // Validasi input
         $validator = Validator::make($request->all(), [
             'nama_lengkap' => 'required|string|max:35',
             'asal_sekolah' => 'nullable|string|max:20',
@@ -231,7 +256,6 @@ class MuridController extends Controller
             'tahun_masuk.max' => 'Tahun masuk maksimal tahun '.date('Y'),
         ]);
 
-        // Jika validasi gagal
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -241,10 +265,8 @@ class MuridController extends Controller
         }
 
         try {
-            // Cari murid berdasarkan ID
             $murid = Murid::findOrFail($id);
             
-            // Update data murid
             $murid->update([
                 'nama_lengkap' => $request->nama_lengkap,
                 'asal_sekolah' => $request->asal_sekolah,
@@ -273,20 +295,16 @@ class MuridController extends Controller
      */
     public function destroy($id)
     {
-        // Deteksi role dari URL request
         $role = request()->is('superadmin*') ? 'superadmin' : 'admin';
         
         DB::beginTransaction();
         try {
-            // Cari murid berdasarkan ID
             $murid = Murid::findOrFail($id);
             
-            // Ambil data kelas terbaru untuk mengurangi jumlah_murid
             $kelasTerbaru = TransaksiKelas::where('id_murid', $id)
                 ->orderBy('created_at', 'desc')
                 ->first();
                 
-            // Kurangi jumlah murid di kelas terkait
             if ($kelasTerbaru) {
                 $kelas = Kelas::find($kelasTerbaru->id_kelas);
                 if ($kelas && $kelas->jumlah_murid > 0) {
@@ -294,13 +312,9 @@ class MuridController extends Controller
                 }
             }
             
-            // Hapus semua transaksi kelas terkait
             TransaksiKelas::where('id_murid', $id)->delete();
-            
-            // Hapus semua transaksi paket terkait
             TransaksiPaket::where('id_murid', $id)->delete();
             
-            // Hapus data murid
             $murid->delete();
             
             DB::commit();
@@ -317,18 +331,105 @@ class MuridController extends Controller
     }
 
     /**
+     * Menampilkan form lanjut periode (via AJAX)
+     */
+    public function lanjutPeriodeForm(Request $request, $id)
+    {
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        $murid = Murid::findOrFail($id);
+        
+        $periodeList = Periode::orderBy('id_periode', 'desc')->get();
+        $paketList = HargaPaket::all();
+        $kelasList = Kelas::where('jumlah_murid', '<', 10)->get();
+        
+        $today = date('Y-m-d');
+        $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
+            ->where('tanggal_selesai', '>=', $today)
+            ->first();
+        
+        return view('dashboard.shared.kelola-murid.lanjut-periode', [
+            'role' => $role,
+            'murid' => $murid,
+            'periodeList' => $periodeList,
+            'paketList' => $paketList,
+            'kelasList' => $kelasList,
+            'periodeAktif' => $periodeAktif,
+        ]);
+    }
+
+    /**
+     * Melanjutkan murid ke periode berikutnya
+     */
+    public function lanjutPeriode(Request $request)
+    {
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        
+        $validator = Validator::make($request->all(), [
+            'id_murid' => 'required|exists:ms_murid,id_murid',
+            'id_periode_baru' => 'required|exists:ms_periode,id_periode',
+            'id_paket_baru' => 'required|exists:ms_paket,id_paket',
+            'id_kelas_baru' => 'required|exists:ms_kelas,id_kelas',
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+        
+        DB::beginTransaction();
+        try {
+            // Tambah transaksi paket baru
+            TransaksiPaket::create([
+                'id_periode' => $request->id_periode_baru,
+                'id_murid' => $request->id_murid,
+                'id_paket' => $request->id_paket_baru,
+                'tanggal_daftar' => date('Y-m-d'),
+                'paket_awal' => 0,
+                'biaya_pendaftaran' => 0
+            ]);
+            
+            // Tambah transaksi kelas baru
+            TransaksiKelas::create([
+                'id_kelas' => $request->id_kelas_baru,
+                'id_murid' => $request->id_murid
+            ]);
+            
+            // Update jumlah murid di kelas baru
+            $kelas = Kelas::find($request->id_kelas_baru);
+            if ($kelas) {
+                $kelas->increment('jumlah_murid');
+            }
+            
+            DB::commit();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Murid berhasil dilanjutkan ke periode baru'
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * API untuk pencarian murid (autocomplete)
      */
     public function search(Request $request)
     {
         $query = $request->get('q');
         
-        // Minimal 2 karakter untuk pencarian
         if (strlen($query) < 2) {
             return response()->json([]);
         }
         
-        // Cari murid berdasarkan nama
         $murids = Murid::where('nama_lengkap', 'like', '%' . $query . '%')
             ->limit(10)
             ->get(['id_murid', 'nama_lengkap', 'asal_sekolah', 'no_hp']);

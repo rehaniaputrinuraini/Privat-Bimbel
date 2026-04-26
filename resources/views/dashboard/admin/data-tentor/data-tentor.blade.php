@@ -40,43 +40,43 @@
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
                 <thead>
                     <tr style="background: #F3E8FF; color: #111827;">
-                        <th style="padding: 15px; font-weight: 700; width: 50px; text-align: center;">No</th>
-                        <th style="padding: 15px; font-weight: 700;">ID</th>
-                        <th style="padding: 15px; font-weight: 700;">Nama Lengkap</th>
-                        <th style="padding: 15px; font-weight: 700;">Alamat</th>
-                        <th style="padding: 15px; font-weight: 700;">No HP</th>
-                        <th style="padding: 15px; font-weight: 700;">Mapel</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Grade</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: right;">HR SD</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: right;">HR SMP</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: right;">HR SMA</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: right;">Uang Makan</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: right;">Transport</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: center; width: 40px;">No</th>
+                        <th style="padding: 15px; font-weight: 700; width: 70px;">ID</th>
+                        <th style="padding: 15px; font-weight: 700; width: 130px;">Nama Lengkap</th>
+                        <th style="padding: 15px; font-weight: 700; max-width: 80px;">Alamat</th>
+                        <th style="padding: 15px; font-weight: 700; width: 90px;">No HP</th>
+                        <th style="padding: 15px; font-weight: 700; width: 70px;">Mapel</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: center; width: 60px;">Grade</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: right; width: 90px;">HR SD</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: right; width: 90px;">HR SMP</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: right; width: 90px;">HR SMA</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: right; width: 90px;">Makan</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: right; width: 90px;">Transport</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody" style="color: #374151;">
                     @forelse($tentors as $index => $t)
-                    <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                    <tr style="border-bottom: 1px solid #F3F4F6;">
                         <td style="padding: 15px; text-align: center;">{{ $tentors->firstItem() + $index }}</td>
-                        <td style="padding: 15px; font-weight: 500;">TE{{ str_pad($t->id_pegawai, 4, '0', STR_PAD_LEFT) }}</td>
-                        <td style="padding: 15px;">{{ $t->nama_lengkap ?? '-' }}</td>
-                        <td style="padding: 15px;">{{ $t->alamat ?? '-' }}</td>
+                        <td style="padding: 15px;">TE{{ str_pad($t->id_pegawai, 4, '0', STR_PAD_LEFT) }}</td>
+                        <td style="padding: 15px; max-width: 130px; overflow: hidden; text-overflow: ellipsis;">{{ $t->nama_lengkap ?? '-' }}</td>
+                        <td style="padding: 15px; max-width: 80px; overflow: hidden; text-overflow: ellipsis;" title="{{ $t->alamat }}">{{ $t->alamat ?? '-' }}</td>
                         <td style="padding: 15px;">{{ $t->no_hp ?? '-' }}</td>
                         <td style="padding: 15px;">{{ $t->mapel ?? '-' }}</td>
                         <td style="padding: 15px; text-align: center;">
                             @if($t->grade == 'A')
-                                <span style="background: #FEF3C7; color: #92400E; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;">Grade A</span>
+                                <span style="background: #FEF3C7; color: #92400E; padding: 4px 10px; border-radius: 20px; font-size: 11px;">Grade A</span>
                             @elseif($t->grade == 'B')
-                                <span style="background: #E0E7FF; color: #3730A3; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;">Grade B</span>
+                                <span style="background: #E0E7FF; color: #3730A3; padding: 4px 10px; border-radius: 20px; font-size: 11px;">Grade B</span>
                             @else
                                 <span style="color: #9CA3AF;">-</span>
                             @endif
                         </td>
-                        <td style="padding: 15px; text-align: right;">Rp {{ number_format($t->hr_sd ?? 0, 0, ',', '.') }}</td>
-                        <td style="padding: 15px; text-align: right;">Rp {{ number_format($t->hr_smp ?? 0, 0, ',', '.') }}</td>
-                        <td style="padding: 15px; text-align: right;">Rp {{ number_format($t->hr_sma ?? 0, 0, ',', '.') }}</td>
-                        <td style="padding: 15px; text-align: right;">Rp {{ number_format($t->uang_makan ?? 0, 0, ',', '.') }}</td>
-                        <td style="padding: 15px; text-align: right;">Rp {{ number_format($t->uang_transport ?? 0, 0, ',', '.') }}</td>
+                        <td style="padding: 15px; text-align: right;">{{ $t->hr_sd ? 'Rp '.number_format($t->hr_sd,0,',','.') : '-' }}</td>
+                        <td style="padding: 15px; text-align: right;">{{ $t->hr_smp ? 'Rp '.number_format($t->hr_smp,0,',','.') : '-' }}</td>
+                        <td style="padding: 15px; text-align: right;">{{ $t->hr_sma ? 'Rp '.number_format($t->hr_sma,0,',','.') : '-' }}</td>
+                        <td style="padding: 15px; text-align: right;">{{ $t->uang_makan ? 'Rp '.number_format($t->uang_makan,0,',','.') : '-' }}</td>
+                        <td style="padding: 15px; text-align: right;">{{ $t->uang_transport ? 'Rp '.number_format($t->uang_transport,0,',','.') : '-' }}</td>
                     </tr>
                     @empty
                     <tr>
@@ -91,22 +91,39 @@
         </div>
     </div>
     
-    {{-- ── PAGINATION & SHOW ENTRIES ── --}}
+    {{-- PAGINATION --}}
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <option value="10">10 baris</option>
-                <option value="25">25 baris</option>
-                <option value="50">50 baris</option>
+            <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
+                <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 baris</option>
+                <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 baris</option>
+                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 baris</option>
             </select>
-            <span style="color: #374151; font-size: 13px;">Menampilkan {{ $tentors->count() }} data</span>
+            <span style="color: #374151; font-size: 13px;">Menampilkan {{ $tentors->total() ?? 0 }} data</span>
         </div>
-
         <div style="display: flex; gap: 5px;">
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-double-left"></i></button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-left"></i></button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">1</button>
-            <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; cursor: pointer;"><i class="fas fa-angle-right"></i></button>
+            @if ($tentors->onFirstPage())
+                <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-double-left"></i></button>
+                <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-left"></i></button>
+            @else
+                <a href="{{ $tentors->url(1) }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
+                <a href="{{ $tentors->previousPageUrl() }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
+            @endif
+
+            @php $start = max(1, $tentors->currentPage() - 2); $end = min($tentors->lastPage(), $tentors->currentPage() + 2); @endphp
+            @for ($i = $start; $i <= $end; $i++)
+                @if ($i == $tentors->currentPage())
+                    <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600;">{{ $i }}</button>
+                @else
+                    <a href="{{ $tentors->url($i) }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">{{ $i }}</a>
+                @endif
+            @endfor
+
+            @if ($tentors->hasMorePages())
+                <a href="{{ $tentors->nextPageUrl() }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
+            @else
+                <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-right"></i></button>
+            @endif
         </div>
     </div>
 
@@ -117,27 +134,29 @@
     document.getElementById('searchInput').addEventListener('keyup', function() {
         let searchValue = this.value.toLowerCase();
         let rows = document.querySelectorAll('#tableBody tr');
-        
         rows.forEach(row => {
             if(row.cells && row.cells.length >= 3) {
                 let id = row.cells[1]?.innerText.toLowerCase() || '';
                 let nama = row.cells[2]?.innerText.toLowerCase() || '';
-                if(id.includes(searchValue) || nama.includes(searchValue)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
+                row.style.display = (id.includes(searchValue) || nama.includes(searchValue)) ? '' : 'none';
             }
         });
     });
 
-    // Page Select (show entries)
-    document.getElementById('pageSelect')?.addEventListener('change', function() {
-        let perPage = this.value;
+    // Page Select
+    document.getElementById('pageSelect').addEventListener('change', function() {
         let url = new URL(window.location.href);
-        url.searchParams.set('per_page', perPage);
+        url.searchParams.set('per_page', this.value);
         url.searchParams.delete('page');
         window.location.href = url.toString();
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const perPage = urlParams.get('per_page');
+        if (perPage && document.getElementById('pageSelect')) {
+            document.getElementById('pageSelect').value = perPage;
+        }
     });
 </script>
 @endsection

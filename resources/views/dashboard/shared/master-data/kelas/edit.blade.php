@@ -10,9 +10,10 @@
         <span id="alertErrorText"></span>
     </div>
 
-    <form action="{{ route($role . '.master-data.kelas.update', $kelas->id_kelas) }}" method="POST">
+    <form id="mainForm" action="{{ route($role . '.master-data.kelas.update', $kelas->id_kelas) }}" method="POST">
         @csrf
         @method('PUT')
+        <input type="hidden" name="id_periode" value="{{ $periodeAktif->id_periode ?? $kelas->id_periode ?? '' }}">
         
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">ID Kelas</label>
@@ -22,13 +23,13 @@
 
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Nama Kelas <span style="color: #EF4444;">*</span></label>
-            <input type="text" name="nama_kelas" value="{{ old('nama_kelas', $kelas->nama_kelas) }}" required
+            <input type="text" name="nama_kelas" id="nama_kelas" value="{{ old('nama_kelas', $kelas->nama_kelas) }}" required
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif;">
         </div>
 
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Jenjang <span style="color: #EF4444;">*</span></label>
-            <select name="jenjang" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; cursor: pointer;">
+            <select name="jenjang" id="jenjang" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; cursor: pointer;">
                 <option value="SD" {{ old('jenjang', $kelas->jenjang) == 'SD' ? 'selected' : '' }}>SD</option>
                 <option value="SMP" {{ old('jenjang', $kelas->jenjang) == 'SMP' ? 'selected' : '' }}>SMP</option>
                 <option value="SMA" {{ old('jenjang', $kelas->jenjang) == 'SMA' ? 'selected' : '' }}>SMA</option>

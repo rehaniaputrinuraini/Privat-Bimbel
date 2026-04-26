@@ -46,7 +46,7 @@
                 </div>
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Jumlah <span style="color: #EF4444;">*</span></label>
-                    <input type="tel" name="jumlah" placeholder="Masukkan Jumlah (contoh: 150000)" required 
+                    <input type="tel" name="jumlah" placeholder="Masukkan Jumlah" required 
                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                            style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif;">
                 </div>
