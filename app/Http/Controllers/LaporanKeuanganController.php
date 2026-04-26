@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\TransaksiUmum;
 use App\Models\Murid;
 use App\Models\HargaPaket;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Carbon\Carbon;
 
 class LaporanKeuanganController extends Controller
@@ -17,6 +18,7 @@ class LaporanKeuanganController extends Controller
         
         $filterBulan = $request->bulan;
         $filterTahun = $request->tahun;
+        $perPage = 10;
         
         // ========== QUERY DASAR ==========
         $query = TransaksiUmum::with('murid');
@@ -30,7 +32,7 @@ class LaporanKeuanganController extends Controller
         }
         
         // ========== PEMASUKAN (SEMUA DEBIT) ==========
-        $pemasukan = (clone $query)->orderBy('tanggal_bayar', 'desc')->get()->map(function($item) {
+        $pemasukanData = (clone $query)->orderBy('tanggal_bayar', 'desc')->get()->map(function($item) {
             $isPendaftaran = str_contains($item->keterangan, 'Pendaftaran');
             $isManual = !$isPendaftaran && !str_contains($item->keterangan, 'SPP');
             
@@ -46,8 +48,10 @@ class LaporanKeuanganController extends Controller
             return $item->jumlah > 0;
         })->values();
         
+        $pemasukan = $this->paginateCollection($pemasukanData, $perPage, $request->get('page_pemasukan', 1), ['path' => $request->url(), 'pageName' => 'page_pemasukan']);
+        
         // ========== PENGELUARAN (SEMUA KREDIT) ==========
-        $pengeluaran = (clone $query)->where('kredit', '>', 0)->orderBy('tanggal_bayar', 'desc')->get()->map(function($item) {
+        $pengeluaranData = (clone $query)->where('kredit', '>', 0)->orderBy('tanggal_bayar', 'desc')->get()->map(function($item) {
             return (object)[
                 'id' => 'K' . $item->id_transaksi,
                 'tanggal' => $item->tanggal_bayar,
@@ -57,9 +61,11 @@ class LaporanKeuanganController extends Controller
             ];
         });
         
-        // ========== PIUTANG & UANG MUKA (DARI SPP) ==========
-        $piutang = collect();
-        $uang_muka = collect();
+        $pengeluaran = $this->paginateCollection($pengeluaranData, $perPage, $request->get('page_pengeluaran', 1), ['path' => $request->url(), 'pageName' => 'page_pengeluaran']);
+        
+        // ========== PIUTANG & UANG MUKA ==========
+        $piutangData = collect();
+        $uangMukaData = collect();
         
         $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;
@@ -82,17 +88,11 @@ class LaporanKeuanganController extends Controller
                         'nama_murid' => $item->murid->nama_lengkap ?? 'Tidak Diketahui',
                         'bulan_periode' => $matches[1] . ' ' . $matches[2],
                         'jumlah' => $item->debit ?? 0,
-                        'sumber' => 'pembayaran',
                     ];
                     
-                    // Bulan depan = Uang Muka
-                    if ($tahunDibayar > $currentYear || 
-                        ($tahunDibayar == $currentYear && $bulanDibayar > $currentMonth)) {
-                        $uang_muka->push($data);
-                    }
-                    // Bulan lalu = Piutang (jika belum lunas)
-                    elseif ($tahunDibayar < $currentYear || 
-                        ($tahunDibayar == $currentYear && $bulanDibayar < $currentMonth)) {
+                    if ($tahunDibayar > $currentYear || ($tahunDibayar == $currentYear && $bulanDibayar > $currentMonth)) {
+                        $uangMukaData->push($data);
+                    } elseif ($tahunDibayar < $currentYear || ($tahunDibayar == $currentYear && $bulanDibayar < $currentMonth)) {
                         $murid = $item->murid;
                         if ($murid) {
                             $paketAktif = \App\Models\TransaksiPaket::where('id_murid', $murid->id_murid)->first();
@@ -100,7 +100,7 @@ class LaporanKeuanganController extends Controller
                                 $hargaPaket = HargaPaket::find($paketAktif->id_paket);
                                 if ($hargaPaket && $item->debit < $hargaPaket->harga) {
                                     $data->jumlah = $hargaPaket->harga - $item->debit;
-                                    $piutang->push($data);
+                                    $piutangData->push($data);
                                 }
                             }
                         }
@@ -111,11 +111,14 @@ class LaporanKeuanganController extends Controller
             }
         }
         
-        // ========== HITUNG TOTAL ==========
-        $totalPemasukan = $pemasukan->sum('jumlah');
-        $totalPengeluaran = $pengeluaran->sum('jumlah');
-        $totalPiutang = $piutang->sum('jumlah');
-        $totalUangMuka = $uang_muka->sum('jumlah');
+        $piutang = $this->paginateCollection($piutangData, $perPage, $request->get('page_piutang', 1), ['path' => $request->url(), 'pageName' => 'page_piutang']);
+        $uang_muka = $this->paginateCollection($uangMukaData, $perPage, $request->get('page_uangmuka', 1), ['path' => $request->url(), 'pageName' => 'page_uangmuka']);
+        
+        // ========== HITUNG TOTAL (tetap dari data asli, bukan paginated) ==========
+        $totalPemasukan = $pemasukanData->sum('jumlah');
+        $totalPengeluaran = $pengeluaranData->sum('jumlah');
+        $totalPiutang = $piutangData->sum('jumlah');
+        $totalUangMuka = $uangMukaData->sum('jumlah');
         $totalPemasukanKas = $totalPemasukan + $totalPiutang + $totalUangMuka;
         $saldoKas = $totalPemasukanKas - $totalPengeluaran;
         
@@ -151,6 +154,21 @@ class LaporanKeuanganController extends Controller
             'filterTahun' => $filterTahun,
         ]);
     }
+    
+    // Helper untuk paginate collection
+    private function paginateCollection($items, $perPage, $page, $options = [])
+    {
+        $page = $page ?: (LengthAwarePaginator::resolveCurrentPage($options['pageName'] ?? 'page'));
+        $items = $items instanceof \Illuminate\Support\Collection ? $items : \Illuminate\Support\Collection::make($items);
+        
+        return new LengthAwarePaginator(
+            $items->forPage($page, $perPage),
+            $items->count(),
+            $perPage,
+            $page,
+            $options
+        );
+    }
 
     // ========== FORM CREATE ==========
     public function create(Request $request)
@@ -175,21 +193,19 @@ class LaporanKeuanganController extends Controller
 
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
-        // Pemasukan = debit, Pengeluaran = kredit
         $debit = $request->kategori == 'pemasukan' ? $request->jumlah : 0;
         $kredit = $request->kategori == 'pengeluaran' ? $request->jumlah : 0;
         
         TransaksiUmum::create([
             'tanggal_bayar' => $request->tanggal,
-            'bulan' => (int) date('m', strtotime($request->tanggal)), // 👈 PERBAIKI: ambil bulan dari tanggal
+            'bulan' => (int) date('m', strtotime($request->tanggal)),
             'jenis_pembayaran' => $request->jenis_pembayaran,
             'keterangan' => $request->rincian,
             'debit' => $debit,
             'kredit' => $kredit,
         ]);
         
-        return redirect()->route($role . '.laporan-keuangan')
-            ->with('success', 'Data berhasil ditambahkan');
+        return response()->json(['success' => true, 'message' => 'Data berhasil ditambahkan']);
     }
 
     // ========== DESTROY ==========
@@ -197,8 +213,7 @@ class LaporanKeuanganController extends Controller
     {
         $role = request()->is('superadmin*') ? 'superadmin' : 'admin';
         
-        // Hapus prefix (P/K/M/W/T) untuk dapatkan id asli
-        $realId = (int) substr($id, 1); // 👈 PASTIKAN jadi integer
+        $realId = (int) substr($id, 1);
         
         if ($realId > 0) {
             TransaksiUmum::where('id_transaksi', $realId)->delete();

@@ -10,12 +10,12 @@
         <span id="alertErrorText"></span>
     </div>
 
-    <form id="mainForm" action="{{ route($role . '.pembayaran.store') }}" method="POST">
-        @csrf
+    <form id="mainForm" action="<?php echo e(route($role . '.pembayaran.store')); ?>" method="POST">
+        <?php echo csrf_field(); ?>
 
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Tanggal <span style="color: #EF4444;">*</span></label>
-            <input type="date" name="tanggal" id="tanggal" required value="{{ date('Y-m-d') }}"
+            <input type="date" name="tanggal" id="tanggal" required value="<?php echo e(date('Y-m-d')); ?>"
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif;">
         </div>
 
@@ -52,11 +52,11 @@
             <select name="paket_selanjutnya" id="paket_selanjutnya" 
                     style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; cursor: pointer;">
                 <option value="">Pilih Paket</option>
-                @foreach($pakets as $paket)
-                    <option value="{{ $paket->tingkat }}" data-harga="{{ $paket->harga }}">
-                        {{ $paket->tingkat }} - Rp {{ number_format($paket->harga, 0, ',', '.') }} / bulan
+                <?php $__currentLoopData = $pakets; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $paket): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($paket->tingkat); ?>" data-harga="<?php echo e($paket->harga); ?>">
+                        <?php echo e($paket->tingkat); ?> - Rp <?php echo e(number_format($paket->harga, 0, ',', '.')); ?> / bulan
                     </option>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </select>
         </div>
 
@@ -97,7 +97,7 @@
     </form>
 </div>
 
-{{-- MODAL BATAL --}}
+
 <div id="modalBatal" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; font-family: 'Poppins', sans-serif;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15);">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -110,7 +110,7 @@
     </div>
 </div>
 
-{{-- MODAL PERINGATAN --}}
+
 <div id="modalPindahHalaman" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; font-family: 'Poppins', sans-serif;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15);">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -123,7 +123,7 @@
     </div>
 </div>
 
-{{-- MODAL SUKSES --}}
+
 <div id="modalSukses" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; font-family: 'Poppins', sans-serif;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15);">
         <div style="color: #10B981; font-size: 50px; margin-bottom: 10px;"><i class="fas fa-check-circle"></i></div>
@@ -131,4 +131,4 @@
         <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;" id="pesanSukses">Pembayaran berhasil disimpan.</p>
         <button type="button" id="btnOkSukses" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #10B981; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">OK</button>
     </div>
-</div>
+</div><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/pembayaran/create-pembayaran.blade.php ENDPATH**/ ?>

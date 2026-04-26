@@ -1,12 +1,12 @@
-@extends('layouts.app')
 
-@section('title', 'Riwayat Pembayaran')
 
-@section('content')
+<?php $__env->startSection('title', 'Riwayat Pembayaran'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div style="width: 100%;">
 
     <div style="margin-bottom: 25px;">
-        <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">{{ \Carbon\Carbon::now()->translatedFormat('F Y') }}</p>
+        <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;"><?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?></p>
         <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0;">Riwayat Pembayaran</h1>
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Riwayat Pembayaran Murid</p>
     </div>
@@ -17,9 +17,9 @@
         </button>
     </div>
 
-    @if(session('success'))
-        <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">{{ session('success') }}</div>
-    @endif
+    <?php if(session('success')): ?>
+        <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;"><?php echo e(session('success')); ?></div>
+    <?php endif; ?>
 
     <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 20px;">
         <div style="position: relative; margin-bottom: 12px;">
@@ -29,7 +29,7 @@
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
             <select id="filterPaketRiwayat" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px;">
                 <option value="">Status Paket</option>
-                @foreach($paketList as $paket)<option value="{{ $paket->tingkat }}">{{ $paket->tingkat }}</option>@endforeach
+                <?php $__currentLoopData = $paketList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $paket): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><option value="<?php echo e($paket->tingkat); ?>"><?php echo e($paket->tingkat); ?></option><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </select>
             <select id="filterJenisPembayaran" style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px;">
                 <option value="">Jenis Pembayaran</option>
@@ -57,35 +57,35 @@
                 <th style="padding: 15px; text-align: center;">Total Bayar</th><th style="padding: 15px;">Keterangan</th>
             </tr></thead>
             <tbody id="riwayatTableBody">
-                @forelse($riwayat as $index => $r)
+                <?php $__empty_1 = true; $__currentLoopData = $riwayat; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr style="border-bottom: 1px solid #F3F4F6;">
-                    <td style="padding: 15px;">{{ $index + 1 }}</td>
-                    <td style="padding: 15px;">{{ $r->tanggal }}</td>
-                    <td style="padding: 15px;">{{ $r->nama_murid }}</td>
-                    <td style="padding: 15px;">{{ $r->paket_awal }}</td>
-                    <td style="padding: 15px;">{{ $r->paket_selanjutnya }}</td>
-                    <td style="padding: 15px;">{{ $r->bulan_dibayar }}</td>
-                    <td style="padding: 15px;">{{ $r->jenis_pembayaran ?? '-' }}</td>
-                    <td style="padding: 15px; text-align: center; font-weight: 700; color: #4D0B87;">{{ $r->total_bayar }}</td>
-                    <td style="padding: 15px;">{{ $r->keterangan }}</td>
+                    <td style="padding: 15px;"><?php echo e($index + 1); ?></td>
+                    <td style="padding: 15px;"><?php echo e($r->tanggal); ?></td>
+                    <td style="padding: 15px;"><?php echo e($r->nama_murid); ?></td>
+                    <td style="padding: 15px;"><?php echo e($r->paket_awal); ?></td>
+                    <td style="padding: 15px;"><?php echo e($r->paket_selanjutnya); ?></td>
+                    <td style="padding: 15px;"><?php echo e($r->bulan_dibayar); ?></td>
+                    <td style="padding: 15px;"><?php echo e($r->jenis_pembayaran ?? '-'); ?></td>
+                    <td style="padding: 15px; text-align: center; font-weight: 700; color: #4D0B87;"><?php echo e($r->total_bayar); ?></td>
+                    <td style="padding: 15px;"><?php echo e($r->keterangan); ?></td>
                 </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr><td colspan="9" style="padding: 40px; text-align: center; color: #9CA3AF;">Belum ada riwayat pembayaran</td></tr>
-                @endforelse
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
 
 </div>
 
-{{-- MODAL FORM --}}
+
 <div id="modalForm" style="display: none; position: fixed; z-index: 9998; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; overflow-y: auto; padding: 20px;">
     <div style="background: white; border-radius: 20px; width: 750px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.15);" id="modalContent"></div>
 </div>
 
 <script>
     function bukaModalCreate() {
-        fetch("{{ route($role . '.pembayaran.create') }}")
+        fetch("<?php echo e(route($role . '.pembayaran.create')); ?>")
             .then(r => r.text())
             .then(html => {
                 document.getElementById('modalContent').innerHTML = html;
@@ -170,4 +170,5 @@
     const ts = document.getElementById('filterTahunRiwayat');
     if (ts) { const tSet = new Set(); document.querySelectorAll('#riwayatTableBody tr').forEach(row => { if (row.cells && row.cells[1]) { const tgl = row.cells[1].innerText; const parts = tgl.split('/'); if (parts[2]) tSet.add(parseInt(parts[2])); } }); Array.from(tSet).sort().reverse().forEach(tahun => { const o = document.createElement('option'); o.value = tahun; o.textContent = tahun; ts.appendChild(o); }); }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/pembayaran/riwayat.blade.php ENDPATH**/ ?>

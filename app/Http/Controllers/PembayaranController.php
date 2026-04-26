@@ -122,7 +122,7 @@ class PembayaranController extends Controller
                 }
             }
             
-            // Bulan belum dibayar (mulai dari TANGGAL DAFTAR murid)
+            // Bulan belum dibayar
             $bulanBelumDibayar = [];
             $bulanMulai = 1;
             if ($murid->tanggal_daftar) {
@@ -132,7 +132,6 @@ class PembayaranController extends Controller
                 $bulanTahun = Carbon::create()->month($i)->translatedFormat('F') . ' ' . $currentYear;
                 $sudahDibayar = false;
                 
-                // Skip bulan pendaftaran (bulan pertama gak dihitung piutang)
                 if ($i == $bulanMulai && !$sudahBayarPendaftaran == false) {
                     continue;
                 }
@@ -281,7 +280,7 @@ class PembayaranController extends Controller
     }
     
     // =============================================
-    // STORE
+    // STORE (REVISI - RETURN JSON)
     // =============================================
     public function store(Request $request)
     {
@@ -295,14 +294,12 @@ class PembayaranController extends Controller
         $murid = Murid::find($request->id_murid);
         
         if (!$murid) {
-            return redirect()->back()->withErrors(['error' => 'Data murid tidak ditemukan']);
+            return response()->json(['success' => false, 'message' => 'Data murid tidak ditemukan']);
         }
         
         $sudahBayarPendaftaran = TransaksiUmum::where('id_murid', $request->id_murid)
             ->where('keterangan', 'like', '%Pendaftaran%')
             ->exists();
-        
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
         $today = date('Y-m-d');
         $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
@@ -310,7 +307,7 @@ class PembayaranController extends Controller
             ->first();
         
         if (!$periodeAktif) {
-            return redirect()->back()->withErrors(['error' => 'Tidak ada periode aktif!']);
+            return response()->json(['success' => false, 'message' => 'Tidak ada periode aktif!']);
         }
         
         // BELUM BAYAR PENDAFTARAN
@@ -331,8 +328,7 @@ class PembayaranController extends Controller
             
             $murid->update(['tanggal_daftar' => $request->tanggal]);
             
-            return redirect()->route($role . '.pembayaran.tagihan')
-                ->with('success', 'Pembayaran pendaftaran berhasil disimpan');
+            return response()->json(['success' => true, 'message' => 'Pembayaran pendaftaran berhasil disimpan']);
         }
         
         // PEMBAYARAN SPP
@@ -372,8 +368,7 @@ class PembayaranController extends Controller
             ]);
         }
         
-        return redirect()->route($role . '.pembayaran.tagihan')
-            ->with('success', 'Pembayaran SPP berhasil disimpan');
+        return response()->json(['success' => true, 'message' => 'Pembayaran SPP berhasil disimpan']);
     }
     
     // =============================================
