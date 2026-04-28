@@ -23,51 +23,55 @@
 
             
             <?php if($role == 'tentor'): ?>
+                
                 <li>
                     <a href="<?php echo e(route('tentor.dashboard')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('tentor.dashboard') ? 'nav-active' : ''); ?>">
                         <img src="<?php echo e(asset('images/dashboard/icons/icon_dashboard.png')); ?>" class="sidebar-icon"> Dashboard
                     </a>
                 </li>
+                
                 <li>
                     <a href="<?php echo e(route('tentor.presensi')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('tentor.presensi') ? 'nav-active' : ''); ?>">
                         <img src="<?php echo e(asset('images/dashboard/icons/icon_presensi.png')); ?>" class="sidebar-icon"> Presensi
                     </a>
                 </li>
+                
                 <li>
                     <a href="<?php echo e(route('tentor.riwayat-presensi')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('tentor.riwayat-presensi') ? 'nav-active' : ''); ?>">
-                        <img src="<?php echo e(asset('images/dashboard/icons/icon_riwayatpresensi.png')); ?>" class="sidebar-icon"> Riwayat Presensi
+                        <img src="<?php echo e(asset('images/dashboard/icons/icon_riwayatpresensi.png')); ?>" class="sidebar-icon"> Riwayat Pengajaran
                     </a>
                 </li>
             <?php endif; ?>
 
             
             <?php if($role == 'admin'): ?>
+                
                 <li>
                     <a href="<?php echo e(route('admin.dashboard')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('admin.dashboard') ? 'nav-active' : ''); ?>">
                         <img src="<?php echo e(asset('images/dashboard/icons/icon_dashboard.png')); ?>" class="sidebar-icon"> Dashboard
                     </a>
                 </li>
-                <li>
-                    <a href="<?php echo e(route('admin.data-tentor')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('admin.data-tentor*') ? 'nav-active' : ''); ?>">
-                        <img src="<?php echo e(asset('images/dashboard/icons/icon_datatentor.png')); ?>" class="sidebar-icon"> Data Tentor
-                    </a>
-                </li>
-                <li>
-                    <a href="<?php echo e(route('admin.kelola-murid')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('admin.kelola-murid*') ? 'nav-active' : ''); ?>">
-                        <img src="<?php echo e(asset('images/dashboard/icons/icon_kelolamurid.png')); ?>" class="sidebar-icon"> Kelola Murid
-                    </a>
-                </li>
 
                 
                 <li class="has-submenu">
-                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle <?php echo e(request()->is('*master-data*') ? 'nav-active' : ''); ?>" onclick="toggleSubmenu(this)">
+                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle <?php echo e(request()->is('*master-data*') || request()->is('*data-tentor*') || request()->is('*kelola-murid*') ? 'nav-active' : ''); ?>" onclick="toggleSubmenu(this)">
                         <div style="display: flex; align-items: center; flex: 1;">
                             <img src="<?php echo e(asset('images/dashboard/icons/icon_hargapaket.png')); ?>" class="sidebar-icon"> 
                             Master Data
                         </div>
                         <i class="fas fa-caret-down submenu-arrow"></i>
                     </a>
-                    <ul class="submenu-list" style="display: <?php echo e(request()->is('*master-data*') ? 'block' : 'none'); ?>;">
+                    <ul class="submenu-list" style="display: <?php echo e(request()->is('*master-data*') || request()->is('*data-tentor*') || request()->is('*kelola-murid*') ? 'block' : 'none'); ?>;">
+                        <li>
+                            <a href="<?php echo e(route('admin.data-tentor')); ?>" class="submenu-link <?php echo e(request()->routeIs('admin.data-tentor*') ? 'sub-active' : ''); ?>">
+                                <i class="fas fa-chalkboard-teacher submenu-icon"></i> Data Tentor
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo e(route('admin.kelola-murid')); ?>" class="submenu-link <?php echo e(request()->routeIs('admin.kelola-murid*') ? 'sub-active' : ''); ?>">
+                                <i class="fas fa-user-graduate submenu-icon"></i> Kelola Murid
+                            </a>
+                        </li>
                         <li>
                             <a href="<?php echo e(route('admin.master-data.harga-paket')); ?>" class="submenu-link <?php echo e(request()->routeIs('admin.master-data.harga-paket*') ? 'sub-active' : ''); ?>">
                                 <i class="fas fa-tag submenu-icon"></i> Harga Paket
@@ -91,80 +95,104 @@
                     </ul>
                 </li>
 
-                <li>
-                    <a href="<?php echo e(route('admin.kelola-presensi')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('admin.kelola-presensi*') ? 'nav-active' : ''); ?>">
-                        <img src="<?php echo e(asset('images/dashboard/icons/icon_riwayatpresensi.png')); ?>" class="sidebar-icon"> Riwayat Presensi
-                    </a>
-                </li>
-
                 
                 <li class="has-submenu">
-                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle <?php echo e(request()->is('*pembayaran*') ? 'nav-active' : ''); ?>" onclick="toggleSubmenu(this)">
+                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle <?php echo e(request()->is('*transaksi*') || request()->is('*pembayaran*') ? 'nav-active' : ''); ?>" onclick="toggleSubmenu(this)">
                         <div style="display: flex; align-items: center; flex: 1;">
                             <img src="<?php echo e(asset('images/dashboard/icons/icon_pembayaran.png')); ?>" class="sidebar-icon"> 
-                            Pembayaran
+                            Transaksi
                         </div>
                         <i class="fas fa-caret-down submenu-arrow"></i>
                     </a>
-                    <ul class="submenu-list" style="display: <?php echo e(request()->is('*pembayaran*') ? 'block' : 'none'); ?>;">
+                    <ul class="submenu-list" style="display: <?php echo e(request()->is('*transaksi*') || request()->is('*pembayaran*') ? 'block' : 'none'); ?>;">
                         <li>
                             <a href="<?php echo e(route('admin.pembayaran.tagihan')); ?>" class="submenu-link <?php echo e(request()->routeIs('admin.pembayaran.tagihan*') ? 'sub-active' : ''); ?>">
-                                <i class="fas fa-file-invoice submenu-icon"></i> Tagihan Murid
+                                <i class="fas fa-arrow-down submenu-icon"></i> Transaksi Pemasukan
                             </a>
                         </li>
                         <li>
                             <a href="<?php echo e(route('admin.pembayaran.riwayat')); ?>" class="submenu-link <?php echo e(request()->routeIs('admin.pembayaran.riwayat*') ? 'sub-active' : ''); ?>">
-                                <i class="fas fa-history submenu-icon"></i> Riwayat Pembayaran
+                                <i class="fas fa-arrow-up submenu-icon"></i> Transaksi Pengeluaran
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo e(route('admin.rekap-gaji')); ?>" class="submenu-link <?php echo e(request()->routeIs('admin.rekap-gaji*') ? 'sub-active' : ''); ?>">
+                                <i class="fas fa-hand-holding-usd submenu-icon"></i> Transaksi Penggajian
                             </a>
                         </li>
                     </ul>
                 </li>
 
+                
                 <li>
-                    <a href="<?php echo e(route('admin.rekap-gaji')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('admin.rekap-gaji*') ? 'nav-active' : ''); ?>">
-                        <img src="<?php echo e(asset('images/dashboard/icons/icon_rekapgaji.png')); ?>" class="sidebar-icon"> Rekap Gaji
-                    </a>
-                </li>
-                <li>
-                    <a href="<?php echo e(route('admin.laporan-keuangan')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('admin.laporan-keuangan*') ? 'nav-active' : ''); ?>">
-                        <img src="<?php echo e(asset('images/dashboard/icons/icon_laporankeuangan.png')); ?>" class="sidebar-icon"> Laporan Keuangan
-                    </a>
-                </li>
-            <?php endif; ?>
-
-            
-            <?php if($role == 'superadmin'): ?>
-                <li>
-                    <a href="<?php echo e(route('superadmin.dashboard')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.dashboard') ? 'nav-active' : ''); ?>">
-                        <img src="<?php echo e(asset('images/dashboard/icons/icon_dashboard.png')); ?>" class="sidebar-icon"> Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a href="<?php echo e(route('superadmin.kelola-admin')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.kelola-admin*') ? 'nav-active' : ''); ?>">
-                        <img src="<?php echo e(asset('images/dashboard/icons/icon_orang.png')); ?>" class="sidebar-icon"> Kelola Admin
-                    </a>
-                </li>
-                <li>
-                    <a href="<?php echo e(route('superadmin.kelola-tentor')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.kelola-tentor*') ? 'nav-active' : ''); ?>">
-                        <img src="<?php echo e(asset('images/dashboard/icons/icon_datatentor.png')); ?>" class="sidebar-icon"> Kelola Tentor
-                    </a>
-                </li>
-                <li>
-                    <a href="<?php echo e(route('superadmin.kelola-murid')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.kelola-murid*') ? 'nav-active' : ''); ?>">
-                        <img src="<?php echo e(asset('images/dashboard/icons/icon_kelolamurid.png')); ?>" class="sidebar-icon"> Kelola Murid
+                    <a href="<?php echo e(route('admin.kelola-presensi')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('admin.kelola-presensi*') ? 'nav-active' : ''); ?>">
+                        <img src="<?php echo e(asset('images/dashboard/icons/icon_riwayatpresensi.png')); ?>" class="sidebar-icon"> Riwayat Pengajaran
                     </a>
                 </li>
 
                 
                 <li class="has-submenu">
-                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle <?php echo e(request()->is('*master-data*') ? 'nav-active' : ''); ?>" onclick="toggleSubmenu(this)">
+                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle <?php echo e(request()->is('*laporan-keuangan*') ? 'nav-active' : ''); ?>" onclick="toggleSubmenu(this)">
+                        <div style="display: flex; align-items: center; flex: 1;">
+                            <img src="<?php echo e(asset('images/dashboard/icons/icon_laporankeuangan.png')); ?>" class="sidebar-icon"> 
+                            Laporan Keuangan
+                        </div>
+                        <i class="fas fa-caret-down submenu-arrow"></i>
+                    </a>
+                    <ul class="submenu-list" style="display: <?php echo e(request()->is('*laporan-keuangan*') ? 'block' : 'none'); ?>;">
+                        <li>
+                            <a href="<?php echo e(route('admin.laporan-keuangan')); ?>" class="submenu-link <?php echo e(request()->routeIs('admin.laporan-keuangan*') && !request()->has('jenis') ? 'sub-active' : ''); ?>">
+                                <i class="fas fa-file-invoice-dollar submenu-icon"></i> Laporan Pemasukan
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo e(route('admin.laporan-keuangan')); ?>?jenis=pengeluaran" class="submenu-link <?php echo e(request()->has('jenis') && request()->get('jenis') == 'pengeluaran' ? 'sub-active' : ''); ?>">
+                                <i class="fas fa-file-invoice submenu-icon"></i> Laporan Pengeluaran
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo e(route('admin.laporan-keuangan')); ?>?jenis=gajian" class="submenu-link <?php echo e(request()->has('jenis') && request()->get('jenis') == 'gajian' ? 'sub-active' : ''); ?>">
+                                <i class="fas fa-receipt submenu-icon"></i> Laporan Gajian
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            <?php endif; ?>
+
+            
+            <?php if($role == 'superadmin'): ?>
+                
+                <li>
+                    <a href="<?php echo e(route('superadmin.dashboard')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.dashboard') ? 'nav-active' : ''); ?>">
+                        <img src="<?php echo e(asset('images/dashboard/icons/icon_dashboard.png')); ?>" class="sidebar-icon"> Dashboard
+                    </a>
+                </li>
+
+                
+                <li class="has-submenu">
+                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle <?php echo e(request()->is('*kelola-admin*') || request()->is('*kelola-tentor*') || request()->is('*kelola-murid*') || request()->is('*master-data*') ? 'nav-active' : ''); ?>" onclick="toggleSubmenu(this)">
                         <div style="display: flex; align-items: center; flex: 1;">
                             <img src="<?php echo e(asset('images/dashboard/icons/icon_hargapaket.png')); ?>" class="sidebar-icon"> 
                             Master Data
                         </div>
                         <i class="fas fa-caret-down submenu-arrow"></i>
                     </a>
-                    <ul class="submenu-list" style="display: <?php echo e(request()->is('*master-data*') ? 'block' : 'none'); ?>;">
+                    <ul class="submenu-list" style="display: <?php echo e(request()->is('*kelola-admin*') || request()->is('*kelola-tentor*') || request()->is('*kelola-murid*') || request()->is('*master-data*') ? 'block' : 'none'); ?>;">
+                        <li>
+                            <a href="<?php echo e(route('superadmin.kelola-admin')); ?>" class="submenu-link <?php echo e(request()->routeIs('superadmin.kelola-admin*') ? 'sub-active' : ''); ?>">
+                                <i class="fas fa-user-shield submenu-icon"></i> Kelola Admin
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo e(route('superadmin.kelola-tentor')); ?>" class="submenu-link <?php echo e(request()->routeIs('superadmin.kelola-tentor*') ? 'sub-active' : ''); ?>">
+                                <i class="fas fa-chalkboard-teacher submenu-icon"></i> Kelola Tentor
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo e(route('superadmin.kelola-murid')); ?>" class="submenu-link <?php echo e(request()->routeIs('superadmin.kelola-murid*') ? 'sub-active' : ''); ?>">
+                                <i class="fas fa-user-graduate submenu-icon"></i> Kelola Murid
+                            </a>
+                        </li>
                         <li>
                             <a href="<?php echo e(route('superadmin.master-data.harga-paket')); ?>" class="submenu-link <?php echo e(request()->routeIs('superadmin.master-data.harga-paket*') ? 'sub-active' : ''); ?>">
                                 <i class="fas fa-tag submenu-icon"></i> Harga Paket
@@ -188,44 +216,67 @@
                     </ul>
                 </li>
 
-               <li>
-                    <a href="<?php echo e(route('superadmin.kelola-presensi')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.kelola-presensi*') ? 'nav-active' : ''); ?>">
-                       <img src="<?php echo e(asset('images/dashboard/icons/icon_riwayatpresensi.png')); ?>" class="sidebar-icon"> Riwayat Presensi
-                     </a>
-                </li>
-
                 
                 <li class="has-submenu">
-                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle <?php echo e(request()->is('*pembayaran*') ? 'nav-active' : ''); ?>" onclick="toggleSubmenu(this)">
+                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle <?php echo e(request()->is('*pembayaran*') || request()->is('*rekap-gaji*') ? 'nav-active' : ''); ?>" onclick="toggleSubmenu(this)">
                         <div style="display: flex; align-items: center; flex: 1;">
                             <img src="<?php echo e(asset('images/dashboard/icons/icon_pembayaran.png')); ?>" class="sidebar-icon"> 
-                            Pembayaran
+                            Transaksi
                         </div>
                         <i class="fas fa-caret-down submenu-arrow"></i>
                     </a>
-                    <ul class="submenu-list" style="display: <?php echo e(request()->is('*pembayaran*') ? 'block' : 'none'); ?>;">
+                    <ul class="submenu-list" style="display: <?php echo e(request()->is('*pembayaran*') || request()->is('*rekap-gaji*') ? 'block' : 'none'); ?>;">
                         <li>
                             <a href="<?php echo e(route('superadmin.pembayaran.tagihan')); ?>" class="submenu-link <?php echo e(request()->routeIs('superadmin.pembayaran.tagihan*') ? 'sub-active' : ''); ?>">
-                                <i class="fas fa-file-invoice submenu-icon"></i> Tagihan Murid
+                                <i class="fas fa-arrow-down submenu-icon"></i> Transaksi Pemasukan
                             </a>
                         </li>
                         <li>
                             <a href="<?php echo e(route('superadmin.pembayaran.riwayat')); ?>" class="submenu-link <?php echo e(request()->routeIs('superadmin.pembayaran.riwayat*') ? 'sub-active' : ''); ?>">
-                                <i class="fas fa-history submenu-icon"></i> Riwayat Pembayaran
+                                <i class="fas fa-arrow-up submenu-icon"></i> Transaksi Pengeluaran
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo e(route('superadmin.rekap-gaji')); ?>" class="submenu-link <?php echo e(request()->routeIs('superadmin.rekap-gaji*') ? 'sub-active' : ''); ?>">
+                                <i class="fas fa-hand-holding-usd submenu-icon"></i> Transaksi Penggajian
                             </a>
                         </li>
                     </ul>
                 </li>
 
+                
                 <li>
-                    <a href="<?php echo e(route('superadmin.rekap-gaji')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.rekap-gaji*') ? 'nav-active' : ''); ?>">
-                        <img src="<?php echo e(asset('images/dashboard/icons/icon_rekapgaji.png')); ?>" class="sidebar-icon"> Rekap Gaji
+                    <a href="<?php echo e(route('superadmin.kelola-presensi')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.kelola-presensi*') ? 'nav-active' : ''); ?>">
+                        <img src="<?php echo e(asset('images/dashboard/icons/icon_riwayatpresensi.png')); ?>" class="sidebar-icon"> Riwayat Pengajaran
                     </a>
                 </li>
-                <li>
-                    <a href="<?php echo e(route('superadmin.laporan-keuangan')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('superadmin.laporan-keuangan*') ? 'nav-active' : ''); ?>">
-                        <img src="<?php echo e(asset('images/dashboard/icons/icon_laporankeuangan.png')); ?>" class="sidebar-icon"> Laporan Keuangan
+
+                
+                <li class="has-submenu">
+                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle <?php echo e(request()->is('*laporan-keuangan*') ? 'nav-active' : ''); ?>" onclick="toggleSubmenu(this)">
+                        <div style="display: flex; align-items: center; flex: 1;">
+                            <img src="<?php echo e(asset('images/dashboard/icons/icon_laporankeuangan.png')); ?>" class="sidebar-icon"> 
+                            Laporan Keuangan
+                        </div>
+                        <i class="fas fa-caret-down submenu-arrow"></i>
                     </a>
+                    <ul class="submenu-list" style="display: <?php echo e(request()->is('*laporan-keuangan*') ? 'block' : 'none'); ?>;">
+                        <li>
+                            <a href="<?php echo e(route('superadmin.laporan-keuangan')); ?>" class="submenu-link <?php echo e(request()->routeIs('superadmin.laporan-keuangan*') && !request()->has('jenis') ? 'sub-active' : ''); ?>">
+                                <i class="fas fa-file-invoice-dollar submenu-icon"></i> Laporan Pemasukan
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo e(route('superadmin.laporan-keuangan')); ?>?jenis=pengeluaran" class="submenu-link <?php echo e(request()->has('jenis') && request()->get('jenis') == 'pengeluaran' ? 'sub-active' : ''); ?>">
+                                <i class="fas fa-file-invoice submenu-icon"></i> Laporan Pengeluaran
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo e(route('superadmin.laporan-keuangan')); ?>?jenis=gajian" class="submenu-link <?php echo e(request()->has('jenis') && request()->get('jenis') == 'gajian' ? 'sub-active' : ''); ?>">
+                                <i class="fas fa-receipt submenu-icon"></i> Laporan Gajian
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             <?php endif; ?>
 
@@ -249,10 +300,10 @@
         
         if (submenu.style.display === 'none' || submenu.style.display === '') {
             submenu.style.display = 'block';
-            arrow.style.transform = 'rotate(180deg)';
+            if (arrow) arrow.style.transform = 'rotate(180deg)';
         } else {
             submenu.style.display = 'none';
-            arrow.style.transform = 'rotate(0deg)';
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
         }
     }
 </script>
