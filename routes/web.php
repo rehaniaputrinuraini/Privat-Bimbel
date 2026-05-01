@@ -172,7 +172,18 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/pembayaran/edit/{id}', [PembayaranController::class, 'edit'])->name('pembayaran.edit');
         Route::put('/pembayaran/update/{id}', [PembayaranController::class, 'update'])->name('pembayaran.update');
         Route::delete('/pembayaran/destroy/{id}', [PembayaranController::class, 'destroy'])->name('pembayaran.destroy');
+        // TRANSAKSI PEMASUKAN
+        Route::get('/transaksi/pemasukan', [PembayaranController::class, 'indexPemasukan'])->name('transaksi.pemasukan');
         
+        // TRANSAKSI PENGELUARAN
+        Route::get('/transaksi/pengeluaran', [PembayaranController::class, 'indexPengeluaran'])->name('transaksi.pengeluaran');
+        Route::get('/pengeluaran/create', [PembayaranController::class, 'createPengeluaran'])->name('pengeluaran.create');
+        Route::post('/pengeluaran/store', [PembayaranController::class, 'storePengeluaran'])->name('pengeluaran.store');
+
+        // TRANSAKSI PENGGAJIAN
+        Route::get('/transaksi/penggajian', [PembayaranController::class, 'indexPenggajian'])->name('transaksi.penggajian');
+        Route::post('/penggajian/bayar/{id}', [PembayaranController::class, 'bayarGaji'])->name('penggajian.bayar');
+
         // KELOLA TENTOR
         Route::get('/kelola-tentor', [KelolaTentorController::class, 'index'])->name('kelola-tentor');
         Route::get('/kelola-tentor/create', [KelolaTentorController::class, 'create'])->name('kelola-tentor.create');
@@ -270,7 +281,18 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/pembayaran/edit/{id}', [PembayaranController::class, 'edit'])->name('pembayaran.edit');
         Route::put('/pembayaran/update/{id}', [PembayaranController::class, 'update'])->name('pembayaran.update');
         Route::delete('/pembayaran/destroy/{id}', [PembayaranController::class, 'destroy'])->name('pembayaran.destroy');
+        // TRANSAKSI PEMASUKAN
+        Route::get('/transaksi/pemasukan', [PembayaranController::class, 'indexPemasukan'])->name('transaksi.pemasukan');
         
+        // TRANSAKSI PENGELUARAN
+        Route::get('/transaksi/pengeluaran', [PembayaranController::class, 'indexPengeluaran'])->name('transaksi.pengeluaran');
+        Route::get('/pengeluaran/create', [PembayaranController::class, 'createPengeluaran'])->name('pengeluaran.create');
+        Route::post('/pengeluaran/store', [PembayaranController::class, 'storePengeluaran'])->name('pengeluaran.store');
+
+        // TRANSAKSI PENGGAJIAN
+        Route::get('/transaksi/penggajian', [PembayaranController::class, 'indexPenggajian'])->name('transaksi.penggajian');
+        Route::post('/penggajian/bayar/{id}', [PembayaranController::class, 'bayarGaji'])->name('penggajian.bayar');
+
         // DATA TENTOR
         Route::get('/data-tentor', [KelolaTentorController::class, 'index'])->name('data-tentor');
         

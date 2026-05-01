@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Murid;
 use App\Models\HargaPaket;
+use App\Models\Mengajar;
+use App\Models\Pegawai;
 use App\Models\TransaksiPaket;
 use App\Models\TransaksiKelas;
-use App\Models\TransaksiUmum; 
+use App\Models\TransaksiUmum;
 use App\Models\Periode;
 use Carbon\Carbon;
 
@@ -20,19 +22,19 @@ class PembayaranController extends Controller
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
-        
+
         $currentMonth = Carbon::now()->month;
-        $currentYear = Carbon::now()->year;
-        
+        $currentYear  = Carbon::now()->year;
+
         $murids = Murid::all();
-        
-        $today = date('Y-m-d');
+
+        $today       = date('Y-m-d');
         $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
             ->where('tanggal_selesai', '>=', $today)
             ->first();
-        
+
         $tagihan = collect();
-        
+
         foreach ($murids as $murid) {
             // Ambil kelas terbaru
             $kelasTerbaru = TransaksiKelas::where('id_murid', $murid->id_murid)
@@ -40,44 +42,44 @@ class PembayaranController extends Controller
                 ->first();
             $namaKelas = '-';
             if ($kelasTerbaru) {
-                $kelas = \App\Models\Kelas::find($kelasTerbaru->id_kelas);
+                $kelas     = \App\Models\Kelas::find($kelasTerbaru->id_kelas);
                 $namaKelas = $kelas ? $kelas->nama_kelas : '-';
             }
-            
+
             // Ambil paket aktif
-            $paketAktif = TransaksiPaket::where('id_murid', $murid->id_murid)
+            $paketAktif    = TransaksiPaket::where('id_murid', $murid->id_murid)
                 ->orderBy('id_paket_murid', 'desc')
                 ->first();
-            $namaPaket = '-';
+            $namaPaket     = '-';
             $hargaPerBulan = 0;
             if ($paketAktif) {
                 $paket = HargaPaket::find($paketAktif->id_paket);
                 if ($paket) {
-                    $namaPaket = $paket->tingkat;
+                    $namaPaket     = $paket->tingkat;
                     $hargaPerBulan = $paket->harga;
                 }
             }
-            
+
             // Cek sudah bayar pendaftaran
             $sudahBayarPendaftaran = TransaksiUmum::where('id_murid', $murid->id_murid)
                 ->where('keterangan', 'like', '%Pendaftaran%')
                 ->exists();
             $statusPendaftaran = $sudahBayarPendaftaran ? 'Lunas' : 'Belum';
-            
+
             // Ambil semua pembayaran SPP
             $semuaPembayaranSPP = TransaksiUmum::where('id_murid', $murid->id_murid)
                 ->where('keterangan', 'like', '%SPP%')
                 ->where('debit', '>', 0)
                 ->orderBy('tanggal_bayar', 'desc')
                 ->get();
-            
+
             // Cek pembayaran bulan ini
-            $pembayaranBulanIni = $semuaPembayaranSPP->filter(function($item) use ($currentMonth, $currentYear) {
+            $pembayaranBulanIni = $semuaPembayaranSPP->filter(function ($item) use ($currentMonth, $currentYear) {
                 preg_match('/SPP\s+(\w+)\s+(\d+)/', $item->keterangan, $matches);
                 if (isset($matches[1]) && isset($matches[2])) {
                     try {
                         $bulanDibayar = Carbon::parse($matches[1])->month;
-                        $tahunDibayar = (int)$matches[2];
+                        $tahunDibayar = (int) $matches[2];
                         return $bulanDibayar == $currentMonth && $tahunDibayar == $currentYear;
                     } catch (\Exception $e) {
                         return false;
@@ -85,34 +87,32 @@ class PembayaranController extends Controller
                 }
                 return false;
             })->first();
-            
-            // Hitung Uang Muka
-            $totalUangMuka = 0;
+
+            // Hitung Uang Muka & Piutang
+            $totalUangMuka    = 0;
             $uangMukaBulanList = [];
-            
-            // Hitung Piutang
-            $totalPiutang = 0;
+            $totalPiutang     = 0;
             $piutangBulanList = [];
-            
+
             foreach ($semuaPembayaranSPP as $pemb) {
                 preg_match('/SPP\s+(\w+)\s+(\d+)/', $pemb->keterangan, $matches);
                 if (isset($matches[1]) && isset($matches[2])) {
                     try {
                         $bulanDibayar = Carbon::parse($matches[1])->month;
-                        $tahunDibayar = (int)$matches[2];
-                        $bulanTahun = $matches[1] . ' ' . $matches[2];
-                        
-                        if ($tahunDibayar > $currentYear || 
+                        $tahunDibayar = (int) $matches[2];
+                        $bulanTahun   = $matches[1] . ' ' . $matches[2];
+
+                        if ($tahunDibayar > $currentYear ||
                             ($tahunDibayar == $currentYear && $bulanDibayar > $currentMonth)) {
-                            $totalUangMuka += $pemb->debit;
+                            $totalUangMuka      += $pemb->debit;
                             $uangMukaBulanList[] = $bulanTahun;
                         }
-                        
-                        if ($tahunDibayar < $currentYear || 
+
+                        if ($tahunDibayar < $currentYear ||
                             ($tahunDibayar == $currentYear && $bulanDibayar < $currentMonth)) {
                             $kekurangan = $hargaPerBulan - $pemb->debit;
                             if ($kekurangan > 0) {
-                                $totalPiutang += $kekurangan;
+                                $totalPiutang      += $kekurangan;
                                 $piutangBulanList[] = $bulanTahun;
                             }
                         }
@@ -121,91 +121,94 @@ class PembayaranController extends Controller
                     }
                 }
             }
-            
+
             // Bulan belum dibayar
             $bulanBelumDibayar = [];
-            $bulanMulai = 1;
+            $bulanMulai        = 1;
             if ($murid->tanggal_daftar) {
                 $bulanMulai = (int) date('m', strtotime($murid->tanggal_daftar));
             }
+
             for ($i = $bulanMulai; $i <= $currentMonth; $i++) {
-                $bulanTahun = Carbon::create()->month($i)->translatedFormat('F') . ' ' . $currentYear;
+                $bulanTahun  = Carbon::create()->month($i)->translatedFormat('F') . ' ' . $currentYear;
                 $sudahDibayar = false;
-                
+
                 if ($i == $bulanMulai && !$sudahBayarPendaftaran == false) {
                     continue;
                 }
-                
+
                 foreach ($semuaPembayaranSPP as $pemb) {
                     if (str_contains($pemb->keterangan, $bulanTahun)) {
                         $sudahDibayar = true;
                         break;
                     }
                 }
-                
+
                 if (!$sudahDibayar) {
                     $bulanBelumDibayar[] = $bulanTahun;
-                    $totalPiutang += $hargaPerBulan;
+                    $totalPiutang       += $hargaPerBulan;
                 }
             }
-            
-            $statusPembayaran = '-';
-            $statusTagihan = '-';
-            $tagihanBulan = '-';
+
+            $statusPembayaran    = '-';
+            $statusTagihan       = '-';
+            $tagihanBulan        = '-';
             $totalPiutangDisplay = '-';
-            $uangMukaDisplay = '-';
-            
+            $uangMukaDisplay     = '-';
+
             if (!$sudahBayarPendaftaran) {
-                $statusTagihan = 'Belum Daftar';
-                $tagihanBulan = 'Pendaftaran';
+                $statusTagihan       = 'Belum Daftar';
+                $tagihanBulan        = 'Pendaftaran';
                 $totalPiutangDisplay = 'Rp 100.000';
-                $uangMukaDisplay = '-';
-                $statusPembayaran = '-';
+                $uangMukaDisplay     = '-';
+                $statusPembayaran    = '-';
             } elseif ($totalUangMuka > 0) {
-                $statusPembayaran = 'Lunas';
-                $statusTagihan = 'Uang Muka';
-                $tagihanBulan = !empty($uangMukaBulanList) ? implode(', ', $uangMukaBulanList) : '-';
+                $statusPembayaran    = 'Lunas';
+                $statusTagihan       = 'Uang Muka';
+                $tagihanBulan        = !empty($uangMukaBulanList) ? implode(', ', $uangMukaBulanList) : '-';
                 $totalPiutangDisplay = '-';
-                $uangMukaDisplay = 'Rp ' . number_format($totalUangMuka, 0, ',', '.');
+                $uangMukaDisplay     = 'Rp ' . number_format($totalUangMuka, 0, ',', '.');
             } elseif ($totalPiutang > 0) {
-                $statusPembayaran = 'Belum';
-                $statusTagihan = 'Tunggak';
-                $allBulan = array_merge($piutangBulanList, $bulanBelumDibayar);
-                $tagihanBulan = !empty($allBulan) ? implode(', ', array_unique($allBulan)) : Carbon::create()->month($currentMonth)->translatedFormat('F') . ' ' . $currentYear;
+                $statusPembayaran    = 'Belum';
+                $statusTagihan       = 'Tunggak';
+                $allBulan            = array_merge($piutangBulanList, $bulanBelumDibayar);
+                $tagihanBulan        = !empty($allBulan)
+                    ? implode(', ', array_unique($allBulan))
+                    : Carbon::create()->month($currentMonth)->translatedFormat('F') . ' ' . $currentYear;
                 $totalPiutangDisplay = 'Rp ' . number_format($totalPiutang, 0, ',', '.');
-                $uangMukaDisplay = '-';
+                $uangMukaDisplay     = '-';
             } elseif ($pembayaranBulanIni) {
-                $statusPembayaran = 'Lunas';
-                $statusTagihan = 'Lunas';
-                $tagihanBulan = '-';
+                $statusPembayaran    = 'Lunas';
+                $statusTagihan       = 'Lunas';
+                $tagihanBulan        = '-';
                 $totalPiutangDisplay = '-';
-                $uangMukaDisplay = '-';
+                $uangMukaDisplay     = '-';
             } else {
-                $statusPembayaran = 'Belum';
-                $statusTagihan = 'Tunggak';
-                $tagihanBulan = Carbon::create()->month($currentMonth)->translatedFormat('F') . ' ' . $currentYear;
+                $statusPembayaran    = 'Belum';
+                $statusTagihan       = 'Tunggak';
+                $tagihanBulan        = Carbon::create()->month($currentMonth)->translatedFormat('F') . ' ' . $currentYear;
                 $totalPiutangDisplay = 'Rp ' . number_format($hargaPerBulan, 0, ',', '.');
-                $uangMukaDisplay = '-';
+                $uangMukaDisplay     = '-';
             }
-            
-            $tagihan->push((object)[
-                'id_murid' => $murid->id_murid,
-                'nama_murid' => $murid->nama_lengkap,
-                'kelas' => $namaKelas,
-                'paket' => $namaPaket,
-                'status_pendaftaran' => $statusPendaftaran,
+
+            $tagihan->push((object) [
+                'id_murid'          => $murid->id_murid,
+                'nama_murid'        => $murid->nama_lengkap,
+                'kelas'             => $namaKelas,
+                'paket'             => $namaPaket,
+                'status_pendaftaran'=> $statusPendaftaran,
                 'status_pembayaran' => $statusPembayaran,
-                'status_tagihan' => $statusTagihan,
-                'tagihan_bulan' => $tagihanBulan,
-                'total_piutang' => $totalPiutangDisplay,
-                'uang_muka' => $uangMukaDisplay,
+                'status_tagihan'    => $statusTagihan,
+                'tagihan_bulan'     => $tagihanBulan,
+                'total_piutang'     => $totalPiutangDisplay,
+                'uang_muka'         => $uangMukaDisplay,
             ]);
         }
-        
+
         // Pagination
-        $perPage = $request->get('per_page', 10);
+        $perPage     = $request->get('per_page', 10);
         $currentPage = $request->get('page', 1);
-        $total = $tagihan->count();
+        $total       = $tagihan->count();
 
         $tagihan = new \Illuminate\Pagination\LengthAwarePaginator(
             $tagihan->forPage($currentPage, $perPage),
@@ -216,39 +219,37 @@ class PembayaranController extends Controller
         );
 
         return view('dashboard.shared.pembayaran.tagihan', [
-            'role' => $role,
-            'tagihan' => $tagihan,
+            'role'      => $role,
+            'tagihan'   => $tagihan,
             'paketList' => $paketList,
         ]);
     }
-    
+
     // =============================================
     // RIWAYAT PEMBAYARAN
     // =============================================
     public function indexRiwayat(Request $request)
     {
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        $role      = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
-        
-        $perPage = $request->get('per_page', 10);
+        $perPage   = $request->get('per_page', 10);
 
         $riwayat = TransaksiUmum::with('murid')
             ->orderBy('tanggal_bayar', 'desc')
             ->paginate($perPage)
             ->through(function ($item) {
-                $nama_murid = $item->murid ? $item->murid->nama_lengkap : 'Tidak Diketahui';
-                $isPendaftaran = str_contains($item->keterangan, 'Pendaftaran');
-                $isSPP = str_contains($item->keterangan, 'SPP');
-                
-                $bulanDibayar = '-';
+                $nama_murid     = $item->murid ? $item->murid->nama_lengkap : 'Tidak Diketahui';
+                $isPendaftaran  = str_contains($item->keterangan, 'Pendaftaran');
+                $isSPP          = str_contains($item->keterangan, 'SPP');
+                $bulanDibayar   = '-';
                 $paketSelanjutnya = '-';
-                
+
                 if ($isSPP) {
                     preg_match('/SPP\s+(\w+)\s+(\d+)/', $item->keterangan, $matches);
                     if (isset($matches[1]) && isset($matches[2])) {
                         $bulanDibayar = $matches[1] . ' ' . $matches[2];
                     }
-                    
+
                     $paketAktif = TransaksiPaket::where('id_murid', $item->id_murid)->first();
                     if ($paketAktif) {
                         $paket = HargaPaket::find($paketAktif->id_paket);
@@ -257,64 +258,479 @@ class PembayaranController extends Controller
                         }
                     }
                 }
-                
-                return (object)[
-                    'id_pembayaran' => $item->id_transaksi,
-                    'tanggal' => $item->tanggal_bayar ? date('d/m/Y', strtotime($item->tanggal_bayar)) : '-',
-                    'nama_murid' => $nama_murid,
-                    'paket_awal' => $isPendaftaran ? 'Rp 100.000' : '-',
-                    'paket_selanjutnya' => $paketSelanjutnya,
-                    'bulan_dibayar' => $bulanDibayar,
+
+                return (object) [
+                    'id_pembayaran'    => $item->id_transaksi,
+                    'tanggal'          => $item->tanggal_bayar ? date('d/m/Y', strtotime($item->tanggal_bayar)) : '-',
+                    'nama_murid'       => $nama_murid,
+                    'paket_awal'       => $isPendaftaran ? 'Rp 100.000' : '-',
+                    'paket_selanjutnya'=> $paketSelanjutnya,
+                    'bulan_dibayar'    => $bulanDibayar,
                     'jenis_pembayaran' => $item->jenis_pembayaran ?? '-',
-                    'total_bayar' => 'Rp ' . number_format($item->debit ?? 0, 0, ',', '.'),
-                    'keterangan' => $isPendaftaran ? 'Pembayaran Pendaftaran' : ($isSPP ? 'Pembayaran SPP' : $item->keterangan),
+                    'total_bayar'      => 'Rp ' . number_format($item->debit ?? 0, 0, ',', '.'),
+                    'keterangan'       => $isPendaftaran
+                        ? 'Pembayaran Pendaftaran'
+                        : ($isSPP ? 'Pembayaran SPP' : $item->keterangan),
                 ];
             });
 
         return view('dashboard.shared.pembayaran.riwayat', [
-            'role' => $role,
-            'riwayat' => $riwayat,
+            'role'      => $role,
+            'riwayat'   => $riwayat,
             'paketList' => $paketList,
         ]);
     }
-    
+
     // =============================================
     // CREATE
     // =============================================
     public function create(Request $request)
     {
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        $role   = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $murids = Murid::orderBy('nama_lengkap', 'asc')->get();
         $pakets = HargaPaket::orderBy('id_paket', 'asc')->get();
-        
+
         return view('dashboard.shared.pembayaran.create-pembayaran', [
-            'role' => $role,
+            'role'   => $role,
             'murids' => $murids,
             'pakets' => $pakets,
         ]);
     }
-    
+
     // =============================================
-    // STORE (REVISI - RETURN JSON)
+    // STORE
     // =============================================
     public function store(Request $request)
     {
+        $today       = date('Y-m-d');
+        $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
+            ->where('tanggal_selesai', '>=', $today)
+            ->first();
+
+        if (!$periodeAktif) {
+            return response()->json(['success' => false, 'message' => 'Tidak ada periode aktif!']);
+        }
+
+        // ========== PEMASUKAN LAINNYA ==========
+        if ($request->kategori_pemasukan == 'lainnya') {
+            $request->validate([
+                'tanggal_lainnya'          => 'required|date',
+                'jenis_pembayaran_lainnya' => 'required|in:Tunai,Transfer',
+                'sumber_pemasukan'         => 'required|string|max:100',
+                'total_pembayaran_lainnya' => 'required|numeric|min:1000',
+            ]);
+
+            TransaksiUmum::create([
+                'id_periode'       => (int) $periodeAktif->id_periode,
+                'id_murid'         => null,
+                'id_pegawai'       => null,
+                'tanggal_bayar'    => $request->tanggal_lainnya,
+                'bulan'            => (int) date('m', strtotime($request->tanggal_lainnya)),
+                'jenis_pembayaran' => $request->jenis_pembayaran_lainnya,
+                'keterangan'       => 'Pemasukan Lainnya: ' . $request->sumber_pemasukan
+                    . ($request->keterangan_lainnya ? ' - ' . $request->keterangan_lainnya : ''),
+                'debit'            => (int) $request->total_pembayaran_lainnya,
+                'kredit'           => 0,
+                'created_at'       => now(),
+                'updated_at'       => now(),
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Pemasukan lainnya berhasil disimpan']);
+        }
+
+        // ========== PEMBAYARAN MURID ==========
         $request->validate([
-            'id_murid' => 'required|exists:ms_murid,id_murid',
-            'tanggal' => 'required|date',
-            'jenis_pembayaran' => 'required|in:Tunai,Transfer',
-            'total_pembayaran' => 'required|numeric|min:1000',
+            'tanggal'             => 'required|date',
+            'jenis_pembayaran'    => 'required|in:Tunai,Transfer',
+            'total_pembayaran'    => 'required|numeric|min:1000',
+            'kategori_pemasukan'  => 'required|in:murid,lainnya',
+            'id_murid'            => 'required|exists:ms_murid,id_murid',
         ]);
-        
+
         $murid = Murid::find($request->id_murid);
-        
+
         if (!$murid) {
             return response()->json(['success' => false, 'message' => 'Data murid tidak ditemukan']);
         }
-        
+
         $sudahBayarPendaftaran = TransaksiUmum::where('id_murid', $request->id_murid)
             ->where('keterangan', 'like', '%Pendaftaran%')
             ->exists();
+
+        // BELUM BAYAR PENDAFTARAN
+        if (!$sudahBayarPendaftaran) {
+            TransaksiUmum::create([
+                'id_periode'       => (int) $periodeAktif->id_periode,
+                'id_murid'         => (int) $request->id_murid,
+                'id_pegawai'       => null,
+                'tanggal_bayar'    => $request->tanggal,
+                'bulan'            => (int) date('m', strtotime($request->tanggal)),
+                'jenis_pembayaran' => $request->jenis_pembayaran,
+                'keterangan'       => 'Pembayaran Pendaftaran - ' . $murid->nama_lengkap,
+                'debit'            => (int) $request->total_pembayaran,
+                'kredit'           => 0,
+                'created_at'       => now(),
+                'updated_at'       => now(),
+            ]);
+
+            $murid->update(['tanggal_daftar' => $request->tanggal]);
+
+            return response()->json(['success' => true, 'message' => 'Pembayaran pendaftaran berhasil disimpan']);
+        }
+
+        // PEMBAYARAN SPP
+        $request->validate([
+            'paket_selanjutnya' => 'required|string',
+            'bulan_dibayar'     => 'nullable|integer|min:1|max:12',
+        ]);
+
+        $bulanDibayar = $request->bulan_dibayar ?? Carbon::now()->month;
+        $tahunDibayar = Carbon::now()->year;
+        $namaBulan    = Carbon::create()->month($bulanDibayar)->translatedFormat('F');
+
+        TransaksiUmum::create([
+            'id_periode'       => (int) $periodeAktif->id_periode,
+            'id_murid'         => (int) $request->id_murid,
+            'id_pegawai'       => null,
+            'tanggal_bayar'    => $request->tanggal,
+            'bulan'            => (int) $bulanDibayar,
+            'jenis_pembayaran' => $request->jenis_pembayaran,
+            'keterangan'       => 'Pembayaran SPP ' . $namaBulan . ' ' . $tahunDibayar . ' - ' . $murid->nama_lengkap,
+            'debit'            => (int) $request->total_pembayaran,
+            'kredit'           => 0,
+            'created_at'       => now(),
+            'updated_at'       => now(),
+        ]);
+
+        $hargaPaket = HargaPaket::where('tingkat', $request->paket_selanjutnya)->first();
+        if ($hargaPaket) {
+            TransaksiPaket::where('id_murid', $request->id_murid)->delete();
+            TransaksiPaket::create([
+                'id_murid'          => (int) $request->id_murid,
+                'id_paket'          => (int) $hargaPaket->id_paket,
+                'id_periode'        => (int) $periodeAktif->id_periode,
+                'tanggal_daftar'    => date('Y-m-d'),
+                'paket_awal'        => 0,
+                'biaya_pendaftaran' => 100000,
+            ]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Pembayaran SPP berhasil disimpan']);
+    }
+
+    // =============================================
+    // DESTROY
+    // =============================================
+    public function destroy(Request $request, $id)
+    {
+        TransaksiUmum::where('id_transaksi', $id)->delete();
+
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+
+        return redirect()->route($role . '.pembayaran.tagihan')
+            ->with('success', 'Data pembayaran berhasil dihapus');
+    }
+
+    // =============================================
+    // API CEK STATUS PEMBAYARAN MURID
+    // =============================================
+    public function cekStatusPembayaran($id)
+    {
+        $murid = Murid::find($id);
+
+        if (!$murid) {
+            return response()->json(['error' => 'Murid tidak ditemukan'], 404);
+        }
+
+        $sudahBayarPendaftaran = TransaksiUmum::where('id_murid', $id)
+            ->where('keterangan', 'like', '%Pendaftaran%')
+            ->exists();
+
+        $paketAktif  = TransaksiPaket::where('id_murid', $id)
+            ->orderBy('id_paket_murid', 'desc')
+            ->first();
+
+        $paketTingkat = null;
+        $hargaPaket   = null;
+
+        if ($paketAktif) {
+            $paket = HargaPaket::find($paketAktif->id_paket);
+            if ($paket) {
+                $paketTingkat = $paket->tingkat;
+                $hargaPaket   = $paket->harga;
+            }
+        }
+
+        $bulanTunggakan  = null;
+        $bulanLunas      = [];
+        $bulanBerikutnya = null;
+
+        if ($sudahBayarPendaftaran) {
+            $currentMonth = Carbon::now()->month;
+            $currentYear  = Carbon::now()->year;
+
+            $semuaSPP = TransaksiUmum::where('id_murid', $id)
+                ->where('keterangan', 'like', '%SPP%')
+                ->where('debit', '>', 0)
+                ->get();
+
+            // Cek pembayaran bulan ini
+            $pembayaranBulanIni = $semuaSPP->filter(function ($item) use ($currentMonth, $currentYear) {
+                preg_match('/SPP\s+(\w+)\s+(\d+)/', $item->keterangan, $matches);
+                if (isset($matches[1]) && isset($matches[2])) {
+                    try {
+                        $bulanDibayar = Carbon::parse($matches[1])->month;
+                        $tahunDibayar = (int) $matches[2];
+                        return $bulanDibayar == $currentMonth && $tahunDibayar == $currentYear;
+                    } catch (\Exception $e) {
+                        return false;
+                    }
+                }
+                return false;
+            })->first();
+
+            if (!$pembayaranBulanIni) {
+                $bulanTunggakan = $currentMonth;
+            }
+
+            // Kumpulkan bulan yang sudah lunas
+            foreach ($semuaSPP as $spp) {
+                preg_match('/SPP\s+(\w+)\s+(\d+)/', $spp->keterangan, $matches);
+                if (isset($matches[1])) {
+                    try {
+                        $bulan = Carbon::parse($matches[1])->month;
+                        $tahun = (int) $matches[2];
+                        if ($tahun == $currentYear && $hargaPaket && $spp->debit >= $hargaPaket) {
+                            $bulanLunas[] = $bulan;
+                        }
+                    } catch (\Exception $e) {
+                    }
+                }
+            }
+
+            // Bulan berikutnya (jika bulan ini sudah lunas)
+            if (in_array($currentMonth, $bulanLunas)) {
+                $bulanBerikutnya = $currentMonth + 1;
+                if ($bulanBerikutnya > 12) {
+                    $bulanBerikutnya = 1;
+                }
+            }
+        }
+
+        return response()->json([
+            'sudah_bayar_pendaftaran' => $sudahBayarPendaftaran,
+            'paket_awal'              => 100000,
+            'paket_aktif'             => $paketTingkat,
+            'bulan_tunggakan'         => $bulanTunggakan,
+            'bulan_berikutnya'        => $bulanBerikutnya,
+            'bulan_lunas'             => $bulanLunas,
+        ]);
+    }
+
+    // =============================================
+    // TRANSAKSI PEMASUKAN
+    // =============================================
+    public function indexPemasukan(Request $request)
+    {
+        $role      = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
+        $perPage   = $request->get('per_page', 10);
+
+        // --- Data Tagihan ---
+        $currentMonth = Carbon::now()->month;
+        $currentYear  = Carbon::now()->year;
+        $murids       = Murid::all();
+        $today        = date('Y-m-d');
+        $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
+            ->where('tanggal_selesai', '>=', $today)
+            ->first();
+
+        $tagihan = collect();
+
+        foreach ($murids as $murid) {
+            $kelasTerbaru = TransaksiKelas::where('id_murid', $murid->id_murid)->orderBy('created_at', 'desc')->first();
+            $namaKelas    = '-';
+            if ($kelasTerbaru) {
+                $kelas     = \App\Models\Kelas::find($kelasTerbaru->id_kelas);
+                $namaKelas = $kelas ? $kelas->nama_kelas : '-';
+            }
+
+            $paketAktif    = TransaksiPaket::where('id_murid', $murid->id_murid)->orderBy('id_paket_murid', 'desc')->first();
+            $namaPaket     = '-';
+            $hargaPerBulan = 0;
+            if ($paketAktif) {
+                $paket = HargaPaket::find($paketAktif->id_paket);
+                if ($paket) { $namaPaket = $paket->tingkat; $hargaPerBulan = $paket->harga; }
+            }
+
+            $sudahBayarPendaftaran = TransaksiUmum::where('id_murid', $murid->id_murid)->where('keterangan', 'like', '%Pendaftaran%')->exists();
+            $statusPendaftaran     = $sudahBayarPendaftaran ? 'Lunas' : 'Belum';
+
+            $semuaPembayaranSPP = TransaksiUmum::where('id_murid', $murid->id_murid)->where('keterangan', 'like', '%SPP%')->where('debit', '>', 0)->orderBy('tanggal_bayar', 'desc')->get();
+
+            $pembayaranBulanIni = $semuaPembayaranSPP->filter(function ($item) use ($currentMonth, $currentYear) {
+                preg_match('/SPP\s+(\w+)\s+(\d+)/', $item->keterangan, $matches);
+                if (isset($matches[1]) && isset($matches[2])) {
+                    try { return Carbon::parse($matches[1])->month == $currentMonth && (int) $matches[2] == $currentYear; }
+                    catch (\Exception $e) { return false; }
+                }
+                return false;
+            })->first();
+
+            $totalUangMuka    = 0; $uangMukaBulanList = [];
+            $totalPiutang     = 0; $piutangBulanList  = [];
+
+            foreach ($semuaPembayaranSPP as $pemb) {
+                preg_match('/SPP\s+(\w+)\s+(\d+)/', $pemb->keterangan, $matches);
+                if (isset($matches[1]) && isset($matches[2])) {
+                    try {
+                        $bulanDibayar = Carbon::parse($matches[1])->month;
+                        $tahunDibayar = (int) $matches[2];
+                        $bulanTahun   = $matches[1] . ' ' . $matches[2];
+                        if ($tahunDibayar > $currentYear || ($tahunDibayar == $currentYear && $bulanDibayar > $currentMonth)) { $totalUangMuka += $pemb->debit; $uangMukaBulanList[] = $bulanTahun; }
+                        if ($tahunDibayar < $currentYear || ($tahunDibayar == $currentYear && $bulanDibayar < $currentMonth)) { $kekurangan = $hargaPerBulan - $pemb->debit; if ($kekurangan > 0) { $totalPiutang += $kekurangan; $piutangBulanList[] = $bulanTahun; } }
+                    } catch (\Exception $e) { continue; }
+                }
+            }
+
+            $bulanBelumDibayar = []; $bulanMulai = 1;
+            if ($murid->tanggal_daftar) { $bulanMulai = (int) date('m', strtotime($murid->tanggal_daftar)); }
+            for ($i = $bulanMulai; $i <= $currentMonth; $i++) {
+                $bulanTahun   = Carbon::create()->month($i)->translatedFormat('F') . ' ' . $currentYear;
+                $sudahDibayar = false;
+                if ($i == $bulanMulai && !$sudahBayarPendaftaran == false) { continue; }
+                foreach ($semuaPembayaranSPP as $pemb) { if (str_contains($pemb->keterangan, $bulanTahun)) { $sudahDibayar = true; break; } }
+                if (!$sudahDibayar) { $bulanBelumDibayar[] = $bulanTahun; $totalPiutang += $hargaPerBulan; }
+            }
+
+            $statusPembayaran = '-'; $statusTagihan = '-'; $tagihanBulan = '-'; $totalPiutangDisplay = '-'; $uangMukaDisplay = '-';
+
+            if (!$sudahBayarPendaftaran) { $statusTagihan = 'Belum Daftar'; $tagihanBulan = 'Pendaftaran'; $totalPiutangDisplay = 'Rp 100.000'; $uangMukaDisplay = '-'; $statusPembayaran = '-'; }
+            elseif ($totalUangMuka > 0)  { $statusPembayaran = 'Lunas'; $statusTagihan = 'Uang Muka'; $tagihanBulan = !empty($uangMukaBulanList) ? implode(', ', $uangMukaBulanList) : '-'; $totalPiutangDisplay = '-'; $uangMukaDisplay = 'Rp ' . number_format($totalUangMuka, 0, ',', '.'); }
+            elseif ($totalPiutang > 0)   { $statusPembayaran = 'Belum'; $statusTagihan = 'Tunggak'; $allBulan = array_merge($piutangBulanList, $bulanBelumDibayar); $tagihanBulan = !empty($allBulan) ? implode(', ', array_unique($allBulan)) : Carbon::create()->month($currentMonth)->translatedFormat('F') . ' ' . $currentYear; $totalPiutangDisplay = 'Rp ' . number_format($totalPiutang, 0, ',', '.'); $uangMukaDisplay = '-'; }
+            elseif ($pembayaranBulanIni) { $statusPembayaran = 'Lunas'; $statusTagihan = 'Lunas'; $tagihanBulan = '-'; $totalPiutangDisplay = '-'; $uangMukaDisplay = '-'; }
+            else { $statusPembayaran = 'Belum'; $statusTagihan = 'Tunggak'; $tagihanBulan = Carbon::create()->month($currentMonth)->translatedFormat('F') . ' ' . $currentYear; $totalPiutangDisplay = 'Rp ' . number_format($hargaPerBulan, 0, ',', '.'); $uangMukaDisplay = '-'; }
+
+            $tagihan->push((object) [
+                'id_murid'           => $murid->id_murid,
+                'nama_murid'         => $murid->nama_lengkap,
+                'kelas'              => $namaKelas,
+                'paket'              => $namaPaket,
+                'status_pendaftaran' => $statusPendaftaran,
+                'status_pembayaran'  => $statusPembayaran,
+                'status_tagihan'     => $statusTagihan,
+                'tagihan_bulan'      => $tagihanBulan,
+                'total_piutang'      => $totalPiutangDisplay,
+                'uang_muka'          => $uangMukaDisplay,
+            ]);
+        }
+
+        $totalTagihan       = $tagihan->count();
+        $currentPageTagihan = $request->get('page_tagihan', 1);
+        $tagihan = new \Illuminate\Pagination\LengthAwarePaginator(
+            $tagihan->forPage($currentPageTagihan, $perPage),
+            $totalTagihan,
+            $perPage,
+            $currentPageTagihan,
+            ['path' => $request->url(), 'query' => $request->query(), 'pageName' => 'page_tagihan']
+        );
+
+        // --- Data Riwayat Pemasukan ---
+        $pemasukan = TransaksiUmum::with('murid')
+            ->where('debit', '>', 0)
+            ->orderBy('tanggal_bayar', 'desc')
+            ->paginate($perPage, ['*'], 'page_riwayat')
+            ->through(function ($item) {
+                $isPendaftaran = str_contains($item->keterangan, 'Pendaftaran');
+                $isSPP         = str_contains($item->keterangan, 'SPP');
+                $paket         = '-';
+                $kategori      = 'Lainnya';
+                $nama          = $item->keterangan;
+
+                if ($isPendaftaran || $isSPP) {
+                    $nama     = $item->murid->nama_lengkap ?? '-';
+                    $kategori = $isPendaftaran ? 'Pendaftaran' : 'SPP';
+                    if ($isSPP) {
+                        $paketAktif = TransaksiPaket::where('id_murid', $item->id_murid)->first();
+                        if ($paketAktif) {
+                            $p = HargaPaket::find($paketAktif->id_paket);
+                            if ($p) { $paket = $p->tingkat; }
+                        }
+                    }
+                }
+
+                return (object) [
+                    'id'               => $item->id_transaksi,
+                    'tanggal'          => $item->tanggal_bayar ? date('d/m/Y', strtotime($item->tanggal_bayar)) : '-',
+                    'nama_murid'       => $nama,
+                    'kategori'         => $kategori,
+                    'paket'            => $paket,
+                    'jenis_pembayaran' => $item->jenis_pembayaran ?? '-',
+                    'jumlah'           => $item->debit ?? 0,
+                    'keterangan'       => $item->keterangan,
+                ];
+            });
+
+        // Summary totals
+        $totalBulanIni    = TransaksiUmum::where('debit', '>', 0)->whereMonth('tanggal_bayar', now()->month)->whereYear('tanggal_bayar', now()->year)->sum('debit');
+        $totalKeseluruhan = TransaksiUmum::where('debit', '>', 0)->sum('debit');
+        $totalMurid       = TransaksiUmum::where('debit', '>', 0)->where(function ($q) { $q->where('keterangan', 'like', '%Pendaftaran%')->orWhere('keterangan', 'like', '%SPP%'); })->sum('debit');
+        $totalLainnya     = TransaksiUmum::where('debit', '>', 0)->where('keterangan', 'not like', '%Pendaftaran%')->where('keterangan', 'not like', '%SPP%')->sum('debit');
+
+        return view('dashboard.shared.transaksi.pemasukan', compact(
+            'role', 'tagihan', 'pemasukan', 'paketList',
+            'totalBulanIni', 'totalKeseluruhan', 'totalMurid', 'totalLainnya'
+        ));
+    }
+
+    // =============================================
+    // TRANSAKSI PENGELUARAN
+    // =============================================
+    public function indexPengeluaran(Request $request)
+    {
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        $perPage = $request->get('per_page', 10);
+        
+        $pengeluaran = TransaksiUmum::where('kredit', '>', 0)
+            ->orderBy('tanggal_bayar', 'desc')
+            ->paginate($perPage)
+            ->through(function ($item) {
+                return (object)[
+                    'id' => $item->id_transaksi,
+                    'tanggal' => $item->tanggal_bayar ? date('d/m/Y', strtotime($item->tanggal_bayar)) : '-',
+                    'keperluan' => str_replace('Pengeluaran: ', '', $item->keterangan),
+                    'jenis_pembayaran' => $item->jenis_pembayaran ?? '-',
+                    'jumlah' => $item->kredit ?? 0,
+                    'keterangan' => $item->keterangan,
+                ];
+            });
+        
+        $totalBulanIni = TransaksiUmum::where('kredit', '>', 0)
+            ->whereMonth('tanggal_bayar', now()->month)
+            ->whereYear('tanggal_bayar', now()->year)
+            ->sum('kredit');
+        
+        $totalKeseluruhan = TransaksiUmum::where('kredit', '>', 0)->sum('kredit');
+        
+        return view('dashboard.shared.transaksi.pengeluaran', compact(
+            'role', 'pengeluaran', 'totalBulanIni', 'totalKeseluruhan'
+        ));
+    }
+
+    public function createPengeluaran(Request $request)
+    {
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        return view('dashboard.shared.pembayaran.create-pengeluaran', compact('role'));
+    }
+
+    public function storePengeluaran(Request $request)
+    {
+        $request->validate([
+            'tanggal' => 'required|date',
+            'jenis_pembayaran' => 'required|in:Tunai,Transfer',
+            'keperluan' => 'required|string|max:100',
+            'total_pembayaran' => 'required|numeric|min:1000',
+        ]);
         
         $today = date('Y-m-d');
         $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
@@ -325,176 +741,123 @@ class PembayaranController extends Controller
             return response()->json(['success' => false, 'message' => 'Tidak ada periode aktif!']);
         }
         
-        // BELUM BAYAR PENDAFTARAN
-        if (!$sudahBayarPendaftaran) {
-            TransaksiUmum::create([
-                'id_periode' => (int) $periodeAktif->id_periode,
-                'id_murid' => (int) $request->id_murid,
-                'id_pegawai' => null,
-                'tanggal_bayar' => $request->tanggal,
-                'bulan' => (int) date('m', strtotime($request->tanggal)),
-                'jenis_pembayaran' => $request->jenis_pembayaran,
-                'keterangan' => 'Pembayaran Pendaftaran - ' . $murid->nama_lengkap,
-                'debit' => (int) $request->total_pembayaran,
-                'kredit' => 0,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-            
-            $murid->update(['tanggal_daftar' => $request->tanggal]);
-            
-            return response()->json(['success' => true, 'message' => 'Pembayaran pendaftaran berhasil disimpan']);
-        }
-        
-        // PEMBAYARAN SPP
-        $request->validate([
-            'paket_selanjutnya' => 'required|string',
-            'bulan_dibayar' => 'nullable|integer|min:1|max:12',
-        ]);
-        
-        $bulanDibayar = $request->bulan_dibayar ?? Carbon::now()->month;
-        $tahunDibayar = Carbon::now()->year;
-        $namaBulan = Carbon::create()->month($bulanDibayar)->translatedFormat('F');
-        
         TransaksiUmum::create([
             'id_periode' => (int) $periodeAktif->id_periode,
-            'id_murid' => (int) $request->id_murid,
+            'id_murid' => null,
             'id_pegawai' => null,
             'tanggal_bayar' => $request->tanggal,
-            'bulan' => (int) $bulanDibayar,
+            'bulan' => (int) date('m', strtotime($request->tanggal)),
             'jenis_pembayaran' => $request->jenis_pembayaran,
-            'keterangan' => 'Pembayaran SPP ' . $namaBulan . ' ' . $tahunDibayar . ' - ' . $murid->nama_lengkap,
-            'debit' => (int) $request->total_pembayaran,
-            'kredit' => 0,
+            'keterangan' => 'Pengeluaran: ' . $request->keperluan . ($request->keterangan ? ' - ' . $request->keterangan : ''),
+            'debit' => 0,
+            'kredit' => (int) $request->total_pembayaran,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
         
-        $hargaPaket = HargaPaket::where('tingkat', $request->paket_selanjutnya)->first();
-        if ($hargaPaket) {
-            TransaksiPaket::where('id_murid', $request->id_murid)->delete();
-            TransaksiPaket::create([
-                'id_murid' => (int) $request->id_murid,
-                'id_paket' => (int) $hargaPaket->id_paket,
-                'id_periode' => (int) $periodeAktif->id_periode,
-                'tanggal_daftar' => date('Y-m-d'),
-                'paket_awal' => 0,
-                'biaya_pendaftaran' => 100000,
-            ]);
-        }
-        
-        return response()->json(['success' => true, 'message' => 'Pembayaran SPP berhasil disimpan']);
-    }
-    
-    // =============================================
-    // DESTROY
-    // =============================================
-    public function destroy(Request $request, $id)
-    {
-        TransaksiUmum::where('id_transaksi', $id)->delete();
-        
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        
-        return redirect()->route($role . '.pembayaran.tagihan')
-            ->with('success', 'Data pembayaran berhasil dihapus');
+        return response()->json(['success' => true, 'message' => 'Pengeluaran berhasil disimpan']);
     }
 
     // =============================================
-    // API CEK STATUS
+    // TRANSAKSI PENGGAJIAN
     // =============================================
-    public function cekStatusPembayaran($id)
+    public function indexPenggajian(Request $request)
     {
-        $murid = Murid::find($id);
+        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
+        $perPage = $request->get('per_page', 10);
+        $bulan = $request->get('bulan', now()->month);
+        $tahun = $request->get('tahun', now()->year);
         
-        if (!$murid) {
-            return response()->json(['error' => 'Murid tidak ditemukan'], 404);
+        // Ambil semua tentor
+        $tentors = Pegawai::with('user')
+            ->where('jenis_pegawai', 'tentor')
+            ->get();
+        
+        $penggajian = collect();
+        
+        foreach ($tentors as $tentor) {
+            // Hitung jumlah sesi mengajar dari presensi bulan ini
+            $jumlahSesi = Mengajar::where('id_pegawai', $tentor->id_pegawai)
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->count();
+            
+            if ($jumlahSesi == 0) continue; // skip kalau ga ada sesi
+            
+            // Honor per sesi (pakai HR SMA sebagai default, bisa disesuaikan)
+            $honorPerSesi = $tentor->hr_sma ?? $tentor->hr_smp ?? $tentor->hr_sd ?? 0;
+            $totalHonor = $jumlahSesi * $honorPerSesi;
+            $uangMakan = $jumlahSesi * ($tentor->uang_makan ?? 0);
+            $uangTransport = $jumlahSesi * ($tentor->uang_transport ?? 0);
+            $totalGaji = $totalHonor + $uangMakan + $uangTransport;
+            
+            // Cek apakah sudah dibayar bulan ini
+            $sudahDibayar = TransaksiUmum::where('id_pegawai', $tentor->id_pegawai)
+                ->where('kredit', '>', 0)
+                ->where('keterangan', 'like', "%Gaji " . Carbon::create()->month($bulan)->translatedFormat('F') . " " . $tahun . "%")
+                ->exists();
+            
+            $penggajian->push((object)[
+                'id_pegawai' => $tentor->id_pegawai,
+                'nama' => $tentor->nama_lengkap,
+                'mapel' => $tentor->mapel ?? '-',
+                'grade' => $tentor->grade ?? '-',
+                'jumlah_sesi' => $jumlahSesi,
+                'honor_per_sesi' => $honorPerSesi,
+                'total_honor' => $totalHonor,
+                'uang_makan' => $uangMakan,
+                'uang_transport' => $uangTransport,
+                'total_gaji' => $totalGaji,
+                'status' => $sudahDibayar ? 'Sudah Dibayar' : 'Belum Dibayar',
+                'sudah_dibayar' => $sudahDibayar,
+            ]);
         }
         
-        $sudahBayarPendaftaran = TransaksiUmum::where('id_murid', $id)
-            ->where('keterangan', 'like', '%Pendaftaran%')
-            ->exists();
+        // Pagination
+        $total = $penggajian->count();
+        $currentPage = $request->get('page', 1);
+        $penggajian = new \Illuminate\Pagination\LengthAwarePaginator(
+            $penggajian->forPage($currentPage, $perPage),
+            $total, $perPage, $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
         
-        $paketAktif = TransaksiPaket::where('id_murid', $id)
-            ->orderBy('id_paket_murid', 'desc')
+        return view('dashboard.shared.transaksi.penggajian', compact('role', 'penggajian', 'bulan', 'tahun'));
+    }
+
+    public function bayarGaji(Request $request, $id)
+    {
+        $tentor = Pegawai::findOrFail($id);
+        $bulan = $request->bulan;
+        $tahun = $request->tahun;
+        $totalGaji = $request->total_gaji;
+        $jumlahSesi = $request->jumlah_sesi;
+        
+        $today = date('Y-m-d');
+        $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
+            ->where('tanggal_selesai', '>=', $today)
             ->first();
         
-        $paketTingkat = null;
-        $hargaPaket = null;
-        if ($paketAktif) {
-            $paket = HargaPaket::find($paketAktif->id_paket);
-            if ($paket) {
-                $paketTingkat = $paket->tingkat;
-                $hargaPaket = $paket->harga;
-            }
+        if (!$periodeAktif) {
+            return response()->json(['success' => false, 'message' => 'Tidak ada periode aktif!']);
         }
         
-        // Bulan tunggakan
-        $bulanTunggakan = null;
+        $namaBulan = Carbon::create()->month($bulan)->translatedFormat('F');
         
-        // Bulan yang sudah lunas
-        $bulanLunas = [];
-        
-        // Bulan berikutnya
-        $bulanBerikutnya = null;
-        
-        if ($sudahBayarPendaftaran) {
-            $currentMonth = Carbon::now()->month;
-            $currentYear = Carbon::now()->year;
-            
-            // Ambil semua SPP
-            $semuaSPP = TransaksiUmum::where('id_murid', $id)
-                ->where('keterangan', 'like', '%SPP%')
-                ->where('debit', '>', 0)
-                ->get();
-            
-            // Cek pembayaran bulan ini
-            $pembayaranBulanIni = $semuaSPP->filter(function($item) use ($currentMonth, $currentYear) {
-                preg_match('/SPP\s+(\w+)\s+(\d+)/', $item->keterangan, $matches);
-                if (isset($matches[1]) && isset($matches[2])) {
-                    try {
-                        $bulanDibayar = Carbon::parse($matches[1])->month;
-                        $tahunDibayar = (int)$matches[2];
-                        return $bulanDibayar == $currentMonth && $tahunDibayar == $currentYear;
-                    } catch (\Exception $e) {
-                        return false;
-                    }
-                }
-                return false;
-            })->first();
-            
-            if (!$pembayaranBulanIni) {
-                $bulanTunggakan = $currentMonth;
-            }
-            
-            // Cari bulan yang sudah lunas
-            foreach ($semuaSPP as $spp) {
-                preg_match('/SPP\s+(\w+)\s+(\d+)/', $spp->keterangan, $matches);
-                if (isset($matches[1])) {
-                    try {
-                        $bulan = Carbon::parse($matches[1])->month;
-                        $tahun = (int)$matches[2];
-                        // Hanya cek tahun yang sama
-                        if ($tahun == $currentYear && $hargaPaket && $spp->debit >= $hargaPaket) {
-                            $bulanLunas[] = $bulan;
-                        }
-                    } catch (\Exception $e) {}
-                }
-            }
-            
-            // Bulan berikutnya (kalau bulan ini sudah lunas)
-            if (in_array($currentMonth, $bulanLunas)) {
-                $bulanBerikutnya = $currentMonth + 1;
-                if ($bulanBerikutnya > 12) $bulanBerikutnya = 1;
-            }
-        }
-        
-        return response()->json([
-            'sudah_bayar_pendaftaran' => $sudahBayarPendaftaran,
-            'paket_awal' => 100000,
-            'paket_aktif' => $paketTingkat,
-            'bulan_tunggakan' => $bulanTunggakan,
-            'bulan_berikutnya' => $bulanBerikutnya,   // ← TAMBAHAN
-            'bulan_lunas' => $bulanLunas,             // ← TAMBAHAN
+        TransaksiUmum::create([
+            'id_periode' => (int) $periodeAktif->id_periode,
+            'id_murid' => null,
+            'id_pegawai' => $tentor->id_pegawai,
+            'tanggal_bayar' => $today,
+            'bulan' => (int) $bulan,
+            'jenis_pembayaran' => 'Transfer',
+            'keterangan' => "Gaji " . $namaBulan . " " . $tahun . " - " . $tentor->nama_lengkap . " ({$jumlahSesi} sesi)",
+            'debit' => 0,
+            'kredit' => (int) $totalGaji,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
+        
+        return response()->json(['success' => true, 'message' => 'Gaji berhasil dibayarkan']);
     }
 }

@@ -109,17 +109,17 @@
                     </a>
                     <ul class="submenu-list" style="display: {{ request()->is('*transaksi*') || request()->is('*pembayaran*') ? 'block' : 'none' }};">
                         <li>
-                            <a href="{{ route('admin.pembayaran.tagihan') }}" class="submenu-link {{ request()->routeIs('admin.pembayaran.tagihan*') ? 'sub-active' : '' }}">
+                            <a href="{{ route('admin.transaksi.pemasukan') }}" class="submenu-link {{ request()->routeIs('admin.transaksi.pemasukan*') ? 'sub-active' : '' }}">
                                 <i class="fas fa-arrow-down submenu-icon"></i> Transaksi Pemasukan
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.pembayaran.riwayat') }}" class="submenu-link {{ request()->routeIs('admin.pembayaran.riwayat*') ? 'sub-active' : '' }}">
+                            <a href="{{ route('admin.transaksi.pengeluaran') }}" class="submenu-link {{ request()->routeIs('admin.transaksi.pengeluaran*') ? 'sub-active' : '' }}">
                                 <i class="fas fa-arrow-up submenu-icon"></i> Transaksi Pengeluaran
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.rekap-gaji') }}" class="submenu-link {{ request()->routeIs('admin.rekap-gaji*') ? 'sub-active' : '' }}">
+                            <a href="{{ route('admin.transaksi.penggajian') }}" class="submenu-link {{ request()->routeIs('admin.transaksi.penggajian*') ? 'sub-active' : '' }}">
                                 <i class="fas fa-hand-holding-usd submenu-icon"></i> Transaksi Penggajian
                             </a>
                         </li>
@@ -221,7 +221,7 @@
 
                 {{-- TRANSAKSI (Dropdown) --}}
                 <li class="has-submenu">
-                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle {{ request()->is('*pembayaran*') || request()->is('*rekap-gaji*') ? 'nav-active' : '' }}" onclick="toggleSubmenu(this)">
+                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle {{ request()->is('*transaksi*') || request()->is('*pembayaran*') || request()->is('*rekap-gaji*') ? 'nav-active' : '' }}" onclick="toggleSubmenu(this)">
                         <div style="display: flex; align-items: center; flex: 1;">
                             <img src="{{ asset('images/dashboard/icons/icon_pembayaran.png') }}" class="sidebar-icon"> 
                             Transaksi
@@ -230,17 +230,17 @@
                     </a>
                     <ul class="submenu-list" style="display: {{ request()->is('*pembayaran*') || request()->is('*rekap-gaji*') ? 'block' : 'none' }};">
                         <li>
-                            <a href="{{ route('superadmin.pembayaran.tagihan') }}" class="submenu-link {{ request()->routeIs('superadmin.pembayaran.tagihan*') ? 'sub-active' : '' }}">
+                            <a href="{{ route('superadmin.transaksi.pemasukan') }}" class="submenu-link {{ request()->routeIs('superadmin.transaksi.pemasukan*') ? 'sub-active' : '' }}">
                                 <i class="fas fa-arrow-down submenu-icon"></i> Transaksi Pemasukan
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('superadmin.pembayaran.riwayat') }}" class="submenu-link {{ request()->routeIs('superadmin.pembayaran.riwayat*') ? 'sub-active' : '' }}">
+                            <a href="{{ route('superadmin.transaksi.pengeluaran') }}" class="submenu-link {{ request()->routeIs('superadmin.transaksi.pengeluaran*') ? 'sub-active' : '' }}">
                                 <i class="fas fa-arrow-up submenu-icon"></i> Transaksi Pengeluaran
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('superadmin.rekap-gaji') }}" class="submenu-link {{ request()->routeIs('superadmin.rekap-gaji*') ? 'sub-active' : '' }}">
+                            <a href="{{ route('superadmin.transaksi.penggajian') }}" class="submenu-link {{ request()->routeIs('superadmin.transaksi.penggajian*') ? 'sub-active' : '' }}">
                                 <i class="fas fa-hand-holding-usd submenu-icon"></i> Transaksi Penggajian
                             </a>
                         </li>

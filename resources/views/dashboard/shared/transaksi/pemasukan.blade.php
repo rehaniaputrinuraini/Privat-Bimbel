@@ -1,0 +1,285 @@
+@extends('layouts.app')
+
+@section('title', 'Transaksi Pemasukan')
+
+@section('content')
+<div style="width: 100%;">
+
+    {{-- HEADER --}}
+    <div style="margin-bottom: 25px;">
+        <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">{{ \Carbon\Carbon::now()->translatedFormat('F Y') }}</p>
+        <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0;">Transaksi Pemasukan</h1>
+        <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Kelola Tagihan & Pemasukan Murid</p>
+    </div>
+
+    {{-- TOTAL BOX --}}
+    <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 150px; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);">
+            <p style="color: #6B7280; font-size: 12px; margin: 0;">Total Bulan Ini</p>
+            <h3 style="color: #10B981; font-size: 20px; margin: 5px 0 0;">Rp {{ number_format($totalBulanIni ?? 0, 0, ',', '.') }}</h3>
+        </div>
+        <div style="flex: 1; min-width: 150px; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);">
+            <p style="color: #6B7280; font-size: 12px; margin: 0;">Total Keseluruhan</p>
+            <h3 style="color: #4D0B87; font-size: 20px; margin: 5px 0 0;">Rp {{ number_format($totalKeseluruhan ?? 0, 0, ',', '.') }}</h3>
+        </div>
+        <div style="flex: 1; min-width: 150px; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);">
+            <p style="color: #6B7280; font-size: 12px; margin: 0;">Dari Murid</p>
+            <h3 style="color: #3B82F6; font-size: 20px; margin: 5px 0 0;">Rp {{ number_format($totalMurid ?? 0, 0, ',', '.') }}</h3>
+        </div>
+        <div style="flex: 1; min-width: 150px; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);">
+            <p style="color: #6B7280; font-size: 12px; margin: 0;">Dari Lainnya</p>
+            <h3 style="color: #F59E0B; font-size: 20px; margin: 5px 0 0;">Rp {{ number_format($totalLainnya ?? 0, 0, ',', '.') }}</h3>
+        </div>
+    </div>
+
+    {{-- BUTTON INPUT --}}
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+        <button onclick="bukaModalCreate()"
+                style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; box-shadow: 0 4px 6px rgba(77,11,135,0.2); font-family: 'Poppins', sans-serif;">
+            <i class="fas fa-plus"></i> Input Pemasukan
+        </button>
+    </div>
+
+    @if(session('success'))
+        <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    {{-- FILTER --}}
+    <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 20px;">
+        <div style="position: relative; margin-bottom: 12px;">
+            <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
+            <input type="text" id="searchTagihan" placeholder="Cari Nama Murid..."
+                   style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 14px; font-family: 'Poppins', sans-serif; box-sizing: border-box; outline: none;">
+        </div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <select id="filterPaket"
+                    style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
+                <option value="">Status Paket</option>
+                @foreach($paketList as $paket)
+                    <option value="{{ $paket->tingkat }}">{{ $paket->tingkat }}</option>
+                @endforeach
+            </select>
+            <select id="filterPembayaran"
+                    style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
+                <option value="">Status Pembayaran</option>
+                <option value="Lunas">Lunas</option>
+                <option value="Belum">Belum</option>
+            </select>
+            <select id="filterTagihan"
+                    style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
+                <option value="">Status Tagihan</option>
+                <option value="Lunas">Lunas</option>
+                <option value="Tunggak">Tunggak</option>
+                <option value="Uang Muka">Uang Muka</option>
+            </select>
+        </div>
+    </div>
+
+    {{-- TABEL TAGIHAN --}}
+    <div style="background: white; border-radius: 20px; overflow-x: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 25px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; font-family: 'Poppins', sans-serif;">
+            <thead>
+                <tr style="background: #F3E8FF;">
+                    <th style="padding: 15px; text-align: left;">No</th>
+                    <th style="padding: 15px; text-align: left;">Nama Murid</th>
+                    <th style="padding: 15px; text-align: left;">Kelas</th>
+                    <th style="padding: 15px; text-align: left;">Status Paket</th>
+                    <th style="padding: 15px; text-align: center;">Pendaftaran</th>
+                    <th style="padding: 15px; text-align: center;">Pembayaran</th>
+                    <th style="padding: 15px; text-align: center;">Tagihan</th>
+                    <th style="padding: 15px; text-align: center;">Tagihan Bulan</th>
+                    <th style="padding: 15px; text-align: center;">Total Piutang</th>
+                    <th style="padding: 15px; text-align: center;">Uang Muka</th>
+                </tr>
+            </thead>
+            <tbody id="tagihanTableBody">
+                @forelse($tagihan as $index => $t)
+                <tr style="border-bottom: 1px solid #F3F4F6;">
+                    <td style="padding: 15px;">{{ $tagihan->firstItem() + $index }}</td>
+                    <td style="padding: 15px; font-weight: 500;">{{ $t->nama_murid }}</td>
+                    <td style="padding: 15px;">{{ $t->kelas ?? '-' }}</td>
+                    <td style="padding: 15px;">{{ $t->paket ?? '-' }}</td>
+                    <td style="padding: 15px; text-align: center;">
+                        @if($t->status_pendaftaran == 'Lunas')
+                            <span style="padding:5px 12px;border-radius:20px;background:#D1FAE5;color:#065F46;font-size:12px;font-weight:600;">Lunas</span>
+                        @else
+                            <span style="padding:5px 12px;border-radius:20px;background:#FEE2E2;color:#EF4444;font-size:12px;font-weight:600;">Belum</span>
+                        @endif
+                    </td>
+                    <td style="padding: 15px; text-align: center;">
+                        @if($t->status_pembayaran == 'Lunas')
+                            <span style="padding:5px 12px;border-radius:20px;background:#D1FAE5;color:#065F46;font-size:12px;font-weight:600;">Lunas</span>
+                        @elseif($t->status_pembayaran == 'Belum')
+                            <span style="padding:5px 12px;border-radius:20px;background:#FEE2E2;color:#EF4444;font-size:12px;font-weight:600;">Belum</span>
+                        @else
+                            <span>-</span>
+                        @endif
+                    </td>
+                    <td style="padding: 15px; text-align: center;">
+                        @if($t->status_tagihan == 'Lunas')
+                            <span style="padding:5px 12px;border-radius:20px;background:#D1FAE5;color:#065F46;font-size:12px;font-weight:600;">Lunas</span>
+                        @elseif($t->status_tagihan == 'Tunggak')
+                            <span style="padding:5px 12px;border-radius:20px;background:#FEF3C7;color:#92400E;font-size:12px;font-weight:600;">Tunggak</span>
+                        @elseif($t->status_tagihan == 'Uang Muka')
+                            <span style="padding:5px 12px;border-radius:20px;background:#E0E7FF;color:#4338CA;font-size:12px;font-weight:600;">Uang Muka</span>
+                        @elseif($t->status_tagihan == 'Belum Daftar')
+                            <span style="padding:5px 12px;border-radius:20px;background:#FEE2E2;color:#991B1B;font-size:12px;font-weight:600;">Belum Daftar</span>
+                        @else
+                            <span>-</span>
+                        @endif
+                    </td>
+                    <td style="padding: 15px; text-align: center; color: #6B7280;">{{ $t->tagihan_bulan ?? '-' }}</td>
+                    <td style="padding: 15px; text-align: center; {{ $t->total_piutang != '-' ? 'font-weight:700;color:#EF4444;' : '' }}">
+                        {{ $t->total_piutang ?? '-' }}
+                    </td>
+                    <td style="padding: 15px; text-align: center; {{ $t->uang_muka != '-' ? 'font-weight:600;color:#4338CA;' : '' }}">
+                        {{ $t->uang_muka ?? '-' }}
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="10" style="padding: 50px; text-align: center; color: #9CA3AF; font-size: 14px;">
+                        <i class="fas fa-inbox" style="font-size: 32px; margin-bottom: 10px; display: block; opacity: .4;"></i>
+                        Belum ada data tagihan
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    {{-- PAGINATION --}}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 0 5px; margin-bottom: 40px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <select id="pageSelect"
+                    style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; font-family: 'Poppins', sans-serif;">
+                <option value="10"  {{ request('per_page', 10) == 10  ? 'selected' : '' }}>10 baris</option>
+                <option value="25"  {{ request('per_page') == 25  ? 'selected' : '' }}>25 baris</option>
+                <option value="50"  {{ request('per_page') == 50  ? 'selected' : '' }}>50 baris</option>
+            </select>
+            <span style="color: #374151; font-size: 13px;">Menampilkan {{ $tagihan->total() ?? 0 }} data</span>
+        </div>
+        <div style="display: flex; gap: 5px;">
+            @if ($tagihan->onFirstPage())
+                <button disabled style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:#F3F4F6;color:#9CA3AF;cursor:not-allowed;"><i class="fas fa-angle-double-left"></i></button>
+                <button disabled style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:#F3F4F6;color:#9CA3AF;cursor:not-allowed;"><i class="fas fa-angle-left"></i></button>
+            @else
+                <a href="{{ $tagihan->url(1) }}&per_page={{ request('per_page', 10) }}"
+                   style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+                <a href="{{ $tagihan->previousPageUrl() }}&per_page={{ request('per_page', 10) }}"
+                   style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            @endif
+
+            @php $start = max(1, $tagihan->currentPage() - 2); $end = min($tagihan->lastPage(), $tagihan->currentPage() + 2); @endphp
+            @for ($i = $start; $i <= $end; $i++)
+                @if ($i == $tagihan->currentPage())
+                    <button style="width:35px;height:35px;border-radius:8px;background:#4D0B87;color:white;border:none;font-weight:600;font-family:'Poppins',sans-serif;">{{ $i }}</button>
+                @else
+                    <a href="{{ $tagihan->url($i) }}&per_page={{ request('per_page', 10) }}"
+                       style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;">
+                        {{ $i }}
+                    </a>
+                @endif
+            @endfor
+
+            @if ($tagihan->hasMorePages())
+                <a href="{{ $tagihan->nextPageUrl() }}&per_page={{ request('per_page', 10) }}"
+                   style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            @else
+                <button disabled style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:#F3F4F6;color:#9CA3AF;cursor:not-allowed;"><i class="fas fa-angle-right"></i></button>
+            @endif
+        </div>
+    </div>
+
+</div>
+
+{{-- MODAL FORM WRAPPER --}}
+<div id="modalForm"
+     style="display: none; position: fixed; z-index: 9998; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; overflow-y: auto; padding: 20px; box-sizing: border-box;">
+    <div style="background: white; border-radius: 20px; width: 750px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.15);" id="modalContent"></div>
+</div>
+
+<script>
+    /* ================================================================
+       BUKA MODAL CREATE
+    ================================================================ */
+    function bukaModalCreate() {
+        fetch("{{ route($role . '.pembayaran.create') }}")
+            .then(r => r.text())
+            .then(html => {
+                const cont = document.getElementById('modalContent');
+                // Set HTML tanpa script dulu
+                cont.innerHTML = html;
+                document.getElementById('modalForm').style.display = 'flex';
+                // Eksekusi manual semua <script> yang ada di dalam HTML hasil fetch
+                // (innerHTML tidak otomatis menjalankan script)
+                cont.querySelectorAll('script').forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = oldScript.textContent;
+                    document.body.appendChild(newScript);
+                    document.body.removeChild(newScript);
+                });
+            })
+            .catch(() => alert('Gagal memuat form. Coba lagi.'));
+    }
+
+    function tutupModalForm() {
+        document.getElementById('modalForm').style.display = 'none';
+        document.getElementById('modalContent').innerHTML = '';
+    }
+
+    /* Klik backdrop tutup modal (jika form belum disentuh — JS di dalam form yang handle) */
+    document.getElementById('modalForm').addEventListener('click', function (e) {
+        if (e.target === this) tutupModalForm();
+    });
+
+    /* ================================================================
+       PAGINATION: ganti jumlah baris
+    ================================================================ */
+    document.getElementById('pageSelect').addEventListener('change', function () {
+        const url = new URL(window.location.href);
+        url.searchParams.set('per_page', this.value);
+        url.searchParams.delete('page');
+        window.location.href = url.toString();
+    });
+
+    /* ================================================================
+       FILTER TABEL CLIENT-SIDE
+    ================================================================ */
+    document.getElementById('searchTagihan')?.addEventListener('keyup', filterTagihan);
+    document.getElementById('filterPaket')?.addEventListener('change', filterTagihan);
+    document.getElementById('filterPembayaran')?.addEventListener('change', filterTagihan);
+    document.getElementById('filterTagihan')?.addEventListener('change', filterTagihan);
+
+    function filterTagihan() {
+        const s   = (document.getElementById('searchTagihan')?.value || '').toLowerCase();
+        const fp  = document.getElementById('filterPaket')?.value || '';
+        const fby = document.getElementById('filterPembayaran')?.value || '';
+        const ftg = document.getElementById('filterTagihan')?.value || '';
+
+        document.querySelectorAll('#tagihanTableBody tr').forEach(row => {
+            if (!row.cells || row.cells.length < 10) return;
+            const nama = (row.cells[1]?.innerText || '').toLowerCase();
+            const paket = row.cells[3]?.innerText.trim() || '';
+            const statusPembayaran = row.cells[5]?.innerText.trim() || '';
+            const statusTagihan    = row.cells[6]?.innerText.trim() || '';
+
+            let show = true;
+            if (s   && !nama.includes(s))              show = false;
+            if (fp  && paket !== fp)                    show = false;
+            if (fby && statusPembayaran !== fby)        show = false;
+            if (ftg && statusTagihan !== ftg)           show = false;
+
+            row.style.display = show ? '' : 'none';
+        });
+    }
+</script>
+@endsection
