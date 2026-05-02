@@ -204,11 +204,10 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/kelola-admin/toggle-status/{id}', [KelolaAdminController::class, 'toggleStatus'])->name('kelola-admin.toggleStatus');
         Route::delete('/kelola-admin/destroy/{id}', [KelolaAdminController::class, 'destroy'])->name('kelola-admin.destroy');
 
-        // LAPORAN KEUANGAN
-        Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan-keuangan');
-        Route::get('/laporan-keuangan/create', [LaporanKeuanganController::class, 'create'])->name('laporan-keuangan.create');
-        Route::post('/laporan-keuangan/store', [LaporanKeuanganController::class, 'store'])->name('laporan-keuangan.store');
-        Route::delete('/laporan-keuangan/destroy/{id}', [LaporanKeuanganController::class, 'destroy'])->name('laporan-keuangan.destroy');
+        // LAPORAN KEUANGAN (3 HALAMAN)
+        Route::get('/laporan-keuangan/pemasukan', [LaporanKeuanganController::class, 'pemasukan'])->name('laporan-keuangan.pemasukan');
+        Route::get('/laporan-keuangan/pengeluaran', [LaporanKeuanganController::class, 'pengeluaran'])->name('laporan-keuangan.pengeluaran');
+        Route::get('/laporan-keuangan/penggajian', [LaporanKeuanganController::class, 'penggajian'])->name('laporan-keuangan.penggajian');
         
         // KELOLA PRESENSI
         Route::get('/kelola-presensi', [KelolaPresensiController::class, 'index'])->name('kelola-presensi');
@@ -296,11 +295,10 @@ Route::middleware(['auth'])->group(function () {
         // DATA TENTOR
         Route::get('/data-tentor', [KelolaTentorController::class, 'index'])->name('data-tentor');
         
-        // LAPORAN KEUANGAN
-        Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan-keuangan');
-        Route::get('/laporan-keuangan/create', [LaporanKeuanganController::class, 'create'])->name('laporan-keuangan.create');
-        Route::post('/laporan-keuangan/store', [LaporanKeuanganController::class, 'store'])->name('laporan-keuangan.store');
-        Route::delete('/laporan-keuangan/destroy/{id}', [LaporanKeuanganController::class, 'destroy'])->name('laporan-keuangan.destroy');
+        // LAPORAN KEUANGAN (3 HALAMAN)
+        Route::get('/laporan-keuangan/pemasukan', [LaporanKeuanganController::class, 'pemasukan'])->name('laporan-keuangan.pemasukan');
+        Route::get('/laporan-keuangan/pengeluaran', [LaporanKeuanganController::class, 'pengeluaran'])->name('laporan-keuangan.pengeluaran');
+        Route::get('/laporan-keuangan/penggajian', [LaporanKeuanganController::class, 'penggajian'])->name('laporan-keuangan.penggajian');
         
         // KELOLA PRESENSI
         Route::get('/kelola-presensi', [KelolaPresensiController::class, 'index'])->name('kelola-presensi');

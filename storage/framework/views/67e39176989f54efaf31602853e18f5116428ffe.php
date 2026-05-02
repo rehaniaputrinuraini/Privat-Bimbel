@@ -141,18 +141,18 @@
                     </a>
                     <ul class="submenu-list" style="display: <?php echo e(request()->is('*laporan-keuangan*') ? 'block' : 'none'); ?>;">
                         <li>
-                            <a href="<?php echo e(route('admin.laporan-keuangan')); ?>" class="submenu-link <?php echo e(request()->routeIs('admin.laporan-keuangan*') && !request()->has('jenis') ? 'sub-active' : ''); ?>">
+                            <a href="<?php echo e(route('admin.laporan-keuangan.pemasukan')); ?>" class="submenu-link <?php echo e(request()->routeIs('admin.laporan-keuangan.pemasukan*') ? 'sub-active' : ''); ?>">
                                 <i class="fas fa-file-invoice-dollar submenu-icon"></i> Laporan Pemasukan
                             </a>
                         </li>
                         <li>
-                            <a href="<?php echo e(route('admin.laporan-keuangan')); ?>?jenis=pengeluaran" class="submenu-link <?php echo e(request()->has('jenis') && request()->get('jenis') == 'pengeluaran' ? 'sub-active' : ''); ?>">
+                            <a href="<?php echo e(route('admin.laporan-keuangan.pengeluaran')); ?>" class="submenu-link <?php echo e(request()->routeIs('admin.laporan-keuangan.pengeluaran*') ? 'sub-active' : ''); ?>">
                                 <i class="fas fa-file-invoice submenu-icon"></i> Laporan Pengeluaran
                             </a>
                         </li>
                         <li>
-                            <a href="<?php echo e(route('admin.laporan-keuangan')); ?>?jenis=gajian" class="submenu-link <?php echo e(request()->has('jenis') && request()->get('jenis') == 'gajian' ? 'sub-active' : ''); ?>">
-                                <i class="fas fa-receipt submenu-icon"></i> Laporan Gajian
+                            <a href="<?php echo e(route('admin.laporan-keuangan.penggajian')); ?>" class="submenu-link <?php echo e(request()->routeIs('admin.laporan-keuangan.penggajian*') ? 'sub-active' : ''); ?>">
+                                <i class="fas fa-receipt submenu-icon"></i> Laporan Penggajian
                             </a>
                         </li>
                     </ul>
@@ -225,7 +225,7 @@
                         </div>
                         <i class="fas fa-caret-down submenu-arrow"></i>
                     </a>
-                    <ul class="submenu-list" style="display: <?php echo e(request()->is('*pembayaran*') || request()->is('*rekap-gaji*') ? 'block' : 'none'); ?>;">
+                    <ul class="submenu-list" style="display: <?php echo e(request()->is('*transaksi*') || request()->is('*pembayaran*') || request()->is('*rekap-gaji*') ? 'block' : 'none'); ?>;">
                         <li>
                             <a href="<?php echo e(route('superadmin.transaksi.pemasukan')); ?>" class="submenu-link <?php echo e(request()->routeIs('superadmin.transaksi.pemasukan*') ? 'sub-active' : ''); ?>">
                                 <i class="fas fa-arrow-down submenu-icon"></i> Transaksi Pemasukan
@@ -262,18 +262,18 @@
                     </a>
                     <ul class="submenu-list" style="display: <?php echo e(request()->is('*laporan-keuangan*') ? 'block' : 'none'); ?>;">
                         <li>
-                            <a href="<?php echo e(route('superadmin.laporan-keuangan')); ?>" class="submenu-link <?php echo e(request()->routeIs('superadmin.laporan-keuangan*') && !request()->has('jenis') ? 'sub-active' : ''); ?>">
+                            <a href="<?php echo e(route('superadmin.laporan-keuangan.pemasukan')); ?>" class="submenu-link <?php echo e(request()->routeIs('superadmin.laporan-keuangan.pemasukan*') ? 'sub-active' : ''); ?>">
                                 <i class="fas fa-file-invoice-dollar submenu-icon"></i> Laporan Pemasukan
                             </a>
                         </li>
                         <li>
-                            <a href="<?php echo e(route('superadmin.laporan-keuangan')); ?>?jenis=pengeluaran" class="submenu-link <?php echo e(request()->has('jenis') && request()->get('jenis') == 'pengeluaran' ? 'sub-active' : ''); ?>">
+                            <a href="<?php echo e(route('superadmin.laporan-keuangan.pengeluaran')); ?>" class="submenu-link <?php echo e(request()->routeIs('superadmin.laporan-keuangan.pengeluaran*') ? 'sub-active' : ''); ?>">
                                 <i class="fas fa-file-invoice submenu-icon"></i> Laporan Pengeluaran
                             </a>
                         </li>
                         <li>
-                            <a href="<?php echo e(route('superadmin.laporan-keuangan')); ?>?jenis=gajian" class="submenu-link <?php echo e(request()->has('jenis') && request()->get('jenis') == 'gajian' ? 'sub-active' : ''); ?>">
-                                <i class="fas fa-receipt submenu-icon"></i> Laporan Gajian
+                            <a href="<?php echo e(route('superadmin.laporan-keuangan.penggajian')); ?>" class="submenu-link <?php echo e(request()->routeIs('superadmin.laporan-keuangan.penggajian*') ? 'sub-active' : ''); ?>">
+                                <i class="fas fa-receipt submenu-icon"></i> Laporan Penggajian
                             </a>
                         </li>
                     </ul>
