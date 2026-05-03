@@ -36,7 +36,6 @@ class PembayaranController extends Controller
         $tagihan = collect();
 
         foreach ($murids as $murid) {
-            // Ambil kelas terbaru
             $kelasTerbaru = TransaksiKelas::where('id_murid', $murid->id_murid)
                 ->orderBy('created_at', 'desc')
                 ->first();
@@ -46,7 +45,6 @@ class PembayaranController extends Controller
                 $namaKelas = $kelas ? $kelas->nama_kelas : '-';
             }
 
-            // Ambil paket aktif
             $paketAktif    = TransaksiPaket::where('id_murid', $murid->id_murid)
                 ->orderBy('id_paket_murid', 'desc')
                 ->first();
@@ -60,20 +58,17 @@ class PembayaranController extends Controller
                 }
             }
 
-            // Cek sudah bayar pendaftaran
             $sudahBayarPendaftaran = TransaksiUmum::where('id_murid', $murid->id_murid)
                 ->where('keterangan', 'like', '%Pendaftaran%')
                 ->exists();
             $statusPendaftaran = $sudahBayarPendaftaran ? 'Lunas' : 'Belum';
 
-            // Ambil semua pembayaran SPP
             $semuaPembayaranSPP = TransaksiUmum::where('id_murid', $murid->id_murid)
                 ->where('keterangan', 'like', '%SPP%')
                 ->where('debit', '>', 0)
                 ->orderBy('tanggal_bayar', 'desc')
                 ->get();
 
-            // Cek pembayaran bulan ini
             $pembayaranBulanIni = $semuaPembayaranSPP->filter(function ($item) use ($currentMonth, $currentYear) {
                 preg_match('/SPP\s+(\w+)\s+(\d+)/', $item->keterangan, $matches);
                 if (isset($matches[1]) && isset($matches[2])) {
@@ -88,7 +83,6 @@ class PembayaranController extends Controller
                 return false;
             })->first();
 
-            // Hitung Uang Muka & Piutang
             $totalUangMuka    = 0;
             $uangMukaBulanList = [];
             $totalPiutang     = 0;
@@ -122,7 +116,6 @@ class PembayaranController extends Controller
                 }
             }
 
-            // Bulan belum dibayar
             $bulanBelumDibayar = [];
             $bulanMulai        = 1;
             if ($murid->tanggal_daftar) {
@@ -205,7 +198,6 @@ class PembayaranController extends Controller
             ]);
         }
 
-        // Pagination
         $perPage     = $request->get('per_page', 10);
         $currentPage = $request->get('page', 1);
         $total       = $tagihan->count();
@@ -311,7 +303,6 @@ class PembayaranController extends Controller
             return response()->json(['success' => false, 'message' => 'Tidak ada periode aktif!']);
         }
 
-        // ========== PEMASUKAN LAINNYA ==========
         if ($request->kategori_pemasukan == 'lainnya') {
             $request->validate([
                 'tanggal_lainnya'          => 'required|date',
@@ -338,7 +329,6 @@ class PembayaranController extends Controller
             return response()->json(['success' => true, 'message' => 'Pemasukan lainnya berhasil disimpan']);
         }
 
-        // ========== PEMBAYARAN MURID ==========
         $request->validate([
             'tanggal'             => 'required|date',
             'jenis_pembayaran'    => 'required|in:Tunai,Transfer',
@@ -357,7 +347,6 @@ class PembayaranController extends Controller
             ->where('keterangan', 'like', '%Pendaftaran%')
             ->exists();
 
-        // BELUM BAYAR PENDAFTARAN
         if (!$sudahBayarPendaftaran) {
             TransaksiUmum::create([
                 'id_periode'       => (int) $periodeAktif->id_periode,
@@ -378,7 +367,6 @@ class PembayaranController extends Controller
             return response()->json(['success' => true, 'message' => 'Pembayaran pendaftaran berhasil disimpan']);
         }
 
-        // PEMBAYARAN SPP
         $request->validate([
             'paket_selanjutnya' => 'required|string',
             'bulan_dibayar'     => 'nullable|integer|min:1|max:12',
@@ -424,9 +412,7 @@ class PembayaranController extends Controller
     public function destroy(Request $request, $id)
     {
         TransaksiUmum::where('id_transaksi', $id)->delete();
-
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-
         return redirect()->route($role . '.pembayaran.tagihan')
             ->with('success', 'Data pembayaran berhasil dihapus');
     }
@@ -437,7 +423,6 @@ class PembayaranController extends Controller
     public function cekStatusPembayaran($id)
     {
         $murid = Murid::find($id);
-
         if (!$murid) {
             return response()->json(['error' => 'Murid tidak ditemukan'], 404);
         }
@@ -474,7 +459,6 @@ class PembayaranController extends Controller
                 ->where('debit', '>', 0)
                 ->get();
 
-            // Cek pembayaran bulan ini
             $pembayaranBulanIni = $semuaSPP->filter(function ($item) use ($currentMonth, $currentYear) {
                 preg_match('/SPP\s+(\w+)\s+(\d+)/', $item->keterangan, $matches);
                 if (isset($matches[1]) && isset($matches[2])) {
@@ -493,7 +477,6 @@ class PembayaranController extends Controller
                 $bulanTunggakan = $currentMonth;
             }
 
-            // Kumpulkan bulan yang sudah lunas
             foreach ($semuaSPP as $spp) {
                 preg_match('/SPP\s+(\w+)\s+(\d+)/', $spp->keterangan, $matches);
                 if (isset($matches[1])) {
@@ -503,17 +486,13 @@ class PembayaranController extends Controller
                         if ($tahun == $currentYear && $hargaPaket && $spp->debit >= $hargaPaket) {
                             $bulanLunas[] = $bulan;
                         }
-                    } catch (\Exception $e) {
-                    }
+                    } catch (\Exception $e) {}
                 }
             }
 
-            // Bulan berikutnya (jika bulan ini sudah lunas)
             if (in_array($currentMonth, $bulanLunas)) {
                 $bulanBerikutnya = $currentMonth + 1;
-                if ($bulanBerikutnya > 12) {
-                    $bulanBerikutnya = 1;
-                }
+                if ($bulanBerikutnya > 12) $bulanBerikutnya = 1;
             }
         }
 
@@ -536,14 +515,9 @@ class PembayaranController extends Controller
         $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
         $perPage   = $request->get('per_page', 10);
 
-        // --- Data Tagihan ---
         $currentMonth = Carbon::now()->month;
         $currentYear  = Carbon::now()->year;
         $murids       = Murid::all();
-        $today        = date('Y-m-d');
-        $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
-            ->where('tanggal_selesai', '>=', $today)
-            ->first();
 
         $tagihan = collect();
 
@@ -629,13 +603,10 @@ class PembayaranController extends Controller
         $currentPageTagihan = $request->get('page_tagihan', 1);
         $tagihan = new \Illuminate\Pagination\LengthAwarePaginator(
             $tagihan->forPage($currentPageTagihan, $perPage),
-            $totalTagihan,
-            $perPage,
-            $currentPageTagihan,
+            $totalTagihan, $perPage, $currentPageTagihan,
             ['path' => $request->url(), 'query' => $request->query(), 'pageName' => 'page_tagihan']
         );
 
-        // --- Data Riwayat Pemasukan ---
         $pemasukan = TransaksiUmum::with('murid')
             ->where('debit', '>', 0)
             ->orderBy('tanggal_bayar', 'desc')
@@ -671,7 +642,6 @@ class PembayaranController extends Controller
                 ];
             });
 
-        // Summary totals
         $totalBulanIni    = TransaksiUmum::where('debit', '>', 0)->whereMonth('tanggal_bayar', now()->month)->whereYear('tanggal_bayar', now()->year)->sum('debit');
         $totalKeseluruhan = TransaksiUmum::where('debit', '>', 0)->sum('debit');
         $totalMurid       = TransaksiUmum::where('debit', '>', 0)->where(function ($q) { $q->where('keterangan', 'like', '%Pendaftaran%')->orWhere('keterangan', 'like', '%SPP%'); })->sum('debit');
@@ -692,6 +662,8 @@ class PembayaranController extends Controller
         $perPage = $request->get('per_page', 10);
         
         $pengeluaran = TransaksiUmum::where('kredit', '>', 0)
+            ->where('keterangan', 'not like', '%Gaji%')
+            ->where('keterangan', 'not like', '%Honor%')
             ->orderBy('tanggal_bayar', 'desc')
             ->paginate($perPage)
             ->through(function ($item) {
@@ -706,11 +678,16 @@ class PembayaranController extends Controller
             });
         
         $totalBulanIni = TransaksiUmum::where('kredit', '>', 0)
+            ->where('keterangan', 'not like', '%Gaji%')
+            ->where('keterangan', 'not like', '%Honor%')
             ->whereMonth('tanggal_bayar', now()->month)
             ->whereYear('tanggal_bayar', now()->year)
             ->sum('kredit');
         
-        $totalKeseluruhan = TransaksiUmum::where('kredit', '>', 0)->sum('kredit');
+        $totalKeseluruhan = TransaksiUmum::where('kredit', '>', 0)
+            ->where('keterangan', 'not like', '%Gaji%')
+            ->where('keterangan', 'not like', '%Honor%')
+            ->sum('kredit');
         
         return view('dashboard.shared.transaksi.pengeluaran', compact(
             'role', 'pengeluaran', 'totalBulanIni', 'totalKeseluruhan'
@@ -768,7 +745,6 @@ class PembayaranController extends Controller
         $bulan = $request->get('bulan', now()->month);
         $tahun = $request->get('tahun', now()->year);
         
-        // Ambil semua tentor
         $tentors = Pegawai::with('user')
             ->where('jenis_pegawai', 'tentor')
             ->get();
@@ -776,22 +752,44 @@ class PembayaranController extends Controller
         $penggajian = collect();
         
         foreach ($tentors as $tentor) {
-            // Hitung jumlah sesi mengajar dari presensi bulan ini
-            $jumlahSesi = Mengajar::where('id_pegawai', $tentor->id_pegawai)
-            ->whereMonth('tanggal', $bulan)
-            ->whereYear('tanggal', $tahun)
-            ->count();
+            $presensi = Mengajar::with('kelas')
+                ->where('id_pegawai', $tentor->id_pegawai)
+                ->whereMonth('tanggal', $bulan)
+                ->whereYear('tanggal', $tahun)
+                ->get();
             
-            if ($jumlahSesi == 0) continue; // skip kalau ga ada sesi
+            $jumlahSesi = $presensi->count();
             
-            // Honor per sesi (pakai HR SMA sebagai default, bisa disesuaikan)
-            $honorPerSesi = $tentor->hr_sma ?? $tentor->hr_smp ?? $tentor->hr_sd ?? 0;
-            $totalHonor = $jumlahSesi * $honorPerSesi;
-            $uangMakan = $jumlahSesi * ($tentor->uang_makan ?? 0);
-            $uangTransport = $jumlahSesi * ($tentor->uang_transport ?? 0);
-            $totalGaji = $totalHonor + $uangMakan + $uangTransport;
+            if ($jumlahSesi == 0) continue;
             
-            // Cek apakah sudah dibayar bulan ini
+            $totalHonor = 0;
+            foreach ($presensi as $p) {
+                $jenjang = $p->kelas->jenjang ?? null;
+                $hr = 0;
+                
+                if ($jenjang == 'SD') $hr = $tentor->hr_sd ?? 0;
+                elseif ($jenjang == 'SMP') $hr = $tentor->hr_smp ?? 0;
+                elseif ($jenjang == 'SMA') $hr = $tentor->hr_sma ?? 0;
+                
+                if ($p->murid_hadir == 'Tidak Hadir') $hr = $hr / 2;
+                
+                $totalHonor += $hr;
+            }
+            
+            $hariHadir = $presensi->unique('tanggal')->count();
+            
+            $daftarTanggal = $presensi->pluck('tanggal')->unique()->map(function($t) {
+                return \Carbon\Carbon::parse($t)->format('d/m');
+            })->implode(', ');
+            
+            $uangMakanPerHari = $tentor->uang_makan ?? 0;
+            $totalUangMakan = $hariHadir * $uangMakanPerHari;
+            
+            $uangTransportPerHari = $tentor->uang_transport ?? 0;
+            $totalUangTransport = $hariHadir * $uangTransportPerHari;
+            
+            $totalGaji = $totalHonor + $totalUangMakan + $totalUangTransport;
+            
             $sudahDibayar = TransaksiUmum::where('id_pegawai', $tentor->id_pegawai)
                 ->where('kredit', '>', 0)
                 ->where('keterangan', 'like', "%Gaji " . Carbon::create()->month($bulan)->translatedFormat('F') . " " . $tahun . "%")
@@ -803,17 +801,19 @@ class PembayaranController extends Controller
                 'mapel' => $tentor->mapel ?? '-',
                 'grade' => $tentor->grade ?? '-',
                 'jumlah_sesi' => $jumlahSesi,
-                'honor_per_sesi' => $honorPerSesi,
+                'hari_hadir' => $hariHadir,
+                'daftar_tanggal' => $daftarTanggal,
                 'total_honor' => $totalHonor,
-                'uang_makan' => $uangMakan,
-                'uang_transport' => $uangTransport,
+                'uang_makan_per_hari' => $uangMakanPerHari,
+                'uang_makan' => $totalUangMakan,
+                'uang_transport_per_hari' => $uangTransportPerHari,
+                'uang_transport' => $totalUangTransport,
                 'total_gaji' => $totalGaji,
                 'status' => $sudahDibayar ? 'Sudah Dibayar' : 'Belum Dibayar',
                 'sudah_dibayar' => $sudahDibayar,
             ]);
         }
         
-        // Pagination
         $total = $penggajian->count();
         $currentPage = $request->get('page', 1);
         $penggajian = new \Illuminate\Pagination\LengthAwarePaginator(
@@ -827,37 +827,42 @@ class PembayaranController extends Controller
 
     public function bayarGaji(Request $request, $id)
     {
-        $tentor = Pegawai::findOrFail($id);
-        $bulan = $request->bulan;
-        $tahun = $request->tahun;
-        $totalGaji = $request->total_gaji;
-        $jumlahSesi = $request->jumlah_sesi;
-        
-        $today = date('Y-m-d');
-        $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
-            ->where('tanggal_selesai', '>=', $today)
-            ->first();
-        
-        if (!$periodeAktif) {
-            return response()->json(['success' => false, 'message' => 'Tidak ada periode aktif!']);
+        try {
+            $tentor = Pegawai::findOrFail($id);
+            $bulan = $request->bulan;
+            $tahun = $request->tahun;
+            $totalGaji = $request->total_gaji;
+            $jumlahSesi = $request->jumlah_sesi;
+            
+            $today = date('Y-m-d');
+            $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
+                ->where('tanggal_selesai', '>=', $today)
+                ->first();
+            
+            if (!$periodeAktif) {
+                return response()->json(['success' => false, 'message' => 'Tidak ada periode aktif!']);
+            }
+            
+            $namaBulan = Carbon::create()->month($bulan)->translatedFormat('F');
+            
+            TransaksiUmum::create([
+                'id_periode' => (int) $periodeAktif->id_periode,
+                'id_murid' => null,
+                'id_pegawai' => $tentor->id_pegawai,
+                'tanggal_bayar' => $today,
+                'bulan' => (int) $bulan,
+                'jenis_pembayaran' => 'Transfer',
+                'keterangan' => "Gaji " . $namaBulan . " " . $tahun . " - " . $tentor->nama_lengkap . " ({$jumlahSesi} sesi)",
+                'debit' => 0,
+                'kredit' => (int) $totalGaji,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            
+            return response()->json(['success' => true, 'message' => 'Gaji berhasil dibayarkan']);
+            
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
         }
-        
-        $namaBulan = Carbon::create()->month($bulan)->translatedFormat('F');
-        
-        TransaksiUmum::create([
-            'id_periode' => (int) $periodeAktif->id_periode,
-            'id_murid' => null,
-            'id_pegawai' => $tentor->id_pegawai,
-            'tanggal_bayar' => $today,
-            'bulan' => (int) $bulan,
-            'jenis_pembayaran' => 'Transfer',
-            'keterangan' => "Gaji " . $namaBulan . " " . $tahun . " - " . $tentor->nama_lengkap . " ({$jumlahSesi} sesi)",
-            'debit' => 0,
-            'kredit' => (int) $totalGaji,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        
-        return response()->json(['success' => true, 'message' => 'Gaji berhasil dibayarkan']);
     }
 }

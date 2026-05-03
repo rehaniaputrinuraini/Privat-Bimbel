@@ -9,7 +9,7 @@
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;"><?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?></p>
         <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0;">Transaksi Penggajian</h1>
-        <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Kelola Gaji Tentor</p>
+        <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Kelola Gaji Tentor Berdasarkan Honor Akhir Presensi</p>
     </div>
 
     <?php if(session('success')): ?>
@@ -45,11 +45,10 @@
                 <th style="padding: 15px;">Mapel</th>
                 <th style="padding: 15px; text-align: center;">Grade</th>
                 <th style="padding: 15px; text-align: center;">Sesi</th>
-                <th style="padding: 15px; text-align: right;">Honor/Sesi</th>
                 <th style="padding: 15px; text-align: right;">Total Honor</th>
-                <th style="padding: 15px; text-align: right;">Makan</th>
+                <th style="padding: 15px; text-align: right;">Uang Makan</th>
                 <th style="padding: 15px; text-align: right;">Transport</th>
-                <th style="padding: 15px; text-align: right;">Total</th>
+                <th style="padding: 15px; text-align: right;">Total Gaji</th>
                 <th style="padding: 15px; text-align: center;">Status</th>
                 <th style="padding: 15px; text-align: center;">Aksi</th>
             </tr></thead>
@@ -60,11 +59,21 @@
                     <td style="padding: 15px;"><?php echo e($item->nama); ?></td>
                     <td style="padding: 15px;"><?php echo e($item->mapel); ?></td>
                     <td style="padding: 15px; text-align: center;"><?php echo e($item->grade); ?></td>
-                    <td style="padding: 15px; text-align: center;"><?php echo e($item->jumlah_sesi); ?></td>
-                    <td style="padding: 15px; text-align: right;">Rp <?php echo e(number_format($item->honor_per_sesi, 0, ',', '.')); ?></td>
-                    <td style="padding: 15px; text-align: right;">Rp <?php echo e(number_format($item->total_honor, 0, ',', '.')); ?></td>
-                    <td style="padding: 15px; text-align: right;">Rp <?php echo e(number_format($item->uang_makan, 0, ',', '.')); ?></td>
-                    <td style="padding: 15px; text-align: right;">Rp <?php echo e(number_format($item->uang_transport, 0, ',', '.')); ?></td>
+                    <td style="padding: 15px; text-align: center;">
+                        <?php echo e($item->jumlah_sesi); ?> Sesi (<?php echo e($item->hari_hadir); ?> Hari)
+                        <br><small style="color:#9CA3AF;"><?php echo e($item->daftar_tanggal); ?></small>
+                    </td>
+                    <td style="padding: 15px; text-align: right; font-weight: 600; color: #4D0B87;">Rp <?php echo e(number_format($item->total_honor, 0, ',', '.')); ?></td>
+                    <td style="padding: 15px; text-align: right;">
+                        Rp <?php echo e(number_format($item->uang_makan, 0, ',', '.')); ?>
+
+                        <br><small style="color:#9CA3AF;">(Rp <?php echo e(number_format($item->uang_makan_per_hari, 0, ',', '.')); ?> × <?php echo e($item->hari_hadir); ?> hari)</small>
+                    </td>
+                    <td style="padding: 15px; text-align: right;">
+                        Rp <?php echo e(number_format($item->uang_transport, 0, ',', '.')); ?>
+
+                        <br><small style="color:#9CA3AF;">(Rp <?php echo e(number_format($item->uang_transport_per_hari, 0, ',', '.')); ?> × <?php echo e($item->hari_hadir); ?> hari)</small>
+                    </td>
                     <td style="padding: 15px; text-align: right; font-weight: 700; color: #4D0B87;">Rp <?php echo e(number_format($item->total_gaji, 0, ',', '.')); ?></td>
                     <td style="padding: 15px; text-align: center;">
                         <?php if($item->sudah_dibayar): ?>
@@ -85,7 +94,7 @@
                     </td>
                 </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                <tr><td colspan="12" style="padding: 50px; text-align: center; color: #9CA3AF;">Pilih bulan dan tahun untuk melihat data gaji</td></tr>
+                <tr><td colspan="11" style="padding: 50px; text-align: center; color: #9CA3AF;">Pilih bulan dan tahun untuk melihat data gaji</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
@@ -100,26 +109,26 @@
                 <option value="25" <?php echo e(request('per_page') == 25 ? 'selected' : ''); ?>>25 baris</option>
                 <option value="50" <?php echo e(request('per_page') == 50 ? 'selected' : ''); ?>>50 baris</option>
             </select>
-            <span style="color: #374151; font-size: 13px;">Menampilkan <?php echo e($penggajian->firstItem() ?? 0); ?> - <?php echo e($penggajian->lastItem() ?? 0); ?> dari <?php echo e($penggajian->total() ?? 0); ?> data</span>
+            <span style="color: #374151; font-size: 13px;">Menampilkan <?php echo e($penggajian->total() ?? 0); ?> data</span>
         </div>
         <div style="display: flex; gap: 5px;">
             <?php if($penggajian->onFirstPage()): ?>
                 <button disabled style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:#F3F4F6;color:#9CA3AF;"><i class="fas fa-angle-double-left"></i></button>
                 <button disabled style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:#F3F4F6;color:#9CA3AF;"><i class="fas fa-angle-left"></i></button>
             <?php else: ?>
-                <a href="<?php echo e($penggajian->url(1)); ?>&per_page=<?php echo e(request('per_page', 10)); ?>&bulan=<?php echo e($bulan); ?>&tahun=<?php echo e($tahun); ?>" style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;"><i class="fas fa-angle-double-left"></i></a>
-                <a href="<?php echo e($penggajian->previousPageUrl()); ?>&per_page=<?php echo e(request('per_page', 10)); ?>&bulan=<?php echo e($bulan); ?>&tahun=<?php echo e($tahun); ?>" style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;"><i class="fas fa-angle-left"></i></a>
+                <a href="<?php echo e(request()->fullUrlWithQuery(['page' => 1])); ?>" style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;"><i class="fas fa-angle-double-left"></i></a>
+                <a href="<?php echo e(request()->fullUrlWithQuery(['page' => $penggajian->currentPage() - 1])); ?>" style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;"><i class="fas fa-angle-left"></i></a>
             <?php endif; ?>
             <?php $start = max(1, $penggajian->currentPage() - 2); $end = min($penggajian->lastPage(), $penggajian->currentPage() + 2); ?>
             <?php for($i = $start; $i <= $end; $i++): ?>
                 <?php if($i == $penggajian->currentPage()): ?>
                     <button style="width:35px;height:35px;border-radius:8px;background:#4D0B87;color:white;border:none;font-weight:600;"><?php echo e($i); ?></button>
                 <?php else: ?>
-                    <a href="<?php echo e($penggajian->url($i)); ?>&per_page=<?php echo e(request('per_page', 10)); ?>&bulan=<?php echo e($bulan); ?>&tahun=<?php echo e($tahun); ?>" style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;"><?php echo e($i); ?></a>
+                    <a href="<?php echo e(request()->fullUrlWithQuery(['page' => $i])); ?>" style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;"><?php echo e($i); ?></a>
                 <?php endif; ?>
             <?php endfor; ?>
             <?php if($penggajian->hasMorePages()): ?>
-                <a href="<?php echo e($penggajian->nextPageUrl()); ?>&per_page=<?php echo e(request('per_page', 10)); ?>&bulan=<?php echo e($bulan); ?>&tahun=<?php echo e($tahun); ?>" style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;"><i class="fas fa-angle-right"></i></a>
+                <a href="<?php echo e(request()->fullUrlWithQuery(['page' => $penggajian->currentPage() + 1])); ?>" style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;"><i class="fas fa-angle-right"></i></a>
             <?php else: ?>
                 <button disabled style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:#F3F4F6;color:#9CA3AF;"><i class="fas fa-angle-right"></i></button>
             <?php endif; ?>
@@ -167,12 +176,18 @@
 
         const bulan = document.getElementById('filterBulan').value;
         const tahun = document.getElementById('filterTahun').value;
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-        fetch(`<?php echo e(route($role . '.penggajian.bayar', '')); ?>/${bayarData.id}`, {
+        // Gunakan replace :id
+        let url = "<?php echo e(route($role . '.penggajian.bayar', ':id')); ?>";
+        url = url.replace(':id', bayarData.id);
+
+        fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
+                'X-CSRF-TOKEN': csrf,
+                'Accept': 'application/json'
             },
             body: JSON.stringify({
                 bulan: bulan,
@@ -181,15 +196,25 @@
                 jumlah_sesi: bayarData.sesi
             })
         })
-        .then(r => r.json())
-        .then(data => {
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('Server error: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(function(data) {
             if (data.success) {
                 window.location.reload();
             } else {
-                alert(data.message);
+                alert(data.message || 'Gagal membayar gaji');
                 btn.disabled = false;
                 btn.innerHTML = 'Ya, Bayar';
             }
+        })
+        .catch(function(err) {
+            alert('Terjadi kesalahan: ' + err.message);
+            btn.disabled = false;
+            btn.innerHTML = 'Ya, Bayar';
         });
     }
 
