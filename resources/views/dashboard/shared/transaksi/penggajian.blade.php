@@ -75,19 +75,19 @@
                     <td style="padding: 15px; text-align: right; font-weight: 700; color: #4D0B87;">Rp {{ number_format($item->total_gaji, 0, ',', '.') }}</td>
                     <td style="padding: 15px; text-align: center;">
                         @if($item->sudah_dibayar)
-                            <span style="background:#D1FAE5;color:#065F46;padding:4px 10px;border-radius:20px;font-size:11px;">Sudah Dibayar</span>
+                            <span style="background:#D1FAE5;color:#065F46;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;">Sudah Dibayar</span>
                         @else
-                            <span style="background:#FEF3C7;color:#92400E;padding:4px 10px;border-radius:20px;font-size:11px;">Belum Dibayar</span>
+                            <span style="background:#FEF3C7;color:#92400E;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;">Belum Dibayar</span>
                         @endif
                     </td>
                     <td style="padding: 15px; text-align: center;">
-                        @if(!$item->sudah_dibayar)
-                            <button onclick="bayarGaji('{{ $item->id_pegawai }}', '{{ $item->nama }}', {{ $item->total_gaji }}, {{ $item->jumlah_sesi }})"
-                                    style="background:#10B981;color:white;padding:6px 12px;border-radius:6px;border:none;cursor:pointer;font-size:12px;">
+                        @if($item->sudah_dibayar)
+                            <span style="background:#D1FAE5;color:#065F46;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;">✅ Sudah Dibayar</span>
+                        @else
+                            <button type="button" onclick="klikBayar('{{ $item->id_pegawai }}', '{{ $item->nama }}', {{ $item->total_gaji }}, {{ $item->jumlah_sesi }})" 
+                                    style="background: #10B981; color: white; padding: 5px 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 10px; white-space: nowrap; font-family: 'Poppins', sans-serif;">
                                 <i class="fas fa-money-bill-wave"></i> Bayar
                             </button>
-                        @else
-                            <span style="color:#10B981;">✅</span>
                         @endif
                     </td>
                 </tr>
@@ -101,8 +101,7 @@
     {{-- PAGINATION --}}
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px; margin-bottom: 40px;">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <select id="pageSelect" onchange="changePage(this.value)"
-                    style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; font-family: 'Poppins', sans-serif;">
+            <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; font-family: 'Poppins', sans-serif;">
                 <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 baris</option>
                 <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 baris</option>
                 <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 baris</option>
@@ -111,39 +110,53 @@
         </div>
         <div style="display: flex; gap: 5px;">
             @if ($penggajian->onFirstPage())
-                <button disabled style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:#F3F4F6;color:#9CA3AF;"><i class="fas fa-angle-double-left"></i></button>
-                <button disabled style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:#F3F4F6;color:#9CA3AF;"><i class="fas fa-angle-left"></i></button>
+                <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-double-left"></i></button>
+                <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-left"></i></button>
             @else
-                <a href="{{ request()->fullUrlWithQuery(['page' => 1]) }}" style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;"><i class="fas fa-angle-double-left"></i></a>
-                <a href="{{ request()->fullUrlWithQuery(['page' => $penggajian->currentPage() - 1]) }}" style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;"><i class="fas fa-angle-left"></i></a>
+                <a href="{{ request()->fullUrlWithQuery(['page' => 1]) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
+                <a href="{{ request()->fullUrlWithQuery(['page' => $penggajian->currentPage() - 1]) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
             @endif
+
             @php $start = max(1, $penggajian->currentPage() - 2); $end = min($penggajian->lastPage(), $penggajian->currentPage() + 2); @endphp
             @for ($i = $start; $i <= $end; $i++)
                 @if ($i == $penggajian->currentPage())
-                    <button style="width:35px;height:35px;border-radius:8px;background:#4D0B87;color:white;border:none;font-weight:600;">{{ $i }}</button>
+                    <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">{{ $i }}</button>
                 @else
-                    <a href="{{ request()->fullUrlWithQuery(['page' => $i]) }}" style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;">{{ $i }}</a>
+                    <a href="{{ request()->fullUrlWithQuery(['page' => $i]) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">{{ $i }}</a>
                 @endif
             @endfor
+
             @if ($penggajian->hasMorePages())
-                <a href="{{ request()->fullUrlWithQuery(['page' => $penggajian->currentPage() + 1]) }}" style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;"><i class="fas fa-angle-right"></i></a>
+                <a href="{{ request()->fullUrlWithQuery(['page' => $penggajian->currentPage() + 1]) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
             @else
-                <button disabled style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:#F3F4F6;color:#9CA3AF;"><i class="fas fa-angle-right"></i></button>
+                <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-right"></i></button>
             @endif
         </div>
     </div>
 
 </div>
 
+{{-- MODAL PERINGATAN (BUKAN AKHIR BULAN) --}}
+<div id="modalPeringatan" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
+        <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
+        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Tidak Dapat Membayar</h2>
+        <p style="color: #6B7280; font-size: 12px; margin: 8px 0 20px 0; line-height: 1.5;" id="pesanPeringatan">
+            Pembayaran gaji hanya bisa dilakukan di <strong>akhir bulan (H-3 s/d akhir bulan)</strong> atau untuk <strong>bulan sebelumnya yang belum dibayar</strong>.
+        </p>
+        <button onclick="tutupModalPeringatan()" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #4D0B87; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Mengerti</button>
+    </div>
+</div>
+
 {{-- MODAL KONFIRMASI BAYAR --}}
-<div id="modalBayar" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; font-family: 'Poppins', sans-serif;">
-    <div style="background: white; padding: 25px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15);">
+<div id="modalBayar" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-money-bill-wave"></i></div>
-        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Konfirmasi Pembayaran Gaji</h2>
-        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0; line-height: 1.5;" id="pesanBayar"></p>
+        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Bayar Gaji?</h2>
+        <p style="color: #6B7280; font-size: 12px; margin: 8px 0 20px 0; line-height: 1.5;" id="pesanBayar">Apakah Anda yakin ingin membayar gaji tentor ini?</p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalBayar()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
-            <button onclick="konfirmasiBayar()" style="flex: 1; padding: 10px; border-radius: 10px; border: none; background: #10B981; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Bayar</button>
+            <button type="button" id="btnKonfirmasiBayar" onclick="konfirmasiBayar()" style="flex: 1; padding: 10px; border-radius: 10px; border: none; background: #10B981; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Bayar</button>
         </div>
     </div>
 </div>
@@ -159,24 +172,49 @@
         }
     }
 
-    function bayarGaji(id, nama, total, sesi) {
+    function klikBayar(id, nama, total, sesi) {
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1;
+        const currentYear = today.getFullYear();
+        const lastDay = new Date(currentYear, currentMonth, 0).getDate();
+        const hMin3 = lastDay - 2;
+        const isAkhirBulan = today.getDate() >= hMin3;
+        
+        const filterBulan = parseInt(document.getElementById('filterBulan').value);
+        const filterTahun = parseInt(document.getElementById('filterTahun').value);
+        const isBulanLalu = (filterTahun < currentYear) || (filterTahun === currentYear && filterBulan < currentMonth);
+        const bolehBayar = isAkhirBulan || isBulanLalu;
+
+        if (!bolehBayar) {
+            document.getElementById('pesanPeringatan').innerHTML = 
+                `Pembayaran gaji <strong>${nama}</strong> hanya bisa dilakukan di <strong>akhir bulan (H-3 s/d akhir bulan)</strong> atau untuk <strong>bulan sebelumnya yang belum dibayar</strong>.`;
+            document.getElementById('modalPeringatan').style.display = 'flex';
+            return;
+        }
+
         bayarData = { id, nama, total, sesi };
-        document.getElementById('pesanBayar').innerHTML = `Bayar gaji <strong>${nama}</strong> sebesar <strong>Rp ${new Intl.NumberFormat('id-ID').format(total)}</strong> untuk <strong>${sesi} sesi</strong>?`;
+        document.getElementById('pesanBayar').innerHTML = 
+            `Apakah Anda <strong>benar-benar yakin</strong> ingin membayar gaji <strong>${nama}</strong> sebesar <strong>Rp ${new Intl.NumberFormat('id-ID').format(total)}</strong> untuk <strong>${sesi} sesi</strong>?<br><br><small style="color:#EF4444;">⚠️ <strong>PERINGATAN:</strong> Pembayaran tidak dapat dibatalkan setelah dikonfirmasi.</small>`;
         document.getElementById('modalBayar').style.display = 'flex';
     }
 
-    function tutupModalBayar() { document.getElementById('modalBayar').style.display = 'none'; }
+    function tutupModalPeringatan() { 
+        document.getElementById('modalPeringatan').style.display = 'none'; 
+    }
+
+    function tutupModalBayar() { 
+        document.getElementById('modalBayar').style.display = 'none'; 
+    }
 
     function konfirmasiBayar() {
-        const btn = document.querySelector('#modalBayar button:last-child');
+        const btn = document.getElementById('btnKonfirmasiBayar');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
 
         const bulan = document.getElementById('filterBulan').value;
         const tahun = document.getElementById('filterTahun').value;
         const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-        // Gunakan replace :id
         let url = "{{ route($role . '.penggajian.bayar', ':id') }}";
         url = url.replace(':id', bayarData.id);
 
@@ -195,9 +233,7 @@
             })
         })
         .then(function(response) {
-            if (!response.ok) {
-                throw new Error('Server error: ' + response.status);
-            }
+            if (!response.ok) throw new Error('Server error: ' + response.status);
             return response.json();
         })
         .then(function(data) {
@@ -216,13 +252,19 @@
         });
     }
 
-    document.getElementById('modalBayar').addEventListener('click', function(e) { if (e.target === this) tutupModalBayar(); });
+    document.getElementById('modalPeringatan').addEventListener('click', function(e) { 
+        if (e.target === this) tutupModalPeringatan(); 
+    });
 
-    function changePage(perPage) {
-        const url = new URL(window.location.href);
-        url.searchParams.set('per_page', perPage);
+    document.getElementById('modalBayar').addEventListener('click', function(e) { 
+        if (e.target === this) tutupModalBayar(); 
+    });
+
+    document.getElementById('pageSelect').addEventListener('change', function() {
+        let url = new URL(window.location.href);
+        url.searchParams.set('per_page', this.value);
         url.searchParams.delete('page');
         window.location.href = url.toString();
-    }
+    });
 </script>
 @endsection

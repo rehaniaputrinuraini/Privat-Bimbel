@@ -745,6 +745,12 @@ class PembayaranController extends Controller
         $bulan = $request->get('bulan', now()->month);
         $tahun = $request->get('tahun', now()->year);
         
+        // Cek apakah hari ini akhir bulan (H-3 s/d akhir bulan)
+        $today = Carbon::now();
+        $lastDayOfMonth = $today->copy()->endOfMonth()->day;
+        $currentDay = $today->day;
+        $isAkhirBulan = ($currentDay >= $lastDayOfMonth - 3);
+        
         $tentors = Pegawai::with('user')
             ->where('jenis_pegawai', 'tentor')
             ->get();
@@ -822,7 +828,7 @@ class PembayaranController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
         
-        return view('dashboard.shared.transaksi.penggajian', compact('role', 'penggajian', 'bulan', 'tahun'));
+        return view('dashboard.shared.transaksi.penggajian', compact('role', 'penggajian', 'bulan', 'tahun', 'isAkhirBulan'));
     }
 
     public function bayarGaji(Request $request, $id)
