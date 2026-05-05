@@ -736,7 +736,7 @@ class PembayaranController extends Controller
     }
 
     // =============================================
-    // TRANSAKSI PENGGAJIAN
+    // TRANSAKSI PENGGAJIAN (FIX - 1 HARI = 1 SESI)
     // =============================================
     public function indexPenggajian(Request $request)
     {
@@ -745,7 +745,6 @@ class PembayaranController extends Controller
         $bulan = $request->get('bulan', now()->month);
         $tahun = $request->get('tahun', now()->year);
         
-        // Cek apakah hari ini akhir bulan (H-3 s/d akhir bulan)
         $today = Carbon::now();
         $lastDayOfMonth = $today->copy()->endOfMonth()->day;
         $currentDay = $today->day;
@@ -758,33 +757,48 @@ class PembayaranController extends Controller
         $penggajian = collect();
         
         foreach ($tentors as $tentor) {
+            // Ambil SEMUA presensi bulan ini
             $presensi = Mengajar::with('kelas')
                 ->where('id_pegawai', $tentor->id_pegawai)
                 ->whereMonth('tanggal', $bulan)
                 ->whereYear('tanggal', $tahun)
                 ->get();
             
-            $jumlahSesi = $presensi->count();
+            if ($presensi->count() == 0) continue;
             
-            if ($jumlahSesi == 0) continue;
+            // === HITUNG PER HARI (1 HARI = 1 SESI) ===
+            $daftarTanggal = $presensi->pluck('tanggal')->unique()->values();
+            $hariHadir = $daftarTanggal->count();
             
             $totalHonor = 0;
-            foreach ($presensi as $p) {
-                $jenjang = $p->kelas->jenjang ?? null;
+            
+            foreach ($daftarTanggal as $tanggal) {
+                // Ambil semua presensi di tanggal ini
+                $presensiHarian = $presensi->where('tanggal', $tanggal);
+                
+                // Cek apakah ada yang "Hadir" di hari ini
+                $adaHadir = $presensiHarian->where('murid_hadir', 'Hadir')->count() > 0;
+                $adaTidakHadir = $presensiHarian->where('murid_hadir', 'Tidak Hadir')->count() > 0;
+                
+                // Ambil jenjang dari presensi pertama di hari itu
+                $jenjang = $presensiHarian->first()->kelas->jenjang ?? null;
                 $hr = 0;
                 
                 if ($jenjang == 'SD') $hr = $tentor->hr_sd ?? 0;
                 elseif ($jenjang == 'SMP') $hr = $tentor->hr_smp ?? 0;
                 elseif ($jenjang == 'SMA') $hr = $tentor->hr_sma ?? 0;
                 
-                if ($p->murid_hadir == 'Tidak Hadir') $hr = $hr / 2;
-                
-                $totalHonor += $hr;
+                // Jika HADIR (walaupun ada yang tidak hadir, tetap 100%)
+                if ($adaHadir) {
+                    $totalHonor += $hr;
+                }
+                // Jika TIDAK HADIR semua (50%)
+                elseif ($adaTidakHadir) {
+                    $totalHonor += ($hr / 2);
+                }
             }
             
-            $hariHadir = $presensi->unique('tanggal')->count();
-            
-            $daftarTanggal = $presensi->pluck('tanggal')->unique()->map(function($t) {
+            $daftarTanggalStr = $daftarTanggal->map(function($t) {
                 return \Carbon\Carbon::parse($t)->format('d/m');
             })->implode(', ');
             
@@ -806,9 +820,9 @@ class PembayaranController extends Controller
                 'nama' => $tentor->nama_lengkap,
                 'mapel' => $tentor->mapel ?? '-',
                 'grade' => $tentor->grade ?? '-',
-                'jumlah_sesi' => $jumlahSesi,
+                'jumlah_sesi' => $hariHadir,        // ⬅️ 1 HARI = 1 SESI
                 'hari_hadir' => $hariHadir,
-                'daftar_tanggal' => $daftarTanggal,
+                'daftar_tanggal' => $daftarTanggalStr,
                 'total_honor' => $totalHonor,
                 'uang_makan_per_hari' => $uangMakanPerHari,
                 'uang_makan' => $totalUangMakan,
