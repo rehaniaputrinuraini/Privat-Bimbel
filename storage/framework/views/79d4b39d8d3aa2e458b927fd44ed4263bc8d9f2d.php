@@ -1,14 +1,15 @@
-@extends('layouts.app')
 
-@section('title', 'Kelola Murid')
 
-@section('content')
+<?php $__env->startSection('title', 'Kelola Murid'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div style="width: 100%;">
     
-    {{-- HEADER HALAMAN --}}
+    
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
-            {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+            <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?>
+
         </p>
         <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
             Kelola Murid
@@ -16,14 +17,15 @@
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Manajemen Data Murid</p>
     </div>
 
-    {{-- SESSION SUCCESS --}}
-    @if(session('success'))
+    
+    <?php if(session('success')): ?>
         <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
-        </div>
-    @endif
+            <i class="fas fa-check-circle"></i> <?php echo e(session('success')); ?>
 
-    {{-- ACTIONS BAR --}}
+        </div>
+    <?php endif; ?>
+
+    
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
         <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
             <div style="position: relative; width: 300px;">
@@ -34,16 +36,16 @@
 
             <select id="filterPaket" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;">
                 <option value="">Semua Paket</option>
-                @foreach($paketList as $paket)
-                    <option value="{{ $paket }}">{{ $paket }}</option>
-                @endforeach
+                <?php $__currentLoopData = $paketList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $paket): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($paket); ?>"><?php echo e($paket); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </select>
 
             <select id="filterTahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;">
                 <option value="">Semua Periode</option>
-                @foreach($tahunPeriodeList as $tahunPeriode)
-                    <option value="{{ $tahunPeriode }}">{{ $tahunPeriode }}</option>
-                @endforeach
+                <?php $__currentLoopData = $tahunPeriodeList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tahunPeriode): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($tahunPeriode); ?>"><?php echo e($tahunPeriode); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </select>
         </div>
         
@@ -52,7 +54,7 @@
         </button>
     </div>
 
-    {{-- TABEL MURID --}}
+    
     <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
@@ -72,115 +74,117 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody" style="color: #374151;">
-                    @forelse($murids as $index => $m)
-                    @php
+                    <?php $__empty_1 = true; $__currentLoopData = $murids; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $m): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
                         $sudahDiPeriodeAktif = false;
                         if($periodeAktif) {
                             $sudahDiPeriodeAktif = $m->transaksiPaket()
                                 ->where('id_periode', $periodeAktif->id_periode)
                                 ->exists();
                         }
-                    @endphp
+                    ?>
                     <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 15px;">{{ $murids->firstItem() + $index }}</td>
-                        <td style="padding: 15px; font-weight: 500;">{{ $m->nama_lengkap }}</td>
+                        <td style="padding: 15px;"><?php echo e($murids->firstItem() + $index); ?></td>
+                        <td style="padding: 15px; font-weight: 500;"><?php echo e($m->nama_lengkap); ?></td>
                         <td style="padding: 15px;">
-                            @php
+                            <?php
                                 $kelasTerbaru = $m->transaksiKelas()->orderBy('created_at', 'desc')->first();
-                            @endphp
-                            {{ $kelasTerbaru && $kelasTerbaru->kelas ? $kelasTerbaru->kelas->jenjang . ' - ' . $kelasTerbaru->kelas->nama_kelas : '-' }}
+                            ?>
+                            <?php echo e($kelasTerbaru && $kelasTerbaru->kelas ? $kelasTerbaru->kelas->jenjang . ' - ' . $kelasTerbaru->kelas->nama_kelas : '-'); ?>
+
                         </td>
-                        <td style="padding: 15px;">{{ $m->asal_sekolah ?? '-' }}</td>
-                        <td style="padding: 15px; max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="{{ $m->alamat }}">{{ $m->alamat ?? '-' }}</td>
-                        <td style="padding: 15px;">{{ $m->no_hp ?? '-' }}</td>
-                        <td style="padding: 15px;">{{ $m->nama_orang_tua ?? '-' }}</td>
-                        <td style="padding: 15px;">{{ $m->no_hp_orang_tua ?? '-' }}</td>
+                        <td style="padding: 15px;"><?php echo e($m->asal_sekolah ?? '-'); ?></td>
+                        <td style="padding: 15px; max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="<?php echo e($m->alamat); ?>"><?php echo e($m->alamat ?? '-'); ?></td>
+                        <td style="padding: 15px;"><?php echo e($m->no_hp ?? '-'); ?></td>
+                        <td style="padding: 15px;"><?php echo e($m->nama_orang_tua ?? '-'); ?></td>
+                        <td style="padding: 15px;"><?php echo e($m->no_hp_orang_tua ?? '-'); ?></td>
                         <td style="padding: 15px;">
-                            @php
+                            <?php
                                 $paketTerbaru = $m->transaksiPaket()->orderBy('id_paket_murid', 'desc')->first();
-                            @endphp
-                            {{ $paketTerbaru && $paketTerbaru->paket ? $paketTerbaru->paket->tingkat : '-' }}
+                            ?>
+                            <?php echo e($paketTerbaru && $paketTerbaru->paket ? $paketTerbaru->paket->tingkat : '-'); ?>
+
                         </td>
-                        <td style="padding: 15px; text-align: center;">{{ $m->tahun_periode }}</td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($m->tahun_periode); ?></td>
                         <td style="padding: 15px; text-align: center;">
                             <div style="display: flex; gap: 3px; justify-content: center; flex-wrap: nowrap;">
-                                <button onclick="bukaModalEdit({{ $m->id_murid }})" 
+                                <button onclick="bukaModalEdit(<?php echo e($m->id_murid); ?>)" 
                                    style="background: #5EB37E; color: white; padding: 4px 7px; border-radius: 5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 10px; white-space: nowrap;">
                                     <i class="far fa-edit"></i> Edit
                                 </button>
                                 
-                                @if($periodeAktif && !$sudahDiPeriodeAktif)
-                                <button onclick="bukaModalLanjutPeriode({{ $m->id_murid }}, '{{ $m->nama_lengkap }}')" 
+                                <?php if($periodeAktif && !$sudahDiPeriodeAktif): ?>
+                                <button onclick="bukaModalLanjutPeriode(<?php echo e($m->id_murid); ?>, '<?php echo e($m->nama_lengkap); ?>')" 
                                         style="background: #F59E0B; color: white; padding: 4px 7px; border-radius: 5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 10px; white-space: nowrap;">
                                     <i class="fas fa-arrow-right"></i> Lanjut
                                 </button>
-                                @endif
+                                <?php endif; ?>
                                 
-                                <button type="button" onclick="bukaModalHapus('{{ $m->id_murid }}', '{{ $m->nama_lengkap }}')" 
+                                <button type="button" onclick="bukaModalHapus('<?php echo e($m->id_murid); ?>', '<?php echo e($m->nama_lengkap); ?>')" 
                                         style="background: #E35D5D; color: white; padding: 4px 7px; border-radius: 5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 10px; white-space: nowrap;">
                                     <i class="fas fa-trash"></i> Hapus
                                 </button>
                             </div>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="11" style="padding: 40px; text-align: center; color: #9CA3AF;">
                             <i class="fas fa-database" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
                             Belum ada data murid.
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
     
-    {{-- PAGINATION --}}
+    
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
             <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
-                <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 baris</option>
-                <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 baris</option>
-                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 baris</option>
+                <option value="10" <?php echo e(request('per_page', 10) == 10 ? 'selected' : ''); ?>>10 baris</option>
+                <option value="25" <?php echo e(request('per_page') == 25 ? 'selected' : ''); ?>>25 baris</option>
+                <option value="50" <?php echo e(request('per_page') == 50 ? 'selected' : ''); ?>>50 baris</option>
             </select>
-            <span style="color: #374151; font-size: 13px;">Menampilkan {{ $murids->total() ?? 0 }} data</span>
+            <span style="color: #374151; font-size: 13px;">Menampilkan <?php echo e($murids->total() ?? 0); ?> data</span>
         </div>
         <div style="display: flex; gap: 5px;">
-            @if ($murids->onFirstPage())
+            <?php if($murids->onFirstPage()): ?>
                 <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-double-left"></i></button>
                 <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-left"></i></button>
-            @else
-                <a href="{{ $murids->url(1) }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
-                <a href="{{ $murids->previousPageUrl() }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
-            @endif
+            <?php else: ?>
+                <a href="<?php echo e($murids->url(1)); ?>&per_page=<?php echo e(request('per_page', 10)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
+                <a href="<?php echo e($murids->previousPageUrl()); ?>&per_page=<?php echo e(request('per_page', 10)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
+            <?php endif; ?>
 
-            @php $start = max(1, $murids->currentPage() - 2); $end = min($murids->lastPage(), $murids->currentPage() + 2); @endphp
-            @for ($i = $start; $i <= $end; $i++)
-                @if ($i == $murids->currentPage())
-                    <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600;">{{ $i }}</button>
-                @else
-                    <a href="{{ $murids->url($i) }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">{{ $i }}</a>
-                @endif
-            @endfor
+            <?php $start = max(1, $murids->currentPage() - 2); $end = min($murids->lastPage(), $murids->currentPage() + 2); ?>
+            <?php for($i = $start; $i <= $end; $i++): ?>
+                <?php if($i == $murids->currentPage()): ?>
+                    <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600;"><?php echo e($i); ?></button>
+                <?php else: ?>
+                    <a href="<?php echo e($murids->url($i)); ?>&per_page=<?php echo e(request('per_page', 10)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><?php echo e($i); ?></a>
+                <?php endif; ?>
+            <?php endfor; ?>
 
-            @if ($murids->hasMorePages())
-                <a href="{{ $murids->nextPageUrl() }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
-            @else
+            <?php if($murids->hasMorePages()): ?>
+                <a href="<?php echo e($murids->nextPageUrl()); ?>&per_page=<?php echo e(request('per_page', 10)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
+            <?php else: ?>
                 <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-right"></i></button>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 
 </div>
 
-{{-- MODAL FORM (Create/Edit) --}}
+
 <div id="modalForm" style="display: none; position: fixed; z-index: 9998; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; overflow-y: auto;">
     <div style="background: white; border-radius: 20px; width: 700px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.15);" id="modalContent">
     </div>
 </div>
 
-{{-- MODAL KONFIRMASI HAPUS --}}
+
 <div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #E35D5D; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-trash-alt"></i></div>
@@ -189,14 +193,14 @@
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalHapus()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
             <form id="formHapus" method="POST" style="flex: 1;">
-                @csrf @method('DELETE')
+                <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                 <button type="submit" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #E35D5D; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Hapus</button>
             </form>
         </div>
     </div>
 </div>
 
-{{-- MODAL LANJUT PERIODE --}}
+
 <div id="modalLanjutPeriode" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; overflow-y: auto;">
     <div style="background: white; border-radius: 20px; width: 500px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.15);" id="modalLanjutContent">
     </div>
@@ -207,7 +211,7 @@
     // BUKA MODAL CREATE
     // =============================================
     function bukaModalCreate() {
-        fetch("{{ route($role . '.murid.create') }}")
+        fetch("<?php echo e(route($role . '.murid.create')); ?>")
             .then(r => r.text())
             .then(html => {
                 document.getElementById('modalContent').innerHTML = html;
@@ -220,7 +224,7 @@
     // BUKA MODAL EDIT
     // =============================================
     function bukaModalEdit(id) {
-        fetch("{{ route($role . '.murid.edit', '') }}/" + id)
+        fetch("<?php echo e(route($role . '.murid.edit', '')); ?>/" + id)
             .then(r => r.text())
             .then(html => {
                 document.getElementById('modalContent').innerHTML = html;
@@ -367,7 +371,7 @@
     // MODAL HAPUS
     // =============================================
     function bukaModalHapus(id, nama) {
-        document.getElementById('formHapus').action = "{{ route($role . '.murid.destroy', '') }}/" + id;
+        document.getElementById('formHapus').action = "<?php echo e(route($role . '.murid.destroy', '')); ?>/" + id;
         document.getElementById('pesanHapus').innerHTML = `Apakah Anda <strong>benar-benar yakin</strong> ingin menghapus data murid <strong>${nama}</strong>?<br><br><small style="color:#EF4444;">⚠️ <strong>PERINGATAN:</strong> Data akan dihapus <strong>secara permanen</strong> dari database.</small>`;
         document.getElementById('modalHapus').style.display = 'flex';
     }
@@ -380,7 +384,7 @@
     // MODAL LANJUT PERIODE
     // =============================================
     function bukaModalLanjutPeriode(id, nama) {
-        fetch("{{ route($role . '.murid.lanjut-periode-form', '') }}/" + id)
+        fetch("<?php echo e(route($role . '.murid.lanjut-periode-form', '')); ?>/" + id)
             .then(r => r.text())
             .then(html => {
                 document.getElementById('modalLanjutContent').innerHTML = html;
@@ -440,4 +444,5 @@
         window.location.href = url.toString();
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/kelola-murid/kelola-murid.blade.php ENDPATH**/ ?>

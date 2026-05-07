@@ -1,27 +1,29 @@
-@extends('layouts.app')
 
-@section('title', 'Daftar Periode')
 
-@section('content')
+<?php $__env->startSection('title', 'Daftar Periode'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div style="width: 100%;">
     
-    {{-- HEADER HALAMAN --}}
+    
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
-            {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+            <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?>
+
         </p>
         <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0;">Daftar Periode</h1>
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Manajemen Periode Tahun Ajaran</p>
     </div>
 
-    {{-- SESSION SUCCESS --}}
-    @if(session('success'))
+    
+    <?php if(session('success')): ?>
         <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
-        </div>
-    @endif
+            <i class="fas fa-check-circle"></i> <?php echo e(session('success')); ?>
 
-    {{-- ACTIONS BAR --}}
+        </div>
+    <?php endif; ?>
+
+    
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
         <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
             <div style="position: relative; width: 300px;">
@@ -36,7 +38,7 @@
         </button>
     </div>
 
-    {{-- TABEL --}}
+    
     <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
@@ -52,95 +54,95 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody" style="color: #374151;">
-                    @forelse($periode as $index => $item)
-                    @php
+                    <?php $__empty_1 = true; $__currentLoopData = $periode; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
                         $sekarang = date('Y-m-d');
                         $aktif = ($item->tanggal_mulai <= $sekarang && $item->tanggal_selesai >= $sekarang);
-                    @endphp
+                    ?>
                     <tr style="border-bottom: 1px solid #F3F4F6;">
-                        <td style="padding: 15px; text-align: center;">{{ $periode->firstItem() + $index }}</td>
-                        <td style="padding: 15px; text-align: center;">PR{{ str_pad($item->id_periode, 4, '0', STR_PAD_LEFT) }}</td>
-                        <td style="padding: 15px; text-align: center;">{{ $item->tahun_periode }}</td>
-                        <td style="padding: 15px; text-align: center;">{{ $item->tanggal_mulai ? date('d/m/Y', strtotime($item->tanggal_mulai)) : '-' }}</td>
-                        <td style="padding: 15px; text-align: center;">{{ $item->tanggal_selesai ? date('d/m/Y', strtotime($item->tanggal_selesai)) : '-' }}</td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($periode->firstItem() + $index); ?></td>
+                        <td style="padding: 15px; text-align: center;">PR<?php echo e(str_pad($item->id_periode, 4, '0', STR_PAD_LEFT)); ?></td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($item->tahun_periode); ?></td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($item->tanggal_mulai ? date('d/m/Y', strtotime($item->tanggal_mulai)) : '-'); ?></td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($item->tanggal_selesai ? date('d/m/Y', strtotime($item->tanggal_selesai)) : '-'); ?></td>
                         <td style="padding: 15px; text-align: center;">
-                            @if($aktif)
+                            <?php if($aktif): ?>
                                 <span style="background: #D1FAE5; color: #065F46; padding: 4px 10px; border-radius: 20px; font-size: 11px;">Aktif</span>
-                            @else
+                            <?php else: ?>
                                 <span style="background: #F3F4F6; color: #6B7280; padding: 4px 10px; border-radius: 20px; font-size: 11px;">Nonaktif</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                         <td style="padding: 15px; text-align: center;">
                             <div style="display: flex; gap: 8px; justify-content: center;">
-                                <button onclick="bukaModalEdit({{ $item->id_periode }})" 
+                                <button onclick="bukaModalEdit(<?php echo e($item->id_periode); ?>)" 
                                    style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; white-space: nowrap;">
                                     <i class="far fa-edit"></i> Edit
                                 </button>
-                                <button type="button" onclick="bukaModalHapus('{{ $item->id_periode }}', '{{ $item->tahun_periode }}')" 
+                                <button type="button" onclick="bukaModalHapus('<?php echo e($item->id_periode); ?>', '<?php echo e($item->tahun_periode); ?>')" 
                                         style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; white-space: nowrap;">
                                     <i class="fas fa-trash"></i> Hapus
                                 </button>
                             </div>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="7" style="padding: 40px; text-align: center; color: #9CA3AF;">
                             <i class="fas fa-calendar-alt" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
                             Belum ada data periode.
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
     
-    {{-- PAGINATION --}}
+    
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
             <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
-                <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 baris</option>
-                <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 baris</option>
-                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 baris</option>
+                <option value="10" <?php echo e(request('per_page', 10) == 10 ? 'selected' : ''); ?>>10 baris</option>
+                <option value="25" <?php echo e(request('per_page') == 25 ? 'selected' : ''); ?>>25 baris</option>
+                <option value="50" <?php echo e(request('per_page') == 50 ? 'selected' : ''); ?>>50 baris</option>
             </select>
-            <span style="color: #374151; font-size: 13px;">Menampilkan {{ $periode->total() ?? 0 }} data</span>
+            <span style="color: #374151; font-size: 13px;">Menampilkan <?php echo e($periode->total() ?? 0); ?> data</span>
         </div>
 
         <div style="display: flex; gap: 5px;">
-            @if ($periode->onFirstPage())
+            <?php if($periode->onFirstPage()): ?>
                 <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-double-left"></i></button>
                 <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-left"></i></button>
-            @else
-                <a href="{{ $periode->url(1) }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
-                <a href="{{ $periode->previousPageUrl() }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
-            @endif
+            <?php else: ?>
+                <a href="<?php echo e($periode->url(1)); ?>&per_page=<?php echo e(request('per_page', 10)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
+                <a href="<?php echo e($periode->previousPageUrl()); ?>&per_page=<?php echo e(request('per_page', 10)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
+            <?php endif; ?>
 
-            @php $start = max(1, $periode->currentPage() - 2); $end = min($periode->lastPage(), $periode->currentPage() + 2); @endphp
-            @for ($i = $start; $i <= $end; $i++)
-                @if ($i == $periode->currentPage())
-                    <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600;">{{ $i }}</button>
-                @else
-                    <a href="{{ $periode->url($i) }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">{{ $i }}</a>
-                @endif
-            @endfor
+            <?php $start = max(1, $periode->currentPage() - 2); $end = min($periode->lastPage(), $periode->currentPage() + 2); ?>
+            <?php for($i = $start; $i <= $end; $i++): ?>
+                <?php if($i == $periode->currentPage()): ?>
+                    <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600;"><?php echo e($i); ?></button>
+                <?php else: ?>
+                    <a href="<?php echo e($periode->url($i)); ?>&per_page=<?php echo e(request('per_page', 10)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><?php echo e($i); ?></a>
+                <?php endif; ?>
+            <?php endfor; ?>
 
-            @if ($periode->hasMorePages())
-                <a href="{{ $periode->nextPageUrl() }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
-            @else
+            <?php if($periode->hasMorePages()): ?>
+                <a href="<?php echo e($periode->nextPageUrl()); ?>&per_page=<?php echo e(request('per_page', 10)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
+            <?php else: ?>
                 <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-right"></i></button>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 
 </div>
 
-{{-- MODAL FORM --}}
-<div id="modalForm" style="display: none; position: fixed; z-index: 9998; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; overflow-y: auto;">
+
+<div id="modalForm" style="display: none; position: fixed; z-index: 9998; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; overflow-y: auto; padding: 20px;">
     <div style="background: white; border-radius: 20px; width: 600px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.15);" id="modalContent"></div>
 </div>
 
-{{-- MODAL HAPUS --}}
+
 <div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #E35D5D; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-trash-alt"></i></div>
@@ -149,7 +151,7 @@
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalHapus()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
             <form id="formHapus" method="POST" style="flex: 1;">
-                @csrf @method('DELETE')
+                <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                 <button type="submit" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #E35D5D; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Hapus</button>
             </form>
         </div>
@@ -158,7 +160,7 @@
 
 <script>
     function bukaModalCreate() {
-        fetch("{{ route($role . '.master-data.periode.create') }}").then(r => r.text()).then(html => {
+        fetch("<?php echo e(route($role . '.master-data.periode.create')); ?>").then(r => r.text()).then(html => {
             document.getElementById('modalContent').innerHTML = html;
             document.getElementById('modalForm').style.display = 'flex';
             setTimeout(() => pasangEventHandler(), 100);
@@ -166,19 +168,15 @@
     }
 
     function bukaModalEdit(id) {
-        fetch("{{ route($role . '.master-data.periode.edit', '') }}/" + id).then(r => r.text()).then(html => {
+        fetch("<?php echo e(route($role . '.master-data.periode.edit', '')); ?>/" + id).then(r => r.text()).then(html => {
             document.getElementById('modalContent').innerHTML = html;
             document.getElementById('modalForm').style.display = 'flex';
             setTimeout(() => pasangEventHandler(), 100);
         });
     }
 
-    function tutupModalForm() { 
-        document.getElementById('modalForm').style.display = 'none'; 
-        document.getElementById('modalContent').innerHTML = ''; 
-    }
-
-    // ⛔ TIDAK BISA TUTUP DENGAN KLIK DI LUAR
+    function tutupModalForm() { document.getElementById('modalForm').style.display = 'none'; document.getElementById('modalContent').innerHTML = ''; }
+    document.getElementById('modalForm').addEventListener('click', function(e) { if (e.target === this) tutupModalForm(); });
 
     function pasangEventHandler() {
         const mc = document.getElementById('modalContent');
@@ -209,13 +207,12 @@
     });
 
     function bukaModalHapus(id, nama) {
-        document.getElementById('formHapus').action = "{{ route($role . '.master-data.periode.destroy', '') }}/" + id;
+        document.getElementById('formHapus').action = "<?php echo e(route($role . '.master-data.periode.destroy', '')); ?>/" + id;
         document.getElementById('pesanHapus').innerHTML = `Apakah Anda <strong>benar-benar yakin</strong> ingin menghapus periode <strong>${nama}</strong>?<br><br><small style="color:#EF4444;">⚠️ <strong>PERINGATAN:</strong> Data akan dihapus <strong>secara permanen</strong> dari database. Semua data yang terkait dengan periode ini (kelas, pembayaran, dll) akan <strong>tidak dapat dikembalikan</strong>.</small>`;
         document.getElementById('modalHapus').style.display = 'flex';
     }
     function tutupModalHapus() { document.getElementById('modalHapus').style.display = 'none'; }
-
-    // ⛔ TIDAK BISA TUTUP MODAL HAPUS DENGAN KLIK DI LUAR
+    document.getElementById('modalHapus').addEventListener('click', function(e) { if (e.target === this) tutupModalHapus(); });
 
     document.getElementById('pageSelect').addEventListener('change', function() {
         let url = new URL(window.location.href);
@@ -230,4 +227,5 @@
         if (perPage && document.getElementById('pageSelect')) document.getElementById('pageSelect').value = perPage;
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/master-data/periode/index.blade.php ENDPATH**/ ?>

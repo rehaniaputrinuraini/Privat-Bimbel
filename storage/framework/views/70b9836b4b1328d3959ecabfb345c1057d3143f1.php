@@ -1,14 +1,15 @@
-@extends('layouts.app')
 
-@section('title', 'Kelola Admin')
 
-@section('content')
+<?php $__env->startSection('title', 'Kelola Admin'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div style="width: 100%;">
     
-    {{-- HEADER HALAMAN --}}
+    
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
-            {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+            <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?>
+
         </p>
         <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
             Kelola Admin
@@ -16,7 +17,7 @@
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Manajemen Data dan Akun Administrator Sistem</p>
     </div>
 
-    {{-- ACTIONS BAR --}}
+    
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
         <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
             <div style="position: relative; width: 300px;">
@@ -31,14 +32,15 @@
         </button>
     </div>
 
-    {{-- SESSION SUCCESS --}}
-    @if(session('success'))
+    
+    <?php if(session('success')): ?>
         <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
-            {{ session('success') }}
-        </div>
-    @endif
+            <?php echo e(session('success')); ?>
 
-    {{-- TABEL UTAMA --}}
+        </div>
+    <?php endif; ?>
+
+    
 <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
     <div style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
@@ -57,107 +59,109 @@
                 </tr>
             </thead>
             <tbody id="tableBody" style="color: #374151;">
-                @forelse($admin as $index => $item)
+                <?php $__empty_1 = true; $__currentLoopData = $admin; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                    <td style="padding: 15px; text-align: center;">{{ $admin->firstItem() + $index }}</td>
-                    <td style="padding: 15px;">AD{{ str_pad($item->id_user, 4, '0', STR_PAD_LEFT) }}</td>
-                    <td style="padding: 15px; max-width: 130px; overflow: hidden; text-overflow: ellipsis;">{{ $item->pegawai->nama_lengkap ?? '-' }}</td>
-                    <td style="padding: 15px; max-width: 100px; overflow: hidden; text-overflow: ellipsis;" title="{{ $item->pegawai->alamat ?? '-' }}">{{ $item->pegawai->alamat ?? '-' }}</td>
-                    <td style="padding: 15px;">{{ $item->pegawai->no_hp ?? '-' }}</td>
+                    <td style="padding: 15px; text-align: center;"><?php echo e($admin->firstItem() + $index); ?></td>
+                    <td style="padding: 15px;">AD<?php echo e(str_pad($item->id_user, 4, '0', STR_PAD_LEFT)); ?></td>
+                    <td style="padding: 15px; max-width: 130px; overflow: hidden; text-overflow: ellipsis;"><?php echo e($item->pegawai->nama_lengkap ?? '-'); ?></td>
+                    <td style="padding: 15px; max-width: 100px; overflow: hidden; text-overflow: ellipsis;" title="<?php echo e($item->pegawai->alamat ?? '-'); ?>"><?php echo e($item->pegawai->alamat ?? '-'); ?></td>
+                    <td style="padding: 15px;"><?php echo e($item->pegawai->no_hp ?? '-'); ?></td>
                     <td style="padding: 15px;">
-                        @if($item->pegawai && $item->pegawai->gaji_pokok)
-                            Rp {{ number_format($item->pegawai->gaji_pokok, 0, ',', '.') }}
-                        @else
+                        <?php if($item->pegawai && $item->pegawai->gaji_pokok): ?>
+                            Rp <?php echo e(number_format($item->pegawai->gaji_pokok, 0, ',', '.')); ?>
+
+                        <?php else: ?>
                             -
-                        @endif
+                        <?php endif; ?>
                     </td>
-                    <td style="padding: 15px; max-width: 150px; overflow: hidden; text-overflow: ellipsis;">{{ $item->email }}</td>
-                    <td style="padding: 15px;">{{ $item->username }}</td>
+                    <td style="padding: 15px; max-width: 150px; overflow: hidden; text-overflow: ellipsis;"><?php echo e($item->email); ?></td>
+                    <td style="padding: 15px;"><?php echo e($item->username); ?></td>
                     <td style="padding: 15px; text-align: center;">
-                        @if($item->status == 1)
+                        <?php if($item->status == 1): ?>
                             <span style="padding: 5px 12px; border-radius: 20px; background: #E1F7E3; color: #0E7490; font-size: 11px;">Aktif</span>
-                        @else
+                        <?php else: ?>
                             <span style="padding: 5px 12px; border-radius: 20px; background: #FEE2E2; color: #EF4444; font-size: 11px;">Nonaktif</span>
-                        @endif
+                        <?php endif; ?>
                     </td>
                     <td style="padding: 15px; white-space: nowrap;">
                     <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: nowrap;">
-                        <button onclick="bukaModalEdit({{ $item->id_user }})" 
+                        <button onclick="bukaModalEdit(<?php echo e($item->id_user); ?>)" 
                         style="background: #5EB37E; color: white; padding: 5px 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 10px; white-space: nowrap;">
                             <i class="far fa-edit"></i> Edit
                         </button>
-                        <button onclick="bukaModalPassword({{ $item->id_user }}, '{{ $item->pegawai->nama_lengkap ?? $item->username }}')" 
+                        <button onclick="bukaModalPassword(<?php echo e($item->id_user); ?>, '<?php echo e($item->pegawai->nama_lengkap ?? $item->username); ?>')" 
                         style="background: #F59E0B; color: white; padding: 5px 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 10px; white-space: nowrap;">
                             <i class="fas fa-key"></i> Password
                         </button>
-                        <button type="button" onclick="bukaModalHapus('{{ $item->id_user }}', '{{ $item->pegawai->nama_lengkap ?? $item->username }}')" 
+                        <button type="button" onclick="bukaModalHapus('<?php echo e($item->id_user); ?>', '<?php echo e($item->pegawai->nama_lengkap ?? $item->username); ?>')" 
                                 style="background: #E35D5D; color: white; padding: 5px 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 10px; white-space: nowrap;">
                             <i class="fas fa-trash"></i> Hapus
                         </button>
-                        <button type="button" onclick="bukaModalToggle('{{ $item->id_user }}', '{{ $item->pegawai->nama_lengkap ?? $item->username }}', '{{ $item->status }}')" 
-                                style="background: {{ $item->status == 1 ? '#EF4444' : '#10B981' }}; color: white; padding: 5px 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 10px; white-space: nowrap;">
-                            <i class="fas {{ $item->status == 1 ? 'fa-ban' : 'fa-check' }}"></i> {{ $item->status == 1 ? 'Nonaktifkan' : 'Aktifkan' }}
+                        <button type="button" onclick="bukaModalToggle('<?php echo e($item->id_user); ?>', '<?php echo e($item->pegawai->nama_lengkap ?? $item->username); ?>', '<?php echo e($item->status); ?>')" 
+                                style="background: <?php echo e($item->status == 1 ? '#EF4444' : '#10B981'); ?>; color: white; padding: 5px 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 10px; white-space: nowrap;">
+                            <i class="fas <?php echo e($item->status == 1 ? 'fa-ban' : 'fa-check'); ?>"></i> <?php echo e($item->status == 1 ? 'Nonaktifkan' : 'Aktifkan'); ?>
+
                         </button>
                     </div>
                 </td>
                 </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
                     <td colspan="10" style="padding: 40px; text-align: center; color: #9CA3AF;">
                         <i class="fas fa-database" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
                         Belum ada data admin. Silakan tambah data baru.
                     </td>
                 </tr>
-                @endforelse
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
     
-    {{-- PAGINATION --}}
+    
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
             <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
-                <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 baris</option>
-                <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 baris</option>
-                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 baris</option>
+                <option value="10" <?php echo e(request('per_page', 10) == 10 ? 'selected' : ''); ?>>10 baris</option>
+                <option value="25" <?php echo e(request('per_page') == 25 ? 'selected' : ''); ?>>25 baris</option>
+                <option value="50" <?php echo e(request('per_page') == 50 ? 'selected' : ''); ?>>50 baris</option>
             </select>
-            <span style="color: #374151; font-size: 13px;">Menampilkan {{ $admin->total() ?? 0 }} data</span>
+            <span style="color: #374151; font-size: 13px;">Menampilkan <?php echo e($admin->total() ?? 0); ?> data</span>
         </div>
         <div style="display: flex; gap: 5px;">
-            @if ($admin->onFirstPage())
+            <?php if($admin->onFirstPage()): ?>
                 <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-double-left"></i></button>
                 <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-left"></i></button>
-            @else
-                <a href="{{ $admin->url(1) }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
-                <a href="{{ $admin->previousPageUrl() }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
-            @endif
+            <?php else: ?>
+                <a href="<?php echo e($admin->url(1)); ?>&per_page=<?php echo e(request('per_page', 10)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
+                <a href="<?php echo e($admin->previousPageUrl()); ?>&per_page=<?php echo e(request('per_page', 10)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
+            <?php endif; ?>
 
-            @php $start = max(1, $admin->currentPage() - 2); $end = min($admin->lastPage(), $admin->currentPage() + 2); @endphp
-            @for ($i = $start; $i <= $end; $i++)
-                @if ($i == $admin->currentPage())
-                    <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">{{ $i }}</button>
-                @else
-                    <a href="{{ $admin->url($i) }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">{{ $i }}</a>
-                @endif
-            @endfor
+            <?php $start = max(1, $admin->currentPage() - 2); $end = min($admin->lastPage(), $admin->currentPage() + 2); ?>
+            <?php for($i = $start; $i <= $end; $i++): ?>
+                <?php if($i == $admin->currentPage()): ?>
+                    <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;"><?php echo e($i); ?></button>
+                <?php else: ?>
+                    <a href="<?php echo e($admin->url($i)); ?>&per_page=<?php echo e(request('per_page', 10)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><?php echo e($i); ?></a>
+                <?php endif; ?>
+            <?php endfor; ?>
 
-            @if ($admin->hasMorePages())
-                <a href="{{ $admin->nextPageUrl() }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
-            @else
+            <?php if($admin->hasMorePages()): ?>
+                <a href="<?php echo e($admin->nextPageUrl()); ?>&per_page=<?php echo e(request('per_page', 10)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
+            <?php else: ?>
                 <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-right"></i></button>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 
 </div>
 
-{{-- MODAL FORM --}}
+
 <div id="modalForm" style="display: none; position: fixed; z-index: 9998; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; overflow-y: auto;">
     <div style="background: white; border-radius: 20px; width: 700px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.15);" id="modalContent"></div>
 </div>
 
-{{-- MODAL HAPUS --}}
+
 <div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #E35D5D; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-trash-alt"></i></div>
@@ -166,14 +170,14 @@
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalHapus()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
             <form id="formHapus" method="POST" style="flex: 1;">
-                @csrf @method('DELETE')
+                <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                 <button type="submit" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #E35D5D; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Hapus</button>
             </form>
         </div>
     </div>
 </div>
 
-{{-- MODAL TOGGLE STATUS --}}
+
 <div id="modalToggle" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; font-family: 'Poppins', sans-serif;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 350px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15);">
         <div style="font-size: 40px; margin-bottom: 10px;" id="toggleIcon"></div>
@@ -182,7 +186,7 @@
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalToggle()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
             <form id="formToggle" method="POST" style="flex: 1;">
-                @csrf @method('PATCH')
+                <?php echo csrf_field(); ?> <?php echo method_field('PATCH'); ?>
                 <button type="submit" style="width: 100%; padding: 10px; border-radius: 10px; border: none; color: white; font-weight: 600; font-size: 13px; cursor: pointer;" id="btnToggle"></button>
             </form>
         </div>
@@ -192,7 +196,7 @@
 <script>
     // ========== BUKA MODAL CREATE ==========
     function bukaModalCreate() {
-        fetch("{{ route('superadmin.kelola-admin.create') }}")
+        fetch("<?php echo e(route('superadmin.kelola-admin.create')); ?>")
             .then(r => r.text())
             .then(html => {
                 document.getElementById('modalContent').innerHTML = html;
@@ -203,7 +207,7 @@
 
     // ========== BUKA MODAL EDIT ==========
     function bukaModalEdit(id) {
-        fetch("{{ route('superadmin.kelola-admin.edit', '') }}/" + id)
+        fetch("<?php echo e(route('superadmin.kelola-admin.edit', '')); ?>/" + id)
             .then(r => r.text())
             .then(html => {
                 document.getElementById('modalContent').innerHTML = html;
@@ -385,7 +389,7 @@
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
 
-                fetch("{{ route('superadmin.kelola-admin.updatePassword', '') }}/" + id, {
+                fetch("<?php echo e(route('superadmin.kelola-admin.updatePassword', '')); ?>/" + id, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -419,7 +423,7 @@
 
     // ========== MODAL TOGGLE STATUS ==========
     function bukaModalToggle(id, nama, status) {
-        document.getElementById('formToggle').action = "{{ route('superadmin.kelola-admin.toggleStatus', ':id') }}".replace(':id', id);
+        document.getElementById('formToggle').action = "<?php echo e(route('superadmin.kelola-admin.toggleStatus', ':id')); ?>".replace(':id', id);
         
         if (status == 1) {
             document.getElementById('toggleIcon').innerHTML = '<i class="fas fa-ban" style="color:#EF4444;"></i>';
@@ -460,10 +464,11 @@
 
     // ========== MODAL HAPUS ==========
     function bukaModalHapus(id, nama) {
-        document.getElementById('formHapus').action = "{{ route('superadmin.kelola-admin.destroy', ':id') }}".replace(':id', id);
+        document.getElementById('formHapus').action = "<?php echo e(route('superadmin.kelola-admin.destroy', ':id')); ?>".replace(':id', id);
         document.getElementById('pesanHapus').innerHTML = `Apakah Anda <strong>benar-benar yakin</strong> ingin menghapus data admin <strong>${nama}</strong>?<br><br><small style="color:#EF4444;">⚠️ <strong>PERINGATAN:</strong> Data akan dihapus <strong>secara permanen</strong> dari database. Semua data yang berhubungan dengan admin ini juga akan <strong>tidak dapat dikembalikan</strong>.</small>`;
         document.getElementById('modalHapus').style.display = 'flex';
     }
     function tutupModalHapus() { document.getElementById('modalHapus').style.display = 'none'; }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/superadmin/kelola-admin/kelola-admin.blade.php ENDPATH**/ ?>

@@ -95,25 +95,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tentor/dashboard', [DashboardController::class, 'tentor'])->name('tentor.dashboard');
     
     // ========== PROFIL ==========
-    Route::get('/profil', function () {
-        return view('dashboard.shared.profil.index');
-    })->name('profile.index');
-    
-    Route::get('/profil/edit', function () {
-        return view('dashboard.shared.profil.edit');
-    })->name('profile.edit');
-    
-    Route::put('/profil/update', function (Request $request) {
-        return redirect()->route('profile.index')->with('success', 'Profil diperbarui!');
-    })->name('profile.update');
-    
+
+    Route::get('/profil', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profil/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profil/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::get('/profil/ubah-password', function () {
         return view('dashboard.shared.profil.ubah_password');
-    })->name('password.edit');
-    
-    Route::put('/profil/password-update', function (Request $request) {
-        return redirect()->route('profile.index')->with('success', 'Password berhasil diubah!');
-    })->name('password.update.profile');
+            })->name('password.edit');
+    Route::put('/profil/password-update', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('password.update.profile');
     
     // ========== SUPERADMIN ONLY ==========
     Route::middleware(['role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {

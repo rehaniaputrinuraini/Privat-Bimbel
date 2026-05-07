@@ -1,34 +1,36 @@
-@extends('layouts.app')
 
-@section('title', 'Daftar Kelas')
 
-@section('content')
+<?php $__env->startSection('title', 'Harga Paket'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div style="width: 100%;">
     
-    {{-- HEADER HALAMAN --}}
+    
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
-            {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+            <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?>
+
         </p>
         <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
-            Daftar Kelas
+            Harga Paket
         </h1>
-        <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Manajemen Data Kelas Bimbel</p>
+        <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Manajemen Harga Paket Bimbel</p>
     </div>
 
-    {{-- SESSION SUCCESS --}}
-    @if(session('success'))
+    
+    <?php if(session('success')): ?>
         <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
-        </div>
-    @endif
+            <i class="fas fa-check-circle"></i> <?php echo e(session('success')); ?>
 
-    {{-- ACTIONS BAR --}}
+        </div>
+    <?php endif; ?>
+
+    
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
         <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
             <div style="position: relative; width: 300px;">
                 <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
-                <input type="text" id="searchInput" placeholder="Cari Nama Kelas atau Jenjang..." 
+                <input type="text" id="searchInput" placeholder="Cari Tingkat atau Harga..." 
                        style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
             </div>
         </div>
@@ -38,106 +40,105 @@
         </button>
     </div>
 
-    {{-- TABEL --}}
+    
     <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
                 <thead>
                     <tr style="background: #F3E8FF; color: #111827;">
                         <th style="padding: 15px; font-weight: 700; text-align: center; width: 50px;">No</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Nama Kelas</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Jenjang</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Jumlah Murid</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: center;">ID</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: center;">Tingkat</th>
+                        <th style="padding: 15px; font-weight: 700; text-align: center;">Harga</th>
                         <th style="padding: 15px; font-weight: 700; text-align: center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody" style="color: #374151;">
-                    @forelse($kelas as $index => $item)
+                    <?php $__empty_1 = true; $__currentLoopData = $paket; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 15px; text-align: center;">{{ $kelas->firstItem() + $index }}</td>
-                        <td style="padding: 15px; text-align: center;">{{ $item->nama_kelas }}</td>
-                        <td style="padding: 15px; text-align: center;">{{ $item->jenjang }}</td>
-                        <td style="padding: 15px; text-align: center;">{{ $item->jumlah_murid ?? 0 }}</td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($loop->iteration); ?></td>
+                        <td style="padding: 15px; text-align: center;">PK<?php echo e(str_pad($item->id_paket, 4, '0', STR_PAD_LEFT)); ?></td>
+                        <td style="padding: 15px; text-align: center;"><?php echo e($item->tingkat); ?></td>
+                        <td style="padding: 15px; text-align: center;">Rp <?php echo e(number_format($item->harga, 0, ',', '.')); ?></td>
                         <td style="padding: 15px; text-align: center;">
                             <div style="display: flex; gap: 8px; justify-content: center;">
-                                <button onclick="bukaModalEdit({{ $item->id_kelas }})" 
+                                <button onclick="bukaModalEdit(<?php echo e($item->id_paket); ?>)" 
                                    style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; white-space: nowrap;">
                                     <i class="far fa-edit"></i> Edit
                                 </button>
-                                <button type="button" onclick="bukaModalHapus('{{ $item->id_kelas }}', '{{ $item->nama_kelas }}')" 
+                                <button type="button" onclick="bukaModalHapus('<?php echo e($item->id_paket); ?>', 'PK<?php echo e(str_pad($item->id_paket, 4, '0', STR_PAD_LEFT)); ?> - <?php echo e($item->tingkat); ?>')" 
                                         style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; white-space: nowrap;">
                                     <i class="fas fa-trash"></i> Hapus
                                 </button>
                             </div>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="5" style="padding: 40px; text-align: center; color: #9CA3AF;">
-                            <i class="fas fa-users" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
-                            Belum ada data kelas.
+                            <i class="fas fa-tag" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
+                            Belum ada data harga paket.
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
     
-    {{-- PAGINATION --}}
+    
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
             <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 baris</option>
-                <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 baris</option>
-                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 baris</option>
+                <option value="10">10 baris</option>
+                <option value="25">25 baris</option>
+                <option value="50">50 baris</option>
             </select>
-            <span style="color: #374151; font-size: 13px;">Menampilkan {{ $kelas->total() ?? 0 }} data</span>
+            <span style="color: #374151; font-size: 13px;">Menampilkan <?php echo e($paket->count()); ?> data</span>
         </div>
 
         <div style="display: flex; gap: 5px;">
-            @if ($kelas->onFirstPage())
+            <?php if($paket->onFirstPage()): ?>
                 <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-double-left"></i></button>
                 <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-left"></i></button>
-            @else
-                <a href="{{ $kelas->url(1) }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
-                <a href="{{ $kelas->previousPageUrl() }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
-            @endif
+            <?php else: ?>
+                <a href="<?php echo e($paket->url(1)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
+                <a href="<?php echo e($paket->previousPageUrl()); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
+            <?php endif; ?>
 
-            @php $start = max(1, $kelas->currentPage() - 2); $end = min($kelas->lastPage(), $kelas->currentPage() + 2); @endphp
-            @for ($i = $start; $i <= $end; $i++)
-                @if ($i == $kelas->currentPage())
-                    <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">{{ $i }}</button>
-                @else
-                    <a href="{{ $kelas->url($i) }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">{{ $i }}</a>
-                @endif
-            @endfor
+            <?php $__currentLoopData = $paket->getUrlRange(1, $paket->lastPage()); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $page => $url): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <?php if($page == $paket->currentPage()): ?>
+                    <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;"><?php echo e($page); ?></button>
+                <?php else: ?>
+                    <a href="<?php echo e($url); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><?php echo e($page); ?></a>
+                <?php endif; ?>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-            @if ($kelas->hasMorePages())
-                <a href="{{ $kelas->nextPageUrl() }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
-            @else
+            <?php if($paket->hasMorePages()): ?>
+                <a href="<?php echo e($paket->nextPageUrl()); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
+            <?php else: ?>
                 <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-right"></i></button>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 
 </div>
 
-{{-- MODAL FORM --}}
+
 <div id="modalForm" style="display: none; position: fixed; z-index: 9998; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; overflow-y: auto;">
     <div style="background: white; border-radius: 20px; width: 600px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.15);" id="modalContent"></div>
 </div>
 
-{{-- MODAL HAPUS --}}
+
 <div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #E35D5D; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-trash-alt"></i></div>
-        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Hapus Kelas?</h2>
+        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Hapus Paket?</h2>
         <p style="color: #6B7280; font-size: 12px; margin: 8px 0 20px 0; line-height: 1.5;" id="pesanHapus"></p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalHapus()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
             <form id="formHapus" method="POST" style="flex: 1;">
-                @csrf @method('DELETE')
+                <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                 <button type="submit" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #E35D5D; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Hapus</button>
             </form>
         </div>
@@ -146,7 +147,7 @@
 
 <script>
     function bukaModalCreate() {
-        fetch("{{ route($role . '.master-data.kelas.create') }}")
+        fetch("<?php echo e(route($role . '.master-data.harga-paket.create')); ?>")
             .then(r => r.text())
             .then(html => {
                 document.getElementById('modalContent').innerHTML = html;
@@ -156,7 +157,7 @@
     }
 
     function bukaModalEdit(id) {
-        fetch("{{ route($role . '.master-data.kelas.edit', '') }}/" + id)
+        fetch("<?php echo e(route($role . '.master-data.harga-paket.edit', '')); ?>/" + id)
             .then(r => r.text())
             .then(html => {
                 document.getElementById('modalContent').innerHTML = html;
@@ -173,24 +174,24 @@
     // ⛔ TIDAK BISA TUTUP DENGAN KLIK DI LUAR
 
     function pasangEventHandler() {
-        const mc = document.getElementById('modalContent');
-        if (!mc) return;
+        const modalContent = document.getElementById('modalContent');
+        if (!modalContent) return;
         
-        const form = mc.querySelector('form');
-        const btnKeluar = mc.querySelector('#btnKeluar');
-        const btnSimpan = mc.querySelector('#btnSimpan');
-        const btnUpdate = mc.querySelector('#btnUpdate');
-        const modalBatal = mc.querySelector('#modalBatal');
-        const modalPindahHalaman = mc.querySelector('#modalPindahHalaman');
-        const modalSukses = mc.querySelector('#modalSukses');
-        const btnTidakBatal = mc.querySelector('#btnTidakBatal');
-        const btnYaKeluar = mc.querySelector('#btnYaKeluar');
-        const btnTidakPindah = mc.querySelector('#btnTidakPindah');
-        const btnYaPindah = mc.querySelector('#btnYaPindah');
-        const btnOkSukses = mc.querySelector('#btnOkSukses');
-        const alertError = mc.querySelector('#alertError');
-        const alertErrorText = mc.querySelector('#alertErrorText');
-        const pesanSukses = mc.querySelector('#pesanSukses');
+        const form = modalContent.querySelector('form');
+        const btnKeluar = modalContent.querySelector('#btnKeluar');
+        const btnSimpan = modalContent.querySelector('#btnSimpan');
+        const btnUpdate = modalContent.querySelector('#btnUpdate');
+        const modalBatal = modalContent.querySelector('#modalBatal');
+        const modalPindahHalaman = modalContent.querySelector('#modalPindahHalaman');
+        const modalSukses = modalContent.querySelector('#modalSukses');
+        const btnTidakBatal = modalContent.querySelector('#btnTidakBatal');
+        const btnYaKeluar = modalContent.querySelector('#btnYaKeluar');
+        const btnTidakPindah = modalContent.querySelector('#btnTidakPindah');
+        const btnYaPindah = modalContent.querySelector('#btnYaPindah');
+        const btnOkSukses = modalContent.querySelector('#btnOkSukses');
+        const alertError = modalContent.querySelector('#alertError');
+        const alertErrorText = modalContent.querySelector('#alertErrorText');
+        const pesanSukses = modalContent.querySelector('#pesanSukses');
         
         let formChanged = false;
         let formSubmitted = false;
@@ -206,6 +207,7 @@
         if (btnKeluar) {
             btnKeluar.addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 if (formChanged && !formSubmitted) {
                     if (modalPindahHalaman) modalPindahHalaman.style.display = 'flex';
                 } else {
@@ -262,29 +264,6 @@
                 });
             });
         }
-
-        // ========== AUTO-DETECT JENJANG ==========
-        const namaKelasInput = mc.querySelector('#nama_kelas');
-        const jenjangSelect = mc.querySelector('#jenjang');
-        
-        if (namaKelasInput && jenjangSelect) {
-            namaKelasInput.addEventListener('input', function() {
-                var nama = this.value.trim();
-                var match = nama.match(/^(\d+)/);
-                
-                if (match) {
-                    var angka = parseInt(match[1]);
-                    
-                    if (angka >= 1 && angka <= 6) {
-                        jenjangSelect.value = 'SD';
-                    } else if (angka >= 7 && angka <= 9) {
-                        jenjangSelect.value = 'SMP';
-                    } else if (angka >= 10 && angka <= 12) {
-                        jenjangSelect.value = 'SMA';
-                    }
-                }
-            });
-        }
     }
 
     document.getElementById('searchInput').addEventListener('keyup', function() {
@@ -296,8 +275,8 @@
     });
 
     function bukaModalHapus(id, nama) {
-        document.getElementById('formHapus').action = "{{ route($role . '.master-data.kelas.destroy', '') }}/" + id;
-        document.getElementById('pesanHapus').innerHTML = `Apakah Anda <strong>benar-benar yakin</strong> ingin menghapus kelas <strong>${nama}</strong>?<br><br><small style="color:#EF4444;">⚠️ <strong>PERINGATAN:</strong> Data akan dihapus <strong>secara permanen</strong> dari database. Semua data murid yang terdaftar di kelas ini akan <strong>kehilangan data kelas</strong> dan tidak dapat dikembalikan.</small>`;
+        document.getElementById('formHapus').action = "<?php echo e(route($role . '.master-data.harga-paket.destroy', '')); ?>/" + id;
+        document.getElementById('pesanHapus').innerHTML = `Apakah Anda <strong>yakin</strong> ingin menghapus paket <strong>${nama}</strong>?<br><br><small style="color:#EF4444;">⚠️ <strong>PERINGATAN:</strong> Jika paket ini masih digunakan oleh data murid atau transaksi, maka <strong>tidak dapat dihapus</strong>. Data paket ini terhubung dengan sistem pembayaran dan data murid.</small>`;
         document.getElementById('modalHapus').style.display = 'flex';
     }
 
@@ -310,7 +289,6 @@
     document.getElementById('pageSelect').addEventListener('change', function() {
         let url = new URL(window.location.href);
         url.searchParams.set('per_page', this.value);
-        url.searchParams.delete('page');
         window.location.href = url.toString();
     });
 
@@ -322,4 +300,5 @@
         }
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/master-data/harga-paket/index.blade.php ENDPATH**/ ?>

@@ -8,11 +8,15 @@
 
     
     <div class="sidebar-profile">
-        <div class="avatar-circle">
-            <img src="<?php echo e(asset('images/dashboard/icons/icon_orang.png')); ?>" alt="Profile">
+        <div class="avatar-circle" style="cursor: pointer;" onclick="bukaPreviewFotoSidebar()">
+            <?php if($user->foto): ?>
+                <img src="<?php echo e(asset('storage/' . $user->foto)); ?>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+            <?php else: ?>
+                <img src="<?php echo e(asset('images/dashboard/icons/icon_orang.png')); ?>" alt="Profile">
+            <?php endif; ?>
         </div>
         <div class="profile-info">
-            <h4><?php echo e($user->username ?? $user->name); ?></h4>
+            <h4><?php echo e($user->pegawai->nama_lengkap ?? $user->username ?? $user->name); ?></h4>
             <p><?php echo e(ucfirst($role)); ?></p>
         </div>
     </div>
@@ -293,6 +297,18 @@
 </aside>
 
 
+<div id="modalPreviewFotoSidebar" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); flex-direction: column; align-items: center; justify-content: center;" onclick="tutupPreviewFotoSidebar(event)">
+    <div style="position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: flex-end; align-items: center; padding: 12px 20px; background: rgba(0,0,0,0.6); z-index: 10;">
+        <button onclick="document.getElementById('modalPreviewFotoSidebar').style.display='none'" style="background: rgba(255,255,255,0.15); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px;" title="Tutup">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 60px 20px 20px 20px;">
+        <img id="previewFotoSidebarImg" src="" alt="Foto Profil" style="max-width: 95%; max-height: 88vh; object-fit: contain; border-radius: 4px;">
+    </div>
+</div>
+
+
 <script>
     function toggleSubmenu(element) {
         const submenu = element.nextElementSibling;
@@ -306,6 +322,26 @@
             if (arrow) arrow.style.transform = 'rotate(0deg)';
         }
     }
+    
+    // Preview foto dari sidebar
+    function bukaPreviewFotoSidebar() {
+        <?php if($user->foto): ?>
+            document.getElementById('previewFotoSidebarImg').src = "<?php echo e(asset('storage/' . $user->foto)); ?>";
+            document.getElementById('modalPreviewFotoSidebar').style.display = 'flex';
+        <?php endif; ?>
+    }
+    
+    function tutupPreviewFotoSidebar(event) {
+        if (event.target === document.getElementById('modalPreviewFotoSidebar')) {
+            document.getElementById('modalPreviewFotoSidebar').style.display = 'none';
+        }
+    }
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('modalPreviewFotoSidebar').style.display = 'none';
+        }
+    });
 </script>
 
 

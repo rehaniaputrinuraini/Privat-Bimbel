@@ -1,8 +1,8 @@
-@extends('layouts.app')
 
-@section('title', 'Profil ' . ucfirst(Auth::user()->peran ?? 'User'))
 
-@push('styles')
+<?php $__env->startSection('title', 'Profil ' . ucfirst(Auth::user()->peran ?? 'User')); ?>
+
+<?php $__env->startPush('styles'); ?>
 <style>
     /* MODAL PREVIEW FOTO */
     .modal-preview-foto {
@@ -66,26 +66,27 @@
         transform: scale(1.02);
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
     
-    @php
+    <?php
         $user = Auth::user();
         $pegawai = $user->pegawai;
-    @endphp
+    ?>
 
-    {{-- 1. HEADER HALAMAN --}}
+    
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
         <div>
             <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
-                Profil {{ ucfirst($user->peran ?? 'User') }}
+                Profil <?php echo e(ucfirst($user->peran ?? 'User')); ?>
+
             </h1>
             <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Informasi Profil</p>
         </div>
         
-        <a href="{{ route('profile.edit') }}" style="text-decoration: none;">
+        <a href="<?php echo e(route('profile.edit')); ?>" style="text-decoration: none;">
             <button style="background: #4D0B87; color: white; border: none; padding: 12px 35px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 16px; box-shadow: 0 4px 10px rgba(77, 11, 135, 0.2);">
                 Edit Profil
             </button>
@@ -94,73 +95,77 @@
 
     <div style="display: flex; gap: 30px; align-items: flex-start;">
         
-        {{-- 2. KARTU IDENTITAS (SISI KIRI) --}}
+        
         <div style="flex: 1; background: white; padding: 40px 20px; border-radius: 20px; border: 1px solid #E5E7EB; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center;">
-            {{-- Foto Profil --}}
-            @if($user->foto)
-                <div class="foto-profil-clickable" onclick="bukaPreviewFoto('{{ asset('storage/' . $user->foto) }}')" style="width: 180px; height: 180px; border-radius: 50%; overflow: hidden; margin: 0 auto 25px; border: 4px solid #4D0B87;">
-                    <img src="{{ asset('storage/' . $user->foto) }}" alt="Foto Profil" style="width: 100%; height: 100%; object-fit: cover;">
+            
+            <?php if($user->foto): ?>
+                <div class="foto-profil-clickable" onclick="bukaPreviewFoto('<?php echo e(asset('storage/' . $user->foto)); ?>')" style="width: 180px; height: 180px; border-radius: 50%; overflow: hidden; margin: 0 auto 25px; border: 4px solid #4D0B87;">
+                    <img src="<?php echo e(asset('storage/' . $user->foto)); ?>" alt="Foto Profil" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
-            @else
+            <?php else: ?>
                 <div style="width: 180px; height: 180px; background: #4D0B87; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px;">
                     <span style="color: white; font-size: 70px; font-weight: 800;">
-                        {{ strtoupper(substr($pegawai->nama_lengkap ?? $user->username ?? 'U', 0, 2)) }}
+                        <?php echo e(strtoupper(substr($pegawai->nama_lengkap ?? $user->username ?? 'U', 0, 2))); ?>
+
                     </span>
                 </div>
-            @endif
+            <?php endif; ?>
             
-            {{-- NAMA LENGKAP --}}
+            
             <h2 style="font-size: 24px; font-weight: 800; color: #111827; margin: 0;">
-                {{ $pegawai->nama_lengkap ?? $user->username ?? 'Nama User' }}
+                <?php echo e($pegawai->nama_lengkap ?? $user->username ?? 'Nama User'); ?>
+
             </h2>
             
-            {{-- Label Peran --}}
+            
             <p style="color: #6B7280; font-size: 16px; font-weight: 500; margin-top: 5px;">
-                {{ ucfirst($user->peran ?? 'user') }}
+                <?php echo e(ucfirst($user->peran ?? 'user')); ?>
+
             </p>
         </div>
 
-        {{-- 3. FORM INFORMASI PROFIL (SISI KANAN) --}}
+        
         <div style="flex: 2; background: white; padding: 35px; border-radius: 20px; border: 1px solid #E5E7EB; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
             <h2 style="font-size: 22px; font-weight: 800; color: #111827; margin: 0 0 25px 0;">Informasi Profil</h2>
             
             <div style="margin-bottom: 20px;">
                 <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">Nama Lengkap</label>
-                <input type="text" value="{{ $pegawai->nama_lengkap ?? '-' }}" readonly
+                <input type="text" value="<?php echo e($pegawai->nama_lengkap ?? '-'); ?>" readonly
                        style="width: 100%; padding: 14px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #f9fafb; color: #4B5563; font-size: 15px; outline: none;">
             </div>
 
             <div style="margin-bottom: 20px;">
                 <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">Email</label>
-                <input type="email" value="{{ $user->email ?? '-' }}" readonly
+                <input type="email" value="<?php echo e($user->email ?? '-'); ?>" readonly
                        style="width: 100%; padding: 14px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #f9fafb; color: #4B5563; font-size: 15px; outline: none;">
             </div>
 
             <div style="margin-bottom: 10px;">
                 <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">Kontak</label>
-                <input type="text" value="{{ $pegawai->no_hp ?? '-' }}" readonly
+                <input type="text" value="<?php echo e($pegawai->no_hp ?? '-'); ?>" readonly
                        style="width: 100%; padding: 14px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #f9fafb; color: #4B5563; font-size: 15px; outline: none;">
             </div>
         </div>
 
     </div>
 
-    {{-- 4. LINK UBAH KATA SANDI --}}
+    
     <div style="margin-top: 30px;">
-        <a href="{{ route('password.edit') }}" style="text-decoration: none; display: flex; align-items: center; gap: 10px; color: #4D0B87; font-weight: 700; font-size: 18px; width: fit-content;">
+        <a href="<?php echo e(route('password.edit')); ?>" style="text-decoration: none; display: flex; align-items: center; gap: 10px; color: #4D0B87; font-weight: 700; font-size: 18px; width: fit-content;">
             Ubah Kata Sandi <i class="fas fa-arrow-right"></i>
         </a>
     </div>
 
-    @if(session('success'))
+    <?php if(session('success')): ?>
         <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-top: 20px;">
-            {{ session('success') }}
+            <?php echo e(session('success')); ?>
+
         </div>
-    @endif
+    <?php endif; ?>
 
 </div>
 
-{{-- MODAL PREVIEW FOTO --}}
+
 <div id="modalPreviewFoto" class="modal-preview-foto" onclick="tutupPreviewFoto(event)">
     <div class="modal-preview-header">
         <button onclick="document.getElementById('modalPreviewFoto').style.display='none'" class="btn-icon" title="Tutup">
@@ -190,4 +195,5 @@
         }
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/profil/index.blade.php ENDPATH**/ ?>

@@ -9,7 +9,14 @@
     <div class="header-right">
         <a href="{{ route('profile.index') }}" class="profile-link">
             <div class="user-avatar-top">
-                <img src="{{ asset('images/dashboard/icons/icon_orang.png') }}" alt="Avatar">
+                @php
+                    $user = Auth::user();
+                @endphp
+                @if($user->foto)
+                    <img src="{{ asset('storage/' . $user->foto) }}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                @else
+                    <img src="{{ asset('images/dashboard/icons/icon_orang.png') }}" alt="Avatar">
+                @endif
             </div>
         </a>
     </div>

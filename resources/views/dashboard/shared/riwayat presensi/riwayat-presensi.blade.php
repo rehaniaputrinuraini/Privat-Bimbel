@@ -61,6 +61,97 @@
         border-radius: 10px;
         font-size: 10px;
     }
+    
+    /* ========== MODAL PREVIEW FOTO - GOOGLE DRIVE STYLE ========== */
+    .modal-preview-foto {
+        display: none;
+        position: fixed;
+        z-index: 99999;
+        left: 0; top: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.85);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-preview-header {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 20px;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        z-index: 10;
+    }
+    .modal-preview-header .tentor-info {
+        font-size: 14px;
+        font-weight: 500;
+    }
+    .modal-preview-header .tentor-info strong {
+        font-weight: 600;
+    }
+    .modal-preview-header .tentor-info small {
+        color: #D1D5DB;
+        font-weight: 400;
+        font-size: 12px;
+    }
+    .modal-preview-header .header-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .modal-preview-header .btn-icon {
+        background: rgba(255,255,255,0.15);
+        border: none;
+        color: white;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 16px;
+        transition: 0.2s;
+        text-decoration: none;
+    }
+    .modal-preview-header .btn-icon:hover {
+        background: rgba(255,255,255,0.3);
+    }
+    .modal-preview-body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        padding: 60px 20px 20px 20px;
+    }
+    .modal-preview-body img {
+        max-width: 95%;
+        max-height: 88vh;
+        object-fit: contain;
+        border-radius: 4px;
+    }
+    
+    .btn-foto {
+        background: #F3E8FF;
+        color: #4D0B87;
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: none;
+        transition: 0.2s;
+    }
+    .btn-foto:hover {
+        background: #E0D5FF;
+    }
 </style>
 @endpush
 
@@ -171,33 +262,25 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody" style="color: #374151;">
-                    @php
-                        $totalHonorKeseluruhan = 0;
-                    @endphp
+                    @php $totalHonorKeseluruhan = 0; @endphp
                     @forelse($presensi as $index => $item)
                     @php
-                        // Data dari relasi
                         $namaTentor = $item->pegawai->nama_lengkap ?? '-';
+                        $tanggal = \Carbon\Carbon::parse($item->tanggal)->format('d F Y');
                         $namaKelas = $item->kelas ? $item->kelas->jenjang . ' - ' . $item->kelas->nama_kelas : '-';
                         $namaRuang = $item->ruang ? $item->ruang->nama_ruang : '-';
                         $jenjang = $item->kelas->jenjang ?? 'SD';
                         
-                        // Status murid (DARI INPUT TENTOR)
                         $isHadir = $item->murid_hadir == 'Hadir';
                         $statusText = $isHadir ? 'Hadir' : 'Tidak Hadir';
                         $statusClass = $isHadir ? 'badge-hadir' : 'badge-tidak-hadir';
                         
-                        // ✅ STATUS VERIFIKASI DARI SESSION
                         $isVerified = in_array($item->id_mengajar, $verifiedIds ?? []);
-                        
-                        // ✅ SESI PERTAMA? (Uang makan & transport cuma di sesi pertama)
                         $isSesiPertama = in_array($item->id_mengajar, $sesiPertamaIds ?? []);
                         
-                        // Jam
                         $jamMasuk = $item->jam_mulai ? \Carbon\Carbon::parse($item->jam_mulai)->format('H:i') : '-';
                         $jamKeluar = $item->jam_selesai ? \Carbon\Carbon::parse($item->jam_selesai)->format('H:i') : '-';
                         
-                        // Honor per jam berdasarkan jenjang
                         $honorPerJam = 0;
                         if ($item->pegawai) {
                             switch ($jenjang) {
@@ -207,12 +290,10 @@
                             }
                         }
                         
-                        // Durasi (lama_mengajar dalam menit)
                         $lamaMengajar = $item->lama_mengajar ?? 0;
                         $jamMengajar = max(1, ceil($lamaMengajar / 60));
                         $honorDasar = $honorPerJam * $jamMengajar;
                         
-                        // Potongan jika murid tidak hadir
                         if (!$isHadir) {
                             $potongan = $honorDasar * 0.5;
                             $honorAkhir = $honorDasar * 0.5;
@@ -221,7 +302,6 @@
                             $honorAkhir = $honorDasar;
                         }
                         
-                        // ✅ UANG MAKAN & TRANSPORT HANYA SESI PERTAMA
                         if ($isSesiPertama) {
                             $uangMakan = $item->pegawai->uang_makan ?? 0;
                             $transport = $item->pegawai->uang_transport ?? 0;
@@ -231,9 +311,9 @@
                         }
                         
                         $totalHonorItem = $honorAkhir + $uangMakan + $transport;
-                        
-                        // Tambahkan ke total keseluruhan
                         $totalHonorKeseluruhan += $totalHonorItem;
+                        
+                        $downloadUrl = route($role . '.kelola-presensi.download', $item->id_mengajar);
                     @endphp
                     <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                         <td style="padding: 15px;">{{ $presensi->firstItem() + $index }}</td>
@@ -255,26 +335,19 @@
                         <td style="padding: 15px; text-align: center;">
                             @if(!$isHadir)
                                 <span style="color: #EF4444; font-size: 11px;">-50%</span>
-                                <br>
-                                <span style="color: #EF4444; font-size: 11px;">(Rp {{ number_format($potongan, 0, ',', '.') }})</span>
+                                <br><span style="color: #EF4444; font-size: 11px;">(Rp {{ number_format($potongan, 0, ',', '.') }})</span>
                             @else
                                 <span style="color: #10B981;">-</span>
                             @endif
                         </td>
                         <td style="padding: 15px; text-align: right; font-weight: 600; color: #4D0B87;">Rp {{ number_format($honorAkhir, 0, ',', '.') }}</td>
                         <td style="padding: 15px; text-align: right;">
-                            @if($isSesiPertama)
-                                Rp {{ number_format($uangMakan, 0, ',', '.') }}
-                            @else
-                                <span style="color: #9CA3AF;">-</span>
-                            @endif
+                            @if($isSesiPertama) Rp {{ number_format($uangMakan, 0, ',', '.') }}
+                            @else <span style="color: #9CA3AF;">-</span> @endif
                         </td>
                         <td style="padding: 15px; text-align: right;">
-                            @if($isSesiPertama)
-                                Rp {{ number_format($transport, 0, ',', '.') }}
-                            @else
-                                <span style="color: #9CA3AF;">-</span>
-                            @endif
+                            @if($isSesiPertama) Rp {{ number_format($transport, 0, ',', '.') }}
+                            @else <span style="color: #9CA3AF;">-</span> @endif
                         </td>
                         <td style="padding: 15px; text-align: right; font-weight: 700; color: #111827;">Rp {{ number_format($totalHonorItem, 0, ',', '.') }}</td>
                         <td style="padding: 15px; text-align: left; white-space: normal; word-break: break-word; max-width: 200px;" title="{{ $item->keterangan ?? '' }}">
@@ -282,10 +355,9 @@
                         </td>
                         <td style="padding: 15px; text-align: center;">
                             @if($item->bukti_mengajar)
-                                <a href="{{ route($role . '.kelola-presensi.download', $item->id_mengajar) }}" 
-                                   style="background: #F3E8FF; color: #4D0B87; width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
-                                    <i class="fas fa-download"></i>
-                                </a>
+                                <button onclick="bukaPreviewFoto('{{ $downloadUrl }}', '{{ addslashes($namaTentor) }}', '{{ addslashes($tanggal) }}', '{{ $downloadUrl }}')" class="btn-foto" title="Lihat Foto">
+                                    <i class="fas fa-image"></i>
+                                </button>
                             @else
                                 <span style="color: #9CA3AF;">-</span>
                             @endif
@@ -338,7 +410,7 @@
         </div>
     </div>
 
-    {{-- TOTAL HONOR KESELURUHAN --}}
+    {{-- TOTAL HONOR --}}
     @if($presensi->count() > 0)
     <div style="padding: 15px 30px; display: flex; justify-content: flex-end; align-items: center; background: #F9FAFB; border-top: 2px solid #F3F4F6; border-radius: 0 0 20px 20px;">
         <span style="font-size: 15px; font-weight: 700; color: #374151; margin-right: 15px;">Total Honor Bulan Ini :</span>
@@ -361,28 +433,23 @@
                 Menampilkan {{ $presensi->firstItem() }} - {{ $presensi->lastItem() }} dari {{ $presensi->total() }} data
             </span>
         </div>
-
         <div style="display: flex; gap: 5px;">
             @if($presensi->onFirstPage())
                 <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled><i class="fas fa-angle-double-left"></i></button>
             @else
                 <a href="{{ $presensi->url(1) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
             @endif
-
             @if($presensi->onFirstPage())
                 <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled><i class="fas fa-angle-left"></i></button>
             @else
                 <a href="{{ $presensi->previousPageUrl() }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
             @endif
-
             <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: default;">{{ $presensi->currentPage() }}</button>
-
             @if($presensi->hasMorePages())
                 <a href="{{ $presensi->nextPageUrl() }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
             @else
                 <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled><i class="fas fa-angle-right"></i></button>
             @endif
-
             @if($presensi->hasMorePages())
                 <a href="{{ $presensi->url($presensi->lastPage()) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-right"></i></a>
             @else
@@ -394,6 +461,24 @@
 
 </div>
 
+{{-- MODAL PREVIEW FOTO - GOOGLE DRIVE STYLE --}}
+<div id="modalPreviewFoto" class="modal-preview-foto" onclick="tutupPreviewFoto(event)">
+    <div class="modal-preview-header">
+        <span class="tentor-info" id="previewTentorInfo">-</span>
+        <div class="header-actions">
+            <a href="#" id="previewDownloadBtn" class="btn-icon" title="Download" download>
+                <i class="fas fa-download"></i>
+            </a>
+            <button onclick="document.getElementById('modalPreviewFoto').style.display='none'" class="btn-icon" title="Tutup">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <div class="modal-preview-body">
+        <img id="previewFotoImg" src="" alt="Foto Bukti Mengajar">
+    </div>
+</div>
+
 {{-- MODAL HAPUS --}}
 <div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
@@ -403,8 +488,7 @@
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalHapus()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
             <form id="formHapus" method="POST" style="flex: 1;">
-                @csrf
-                @method('DELETE')
+                @csrf @method('DELETE')
                 <button type="submit" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #E35D5D; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Hapus</button>
             </form>
         </div>
@@ -412,10 +496,28 @@
 </div>
 
 <script>
-    // PerPage Select
     document.getElementById('perPageSelect')?.addEventListener('change', function() {
         document.getElementById('perPageInput').value = this.value;
         document.getElementById('filterForm').submit();
+    });
+
+    function bukaPreviewFoto(url, namaTentor, tanggal, downloadUrl) {
+        document.getElementById('previewFotoImg').src = url;
+        document.getElementById('previewTentorInfo').innerHTML = '<strong>' + namaTentor + '</strong> <small>- ' + tanggal + '</small>';
+        document.getElementById('previewDownloadBtn').href = downloadUrl;
+        document.getElementById('modalPreviewFoto').style.display = 'flex';
+    }
+
+    function tutupPreviewFoto(event) {
+        if (event.target === document.getElementById('modalPreviewFoto')) {
+            document.getElementById('modalPreviewFoto').style.display = 'none';
+        }
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('modalPreviewFoto').style.display = 'none';
+        }
     });
 
     function bukaModalHapus(id, nama, tanggal) {
@@ -423,22 +525,14 @@
         let url = "{{ route($role . '.kelola-presensi.destroy', ':id') }}";
         url = url.replace(':id', id);
         form.action = url;
-        
-        let pesan = document.getElementById('pesanHapus');
-        pesan.innerHTML = `Apakah Anda yakin ingin menghapus data presensi <strong>${nama}</strong><br>tanggal <strong>${tanggal}</strong>?`;
-        
+        document.getElementById('pesanHapus').innerHTML = 'Apakah Anda yakin ingin menghapus data presensi <strong>' + nama + '</strong><br>tanggal <strong>' + tanggal + '</strong>?';
         document.getElementById('modalHapus').style.display = 'flex';
     }
 
-    function tutupModalHapus() {
-        document.getElementById('modalHapus').style.display = 'none';
-    }
+    function tutupModalHapus() { document.getElementById('modalHapus').style.display = 'none'; }
 
     window.addEventListener('click', function(event) {
-        let modal = document.getElementById('modalHapus');
-        if (event.target == modal) {
-            tutupModalHapus();
-        }
+        if (event.target == document.getElementById('modalHapus')) tutupModalHapus();
     });
 </script>
 @endsection
