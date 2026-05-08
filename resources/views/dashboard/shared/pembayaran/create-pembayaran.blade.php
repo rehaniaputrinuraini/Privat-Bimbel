@@ -2,8 +2,8 @@
 
     {{-- HEADER --}}
     <div style="margin-bottom: 22px; padding-bottom: 14px; border-bottom: 1.5px solid #F3F4F6;">
-        <h2 style="font-size: 19px; font-weight: 700; color: #111827; margin: 0;">Input Pemasukan</h2>
-        <p style="color: #9CA3AF; font-size: 12px; margin: 3px 0 0 0;">Pilih kategori pemasukan terlebih dahulu</p>
+        <h2 style="font-size: 19px; font-weight: 700; color: #111827; margin: 0;">Input Pembayaran Murid</h2>
+        <p style="color: #9CA3AF; font-size: 12px; margin: 3px 0 0 0;">Form pembayaran untuk murid</p>
     </div>
 
     {{-- ALERT ERROR --}}
@@ -15,234 +15,137 @@
     <form id="mainForm" action="{{ route($role . '.pembayaran.store') }}" method="POST">
         @csrf
 
-        {{-- ===== DROPDOWN KATEGORI ===== --}}
-        <div style="margin-bottom: 18px;">
+        <input type="hidden" name="kategori_pemasukan" value="murid">
+
+        {{-- Tanggal --}}
+        <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                Kategori Pemasukan <span style="color: #EF4444;">*</span>
+                Tanggal <span style="color: #EF4444;">*</span>
             </label>
-            <select id="kategoriPemasukan" required
-                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; cursor: pointer; color: #374151; appearance: none; background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E\"); background-repeat: no-repeat; background-position: right 15px center;">
-                <option value="">— Pilih Kategori —</option>
-                <option value="murid">Pembayaran Murid</option>
-                <option value="lainnya">Pemasukan Lainnya</option>
+            <input type="date" name="tanggal" id="tanggal" value="{{ date('Y-m-d') }}"
+                   style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;">
+        </div>
+
+        {{-- Jenis Pembayaran --}}
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
+                Jenis Pembayaran <span style="color: #EF4444;">*</span>
+            </label>
+            <select name="jenis_pembayaran" id="jenis_pembayaran"
+                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; cursor: pointer; color: #374151;">
+                <option value="">Pilih Jenis Pembayaran</option>
+                <option value="Tunai">Tunai</option>
+                <option value="Transfer">Transfer</option>
             </select>
         </div>
 
-        {{-- hidden untuk kategori --}}
-        <input type="hidden" name="kategori_pemasukan" id="kategoriPemasukanHidden" value="">
-
-        {{-- ================================================================ --}}
-        {{-- FORM MURID                                                       --}}
-        {{-- ================================================================ --}}
-        <div id="formMurid" style="display: none;">
-
-            {{-- Divider --}}
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
-                <div style="flex:1; height:1px; background:#F3F4F6;"></div>
-                <span style="font-size: 11px; font-weight: 600; color: #4D0B87; text-transform: uppercase; letter-spacing: 0.05em;">Data Pembayaran Murid</span>
-                <div style="flex:1; height:1px; background:#F3F4F6;"></div>
-            </div>
-
-            {{-- Tanggal --}}
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                    Tanggal <span style="color: #EF4444;">*</span>
-                </label>
-                <input type="date" name="tanggal" id="tanggal" value="{{ date('Y-m-d') }}"
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;">
-            </div>
-
-            {{-- Jenis Pembayaran --}}
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                    Jenis Pembayaran <span style="color: #EF4444;">*</span>
-                </label>
-                <select name="jenis_pembayaran" id="jenis_pembayaran"
-                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; cursor: pointer; color: #374151;">
-                    <option value="">Pilih Jenis Pembayaran</option>
-                    <option value="Tunai">Tunai</option>
-                    <option value="Transfer">Transfer</option>
-                </select>
-            </div>
-
-            {{-- Autocomplete Nama Murid --}}
-            <div style="margin-bottom: 15px; position: relative;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                    Nama Murid <span style="color: #EF4444;">*</span>
-                </label>
-                <input type="text" id="searchMurid" name="search_murid" placeholder="Ketik nama murid..." autocomplete="off"
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;">
-                <div id="autocompleteResult"
-                     style="position: absolute; z-index: 1000; background: white; border: 1px solid #E5E7EB; border-radius: 12px; width: 100%; max-height: 200px; overflow-y: auto; margin-top: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); display: none; font-family: 'Poppins', sans-serif;"></div>
-                <input type="hidden" name="id_murid" id="id_murid">
-                <small style="color: #9CA3AF; font-size: 12px;">Ketik minimal 2 huruf untuk mencari murid</small>
-            </div>
-
-            {{-- Info Status Murid --}}
-            <div id="infoStatusMurid" style="display: none; margin-bottom: 15px;"></div>
-
-            {{-- Paket Awal --}}
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                    Paket Awal (Pendaftaran)
-                </label>
-                <input type="text" id="paket_awal_display" readonly value="Rp 100.000"
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #F3F4F6; color: #6B7280; font-size: 14px; font-family: 'Poppins', sans-serif; box-sizing: border-box;">
-                <input type="hidden" name="paket_awal" id="paket_awal" value="100000">
-            </div>
-
-            {{-- Paket Belajar --}}
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                    Paket Belajar
-                </label>
-                <select name="paket_selanjutnya" id="paket_selanjutnya"
-                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; cursor: pointer; color: #374151;">
-                    <option value="">Pilih Paket</option>
-                    @foreach($pakets as $paket)
-                        <option value="{{ $paket->tingkat }}" data-harga="{{ $paket->harga }}">
-                            {{ $paket->tingkat }} — Rp {{ number_format($paket->harga, 0, ',', '.') }} / bulan
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            {{-- Info Harga --}}
-            <div id="infoHarga" style="margin-bottom: 15px; padding: 12px 15px; background: #E0E7FF; border-radius: 10px; display: none; color: #3730A3; font-size: 13px;">
-                <i class="fas fa-info-circle"></i> Harga: <strong id="hargaPaketValue">Rp 0</strong> / bulan
-            </div>
-
-            {{-- Untuk Bulan --}}
-            <div id="bulanGroup" style="margin-bottom: 15px; display: none;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                    Untuk Bulan
-                </label>
-                <select name="bulan_dibayar" id="bulan_dibayar"
-                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; cursor: pointer; color: #374151;">
-                    <option value="">Pilih Bulan</option>
-                    <option value="1">Januari</option>
-                    <option value="2">Februari</option>
-                    <option value="3">Maret</option>
-                    <option value="4">April</option>
-                    <option value="5">Mei</option>
-                    <option value="6">Juni</option>
-                    <option value="7">Juli</option>
-                    <option value="8">Agustus</option>
-                    <option value="9">September</option>
-                    <option value="10">Oktober</option>
-                    <option value="11">November</option>
-                    <option value="12">Desember</option>
-                </select>
-            </div>
-
-            {{-- Total Pembayaran --}}
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                    Total Pembayaran <span style="color: #EF4444;">*</span>
-                </label>
-                <input type="text" name="total_pembayaran" id="total_pembayaran" placeholder="Masukkan Total Pembayaran"
-                       oninput="this.value = this.value.replace(/[^0-9]/g, ''); updatePreview();"
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;">
-            </div>
-
-            {{-- Preview Status --}}
-            <div id="previewStatus" style="margin-bottom: 15px; padding: 12px 15px; border-radius: 10px; display: none; font-size: 13px;"></div>
-
-            {{-- Keterangan --}}
-            <div style="margin-bottom: 5px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                    Keterangan
-                </label>
-                <textarea name="keterangan" id="keterangan" rows="3" placeholder="Masukkan Keterangan (opsional)"
-                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; resize: vertical; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;"></textarea>
-            </div>
-
+        {{-- Autocomplete Nama Murid --}}
+        <div style="margin-bottom: 15px; position: relative;">
+            <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
+                Nama Murid <span style="color: #EF4444;">*</span>
+            </label>
+            <input type="text" id="searchMurid" name="search_murid" placeholder="Ketik nama murid..." autocomplete="off"
+                   style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;">
+            <div id="autocompleteResult"
+                 style="position: absolute; z-index: 1000; background: white; border: 1px solid #E5E7EB; border-radius: 12px; width: 100%; max-height: 200px; overflow-y: auto; margin-top: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); display: none; font-family: 'Poppins', sans-serif;"></div>
+            <input type="hidden" name="id_murid" id="id_murid">
+            <small style="color: #9CA3AF; font-size: 12px;">Ketik minimal 2 huruf untuk mencari murid</small>
         </div>
-        {{-- END formMurid --}}
 
-        {{-- ================================================================ --}}
-        {{-- FORM LAINNYA                                                     --}}
-        {{-- ================================================================ --}}
-        <div id="formLainnya" style="display: none;">
+        {{-- Info Status Murid --}}
+        <div id="infoStatusMurid" style="display: none; margin-bottom: 15px;"></div>
 
-            {{-- Divider --}}
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
-                <div style="flex:1; height:1px; background:#F3F4F6;"></div>
-                <span style="font-size: 11px; font-weight: 600; color: #F59E0B; text-transform: uppercase; letter-spacing: 0.05em;">Data Pemasukan Lainnya</span>
-                <div style="flex:1; height:1px; background:#F3F4F6;"></div>
-            </div>
-
-            {{-- Tanggal --}}
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                    Tanggal <span style="color: #EF4444;">*</span>
-                </label>
-                <input type="date" name="tanggal_lainnya" id="tanggal_lainnya" value="{{ date('Y-m-d') }}"
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;">
-            </div>
-
-            {{-- Jenis --}}
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                    Jenis <span style="color: #EF4444;">*</span>
-                </label>
-                <select name="jenis_pembayaran_lainnya" id="jenis_pembayaran_lainnya"
-                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; cursor: pointer; color: #374151;">
-                    <option value="">Pilih Jenis</option>
-                    <option value="Tunai">Tunai</option>
-                    <option value="Transfer">Transfer</option>
-                </select>
-            </div>
-
-            {{-- Sumber Pemasukan --}}
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                    Sumber Pemasukan <span style="color: #EF4444;">*</span>
-                </label>
-                <input type="text" name="sumber_pemasukan" id="sumber_pemasukan" placeholder="Contoh: Donasi, Sponsor, Hibah, dll"
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;">
-            </div>
-
-            {{-- Total --}}
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                    Total <span style="color: #EF4444;">*</span>
-                </label>
-                <input type="text" name="total_pembayaran_lainnya" id="total_pembayaran_lainnya" placeholder="Masukkan Total"
-                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;">
-            </div>
-
-            {{-- Keterangan --}}
-            <div style="margin-bottom: 5px;">
-                <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                    Keterangan
-                </label>
-                <textarea name="keterangan_lainnya" id="keterangan_lainnya" rows="3" placeholder="Masukkan Keterangan (opsional)"
-                          style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; resize: vertical; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;"></textarea>
-            </div>
-
+        {{-- Paket Awal --}}
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
+                Paket Awal (Pendaftaran)
+            </label>
+            <input type="text" id="paket_awal_display" readonly value="Rp 100.000"
+                   style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #F3F4F6; color: #6B7280; font-size: 14px; font-family: 'Poppins', sans-serif; box-sizing: border-box;">
+            <input type="hidden" name="paket_awal" id="paket_awal" value="100000">
         </div>
-        {{-- END formLainnya --}}
 
-        {{-- ===== TOMBOL AKSI ===== --}}
+        {{-- Paket Belajar --}}
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
+                Paket Belajar
+            </label>
+            <select name="paket_selanjutnya" id="paket_selanjutnya"
+                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; cursor: pointer; color: #374151;">
+                <option value="">Pilih Paket</option>
+                @foreach($pakets as $paket)
+                    <option value="{{ $paket->tingkat }}" data-harga="{{ $paket->harga }}">
+                        {{ $paket->tingkat }} — Rp {{ number_format($paket->harga, 0, ',', '.') }} / bulan
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        {{-- Info Harga --}}
+        <div id="infoHarga" style="margin-bottom: 15px; padding: 12px 15px; background: #E0E7FF; border-radius: 10px; display: none; color: #3730A3; font-size: 13px;">
+            <i class="fas fa-info-circle"></i> Harga: <strong id="hargaPaketValue">Rp 0</strong> / bulan
+        </div>
+
+        {{-- Untuk Bulan --}}
+        <div id="bulanGroup" style="margin-bottom: 15px; display: none;">
+            <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
+                Untuk Bulan
+            </label>
+            <select name="bulan_dibayar" id="bulan_dibayar"
+                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; cursor: pointer; color: #374151;">
+                <option value="">Pilih Bulan</option>
+                <option value="1">Januari</option>
+                <option value="2">Februari</option>
+                <option value="3">Maret</option>
+                <option value="4">April</option>
+                <option value="5">Mei</option>
+                <option value="6">Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">Agustus</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+            </select>
+        </div>
+
+        {{-- Total Pembayaran --}}
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
+                Total Pembayaran <span style="color: #EF4444;">*</span>
+            </label>
+            <input type="text" name="total_pembayaran" id="total_pembayaran" placeholder="Masukkan Total Pembayaran"
+                   oninput="this.value = this.value.replace(/[^0-9]/g, ''); updatePreview();"
+                   style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;">
+        </div>
+
+        {{-- Preview Status --}}
+        <div id="previewStatus" style="margin-bottom: 15px; padding: 12px 15px; border-radius: 10px; display: none; font-size: 13px;"></div>
+
+        {{-- Keterangan --}}
+        <div style="margin-bottom: 5px;">
+            <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
+                Keterangan
+            </label>
+            <textarea name="keterangan" id="keterangan" rows="3" placeholder="Masukkan Keterangan (opsional)"
+                      style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; resize: vertical; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;"></textarea>
+        </div>
+
+        {{-- TOMBOL AKSI --}}
         <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 28px; padding-top: 16px; border-top: 1.5px solid #F3F4F6;">
             <button type="button" id="btnKeluar"
-                    style="padding: 11px 40px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 15px; background: #FFFFFF; cursor: pointer; font-family: 'Poppins', sans-serif; transition: background .15s;">
+                    style="padding: 11px 40px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 15px; background: #FFFFFF; cursor: pointer; font-family: 'Poppins', sans-serif;">
                 Keluar
             </button>
             <button type="submit" id="btnSimpan"
-                    style="padding: 11px 40px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 15px; cursor: pointer; font-family: 'Poppins', sans-serif; box-shadow: 0 4px 10px rgba(77,11,135,0.25); transition: opacity .15s;">
+                    style="padding: 11px 40px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 15px; cursor: pointer; font-family: 'Poppins', sans-serif; box-shadow: 0 4px 10px rgba(77,11,135,0.25);">
                 Simpan
             </button>
         </div>
-
     </form>
 </div>
 
-{{-- ================================================================ --}}
-{{-- MODAL: BATAL (belum ada perubahan)                               --}}
-{{-- ================================================================ --}}
+{{-- MODAL: BATAL --}}
 <div id="modalBatal" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); backdrop-filter: blur(3px); align-items: center; justify-content: center; font-family: 'Poppins', sans-serif;">
     <div style="background: white; padding: 28px 24px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.18);">
         <div style="color: #F59E0B; font-size: 42px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -250,20 +153,14 @@
         <p style="color: #6B7280; font-size: 13px; margin: 8px 0 22px 0;">Data yang Anda masukkan tidak akan disimpan.</p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button type="button" id="btnTidakBatal"
-                    style="flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid #E5E7EB; background: white; color: #374151; font-weight: 600; font-size: 13px; cursor: pointer; font-family: 'Poppins', sans-serif;">
-                Tidak
-            </button>
+                    style="flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid #E5E7EB; background: white; color: #374151; font-weight: 600; font-size: 13px; cursor: pointer; font-family: 'Poppins', sans-serif;">Tidak</button>
             <button type="button" id="btnYaKeluar"
-                    style="flex: 1; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer; font-family: 'Poppins', sans-serif;">
-                Ya, Keluar
-            </button>
+                    style="flex: 1; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer; font-family: 'Poppins', sans-serif;">Ya, Keluar</button>
         </div>
     </div>
 </div>
 
-{{-- ================================================================ --}}
-{{-- MODAL: PERINGATAN PERUBAHAN BELUM DISIMPAN                      --}}
-{{-- ================================================================ --}}
+{{-- MODAL: PERINGATAN --}}
 <div id="modalPindahHalaman" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); backdrop-filter: blur(3px); align-items: center; justify-content: center; font-family: 'Poppins', sans-serif;">
     <div style="background: white; padding: 28px 24px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.18);">
         <div style="color: #F59E0B; font-size: 42px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -271,91 +168,59 @@
         <p style="color: #6B7280; font-size: 13px; margin: 8px 0 22px 0;">Ada data yang belum disimpan. Yakin ingin keluar?</p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button type="button" id="btnTidakPindah"
-                    style="flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid #E5E7EB; background: white; color: #374151; font-weight: 600; font-size: 13px; cursor: pointer; font-family: 'Poppins', sans-serif;">
-                Tidak
-            </button>
+                    style="flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid #E5E7EB; background: white; color: #374151; font-weight: 600; font-size: 13px; cursor: pointer; font-family: 'Poppins', sans-serif;">Tidak</button>
             <button type="button" id="btnYaPindah"
-                    style="flex: 1; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer; font-family: 'Poppins', sans-serif;">
-                Ya, Keluar
-            </button>
+                    style="flex: 1; padding: 10px; border-radius: 10px; border: none; background: #EF4444; color: white; font-weight: 600; font-size: 13px; cursor: pointer; font-family: 'Poppins', sans-serif;">Ya, Keluar</button>
         </div>
     </div>
 </div>
 
-{{-- ================================================================ --}}
-{{-- MODAL: SUKSES                                                    --}}
-{{-- ================================================================ --}}
+{{-- MODAL: SUKSES --}}
 <div id="modalSukses" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); backdrop-filter: blur(3px); align-items: center; justify-content: center; font-family: 'Poppins', sans-serif;">
     <div style="background: white; padding: 28px 24px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.18);">
         <div style="color: #10B981; font-size: 52px; margin-bottom: 10px;"><i class="fas fa-check-circle"></i></div>
         <h2 style="margin: 0; font-size: 18px; font-weight: 700; color: #111827;">Berhasil!</h2>
-        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 22px 0;" id="pesanSukses">Pemasukan berhasil disimpan.</p>
+        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 22px 0;" id="pesanSukses">Pembayaran berhasil disimpan.</p>
         <button type="button" id="btnOkSukses"
-                style="width: 100%; padding: 11px; border-radius: 10px; border: none; background: #10B981; color: white; font-weight: 600; font-size: 14px; cursor: pointer; font-family: 'Poppins', sans-serif;">
-            OK
-        </button>
+                style="width: 100%; padding: 11px; border-radius: 10px; border: none; background: #10B981; color: white; font-weight: 600; font-size: 14px; cursor: pointer; font-family: 'Poppins', sans-serif;">OK</button>
     </div>
 </div>
 
-{{-- ================================================================ --}}
-{{-- JAVASCRIPT                                                        --}}
-{{-- ================================================================ --}}
 <script>
 (function () {
-    /* ---- Referensi elemen ---- */
-    const mc              = document.getElementById('modalContent') || document.body;
-    const form            = mc.querySelector('#mainForm');
-    const kategoriSel     = mc.querySelector('#kategoriPemasukan');
-    const kategoriHidden  = mc.querySelector('#kategoriPemasukanHidden');
-    const formMurid       = mc.querySelector('#formMurid');
-    const formLainnya     = mc.querySelector('#formLainnya');
-    const btnKeluar       = mc.querySelector('#btnKeluar');
-    const btnSimpan       = mc.querySelector('#btnSimpan');
-    const alertError      = mc.querySelector('#alertError');
-    const alertErrorText  = mc.querySelector('#alertErrorText');
-    const pesanSukses     = mc.querySelector('#pesanSukses');
+    const form            = document.querySelector('#mainForm');
+    const btnKeluar       = document.querySelector('#btnKeluar');
+    const btnSimpan       = document.querySelector('#btnSimpan');
+    const alertError      = document.querySelector('#alertError');
+    const alertErrorText  = document.querySelector('#alertErrorText');
+    const pesanSukses     = document.querySelector('#pesanSukses');
 
-    /* ---- Modals ---- */
-    const modalBatal      = mc.querySelector('#modalBatal');
-    const modalPindah     = mc.querySelector('#modalPindahHalaman');
-    const modalSukses     = mc.querySelector('#modalSukses');
-    const btnTidakBatal   = mc.querySelector('#btnTidakBatal');
-    const btnYaKeluar     = mc.querySelector('#btnYaKeluar');
-    const btnTidakPindah  = mc.querySelector('#btnTidakPindah');
-    const btnYaPindah     = mc.querySelector('#btnYaPindah');
-    const btnOkSukses     = mc.querySelector('#btnOkSukses');
+    const modalBatal      = document.querySelector('#modalBatal');
+    const modalPindah     = document.querySelector('#modalPindahHalaman');
+    const modalSukses     = document.querySelector('#modalSukses');
+    const btnTidakBatal   = document.querySelector('#btnTidakBatal');
+    const btnYaKeluar     = document.querySelector('#btnYaKeluar');
+    const btnTidakPindah  = document.querySelector('#btnTidakPindah');
+    const btnYaPindah     = document.querySelector('#btnYaPindah');
+    const btnOkSukses     = document.querySelector('#btnOkSukses');
 
-    /* ---- Murid fields ---- */
-    const searchInput     = mc.querySelector('#searchMurid');
-    const autocompleteDiv = mc.querySelector('#autocompleteResult');
-    const idHidden        = mc.querySelector('#id_murid');
-    const infoStatus      = mc.querySelector('#infoStatusMurid');
-    const paketSelect     = mc.querySelector('#paket_selanjutnya');
-    const totalInput      = mc.querySelector('#total_pembayaran');
-    const bulanGroup      = mc.querySelector('#bulanGroup');
-    const bulanSelect     = mc.querySelector('#bulan_dibayar');
-    const infoHarga       = mc.querySelector('#infoHarga');
-    const hargaValue      = mc.querySelector('#hargaPaketValue');
-    const previewStatus   = mc.querySelector('#previewStatus');
+    const searchInput     = document.querySelector('#searchMurid');
+    const autocompleteDiv = document.querySelector('#autocompleteResult');
+    const idHidden        = document.querySelector('#id_murid');
+    const infoStatus      = document.querySelector('#infoStatusMurid');
+    const paketSelect     = document.querySelector('#paket_selanjutnya');
+    const totalInput      = document.querySelector('#total_pembayaran');
+    const bulanGroup      = document.querySelector('#bulanGroup');
+    const bulanSelect     = document.querySelector('#bulan_dibayar');
+    const infoHarga       = document.querySelector('#infoHarga');
+    const hargaValue      = document.querySelector('#hargaPaketValue');
+    const previewStatus   = document.querySelector('#previewStatus');
 
     let formChanged  = false;
     let formSubmitted = false;
-    let _hargaPaket  = 0;  // harga paket aktif untuk preview
+    let _hargaPaket  = 0;
 
-    /* ================================================================
-       KATEGORI: tampilkan / sembunyikan form yang sesuai
-    ================================================================ */
-    kategoriSel.addEventListener('change', function () {
-        const val = this.value;
-        kategoriHidden.value = val;
-        formMurid.style.display   = (val === 'murid')    ? 'block' : 'none';
-        formLainnya.style.display = (val === 'lainnya')  ? 'block' : 'none';
-        if (!formSubmitted) formChanged = true;
-    });
-
-    /* ================================================================
-       TRACK perubahan form
-    ================================================================ */
+    /* TRACK perubahan */
     if (form) {
         form.querySelectorAll('input, select, textarea').forEach(el => {
             el.addEventListener('input',  () => { if (!formSubmitted) formChanged = true; });
@@ -363,10 +228,8 @@
         });
     }
 
-    /* ================================================================
-       KELUAR
-    ================================================================ */
-    btnKeluar.addEventListener('click', function (e) {
+    /* KELUAR */
+    btnKeluar?.addEventListener('click', function (e) {
         e.preventDefault();
         if (formChanged && !formSubmitted) {
             modalPindah.style.display = 'flex';
@@ -375,62 +238,29 @@
         }
     });
 
-    /* Modal Batal */
-    btnTidakBatal.addEventListener('click', () => modalBatal.style.display = 'none');
-    btnYaKeluar.addEventListener('click', () => {
-        formChanged = false;
-        modalBatal.style.display = 'none';
-        tutupModal();
-    });
-    modalBatal.addEventListener('click', e => { if (e.target === modalBatal) modalBatal.style.display = 'none'; });
+    btnTidakBatal?.addEventListener('click', () => modalBatal.style.display = 'none');
+    btnYaKeluar?.addEventListener('click', () => { formChanged = false; modalBatal.style.display = 'none'; tutupModal(); });
+    modalBatal?.addEventListener('click', e => { if (e.target === modalBatal) modalBatal.style.display = 'none'; });
 
-    /* Modal Pindah */
-    btnTidakPindah.addEventListener('click', () => modalPindah.style.display = 'none');
-    btnYaPindah.addEventListener('click', () => {
-        formChanged = false;
-        modalPindah.style.display = 'none';
-        tutupModal();
-    });
-    modalPindah.addEventListener('click', e => { if (e.target === modalPindah) modalPindah.style.display = 'none'; });
+    btnTidakPindah?.addEventListener('click', () => modalPindah.style.display = 'none');
+    btnYaPindah?.addEventListener('click', () => { formChanged = false; modalPindah.style.display = 'none'; tutupModal(); });
+    modalPindah?.addEventListener('click', e => { if (e.target === modalPindah) modalPindah.style.display = 'none'; });
 
-    /* Modal Sukses */
-    btnOkSukses.addEventListener('click', () => {
-        modalSukses.style.display = 'none';
-        tutupModal();
-        window.location.reload();
-    });
-    modalSukses.addEventListener('click', e => {
-        if (e.target === modalSukses) {
-            modalSukses.style.display = 'none';
-            tutupModal();
-            window.location.reload();
-        }
-    });
+    btnOkSukses?.addEventListener('click', () => { modalSukses.style.display = 'none'; tutupModal(); window.location.reload(); });
+    modalSukses?.addEventListener('click', e => { if (e.target === modalSukses) { modalSukses.style.display = 'none'; tutupModal(); window.location.reload(); } });
 
     function tutupModal() {
         const mf = document.getElementById('modalForm');
-        if (mf) { mf.style.display = 'none'; }
+        if (mf) mf.style.display = 'none';
         const cont = document.getElementById('modalContent');
         if (cont) cont.innerHTML = '';
     }
 
-    /* ================================================================
-       SUBMIT FORM (AJAX)
-    ================================================================ */
+    /* SUBMIT */
     if (form) {
         form.addEventListener('submit', function (e) {
             e.preventDefault();
-
-            /* Validasi frontend dasar */
-            const kategori = kategoriHidden.value;
-            if (!kategori) {
-                tampilError('Silakan pilih kategori pemasukan terlebih dahulu.');
-                return;
-            }
-            if (kategori === 'murid' && !idHidden.value) {
-                tampilError('Silakan pilih nama murid terlebih dahulu.');
-                return;
-            }
+            if (!idHidden.value) { tampilError('Silakan pilih nama murid terlebih dahulu.'); return; }
 
             const orig = btnSimpan.innerHTML;
             btnSimpan.disabled = true;
@@ -440,227 +270,122 @@
             fetch(form.action, {
                 method: 'POST',
                 body: fd,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                    'Accept': 'application/json'
-                }
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '', 'Accept': 'application/json' }
             })
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    formChanged = false;
-                    formSubmitted = true;
-                    if (pesanSukses) pesanSukses.textContent = data.message || 'Pemasukan berhasil disimpan.';
+                    formChanged = false; formSubmitted = true;
+                    if (pesanSukses) pesanSukses.textContent = data.message || 'Pembayaran berhasil disimpan.';
                     modalSukses.style.display = 'flex';
                 } else {
                     let msg = data.message || 'Terjadi kesalahan.';
-                    if (data.errors) {
-                        msg = Object.values(data.errors).flat().join('\n');
-                    }
+                    if (data.errors) msg = Object.values(data.errors).flat().join('\n');
                     tampilError(msg);
-                    btnSimpan.disabled = false;
-                    btnSimpan.innerHTML = orig;
+                    btnSimpan.disabled = false; btnSimpan.innerHTML = orig;
                 }
             })
-            .catch(err => {
-                tampilError('Koneksi gagal: ' + err.message);
-                btnSimpan.disabled = false;
-                btnSimpan.innerHTML = orig;
-            });
+            .catch(err => { tampilError('Koneksi gagal: ' + err.message); btnSimpan.disabled = false; btnSimpan.innerHTML = orig; });
         });
     }
 
     function tampilError(msg) {
-        if (alertError && alertErrorText) {
-            alertErrorText.textContent = msg;
-            alertError.style.display = 'flex';
-            setTimeout(() => alertError.style.display = 'none', 5000);
-        }
+        if (alertError && alertErrorText) { alertErrorText.textContent = msg; alertError.style.display = 'flex'; setTimeout(() => alertError.style.display = 'none', 5000); }
     }
 
-    /* ================================================================
-       AUTOCOMPLETE MURID
-    ================================================================ */
-    if (searchInput) {
-        searchInput.addEventListener('input', function () {
-            const q = this.value.trim();
-            if (q.length < 2) { autocompleteDiv.style.display = 'none'; return; }
-
-            fetch('/search-murid?q=' + encodeURIComponent(q))
-                .then(r => r.json())
-                .then(data => {
-                    if (data.length) {
-                        autocompleteDiv.innerHTML = data.map(m =>
-                            `<div style="padding:10px 15px;cursor:pointer;border-bottom:1px solid #F3F4F6;" 
-                                  onmouseover="this.style.background='#F3E8FF'" 
-                                  onmouseout="this.style.background='white'" 
-                                  data-id="${m.id_murid}">
-                                <strong style="font-size:14px;">${m.nama_lengkap}</strong>
-                                <br><small style="color:#9CA3AF;">${m.asal_sekolah || '-'} | ${m.no_hp || '-'}</small>
-                             </div>`
-                        ).join('');
-                        autocompleteDiv.style.display = 'block';
-                        autocompleteDiv.querySelectorAll('div[data-id]').forEach(item => {
-                            item.addEventListener('click', function () {
-                                searchInput.value = this.querySelector('strong').innerText;
-                                idHidden.value    = this.dataset.id;
-                                autocompleteDiv.style.display = 'none';
-                                cekStatusMurid(this.dataset.id);
-                            });
+    /* AUTOCOMPLETE */
+    searchInput?.addEventListener('input', function () {
+        const q = this.value.trim();
+        if (q.length < 2) { autocompleteDiv.style.display = 'none'; return; }
+        fetch('/search-murid?q=' + encodeURIComponent(q))
+            .then(r => r.json())
+            .then(data => {
+                if (data.length) {
+                    autocompleteDiv.innerHTML = data.map(m =>
+                        `<div style="padding:10px 15px;cursor:pointer;border-bottom:1px solid #F3F4F6;" onmouseover="this.style.background='#F3E8FF'" onmouseout="this.style.background='white'" data-id="${m.id_murid}"><strong style="font-size:14px;">${m.nama_lengkap}</strong><br><small style="color:#9CA3AF;">${m.asal_sekolah || '-'} | ${m.no_hp || '-'}</small></div>`
+                    ).join('');
+                    autocompleteDiv.style.display = 'block';
+                    autocompleteDiv.querySelectorAll('div[data-id]').forEach(item => {
+                        item.addEventListener('click', function () {
+                            searchInput.value = this.querySelector('strong').innerText;
+                            idHidden.value = this.dataset.id;
+                            autocompleteDiv.style.display = 'none';
+                            cekStatusMurid(this.dataset.id);
                         });
-                    } else {
-                        autocompleteDiv.innerHTML = '<div style="padding:10px 15px;color:#9CA3AF;">Murid tidak ditemukan</div>';
-                        autocompleteDiv.style.display = 'block';
-                    }
-                })
-                .catch(() => { autocompleteDiv.style.display = 'none'; });
-        });
-    }
-
-    document.addEventListener('click', function (e) {
-        if (searchInput && !searchInput.contains(e.target) && autocompleteDiv && !autocompleteDiv.contains(e.target)) {
-            autocompleteDiv.style.display = 'none';
-        }
+                    });
+                } else {
+                    autocompleteDiv.innerHTML = '<div style="padding:10px 15px;color:#9CA3AF;">Murid tidak ditemukan</div>';
+                    autocompleteDiv.style.display = 'block';
+                }
+            });
     });
 
-    /* ================================================================
-       CEK STATUS MURID
-    ================================================================ */
+    document.addEventListener('click', function (e) {
+        if (searchInput && !searchInput.contains(e.target) && autocompleteDiv && !autocompleteDiv.contains(e.target)) autocompleteDiv.style.display = 'none';
+    });
+
+    /* CEK STATUS */
     function cekStatusMurid(id) {
         fetch('/cek-status-pembayaran/' + id)
             .then(r => r.json())
             .then(d => {
-                /* Reset bulan dropdown */
-                if (bulanSelect) {
-                    Array.from(bulanSelect.options).forEach(opt => {
-                        opt.disabled = false;
-                        opt.text = opt.text.replace(' ✓ Lunas', '');
-                    });
-                }
-
+                if (bulanSelect) { Array.from(bulanSelect.options).forEach(opt => { opt.disabled = false; opt.text = opt.text.replace(' ✓ Lunas', ''); }); }
                 if (!d.sudah_bayar_pendaftaran) {
-                    /* --- Pendaftaran baru --- */
-                    infoStatus.innerHTML = `
-                        <div style="padding:12px 15px;border-radius:10px;background:#FEF3C7;color:#92400E;border-left:4px solid #F59E0B;">
-                            <strong><i class="fas fa-exclamation-triangle"></i> Pendaftaran Baru!</strong><br>
-                            <span style="font-size:13px;">Murid ini belum terdaftar. Wajib bayar biaya pendaftaran <strong>Rp 100.000</strong>.</span>
-                        </div>`;
+                    infoStatus.innerHTML = `<div style="padding:12px 15px;border-radius:10px;background:#FEF3C7;color:#92400E;border-left:4px solid #F59E0B;"><strong><i class="fas fa-exclamation-triangle"></i> Pendaftaran Baru!</strong><br><span style="font-size:13px;">Murid ini belum terdaftar. Wajib bayar biaya pendaftaran <strong>Rp 100.000</strong>.</span></div>`;
                     infoStatus.style.display = 'block';
                     if (paketSelect) paketSelect.disabled = true;
-                    if (bulanGroup)  bulanGroup.style.display = 'none';
-                    if (infoHarga)   infoHarga.style.display = 'none';
+                    if (bulanGroup) bulanGroup.style.display = 'none';
+                    if (infoHarga) infoHarga.style.display = 'none';
                     if (previewStatus) previewStatus.style.display = 'none';
-                    if (totalInput)  totalInput.value = '100000';
+                    if (totalInput) totalInput.value = '100000';
                     _hargaPaket = 100000;
                     updatePreview();
                 } else {
-                    /* --- Sudah terdaftar --- */
-                    infoStatus.innerHTML = `
-                        <div style="padding:12px 15px;border-radius:10px;background:#D1FAE5;color:#065F46;border-left:4px solid #10B981;">
-                            <strong><i class="fas fa-check-circle"></i> Sudah Terdaftar!</strong><br>
-                            <span style="font-size:13px;">Pilih paket dan bulan pembayaran.</span>
-                        </div>`;
+                    infoStatus.innerHTML = `<div style="padding:12px 15px;border-radius:10px;background:#D1FAE5;color:#065F46;border-left:4px solid #10B981;"><strong><i class="fas fa-check-circle"></i> Sudah Terdaftar!</strong><br><span style="font-size:13px;">Pilih paket dan bulan pembayaran.</span></div>`;
                     infoStatus.style.display = 'block';
                     if (paketSelect) paketSelect.disabled = false;
-
-                    /* Set paket aktif */
                     if (d.paket_aktif && paketSelect) {
                         paketSelect.value = d.paket_aktif;
                         const selOpt = paketSelect.options[paketSelect.selectedIndex];
                         const h = parseInt(selOpt?.dataset?.harga) || 0;
                         _hargaPaket = h;
                         if (totalInput && h > 0) totalInput.value = h;
-                        if (infoHarga && hargaValue && h > 0) {
-                            hargaValue.textContent = 'Rp ' + h.toLocaleString('id-ID');
-                            infoHarga.style.display = 'block';
-                        }
+                        if (infoHarga && hargaValue && h > 0) { hargaValue.textContent = 'Rp ' + h.toLocaleString('id-ID'); infoHarga.style.display = 'block'; }
                     }
-
-                    /* Tampilkan bulan group */
                     if (bulanGroup) bulanGroup.style.display = 'block';
-
-                    /* Tandai bulan lunas */
-                    if (d.bulan_lunas && bulanSelect) {
-                        d.bulan_lunas.forEach(function (bulan) {
-                            Array.from(bulanSelect.options).forEach(opt => {
-                                if (parseInt(opt.value) === bulan) {
-                                    opt.disabled = true;
-                                    opt.text += ' ✓ Lunas';
-                                }
-                            });
-                        });
-                    }
-
-                    /* Set default bulan */
-                    if (bulanSelect) {
-                        if (d.bulan_tunggakan) {
-                            bulanSelect.value = d.bulan_tunggakan;
-                        } else if (d.bulan_berikutnya) {
-                            bulanSelect.value = d.bulan_berikutnya;
-                        }
-                    }
-
+                    if (d.bulan_lunas && bulanSelect) { d.bulan_lunas.forEach(bulan => { Array.from(bulanSelect.options).forEach(opt => { if (parseInt(opt.value) === bulan) { opt.disabled = true; opt.text += ' ✓ Lunas'; } }); }); }
+                    if (bulanSelect) { if (d.bulan_tunggakan) bulanSelect.value = d.bulan_tunggakan; else if (d.bulan_berikutnya) bulanSelect.value = d.bulan_berikutnya; }
                     updatePreview();
                 }
             })
-            .catch(() => {
-                infoStatus.innerHTML = '<div style="padding:12px 15px;border-radius:10px;background:#FEE2E2;color:#991B1B;">Gagal memuat data murid.</div>';
-                infoStatus.style.display = 'block';
-            });
+            .catch(() => { infoStatus.innerHTML = '<div style="padding:12px 15px;border-radius:10px;background:#FEE2E2;color:#991B1B;">Gagal memuat data murid.</div>'; infoStatus.style.display = 'block'; });
     }
 
-    /* ================================================================
-       PAKET BELAJAR → update total & harga info
-    ================================================================ */
-    if (paketSelect) {
-        paketSelect.addEventListener('change', function () {
-            const selOpt = this.options[this.selectedIndex];
-            const h = parseInt(selOpt?.dataset?.harga) || 0;
-            _hargaPaket = h;
-            if (h > 0) {
-                if (totalInput) totalInput.value = h;
-                if (infoHarga && hargaValue) {
-                    hargaValue.textContent = 'Rp ' + h.toLocaleString('id-ID');
-                    infoHarga.style.display = 'block';
-                }
-            } else {
-                if (infoHarga) infoHarga.style.display = 'none';
-            }
-            updatePreview();
-        });
-    }
+    /* PAKET CHANGE */
+    paketSelect?.addEventListener('change', function () {
+        const selOpt = this.options[this.selectedIndex];
+        const h = parseInt(selOpt?.dataset?.harga) || 0;
+        _hargaPaket = h;
+        if (h > 0) { if (totalInput) totalInput.value = h; if (infoHarga && hargaValue) { hargaValue.textContent = 'Rp ' + h.toLocaleString('id-ID'); infoHarga.style.display = 'block'; } }
+        else { if (infoHarga) infoHarga.style.display = 'none'; }
+        updatePreview();
+    });
 
-    /* ================================================================
-       PREVIEW LUNAS / UANG MUKA
-    ================================================================ */
+    /* PREVIEW */
     window.updatePreview = function () {
         if (!previewStatus || !totalInput) return;
-        const kategori = kategoriHidden.value;
-        if (kategori !== 'murid') { previewStatus.style.display = 'none'; return; }
-
         const total = parseInt(totalInput.value) || 0;
         if (!total || !_hargaPaket) { previewStatus.style.display = 'none'; return; }
-
         if (total >= _hargaPaket) {
             const lebih = total - _hargaPaket;
-            previewStatus.style.background = '#D1FAE5';
-            previewStatus.style.color = '#065F46';
-            previewStatus.style.display = 'block';
-            previewStatus.innerHTML = `<i class="fas fa-check-circle"></i> <strong>Lunas</strong>` +
-                (lebih > 0 ? ` — Uang Muka <strong>Rp ${lebih.toLocaleString('id-ID')}</strong>` : '');
+            previewStatus.style.background = '#D1FAE5'; previewStatus.style.color = '#065F46'; previewStatus.style.display = 'block';
+            previewStatus.innerHTML = `<i class="fas fa-check-circle"></i> <strong>Lunas</strong>` + (lebih > 0 ? ` — Uang Muka <strong>Rp ${lebih.toLocaleString('id-ID')}</strong>` : '');
         } else {
             const kurang = _hargaPaket - total;
-            previewStatus.style.background = '#FEF3C7';
-            previewStatus.style.color = '#92400E';
-            previewStatus.style.display = 'block';
+            previewStatus.style.background = '#FEF3C7'; previewStatus.style.color = '#92400E'; previewStatus.style.display = 'block';
             previewStatus.innerHTML = `<i class="fas fa-exclamation-triangle"></i> <strong>Kurang Rp ${kurang.toLocaleString('id-ID')}</strong> dari tagihan`;
         }
     };
-
-    if (totalInput) {
-        totalInput.addEventListener('input', updatePreview);
-    }
-
+    totalInput?.addEventListener('input', updatePreview);
 })();
 </script>

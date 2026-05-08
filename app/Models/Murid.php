@@ -49,6 +49,14 @@ class Murid extends Model
     }
 
     /**
+     * Relasi ke tabel transaksi umum (ms_transaksi)
+     */
+    public function transaksiUmum()
+    {
+        return $this->hasMany(TransaksiUmum::class, 'id_murid', 'id_murid');
+    }
+
+    /**
      * Relasi ke tabel pembayaran (tr_transaksi)
      */
     public function pembayaran()

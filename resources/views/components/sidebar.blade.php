@@ -104,27 +104,32 @@
 
                 {{-- TRANSAKSI (Dropdown) --}}
                 <li class="has-submenu">
-                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle {{ request()->is('*transaksi*') || request()->is('*pembayaran*') ? 'nav-active' : '' }}" onclick="toggleSubmenu(this)">
+                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle {{ request()->is('*transaksi*') || request()->is('*pembayaran*') || request()->is('*rekap-gaji*') ? 'nav-active' : '' }}" onclick="toggleSubmenu(this)">
                         <div style="display: flex; align-items: center; flex: 1;">
                             <img src="{{ asset('images/dashboard/icons/icon_pembayaran.png') }}" class="sidebar-icon"> 
                             Transaksi
                         </div>
                         <i class="fas fa-caret-down submenu-arrow"></i>
                     </a>
-                    <ul class="submenu-list" style="display: {{ request()->is('*transaksi*') || request()->is('*pembayaran*') ? 'block' : 'none' }};">
+                    <ul class="submenu-list" style="display: {{ request()->is('*transaksi*') || request()->is('*pembayaran*') || request()->is('*rekap-gaji*') ? 'block' : 'none' }};">
                         <li>
                             <a href="{{ route('admin.transaksi.pemasukan') }}" class="submenu-link {{ request()->routeIs('admin.transaksi.pemasukan*') ? 'sub-active' : '' }}">
-                                <i class="fas fa-arrow-down submenu-icon"></i> Transaksi Pemasukan
+                                <i class="fas fa-arrow-down submenu-icon"></i> Pembayaran Murid
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.transaksi.pemasukan-lain') }}" class="submenu-link {{ request()->routeIs('admin.transaksi.pemasukan-lain*') ? 'sub-active' : '' }}">
+                                <i class="fas fa-plus-circle submenu-icon"></i> Pemasukan Lain
                             </a>
                         </li>
                         <li>
                             <a href="{{ route('admin.transaksi.pengeluaran') }}" class="submenu-link {{ request()->routeIs('admin.transaksi.pengeluaran*') ? 'sub-active' : '' }}">
-                                <i class="fas fa-arrow-up submenu-icon"></i> Transaksi Pengeluaran
+                                <i class="fas fa-arrow-up submenu-icon"></i> Pengeluaran Lain
                             </a>
                         </li>
                         <li>
                             <a href="{{ route('admin.transaksi.penggajian') }}" class="submenu-link {{ request()->routeIs('admin.transaksi.penggajian*') ? 'sub-active' : '' }}">
-                                <i class="fas fa-hand-holding-usd submenu-icon"></i> Transaksi Penggajian
+                                <i class="fas fa-hand-holding-usd submenu-icon"></i> Penggajian
                             </a>
                         </li>
                     </ul>
@@ -137,32 +142,11 @@
                     </a>
                 </li>
 
-                {{-- LAPORAN KEUANGAN (Dropdown) --}}
-                <li class="has-submenu">
-                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle {{ request()->is('*laporan-keuangan*') ? 'nav-active' : '' }}" onclick="toggleSubmenu(this)">
-                        <div style="display: flex; align-items: center; flex: 1;">
-                            <img src="{{ asset('images/dashboard/icons/icon_laporankeuangan.png') }}" class="sidebar-icon"> 
-                            Laporan Keuangan
-                        </div>
-                        <i class="fas fa-caret-down submenu-arrow"></i>
+                {{-- LAPORAN KEUANGAN (Menu Langsung) --}}
+                <li>
+                    <a href="{{ route('admin.laporan-keuangan') }}" class="nav-link-custom {{ request()->routeIs('admin.laporan-keuangan*') ? 'nav-active' : '' }}">
+                        <img src="{{ asset('images/dashboard/icons/icon_laporankeuangan.png') }}" class="sidebar-icon"> Laporan Keuangan
                     </a>
-                    <ul class="submenu-list" style="display: {{ request()->is('*laporan-keuangan*') ? 'block' : 'none' }};">
-                        <li>
-                            <a href="{{ route('admin.laporan-keuangan.pemasukan') }}" class="submenu-link {{ request()->routeIs('admin.laporan-keuangan.pemasukan*') ? 'sub-active' : '' }}">
-                                <i class="fas fa-file-invoice-dollar submenu-icon"></i> Laporan Pemasukan
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.laporan-keuangan.pengeluaran') }}" class="submenu-link {{ request()->routeIs('admin.laporan-keuangan.pengeluaran*') ? 'sub-active' : '' }}">
-                                <i class="fas fa-file-invoice submenu-icon"></i> Laporan Pengeluaran
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.laporan-keuangan.penggajian') }}" class="submenu-link {{ request()->routeIs('admin.laporan-keuangan.penggajian*') ? 'sub-active' : '' }}">
-                                <i class="fas fa-receipt submenu-icon"></i> Laporan Penggajian
-                            </a>
-                        </li>
-                    </ul>
                 </li>
             @endif
 
@@ -235,17 +219,22 @@
                     <ul class="submenu-list" style="display: {{ request()->is('*transaksi*') || request()->is('*pembayaran*') || request()->is('*rekap-gaji*') ? 'block' : 'none' }};">
                         <li>
                             <a href="{{ route('superadmin.transaksi.pemasukan') }}" class="submenu-link {{ request()->routeIs('superadmin.transaksi.pemasukan*') ? 'sub-active' : '' }}">
-                                <i class="fas fa-arrow-down submenu-icon"></i> Transaksi Pemasukan
+                                <i class="fas fa-arrow-down submenu-icon"></i> Pembayaran Murid
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('superadmin.transaksi.pemasukan-lain') }}" class="submenu-link {{ request()->routeIs('superadmin.transaksi.pemasukan-lain*') ? 'sub-active' : '' }}">
+                                <i class="fas fa-plus-circle submenu-icon"></i> Pemasukan Lain
                             </a>
                         </li>
                         <li>
                             <a href="{{ route('superadmin.transaksi.pengeluaran') }}" class="submenu-link {{ request()->routeIs('superadmin.transaksi.pengeluaran*') ? 'sub-active' : '' }}">
-                                <i class="fas fa-arrow-up submenu-icon"></i> Transaksi Pengeluaran
+                                <i class="fas fa-arrow-up submenu-icon"></i> Pengeluaran Lain
                             </a>
                         </li>
                         <li>
                             <a href="{{ route('superadmin.transaksi.penggajian') }}" class="submenu-link {{ request()->routeIs('superadmin.transaksi.penggajian*') ? 'sub-active' : '' }}">
-                                <i class="fas fa-hand-holding-usd submenu-icon"></i> Transaksi Penggajian
+                                <i class="fas fa-hand-holding-usd submenu-icon"></i> Penggajian
                             </a>
                         </li>
                     </ul>
@@ -258,32 +247,11 @@
                     </a>
                 </li>
 
-                {{-- LAPORAN KEUANGAN (Dropdown) --}}
-                <li class="has-submenu">
-                    <a href="javascript:void(0)" class="nav-link-custom submenu-toggle {{ request()->is('*laporan-keuangan*') ? 'nav-active' : '' }}" onclick="toggleSubmenu(this)">
-                        <div style="display: flex; align-items: center; flex: 1;">
-                            <img src="{{ asset('images/dashboard/icons/icon_laporankeuangan.png') }}" class="sidebar-icon"> 
-                            Laporan Keuangan
-                        </div>
-                        <i class="fas fa-caret-down submenu-arrow"></i>
+                {{-- LAPORAN KEUANGAN (Menu Langsung) --}}
+                <li>
+                    <a href="{{ route('superadmin.laporan-keuangan') }}" class="nav-link-custom {{ request()->routeIs('superadmin.laporan-keuangan*') ? 'nav-active' : '' }}">
+                        <img src="{{ asset('images/dashboard/icons/icon_laporankeuangan.png') }}" class="sidebar-icon"> Laporan Keuangan
                     </a>
-                    <ul class="submenu-list" style="display: {{ request()->is('*laporan-keuangan*') ? 'block' : 'none' }};">
-                        <li>
-                            <a href="{{ route('superadmin.laporan-keuangan.pemasukan') }}" class="submenu-link {{ request()->routeIs('superadmin.laporan-keuangan.pemasukan*') ? 'sub-active' : '' }}">
-                                <i class="fas fa-file-invoice-dollar submenu-icon"></i> Laporan Pemasukan
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('superadmin.laporan-keuangan.pengeluaran') }}" class="submenu-link {{ request()->routeIs('superadmin.laporan-keuangan.pengeluaran*') ? 'sub-active' : '' }}">
-                                <i class="fas fa-file-invoice submenu-icon"></i> Laporan Pengeluaran
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('superadmin.laporan-keuangan.penggajian') }}" class="submenu-link {{ request()->routeIs('superadmin.laporan-keuangan.penggajian*') ? 'sub-active' : '' }}">
-                                <i class="fas fa-receipt submenu-icon"></i> Laporan Penggajian
-                            </a>
-                        </li>
-                    </ul>
                 </li>
             @endif
 

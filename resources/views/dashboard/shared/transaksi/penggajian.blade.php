@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Transaksi Penggajian')
+@section('title', 'Penggajian')
 
 @section('content')
 <div style="width: 100%;">
@@ -8,7 +8,7 @@
     {{-- HEADER --}}
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">{{ \Carbon\Carbon::now()->translatedFormat('F Y') }}</p>
-        <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0;">Transaksi Penggajian</h1>
+        <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0;">Penggajian</h1>
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Kelola Gaji Tentor Berdasarkan Honor Akhir Presensi</p>
     </div>
 
@@ -81,14 +81,20 @@
                         @endif
                     </td>
                     <td style="padding: 15px; text-align: center;">
-                        @if($item->sudah_dibayar)
-                            <span style="background:#D1FAE5;color:#065F46;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;">✅ Sudah Dibayar</span>
-                        @else
-                            <button type="button" onclick="klikBayar('{{ $item->id_pegawai }}', '{{ $item->nama }}', {{ $item->total_gaji }}, {{ $item->jumlah_sesi }})" 
-                                    style="background: #10B981; color: white; padding: 5px 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 10px; white-space: nowrap; font-family: 'Poppins', sans-serif;">
-                                <i class="fas fa-money-bill-wave"></i> Bayar
+                        <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                            {{-- Tombol Detail --}}
+                            <button onclick="bukaDetailPenggajian({{ $item->id_pegawai }})"
+                                    style="background: #4D0B87; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: 'Poppins', sans-serif; white-space: nowrap;">
+                                <i class="fas fa-eye"></i> Detail
                             </button>
-                        @endif
+                            {{-- Tombol Bayar --}}
+                            @if(!$item->sudah_dibayar)
+                                <button type="button" onclick="klikBayar('{{ $item->id_pegawai }}', '{{ $item->nama }}', {{ $item->total_gaji }}, {{ $item->jumlah_sesi }})" 
+                                        style="background: #10B981; color: white; padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; font-size: 11px; font-weight: 600; white-space: nowrap; font-family: 'Poppins', sans-serif;">
+                                    <i class="fas fa-money-bill-wave"></i> Bayar
+                                </button>
+                            @endif
+                        </div>
                     </td>
                 </tr>
                 @empty
@@ -136,14 +142,18 @@
 
 </div>
 
+{{-- MODAL DETAIL PENGGAJIAN --}}
+<div id="modalDetailGaji"
+     style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; overflow-y: auto; padding: 20px; box-sizing: border-box;">
+    <div style="background: white; border-radius: 20px; width: 700px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.15);" id="modalDetailGajiContent"></div>
+</div>
+
 {{-- MODAL PERINGATAN (BUKAN AKHIR BULAN) --}}
 <div id="modalPeringatan" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
         <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Tidak Dapat Membayar</h2>
-        <p style="color: #6B7280; font-size: 12px; margin: 8px 0 20px 0; line-height: 1.5;" id="pesanPeringatan">
-            Pembayaran gaji hanya bisa dilakukan di <strong>akhir bulan (H-3 s/d akhir bulan)</strong> atau untuk <strong>bulan sebelumnya yang belum dibayar</strong>.
-        </p>
+        <p style="color: #6B7280; font-size: 12px; margin: 8px 0 20px 0; line-height: 1.5;" id="pesanPeringatan"></p>
         <button onclick="tutupModalPeringatan()" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #4D0B87; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Mengerti</button>
     </div>
 </div>
@@ -153,7 +163,7 @@
     <div style="background: white; padding: 25px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-money-bill-wave"></i></div>
         <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Bayar Gaji?</h2>
-        <p style="color: #6B7280; font-size: 12px; margin: 8px 0 20px 0; line-height: 1.5;" id="pesanBayar">Apakah Anda yakin ingin membayar gaji tentor ini?</p>
+        <p style="color: #6B7280; font-size: 12px; margin: 8px 0 20px 0; line-height: 1.5;" id="pesanBayar"></p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalBayar()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
             <button type="button" id="btnKonfirmasiBayar" onclick="konfirmasiBayar()" style="flex: 1; padding: 10px; border-radius: 10px; border: none; background: #10B981; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Bayar</button>
@@ -172,6 +182,42 @@
         }
     }
 
+    /* ================================================================
+       BUKA MODAL DETAIL PENGGAJIAN
+    ================================================================ */
+    function bukaDetailPenggajian(idPegawai) {
+        const bulan = document.getElementById('filterBulan').value;
+        const tahun = document.getElementById('filterTahun').value;
+        const url = "{{ url($role . '/penggajian/detail') }}/" + idPegawai + "?bulan=" + bulan + "&tahun=" + tahun;
+        
+        fetch(url)
+            .then(r => r.text())
+            .then(html => {
+                const cont = document.getElementById('modalDetailGajiContent');
+                cont.innerHTML = html;
+                document.getElementById('modalDetailGaji').style.display = 'flex';
+                cont.querySelectorAll('script').forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = oldScript.textContent;
+                    document.body.appendChild(newScript);
+                    document.body.removeChild(newScript);
+                });
+            })
+            .catch(() => alert('Gagal memuat detail penggajian.'));
+    }
+
+    function tutupModalDetailGaji() {
+        document.getElementById('modalDetailGaji').style.display = 'none';
+        document.getElementById('modalDetailGajiContent').innerHTML = '';
+    }
+
+    document.getElementById('modalDetailGaji').addEventListener('click', function(e) {
+        if (e.target === this) tutupModalDetailGaji();
+    });
+
+    /* ================================================================
+       BAYAR GAJI
+    ================================================================ */
     function klikBayar(id, nama, total, sesi) {
         const today = new Date();
         const currentMonth = today.getMonth() + 1;

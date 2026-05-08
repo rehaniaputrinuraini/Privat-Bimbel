@@ -61,7 +61,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; background-color: #F3E8FF; padding: 15px 25px; border-bottom: 1px solid #E5E7EB;">
         <h2 style="font-size: 16px; font-weight: 700; color: #111827; margin: 0;">Rincian Keuangan Terakhir</h2>
         @if($role !== 'tentor')
-            <a href="{{ route($role . '.laporan-keuangan.pemasukan') }}" style="color: #4D0B87; text-decoration: none; font-weight: 700; font-size: 13px;">Lihat Semua</a>
+            <a href="{{ route($role . '.laporan-keuangan') }}" style="color: #4D0B87; text-decoration: none; font-weight: 700; font-size: 13px;">Lihat Semua</a>
         @endif
     </div>
 

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Transaksi Pemasukan')
+@section('title', 'Pembayaran Murid')
 
 @section('content')
 <div style="width: 100%;">
@@ -8,8 +8,8 @@
     {{-- HEADER --}}
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">{{ \Carbon\Carbon::now()->translatedFormat('F Y') }}</p>
-        <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0;">Transaksi Pemasukan</h1>
-        <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Kelola Tagihan & Pemasukan Murid</p>
+        <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0;">Pembayaran Murid</h1>
+        <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Kelola Pembayaran Murid</p>
     </div>
 
     {{-- TOTAL BOX --}}
@@ -36,7 +36,7 @@
     <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
         <button onclick="bukaModalCreate()"
                 style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; box-shadow: 0 4px 6px rgba(77,11,135,0.2); font-family: 'Poppins', sans-serif;">
-            <i class="fas fa-plus"></i> Input Pemasukan
+            <i class="fas fa-plus"></i> Input Pembayaran Murid
         </button>
     </div>
 
@@ -77,7 +77,7 @@
         </div>
     </div>
 
-    {{-- TABEL TAGIHAN --}}
+    {{-- TABEL PEMBAYARAN MURID --}}
     <div style="background: white; border-radius: 20px; overflow-x: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 25px;">
         <table style="width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; font-family: 'Poppins', sans-serif;">
             <thead>
@@ -89,9 +89,7 @@
                     <th style="padding: 15px; text-align: center;">Pendaftaran</th>
                     <th style="padding: 15px; text-align: center;">Pembayaran</th>
                     <th style="padding: 15px; text-align: center;">Tagihan</th>
-                    <th style="padding: 15px; text-align: center;">Tagihan Bulan</th>
-                    <th style="padding: 15px; text-align: center;">Total Piutang</th>
-                    <th style="padding: 15px; text-align: center;">Uang Muka</th>
+                    <th style="padding: 15px; text-align: center;">Aksi</th>
                 </tr>
             </thead>
             <tbody id="tagihanTableBody">
@@ -130,19 +128,18 @@
                             <span>-</span>
                         @endif
                     </td>
-                    <td style="padding: 15px; text-align: center; color: #6B7280;">{{ $t->tagihan_bulan ?? '-' }}</td>
-                    <td style="padding: 15px; text-align: center; {{ $t->total_piutang != '-' ? 'font-weight:700;color:#EF4444;' : '' }}">
-                        {{ $t->total_piutang ?? '-' }}
-                    </td>
-                    <td style="padding: 15px; text-align: center; {{ $t->uang_muka != '-' ? 'font-weight:600;color:#4338CA;' : '' }}">
-                        {{ $t->uang_muka ?? '-' }}
+                    <td style="padding: 15px; text-align: center;">
+                        <button onclick="bukaDetailPembayaran({{ $t->id_murid }})"
+                                style="background: #4D0B87; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; font-family: 'Poppins', sans-serif;">
+                            <i class="fas fa-eye"></i> Detail
+                        </button>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="10" style="padding: 50px; text-align: center; color: #9CA3AF; font-size: 14px;">
+                    <td colspan="8" style="padding: 50px; text-align: center; color: #9CA3AF; font-size: 14px;">
                         <i class="fas fa-inbox" style="font-size: 32px; margin-bottom: 10px; display: block; opacity: .4;"></i>
-                        Belum ada data tagihan
+                        Belum ada data pembayaran murid
                     </td>
                 </tr>
                 @endforelse
@@ -201,10 +198,16 @@
 
 </div>
 
-{{-- MODAL FORM WRAPPER --}}
+{{-- MODAL FORM CREATE --}}
 <div id="modalForm"
      style="display: none; position: fixed; z-index: 9998; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; overflow-y: auto; padding: 20px; box-sizing: border-box;">
     <div style="background: white; border-radius: 20px; width: 750px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.15);" id="modalContent"></div>
+</div>
+
+{{-- MODAL DETAIL PEMBAYARAN --}}
+<div id="modalDetail"
+     style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; overflow-y: auto; padding: 20px; box-sizing: border-box;">
+    <div style="background: white; border-radius: 20px; width: 700px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.15);" id="modalDetailContent"></div>
 </div>
 
 <script>
@@ -216,11 +219,8 @@
             .then(r => r.text())
             .then(html => {
                 const cont = document.getElementById('modalContent');
-                // Set HTML tanpa script dulu
                 cont.innerHTML = html;
                 document.getElementById('modalForm').style.display = 'flex';
-                // Eksekusi manual semua <script> yang ada di dalam HTML hasil fetch
-                // (innerHTML tidak otomatis menjalankan script)
                 cont.querySelectorAll('script').forEach(oldScript => {
                     const newScript = document.createElement('script');
                     newScript.textContent = oldScript.textContent;
@@ -236,11 +236,41 @@
         document.getElementById('modalContent').innerHTML = '';
     }
 
-    /* Klik backdrop tutup modal (jika form belum disentuh — JS di dalam form yang handle) */
     document.getElementById('modalForm').addEventListener('click', function (e) {
         if (e.target === this) tutupModalForm();
     });
 
+    /* ================================================================
+    BUKA MODAL DETAIL PEMBAYARAN MURID
+    =============================================================== */
+    function bukaDetailPembayaran(idMurid) {
+        const baseUrl = "{{ url($role . '/pembayaran/detail') }}/" + idMurid;
+        
+        fetch(baseUrl)
+            .then(r => r.text())
+            .then(html => {
+                const cont = document.getElementById('modalDetailContent');
+                cont.innerHTML = html;
+                document.getElementById('modalDetail').style.display = 'flex';
+                cont.querySelectorAll('script').forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = oldScript.textContent;
+                    document.body.appendChild(newScript);
+                    document.body.removeChild(newScript);
+                });
+            })
+            .catch(() => alert('Gagal memuat detail pembayaran.'));
+    }
+
+    function tutupModalDetail() {
+        document.getElementById('modalDetail').style.display = 'none';
+        document.getElementById('modalDetailContent').innerHTML = '';
+    }
+
+    document.getElementById('modalDetail').addEventListener('click', function (e) {
+        if (e.target === this) tutupModalDetail();
+    });
+    
     /* ================================================================
        PAGINATION: ganti jumlah baris
     ================================================================ */
@@ -252,7 +282,7 @@
     });
 
     /* ================================================================
-       FILTER TABEL CLIENT-SIDE
+       FILTER TABEL CLIENT-SIDE (update index kolom)
     ================================================================ */
     document.getElementById('searchTagihan')?.addEventListener('keyup', filterTagihan);
     document.getElementById('filterPaket')?.addEventListener('change', filterTagihan);
@@ -266,7 +296,7 @@
         const ftg = document.getElementById('filterTagihan')?.value || '';
 
         document.querySelectorAll('#tagihanTableBody tr').forEach(row => {
-            if (!row.cells || row.cells.length < 10) return;
+            if (!row.cells || row.cells.length < 8) return;
             const nama = (row.cells[1]?.innerText || '').toLowerCase();
             const paket = row.cells[3]?.innerText.trim() || '';
             const statusPembayaran = row.cells[5]?.innerText.trim() || '';

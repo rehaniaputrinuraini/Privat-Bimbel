@@ -161,10 +161,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/pembayaran/edit/{id}', [PembayaranController::class, 'edit'])->name('pembayaran.edit');
         Route::put('/pembayaran/update/{id}', [PembayaranController::class, 'update'])->name('pembayaran.update');
         Route::delete('/pembayaran/destroy/{id}', [PembayaranController::class, 'destroy'])->name('pembayaran.destroy');
-        // TRANSAKSI PEMASUKAN
+        // TRANSAKSI PEMASUKAN (Pembayaran Murid)
         Route::get('/transaksi/pemasukan', [PembayaranController::class, 'indexPemasukan'])->name('transaksi.pemasukan');
+        Route::get('/pembayaran/detail/{id}', [PembayaranController::class, 'detail'])->name('pembayaran.detail');
+
+        Route::get('/pemasukan-lain/create', [PembayaranController::class, 'createPemasukanLain'])->name('pemasukan-lain.create');
+
+        // TRANSAKSI PEMASUKAN LAIN
+        Route::get('/transaksi/pemasukan-lain', [PembayaranController::class, 'indexPemasukanLain'])->name('transaksi.pemasukan-lain');
         
-        // TRANSAKSI PENGELUARAN
+        // TRANSAKSI PENGELUARAN (Pengeluaran Lain)
         Route::get('/transaksi/pengeluaran', [PembayaranController::class, 'indexPengeluaran'])->name('transaksi.pengeluaran');
         Route::get('/pengeluaran/create', [PembayaranController::class, 'createPengeluaran'])->name('pengeluaran.create');
         Route::post('/pengeluaran/store', [PembayaranController::class, 'storePengeluaran'])->name('pengeluaran.store');
@@ -172,6 +178,7 @@ Route::middleware(['auth'])->group(function () {
         // TRANSAKSI PENGGAJIAN
         Route::get('/transaksi/penggajian', [PembayaranController::class, 'indexPenggajian'])->name('transaksi.penggajian');
         Route::post('/penggajian/bayar/{id}', [PembayaranController::class, 'bayarGaji'])->name('penggajian.bayar');
+        Route::get('/penggajian/detail/{id}', [PembayaranController::class, 'detailPenggajian'])->name('penggajian.detail');
 
         // KELOLA TENTOR
         Route::get('/kelola-tentor', [KelolaTentorController::class, 'index'])->name('kelola-tentor');
@@ -193,10 +200,8 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/kelola-admin/toggle-status/{id}', [KelolaAdminController::class, 'toggleStatus'])->name('kelola-admin.toggleStatus');
         Route::delete('/kelola-admin/destroy/{id}', [KelolaAdminController::class, 'destroy'])->name('kelola-admin.destroy');
 
-        // LAPORAN KEUANGAN (3 HALAMAN)
-        Route::get('/laporan-keuangan/pemasukan', [LaporanKeuanganController::class, 'pemasukan'])->name('laporan-keuangan.pemasukan');
-        Route::get('/laporan-keuangan/pengeluaran', [LaporanKeuanganController::class, 'pengeluaran'])->name('laporan-keuangan.pengeluaran');
-        Route::get('/laporan-keuangan/penggajian', [LaporanKeuanganController::class, 'penggajian'])->name('laporan-keuangan.penggajian');
+        // LAPORAN KEUANGAN (1 HALAMAN GABUNGAN)
+        Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan-keuangan');
         
         // KELOLA PRESENSI
         Route::get('/kelola-presensi', [KelolaPresensiController::class, 'index'])->name('kelola-presensi');
@@ -269,10 +274,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/pembayaran/edit/{id}', [PembayaranController::class, 'edit'])->name('pembayaran.edit');
         Route::put('/pembayaran/update/{id}', [PembayaranController::class, 'update'])->name('pembayaran.update');
         Route::delete('/pembayaran/destroy/{id}', [PembayaranController::class, 'destroy'])->name('pembayaran.destroy');
-        // TRANSAKSI PEMASUKAN
+        // TRANSAKSI PEMASUKAN (Pembayaran Murid)
         Route::get('/transaksi/pemasukan', [PembayaranController::class, 'indexPemasukan'])->name('transaksi.pemasukan');
+        Route::get('/pembayaran/detail/{id}', [PembayaranController::class, 'detail'])->name('pembayaran.detail');
+
+        Route::get('/pemasukan-lain/create', [PembayaranController::class, 'createPemasukanLain'])->name('pemasukan-lain.create');
+
+        // TRANSAKSI PEMASUKAN LAIN
+        Route::get('/transaksi/pemasukan-lain', [PembayaranController::class, 'indexPemasukanLain'])->name('transaksi.pemasukan-lain');
         
-        // TRANSAKSI PENGELUARAN
+        // TRANSAKSI PENGELUARAN (Pengeluaran Lain)
         Route::get('/transaksi/pengeluaran', [PembayaranController::class, 'indexPengeluaran'])->name('transaksi.pengeluaran');
         Route::get('/pengeluaran/create', [PembayaranController::class, 'createPengeluaran'])->name('pengeluaran.create');
         Route::post('/pengeluaran/store', [PembayaranController::class, 'storePengeluaran'])->name('pengeluaran.store');
@@ -280,14 +291,13 @@ Route::middleware(['auth'])->group(function () {
         // TRANSAKSI PENGGAJIAN
         Route::get('/transaksi/penggajian', [PembayaranController::class, 'indexPenggajian'])->name('transaksi.penggajian');
         Route::post('/penggajian/bayar/{id}', [PembayaranController::class, 'bayarGaji'])->name('penggajian.bayar');
-
+        Route::get('/penggajian/detail/{id}', [PembayaranController::class, 'detailPenggajian'])->name('penggajian.detail'); // 
+        
         // DATA TENTOR
         Route::get('/data-tentor', [KelolaTentorController::class, 'index'])->name('data-tentor');
         
-        // LAPORAN KEUANGAN (3 HALAMAN)
-        Route::get('/laporan-keuangan/pemasukan', [LaporanKeuanganController::class, 'pemasukan'])->name('laporan-keuangan.pemasukan');
-        Route::get('/laporan-keuangan/pengeluaran', [LaporanKeuanganController::class, 'pengeluaran'])->name('laporan-keuangan.pengeluaran');
-        Route::get('/laporan-keuangan/penggajian', [LaporanKeuanganController::class, 'penggajian'])->name('laporan-keuangan.penggajian');
+        // LAPORAN KEUANGAN (1 HALAMAN GABUNGAN)
+        Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan-keuangan');
         
         // KELOLA PRESENSI
         Route::get('/kelola-presensi', [KelolaPresensiController::class, 'index'])->name('kelola-presensi');

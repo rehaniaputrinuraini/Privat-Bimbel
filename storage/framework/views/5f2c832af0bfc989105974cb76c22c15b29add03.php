@@ -138,7 +138,7 @@
 </div>
 
 
-<div id="modalForm" style="display: none; position: fixed; z-index: 9998; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; overflow-y: auto; padding: 20px;">
+<div id="modalForm" style="display: none; position: fixed; z-index: 9998; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; overflow-y: auto;">
     <div style="background: white; border-radius: 20px; width: 600px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.15);" id="modalContent"></div>
 </div>
 
@@ -175,8 +175,12 @@
         });
     }
 
-    function tutupModalForm() { document.getElementById('modalForm').style.display = 'none'; document.getElementById('modalContent').innerHTML = ''; }
-    document.getElementById('modalForm').addEventListener('click', function(e) { if (e.target === this) tutupModalForm(); });
+    function tutupModalForm() { 
+        document.getElementById('modalForm').style.display = 'none'; 
+        document.getElementById('modalContent').innerHTML = ''; 
+    }
+
+    // ⛔ TIDAK BISA TUTUP DENGAN KLIK DI LUAR
 
     function pasangEventHandler() {
         const mc = document.getElementById('modalContent');
@@ -212,7 +216,8 @@
         document.getElementById('modalHapus').style.display = 'flex';
     }
     function tutupModalHapus() { document.getElementById('modalHapus').style.display = 'none'; }
-    document.getElementById('modalHapus').addEventListener('click', function(e) { if (e.target === this) tutupModalHapus(); });
+
+    // ⛔ TIDAK BISA TUTUP MODAL HAPUS DENGAN KLIK DI LUAR
 
     document.getElementById('pageSelect').addEventListener('change', function() {
         let url = new URL(window.location.href);
