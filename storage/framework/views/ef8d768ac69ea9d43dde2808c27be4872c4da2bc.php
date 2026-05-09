@@ -165,9 +165,9 @@
 
         </p>
         <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
-            Riwayat Presensi
+            Riwayat Pengajaran
         </h1>
-        <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Lihat Riwayat Presensi Semua Tentor</p>
+        <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Lihat Riwayat Pengajaran Semua Tentor</p>
     </div>
 
     
@@ -197,8 +197,8 @@
                 </div>
 
                 
-                <select name="tentor" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
-                    <option value="">--- Semua Tentor ---</option>
+                <select name="tentor" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 180px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
+                    <option value="">Semua Tentor</option>
                     <?php $__currentLoopData = $tentors ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <option value="<?php echo e($t->id_pegawai); ?>" <?php echo e(($tentorFilter ?? '') == $t->id_pegawai ? 'selected' : ''); ?>>
                             <?php echo e($t->nama_lengkap); ?>
@@ -208,10 +208,21 @@
                 </select>
 
                 
+                <?php
+                    $bulanSekarang = date('n');
+                    $requestBulan = request('bulan');
+                ?>
                 <select name="bulan" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 140px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
-                    <option value="">--- Pilih Bulan ---</option>
                     <?php $__currentLoopData = range(1, 12); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $b): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <option value="<?php echo e($b); ?>" <?php echo e(($bulan ?? '') == $b ? 'selected' : ''); ?>>
+                        <?php
+                            $selected = false;
+                            if ($requestBulan) {
+                                $selected = ($requestBulan == $b);
+                            } else {
+                                $selected = ($bulanSekarang == $b);
+                            }
+                        ?>
+                        <option value="<?php echo e($b); ?>" <?php echo e($selected ? 'selected' : ''); ?>>
                             <?php echo e(\Carbon\Carbon::create()->month($b)->translatedFormat('F')); ?>
 
                         </option>
@@ -219,10 +230,21 @@
                 </select>
 
                 
+                <?php
+                    $tahunSekarang = date('Y');
+                    $requestTahun = request('tahun');
+                ?>
                 <select name="tahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 100px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
-                    <option value="">--- Tahun ---</option>
                     <?php $__currentLoopData = $tahunList ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $th): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <option value="<?php echo e($th); ?>" <?php echo e(($tahun ?? '') == $th ? 'selected' : ''); ?>><?php echo e($th); ?></option>
+                        <?php
+                            $selected = false;
+                            if ($requestTahun) {
+                                $selected = ($requestTahun == $th);
+                            } else {
+                                $selected = ($tahunSekarang == $th);
+                            }
+                        ?>
+                        <option value="<?php echo e($th); ?>" <?php echo e($selected ? 'selected' : ''); ?>><?php echo e($th); ?></option>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
                 

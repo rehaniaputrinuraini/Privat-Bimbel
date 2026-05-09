@@ -1,7 +1,4 @@
-{{-- =============================================
-     Dashboard Shared - Ubah Kata Sandi
-     File: resources/views/dashboard/shared/profil/ubah_password.blade.php
-============================================= --}}
+
 
 <!DOCTYPE html>
 <html lang="id">
@@ -33,15 +30,16 @@
                     <p class="text-gray-500 text-sm">Masukkan Password Lama dan Password Baru Anda</p>
                 </div>
 
-                <form method="POST" action="{{ route('password.update.profile') }}">
-                    @csrf
-                    @method('PUT')
+                <form method="POST" action="<?php echo e(route('password.update.profile')); ?>">
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('PUT'); ?>
 
-                    @if ($errors->any())
+                    <?php if($errors->any()): ?>
                         <div class="bg-red-100 text-red-700 p-2 rounded-lg mb-3 text-xs border border-red-200">
-                            <i class="fas fa-exclamation-circle mr-1"></i> {{ $errors->first() }}
+                            <i class="fas fa-exclamation-circle mr-1"></i> <?php echo e($errors->first()); ?>
+
                         </div>
-                    @endif
+                    <?php endif; ?>
 
                     <div class="mb-3">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Password Lama</label>
@@ -90,7 +88,7 @@
                 </form>
 
                 <div class="mt-4 text-center">
-                    <a href="{{ route('profile.index') }}" class="text-xs text-[#4D0B87] hover:underline">
+                    <a href="<?php echo e(route('profile.index')); ?>" class="text-xs text-[#4D0B87] hover:underline">
                         Kembali ke Profil
                     </a>
                 </div>
@@ -115,4 +113,4 @@
         }
     </script>
 </body>
-</html>
+</html><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/profil/ubah_password.blade.php ENDPATH**/ ?>

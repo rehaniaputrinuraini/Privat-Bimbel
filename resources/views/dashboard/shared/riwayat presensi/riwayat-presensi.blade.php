@@ -164,9 +164,9 @@
             {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
         </p>
         <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
-            Riwayat Presensi
+            Riwayat Pengajaran
         </h1>
-        <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Lihat Riwayat Presensi Semua Tentor</p>
+        <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Lihat Riwayat Pengajaran Semua Tentor</p>
     </div>
 
     {{-- ALERT SUCCESS/ERROR --}}
@@ -194,8 +194,8 @@
                 </div>
 
                 {{-- FILTER TENTOR --}}
-                <select name="tentor" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
-                    <option value="">--- Semua Tentor ---</option>
+                <select name="tentor" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 180px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
+                    <option value="">Semua Tentor</option>
                     @foreach($tentors ?? [] as $t)
                         <option value="{{ $t->id_pegawai }}" {{ ($tentorFilter ?? '') == $t->id_pegawai ? 'selected' : '' }}>
                             {{ $t->nama_lengkap }}
@@ -204,20 +204,42 @@
                 </select>
 
                 {{-- FILTER BULAN --}}
+                @php
+                    $bulanSekarang = date('n');
+                    $requestBulan = request('bulan');
+                @endphp
                 <select name="bulan" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 140px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
-                    <option value="">--- Pilih Bulan ---</option>
                     @foreach(range(1, 12) as $b)
-                        <option value="{{ $b }}" {{ ($bulan ?? '') == $b ? 'selected' : '' }}>
+                        @php
+                            $selected = false;
+                            if ($requestBulan) {
+                                $selected = ($requestBulan == $b);
+                            } else {
+                                $selected = ($bulanSekarang == $b);
+                            }
+                        @endphp
+                        <option value="{{ $b }}" {{ $selected ? 'selected' : '' }}>
                             {{ \Carbon\Carbon::create()->month($b)->translatedFormat('F') }}
                         </option>
                     @endforeach
                 </select>
 
                 {{-- FILTER TAHUN --}}
+                @php
+                    $tahunSekarang = date('Y');
+                    $requestTahun = request('tahun');
+                @endphp
                 <select name="tahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 100px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
-                    <option value="">--- Tahun ---</option>
                     @foreach($tahunList ?? [] as $th)
-                        <option value="{{ $th }}" {{ ($tahun ?? '') == $th ? 'selected' : '' }}>{{ $th }}</option>
+                        @php
+                            $selected = false;
+                            if ($requestTahun) {
+                                $selected = ($requestTahun == $th);
+                            } else {
+                                $selected = ($tahunSekarang == $th);
+                            }
+                        @endphp
+                        <option value="{{ $th }}" {{ $selected ? 'selected' : '' }}>{{ $th }}</option>
                     @endforeach
                 </select>
                 
