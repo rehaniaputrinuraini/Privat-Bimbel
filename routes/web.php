@@ -202,6 +202,7 @@ Route::middleware(['auth'])->group(function () {
 
         // LAPORAN KEUANGAN (1 HALAMAN GABUNGAN)
         Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan-keuangan');
+        Route::get('/laporan-keuangan/export-pdf', [LaporanKeuanganController::class, 'exportPdf'])->name('laporan-keuangan.export-pdf');
         
         // KELOLA PRESENSI
         Route::get('/kelola-presensi', [KelolaPresensiController::class, 'index'])->name('kelola-presensi');
@@ -291,13 +292,14 @@ Route::middleware(['auth'])->group(function () {
         // TRANSAKSI PENGGAJIAN
         Route::get('/transaksi/penggajian', [PembayaranController::class, 'indexPenggajian'])->name('transaksi.penggajian');
         Route::post('/penggajian/bayar/{id}', [PembayaranController::class, 'bayarGaji'])->name('penggajian.bayar');
-        Route::get('/penggajian/detail/{id}', [PembayaranController::class, 'detailPenggajian'])->name('penggajian.detail'); // 
+        Route::get('/penggajian/detail/{id}', [PembayaranController::class, 'detailPenggajian'])->name('penggajian.detail');
         
         // DATA TENTOR
         Route::get('/data-tentor', [KelolaTentorController::class, 'index'])->name('data-tentor');
         
         // LAPORAN KEUANGAN (1 HALAMAN GABUNGAN)
         Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan-keuangan');
+        Route::get('/laporan-keuangan/export-pdf', [LaporanKeuanganController::class, 'exportPdf'])->name('laporan-keuangan.export-pdf');
         
         // KELOLA PRESENSI
         Route::get('/kelola-presensi', [KelolaPresensiController::class, 'index'])->name('kelola-presensi');
