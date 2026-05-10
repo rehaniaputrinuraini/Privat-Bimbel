@@ -1225,9 +1225,6 @@ class PembayaranController extends Controller
         return view('dashboard.shared.transaksi.detail-penggajian', $data);
     }
 
-    // =============================================
-    // SLIP GAJI (PDF)
-    // =============================================
     public function slipGaji(Request $request, $id)
     {
         $bulan = $request->get('bulan', now()->month);
@@ -1235,65 +1232,74 @@ class PembayaranController extends Controller
         
         $tentor = Pegawai::findOrFail($id);
         
-        // Ambil presensi bulan ini
-        $presensi = Mengajar::with('kelas')
+        $presensi = Mengajar::with('kelas', 'ruang')
             ->where('id_pegawai', $tentor->id_pegawai)
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
+            ->orderBy('tanggal', 'asc')
             ->get();
         
-        $daftarTanggal = $presensi->pluck('tanggal')->unique()->values();
-        $hariHadir = $daftarTanggal->count();
+        $presensiPerHari = $presensi->groupBy('tanggal');
         
         $detailPresensi = collect();
         $totalHonor = 0;
+        $totalUangMakan = 0;
+        $totalUangTransport = 0;
+        $no = 1;
         
-        foreach ($daftarTanggal as $tanggal) {
-            $presensiHarian = $presensi->where('tanggal', $tanggal);
-            $adaHadir = $presensiHarian->where('murid_hadir', 'Hadir')->count() > 0;
-            $adaTidakHadir = $presensiHarian->where('murid_hadir', 'Tidak Hadir')->count() > 0;
+        foreach ($presensiPerHari as $tanggal => $items) {
+            $firstItem = $items->first();
+            $jenjang = $firstItem->kelas->jenjang ?? null;
             
-            $jenjang = $presensiHarian->first()->kelas->jenjang ?? null;
-            $hr = 0;
-            if ($jenjang == 'SD') $hr = $tentor->hr_sd ?? 0;
-            elseif ($jenjang == 'SMP') $hr = $tentor->hr_smp ?? 0;
-            elseif ($jenjang == 'SMA') $hr = $tentor->hr_sma ?? 0;
+            $hrFull = 0;
+            if ($jenjang == 'SD') $hrFull = $tentor->hr_sd ?? 0;
+            elseif ($jenjang == 'SMP') $hrFull = $tentor->hr_smp ?? 0;
+            elseif ($jenjang == 'SMA') $hrFull = $tentor->hr_sma ?? 0;
+            
+            // Cek apakah ada murid yang HADIR
+            $adaHadir = $items->where('murid_hadir', 'Hadir')->count() > 0;
+            
+            // KEHADIRAN MURID: hanya "Hadir" atau "Tidak Hadir"
+            $kehadiranMurid = $adaHadir ? 'Hadir' : 'Tidak Hadir';
             
             $honorHarian = 0;
-            $statusHadir = 'Tidak Hadir';
+            $keterangan = '';
+            
             if ($adaHadir) {
-                $honorHarian = $hr;
-                $statusHadir = 'Hadir';
-                $totalHonor += $hr;
-            } elseif ($adaTidakHadir) {
-                $honorHarian = $hr / 2;
-                $statusHadir = 'Tidak Hadir (50%)';
-                $totalHonor += ($hr / 2);
+                $honorHarian = $hrFull;
+                $keterangan = '';
+            } else {
+                $honorHarian = $hrFull / 2;
+                $keterangan = 'SISWA ABSEN (50%)';
             }
             
-            $muridList = $presensiHarian->map(function($p) {
-                return [
-                    'nama_murid' => $p->nama_murid ?? '-',
-                    'kelas' => $p->kelas->nama_kelas ?? '-',
-                    'status' => $p->murid_hadir ?? '-',
-                ];
-            })->toArray();
+            // Uang Makan & Transport: hanya jika ADA murid yang HADIR
+            $uangMakan = $adaHadir ? ($tentor->uang_makan ?? 0) : 0;
+            $uangTransport = $adaHadir ? ($tentor->uang_transport ?? 0) : 0;
+            $totalHr = $honorHarian + $uangMakan + $uangTransport;
+            
+            $namaKelas = $firstItem->kelas ? ($firstItem->kelas->jenjang . ' - ' . $firstItem->kelas->nama_kelas) : '-';
+            $namaRuang = $firstItem->ruang->nama_ruang ?? '-';
             
             $detailPresensi->push((object)[
+                'no' => $no++,
                 'tanggal' => Carbon::parse($tanggal)->format('d/m/Y'),
-                'hari' => Carbon::parse($tanggal)->translatedFormat('l'),
-                'status' => $statusHadir,
+                'kelas' => $namaKelas,
+                'ruang' => $namaRuang,
+                'kehadiran_murid' => $kehadiranMurid,  // Hanya "Hadir" atau "Tidak Hadir"
                 'honor' => $honorHarian,
-                'murid_list' => $muridList,
+                'uang_makan' => $uangMakan,
+                'uang_transport' => $uangTransport,
+                'total_hr' => $totalHr,
+                'keterangan' => $keterangan,
             ]);
+            
+            $totalHonor += $honorHarian;
+            $totalUangMakan += $uangMakan;
+            $totalUangTransport += $uangTransport;
         }
         
-        $uangMakanPerHari = $tentor->uang_makan ?? 0;
-        $totalUangMakan = $hariHadir * $uangMakanPerHari;
-        $uangTransportPerHari = $tentor->uang_transport ?? 0;
-        $totalUangTransport = $hariHadir * $uangTransportPerHari;
         $totalGaji = $totalHonor + $totalUangMakan + $totalUangTransport;
-        
         $namaBulan = Carbon::create()->month($bulan)->translatedFormat('F');
         
         $data = [
@@ -1301,12 +1307,9 @@ class PembayaranController extends Controller
             'bulan' => $bulan,
             'tahun' => $tahun,
             'namaBulan' => $namaBulan,
-            'hariHadir' => $hariHadir,
             'detailPresensi' => $detailPresensi,
             'totalHonor' => $totalHonor,
-            'uangMakanPerHari' => $uangMakanPerHari,
             'totalUangMakan' => $totalUangMakan,
-            'uangTransportPerHari' => $uangTransportPerHari,
             'totalUangTransport' => $totalUangTransport,
             'totalGaji' => $totalGaji,
         ];
