@@ -94,3 +94,97 @@
         <button type="button" id="btnOkSukses" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #10B981; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">OK</button>
     </div>
 </div>
+
+<script>
+(function () {
+    const form           = document.querySelector('#mainForm');
+    const btnKeluar      = document.querySelector('#btnKeluar');
+    const btnSimpan      = document.querySelector('#btnSimpan');
+    const alertError     = document.querySelector('#alertError');
+    const alertErrorText = document.querySelector('#alertErrorText');
+
+    const modalBatal     = document.querySelector('#modalBatal');
+    const modalPindah    = document.querySelector('#modalPindahHalaman');
+    const modalSukses    = document.querySelector('#modalSukses');
+    const btnTidakBatal  = document.querySelector('#btnTidakBatal');
+    const btnYaKeluar    = document.querySelector('#btnYaKeluar');
+    const btnTidakPindah = document.querySelector('#btnTidakPindah');
+    const btnYaPindah    = document.querySelector('#btnYaPindah');
+    const btnOkSukses    = document.querySelector('#btnOkSukses');
+    const pesanSukses    = document.querySelector('#pesanSukses');
+
+    let formChanged  = false;
+    let formSubmitted = false;
+
+    /* TRACK perubahan */
+    if (form) {
+        form.querySelectorAll('input, select, textarea').forEach(el => {
+            el.addEventListener('input',  () => { if (!formSubmitted) formChanged = true; });
+            el.addEventListener('change', () => { if (!formSubmitted) formChanged = true; });
+        });
+    }
+
+    /* KELUAR */
+    btnKeluar?.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (formChanged && !formSubmitted) {
+            modalPindah.style.display = 'flex';
+        } else {
+            modalBatal.style.display = 'flex';
+        }
+    });
+
+    btnTidakBatal?.addEventListener('click', () => modalBatal.style.display = 'none');
+    btnYaKeluar?.addEventListener('click', () => { formChanged = false; modalBatal.style.display = 'none'; tutupModal(); });
+    
+    btnTidakPindah?.addEventListener('click', () => modalPindah.style.display = 'none');
+    btnYaPindah?.addEventListener('click', () => { formChanged = false; modalPindah.style.display = 'none'; tutupModal(); });
+    
+    btnOkSukses?.addEventListener('click', () => { modalSukses.style.display = 'none'; tutupModal(); window.location.reload(); });
+    
+    // ⬅️ BACKDROP DIHAPUS - HANYA BISA TUTUP LEWAT TOMBOL
+
+    function tutupModal() {
+        const mf = document.getElementById('modalForm');
+        if (mf) mf.style.display = 'none';
+        const cont = document.getElementById('modalContent');
+        if (cont) cont.innerHTML = '';
+    }
+
+    /* SUBMIT */
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const orig = btnSimpan.innerHTML;
+            btnSimpan.disabled = true;
+            btnSimpan.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+            const fd = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                body: fd,
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '', 'Accept': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    formChanged = false; formSubmitted = true;
+                    if (pesanSukses) pesanSukses.textContent = data.message || 'Penggajian berhasil disimpan.';
+                    modalSukses.style.display = 'flex';
+                } else {
+                    let msg = data.message || 'Terjadi kesalahan.';
+                    if (data.errors) msg = Object.values(data.errors).flat().join('\n');
+                    tampilError(msg);
+                    btnSimpan.disabled = false; btnSimpan.innerHTML = orig;
+                }
+            })
+            .catch(err => { tampilError('Koneksi gagal: ' + err.message); btnSimpan.disabled = false; btnSimpan.innerHTML = orig; });
+        });
+    }
+
+    function tampilError(msg) {
+        if (alertError && alertErrorText) { alertErrorText.textContent = msg; alertError.style.display = 'flex'; setTimeout(() => alertError.style.display = 'none', 5000); }
+    }
+})();
+</script>

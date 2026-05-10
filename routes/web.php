@@ -164,12 +164,11 @@ Route::middleware(['auth'])->group(function () {
         // TRANSAKSI PEMASUKAN (Pembayaran Murid)
         Route::get('/transaksi/pemasukan', [PembayaranController::class, 'indexPemasukan'])->name('transaksi.pemasukan');
         Route::get('/pembayaran/detail/{id}', [PembayaranController::class, 'detail'])->name('pembayaran.detail');
-
-        Route::get('/pemasukan-lain/create', [PembayaranController::class, 'createPemasukanLain'])->name('pemasukan-lain.create');
-
+        
         // TRANSAKSI PEMASUKAN LAIN
         Route::get('/transaksi/pemasukan-lain', [PembayaranController::class, 'indexPemasukanLain'])->name('transaksi.pemasukan-lain');
-        
+        Route::get('/pemasukan-lain/create', [PembayaranController::class, 'createPemasukanLain'])->name('pemasukan-lain.create');
+
         // TRANSAKSI PENGELUARAN (Pengeluaran Lain)
         Route::get('/transaksi/pengeluaran', [PembayaranController::class, 'indexPengeluaran'])->name('transaksi.pengeluaran');
         Route::get('/pengeluaran/create', [PembayaranController::class, 'createPengeluaran'])->name('pengeluaran.create');
@@ -179,6 +178,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/transaksi/penggajian', [PembayaranController::class, 'indexPenggajian'])->name('transaksi.penggajian');
         Route::post('/penggajian/bayar/{id}', [PembayaranController::class, 'bayarGaji'])->name('penggajian.bayar');
         Route::get('/penggajian/detail/{id}', [PembayaranController::class, 'detailPenggajian'])->name('penggajian.detail');
+        Route::get('/penggajian/slip/{id}', [PembayaranController::class, 'slipGaji'])->name('penggajian.slip');
 
         // KELOLA TENTOR
         Route::get('/kelola-tentor', [KelolaTentorController::class, 'index'])->name('kelola-tentor');
@@ -279,11 +279,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/transaksi/pemasukan', [PembayaranController::class, 'indexPemasukan'])->name('transaksi.pemasukan');
         Route::get('/pembayaran/detail/{id}', [PembayaranController::class, 'detail'])->name('pembayaran.detail');
 
-        Route::get('/pemasukan-lain/create', [PembayaranController::class, 'createPemasukanLain'])->name('pemasukan-lain.create');
-
         // TRANSAKSI PEMASUKAN LAIN
         Route::get('/transaksi/pemasukan-lain', [PembayaranController::class, 'indexPemasukanLain'])->name('transaksi.pemasukan-lain');
-        
+        Route::get('/pemasukan-lain/create', [PembayaranController::class, 'createPemasukanLain'])->name('pemasukan-lain.create');
+
         // TRANSAKSI PENGELUARAN (Pengeluaran Lain)
         Route::get('/transaksi/pengeluaran', [PembayaranController::class, 'indexPengeluaran'])->name('transaksi.pengeluaran');
         Route::get('/pengeluaran/create', [PembayaranController::class, 'createPengeluaran'])->name('pengeluaran.create');
@@ -293,6 +292,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/transaksi/penggajian', [PembayaranController::class, 'indexPenggajian'])->name('transaksi.penggajian');
         Route::post('/penggajian/bayar/{id}', [PembayaranController::class, 'bayarGaji'])->name('penggajian.bayar');
         Route::get('/penggajian/detail/{id}', [PembayaranController::class, 'detailPenggajian'])->name('penggajian.detail');
+        Route::get('/penggajian/slip/{id}', [PembayaranController::class, 'slipGaji'])->name('penggajian.slip');
         
         // DATA TENTOR
         Route::get('/data-tentor', [KelolaTentorController::class, 'index'])->name('data-tentor');

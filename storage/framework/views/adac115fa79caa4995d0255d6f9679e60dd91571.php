@@ -153,8 +153,10 @@
     <table class="header-table">
         <tr>
             <td class="logo-cell">
-                <?php if($logoBase64): ?>
-                    <img src="data:image/png;base64,<?php echo e($logoBase64); ?>" class="logo-img" alt="Logo">
+                <?php if(file_exists(public_path('images/logo/foto_logo.png'))): ?>
+                    <img src="<?php echo e(public_path('images/logo/foto_logo.png')); ?>" class="logo-img" alt="Logo">
+                <?php else: ?>
+                    <div style="width:70px;height:70px;"></div>
                 <?php endif; ?>
             </td>
             <td class="title-cell">
@@ -308,7 +310,6 @@
             <td class="c-tot"></td>
         </tr>
         <tr class="r-item">
-            
             <td class="c-label">&nbsp;&nbsp;&nbsp;-&nbsp; Lain-lain</td>
             <td class="c-rp-item">Rp.</td>
             <td class="c-nom"><?php echo e(number_format($pengeluaranData['Lainnya_Pengeluaran'] + $pengeluaranData['Penggajian'], 0, ',', '.')); ?></td>
@@ -346,7 +347,7 @@
         <tr>
             <td style="text-align:center;"><span class="sig-name"><?php echo e($mengetahui); ?></span></td>
             <td style="text-align:center;"><span class="sig-name"><?php echo e($dibuatOleh); ?></span></td>
-            <td></td>
+            <td style="text-align:right;"></td>
         </tr>
     </table>
 

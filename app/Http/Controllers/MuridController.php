@@ -21,7 +21,6 @@ class MuridController extends Controller
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
-        // Ambil data murid dengan PAGINATION
         $perPage = $request->get('per_page', 10);
         
         $query = Murid::with([
@@ -29,13 +28,23 @@ class MuridController extends Controller
             'transaksiPaket.paket',
             'transaksiKelas.kelas'
         ])->orderBy('id_murid', 'asc');
-        
-        // Filter berdasarkan tahun periode
+
+        // Default filter: periode aktif
+        $today = date('Y-m-d');
+        $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
+            ->where('tanggal_selesai', '>=', $today)
+            ->first();
+
+        // Filter berdasarkan tahun periode (default: periode aktif)
         if ($request->has('tahun_periode') && $request->tahun_periode != '') {
             $query->whereHas('transaksiPaket', function($q) use ($request) {
                 $q->whereHas('periode', function($subQ) use ($request) {
                     $subQ->where('tahun_periode', $request->tahun_periode);
                 });
+            });
+        } elseif ($periodeAktif && !$request->has('tahun_periode')) {
+            $query->whereHas('transaksiPaket', function($q) use ($periodeAktif) {
+                $q->where('id_periode', $periodeAktif->id_periode);
             });
         }
         
@@ -50,7 +59,7 @@ class MuridController extends Controller
         
         $murids = $query->paginate($perPage)->appends($request->except('page'));
         
-        // Kumpulkan daftar paket dari SEMUA data (bukan hanya halaman saat ini)
+        // Paket list
         $allMurids = Murid::with('transaksiPaket.paket')->get();
         $paketList = [];
         foreach($allMurids as $m) {
@@ -61,17 +70,11 @@ class MuridController extends Controller
         }
         sort($paketList);
         
-        // Ambil daftar tahun periode dari ms_periode
+        // Tahun periode list
         $tahunPeriodeList = Periode::orderBy('tahun_periode', 'desc')
             ->pluck('tahun_periode')
             ->unique()
             ->toArray();
-        
-        // Ambil periode aktif
-        $today = date('Y-m-d');
-        $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
-            ->where('tanggal_selesai', '>=', $today)
-            ->first();
         
         return view('dashboard.shared.kelola-murid.kelola-murid', [
             'role' => $role,

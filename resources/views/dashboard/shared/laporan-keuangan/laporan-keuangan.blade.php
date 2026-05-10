@@ -38,56 +38,60 @@
                 <input type="text" id="searchLaporan" placeholder="Cari Keterangan..."
                        style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 14px; font-family: 'Poppins', sans-serif; outline: none;">
             </div>
+            
             <select id="filterKategori" onchange="filterLaporan()"
                     style="flex: 1; min-width: 150px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
                 <option value="">Semua Kategori</option>
                 <option value="Pembayaran Murid" {{ request('kategori') == 'Pembayaran Murid' ? 'selected' : '' }}>Pembayaran Murid</option>
                 <option value="Pemasukan Lainnya" {{ request('kategori') == 'Pemasukan Lainnya' ? 'selected' : '' }}>Pemasukan Lainnya</option>
-                <option value="Pengeluaran" {{ request('kategori') == 'Pengeluaran' ? 'selected' : '' }}>Pengeluaran</option>
+                <option value="Pengeluaran Lainnya" {{ request('kategori') == 'Pengeluaran Lainnya' ? 'selected' : '' }}>Pengeluaran Lainnya</option>
                 <option value="Penggajian" {{ request('kategori') == 'Penggajian' ? 'selected' : '' }}>Penggajian</option>
             </select>
-            <select id="filterBulan" onchange="filterLaporan()"
-                    style="flex: 1; min-width: 120px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
-                @php
-                    $bulanTersedia = App\Models\TransaksiUmum::selectRaw('DISTINCT MONTH(tanggal_bayar) as bulan')->whereNotNull('tanggal_bayar')->orderBy('bulan')->pluck('bulan');
-                    $bulanSekarang = date('n');
-                    $requestBulan = request('bulan');
-                @endphp
-                @foreach($bulanTersedia as $b)
-                    @php
-                        $selected = false;
-                        if ($requestBulan) {
-                            $selected = ($requestBulan == $b);
-                        } else {
-                            $selected = ($bulanSekarang == $b);
-                        }
-                    @endphp
-                    <option value="{{ $b }}" {{ $selected ? 'selected' : '' }}>{{ Carbon\Carbon::create()->month($b)->translatedFormat('F') }}</option>
-                @endforeach
-            </select>
-            <select id="filterTahun" onchange="filterLaporan()"
-                    style="flex: 1; min-width: 100px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
-                @php
-                    $tahunTersedia = App\Models\TransaksiUmum::selectRaw('DISTINCT YEAR(tanggal_bayar) as tahun')->whereNotNull('tanggal_bayar')->orderBy('tahun', 'desc')->pluck('tahun');
-                    $tahunSekarang = date('Y');
-                    $requestTahun = request('tahun');
-                @endphp
-                @foreach($tahunTersedia as $t)
-                    @php
-                        $selected = false;
-                        if ($requestTahun) {
-                            $selected = ($requestTahun == $t);
-                        } else {
-                            $selected = ($tahunSekarang == $t);
-                        }
-                    @endphp
-                    <option value="{{ $t }}" {{ $selected ? 'selected' : '' }}>{{ $t }}</option>
-                @endforeach
-            </select>
+        </div>
+        
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 15px;">
+            {{-- Tombol Toggle Per Bulan / Per Periode --}}
+            <div style="display: flex; background: #F3F4F6; border-radius: 12px; padding: 4px;">
+                <button type="button" id="btnBulan" onclick="setTipe('bulan')" 
+                        style="padding: 8px 20px; border-radius: 10px; border: none; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.3s; {{ $tipe == 'bulan' ? 'background: #4D0B87; color: white;' : 'background: transparent; color: #6B7280;' }}">
+                    <i class="fas fa-calendar-alt"></i> Per Bulan
+                </button>
+                <button type="button" id="btnPeriode" onclick="setTipe('periode')" 
+                        style="padding: 8px 20px; border-radius: 10px; border: none; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.3s; {{ $tipe == 'periode' ? 'background: #4D0B87; color: white;' : 'background: transparent; color: #6B7280;' }}">
+                    <i class="fas fa-calendar-week"></i> Per Periode
+                </button>
+            </div>
+            
+            {{-- Filter Per Bulan --}}
+            <div id="filterBulanDiv" style="display: {{ $tipe == 'bulan' ? 'flex' : 'none' }}; gap: 12px; flex-wrap: wrap; align-items: center;">
+                <select id="filterBulan" onchange="filterLaporan()"
+                        style="flex: 1; min-width: 120px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
+                    @foreach($bulanTersedia as $b)
+                        <option value="{{ $b }}" {{ $bulan == $b ? 'selected' : '' }}>{{ Carbon\Carbon::create()->month($b)->translatedFormat('F') }}</option>
+                    @endforeach
+                </select>
+                
+                <select id="filterTahun" onchange="filterLaporan()"
+                        style="flex: 1; min-width: 100px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
+                    @foreach($tahunTersedia as $t)
+                        <option value="{{ $t }}" {{ $tahun == $t ? 'selected' : '' }}>{{ $t }}</option>
+                    @endforeach
+                </select>
+            </div>
+            
+            {{-- Filter Per Periode --}}
+            <div id="filterPeriodeDiv" style="display: {{ $tipe == 'periode' ? 'flex' : 'none' }}; gap: 12px;">
+                <select id="filterPeriode" onchange="filterLaporan()"
+                        style="flex: 1; min-width: 150px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
+                    @foreach($periodeTersedia as $p)
+                        <option value="{{ $p }}" {{ $periode == $p ? 'selected' : '' }}>{{ $p }}</option>
+                    @endforeach
+                </select>
+            </div>
             
             {{-- TOMBOL EXPORT PDF --}}
             <button onclick="exportToPDF()" 
-                    style="background: #4D0B87; color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; transition: 0.3s; box-shadow: 0 2px 5px rgba(239, 68, 68, 0.2);">
+                    style="background: #4D0B87; color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; transition: 0.3s;">
                 <i class="fas fa-file-pdf"></i> Export PDF
             </button>
         </div>
@@ -116,7 +120,7 @@
                             $badgeColors = [
                                 'Pembayaran Murid' => ['bg' => '#E0E7FF', 'color' => '#1E40AF'],
                                 'Pemasukan Lainnya' => ['bg' => '#D1FAE5', 'color' => '#065F46'],
-                                'Pengeluaran' => ['bg' => '#FEE2E2', 'color' => '#991B1B'],
+                                'Pengeluaran Lainnya' => ['bg' => '#FEE2E2', 'color' => '#991B1B'],
                                 'Penggajian' => ['bg' => '#FEF3C7', 'color' => '#92400E'],
                             ];
                             $badge = $badgeColors[$item->kategori] ?? ['bg' => '#F3F4F6', 'color' => '#6B7280'];
@@ -142,7 +146,7 @@
                     <td colspan="4" style="padding: 15px; text-align: right;">TOTAL</td>
                     <td style="padding: 15px; text-align: right; color: #10B981;">Rp {{ number_format($totalPemasukan ?? 0, 0, ',', '.') }}</td>
                     <td style="padding: 15px; text-align: right; color: #EF4444;">Rp {{ number_format($totalPengeluaran ?? 0, 0, ',', '.') }}</td>
-                </tr>
+                </table>
             </tfoot>
         </table>
     </div>
@@ -187,14 +191,48 @@
 </div>
 
 <script>
-    function filterLaporan() {
-        const kategori = document.getElementById('filterKategori').value;
-        const bulan = document.getElementById('filterBulan').value;
-        const tahun = document.getElementById('filterTahun').value;
+    function setTipe(tipe) {
         let url = new URL(window.location.href);
+        url.searchParams.set('tipe', tipe);
+        url.searchParams.delete('page');
+        
+        if (tipe == 'bulan') {
+            url.searchParams.delete('periode');
+            let bulan = document.getElementById('filterBulan')?.value || '';
+            let tahun = document.getElementById('filterTahun')?.value || '';
+            if (bulan) url.searchParams.set('bulan', bulan);
+            if (tahun) url.searchParams.set('tahun', tahun);
+        } else {
+            url.searchParams.delete('bulan');
+            url.searchParams.delete('tahun');
+            let periode = document.getElementById('filterPeriode')?.value || '';
+            if (periode) url.searchParams.set('periode', periode);
+        }
+        
+        window.location.href = url.toString();
+    }
+
+    function filterLaporan() {
+        const tipe = '{{ $tipe }}';
+        const kategori = document.getElementById('filterKategori').value;
+        
+        let url = new URL(window.location.href);
+        url.searchParams.set('tipe', tipe);
         if (kategori) url.searchParams.set('kategori', kategori); else url.searchParams.delete('kategori');
-        if (bulan) url.searchParams.set('bulan', bulan); else url.searchParams.delete('bulan');
-        if (tahun) url.searchParams.set('tahun', tahun); else url.searchParams.delete('tahun');
+        
+        if (tipe == 'bulan') {
+            const bulan = document.getElementById('filterBulan').value;
+            const tahun = document.getElementById('filterTahun').value;
+            if (bulan) url.searchParams.set('bulan', bulan); else url.searchParams.delete('bulan');
+            if (tahun) url.searchParams.set('tahun', tahun); else url.searchParams.delete('tahun');
+            url.searchParams.delete('periode');
+        } else {
+            const periode = document.getElementById('filterPeriode').value;
+            if (periode) url.searchParams.set('periode', periode); else url.searchParams.delete('periode');
+            url.searchParams.delete('bulan');
+            url.searchParams.delete('tahun');
+        }
+        
         url.searchParams.delete('page');
         window.location.href = url.toString();
     }
@@ -216,20 +254,26 @@
     });
 
     function exportToPDF() {
+        const tipe = '{{ $tipe }}';
         const kategori = document.getElementById('filterKategori').value;
-        const bulan = document.getElementById('filterBulan').value;
-        const tahun = document.getElementById('filterTahun').value;
         
         let url = "{{ route($role . '.laporan-keuangan.export-pdf') }}";
         let params = [];
-        if (kategori) params.push(`kategori=${encodeURIComponent(kategori)}`);
-        if (bulan) params.push(`bulan=${bulan}`);
-        if (tahun) params.push(`tahun=${tahun}`);
         
-        if (params.length > 0) {
-            url += '?' + params.join('&');
+        params.push(`tipe=${tipe}`);
+        if (kategori) params.push(`kategori=${encodeURIComponent(kategori)}`);
+        
+        if (tipe == 'bulan') {
+            const bulan = document.getElementById('filterBulan').value;
+            const tahun = document.getElementById('filterTahun').value;
+            if (bulan) params.push(`bulan=${bulan}`);
+            if (tahun) params.push(`tahun=${tahun}`);
+        } else {
+            const periode = document.getElementById('filterPeriode').value;
+            if (periode) params.push(`periode=${periode}`);
         }
         
+        if (params.length > 0) url += '?' + params.join('&');
         window.open(url, '_blank');
     }
 </script>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Transaksi Pengeluaran')
+@section('title', 'Pengeluaran Lain')
 
 @section('content')
 <div style="width: 100%;">
@@ -8,7 +8,7 @@
     {{-- HEADER --}}
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">{{ \Carbon\Carbon::now()->translatedFormat('F Y') }}</p>
-        <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0;">Transaksi Pengeluaran</h1>
+        <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0;">Pengeluaran Lain</h1>
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Kelola Pengeluaran Operasional (WiFi, Listrik, ATK, dll)</p>
     </div>
 
@@ -27,7 +27,7 @@
     {{-- BUTTON INPUT --}}
     <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
         <button onclick="bukaModalCreate()"
-                style="background-color: #EF4444; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; box-shadow: 0 4px 6px rgba(239,68,68,0.2); font-family: 'Poppins', sans-serif;">
+                style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; box-shadow: 0 4px 6px rgba(77,11,135,0.2); font-family: 'Poppins', sans-serif;">
             <i class="fas fa-plus"></i> Input Pengeluaran
         </button>
     </div>
@@ -38,27 +38,38 @@
 
     {{-- FILTER --}}
     <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 20px;">
+        <div style="position: relative; margin-bottom: 12px;">
+            <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
+            <input type="text" id="searchPengeluaran" placeholder="Cari Keperluan..."
+                   style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 14px; font-family: 'Poppins', sans-serif; box-sizing: border-box; outline: none;">
+        </div>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-            <div style="position: relative; flex: 2; min-width: 200px;">
-                <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
-                <input type="text" id="searchPengeluaran" placeholder="Cari Keperluan..."
-                       style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 14px; font-family: 'Poppins', sans-serif; outline: none;">
-            </div>
             <select id="filterJenis"
-                    style="flex: 1; min-width: 130px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
-                <option value="">Jenis</option>
+                    style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
+                <option value="">Semua Jenis</option>
                 <option value="Tunai">Tunai</option>
                 <option value="Transfer">Transfer</option>
             </select>
             <select id="filterBulan"
-                    style="flex: 1; min-width: 110px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
-                <option value="">Bulan</option>
-                @for($i=1; $i<=12; $i++)<option value="{{ $i }}">{{ Carbon\Carbon::create()->month($i)->translatedFormat('F') }}</option>@endfor
+                    style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
+                <option value="">Semua Bulan</option>
+                @for($i=1; $i<=12; $i++)
+                    <option value="{{ $i }}" {{ date('n') == $i ? 'selected' : '' }}>{{ Carbon\Carbon::create()->month($i)->translatedFormat('F') }}</option>
+                @endfor
             </select>
             <select id="filterTahun"
-                    style="flex: 1; min-width: 100px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
-                <option value="">Tahun</option>
-                @for($i=date('Y'); $i>=2020; $i--)<option value="{{ $i }}">{{ $i }}</option>@endfor
+                    style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
+                <option value="">Semua Tahun</option>
+                @for($i=date('Y'); $i>=2020; $i--)
+                    <option value="{{ $i }}" {{ date('Y') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                @endfor
+            </select>
+            <select id="filterPeriode"
+                    style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
+                <option value="">Semua Periode</option>
+                @foreach($periodeList as $periode)
+                    <option value="{{ $periode->tahun_periode }}" {{ ($periodeAktif && $periodeAktif->tahun_periode == $periode->tahun_periode) ? 'selected' : '' }}>{{ $periode->tahun_periode }}</option>
+                @endforeach
             </select>
         </div>
     </div>
@@ -151,7 +162,10 @@
         }).catch(() => alert('Gagal memuat form.'));
     }
     function tutupModalForm() { document.getElementById('modalForm').style.display = 'none'; document.getElementById('modalContent').innerHTML = ''; }
-    document.getElementById('modalForm').addEventListener('click', function(e) { if (e.target === this) tutupModalForm(); });
+
+    document.getElementById('modalForm').addEventListener('click', function(e) { 
+        e.stopPropagation();
+    });
 
     document.getElementById('pageSelect').addEventListener('change', function() {
         const url = new URL(window.location.href);
@@ -164,11 +178,14 @@
     document.getElementById('filterJenis')?.addEventListener('change', filterTable);
     document.getElementById('filterBulan')?.addEventListener('change', filterTable);
     document.getElementById('filterTahun')?.addEventListener('change', filterTable);
+    document.getElementById('filterPeriode')?.addEventListener('change', filterTable);
+
     function filterTable() {
         const s = (document.getElementById('searchPengeluaran')?.value || '').toLowerCase();
         const jenis = document.getElementById('filterJenis')?.value || '';
         const bulan = document.getElementById('filterBulan')?.value || '';
         const tahun = document.getElementById('filterTahun')?.value || '';
+        const periode = document.getElementById('filterPeriode')?.value || '';
         document.querySelectorAll('#tableBody tr').forEach(row => {
             if (!row.cells || row.cells.length < 6) return;
             const keperluan = (row.cells[2]?.innerText || '').toLowerCase();

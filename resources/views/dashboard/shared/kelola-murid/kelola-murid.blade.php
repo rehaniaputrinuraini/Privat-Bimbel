@@ -40,11 +40,11 @@
             </select>
 
             <select id="filterTahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;">
-                <option value="">Semua Periode</option>
-                @foreach($tahunPeriodeList as $tahunPeriode)
-                    <option value="{{ $tahunPeriode }}">{{ $tahunPeriode }}</option>
-                @endforeach
-            </select>
+            <option value="">Semua Periode</option>
+            @foreach($tahunPeriodeList as $tahunPeriode)
+                <option value="{{ $tahunPeriode }}" {{ $tahunPeriode == ($periodeAktif->tahun_periode ?? '') ? 'selected' : '' }}>{{ $tahunPeriode }}</option>
+            @endforeach
+        </select>
         </div>
         
         <button onclick="bukaModalCreate()" style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: 0.3s; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">

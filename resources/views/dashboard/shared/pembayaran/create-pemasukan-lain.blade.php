@@ -163,15 +163,12 @@
 
     btnTidakBatal?.addEventListener('click', () => modalBatal.style.display = 'none');
     btnYaKeluar?.addEventListener('click', () => { formChanged = false; modalBatal.style.display = 'none'; tutupModal(); });
-    modalBatal?.addEventListener('click', e => { if (e.target === modalBatal) modalBatal.style.display = 'none'; });
-
+    
     btnTidakPindah?.addEventListener('click', () => modalPindah.style.display = 'none');
     btnYaPindah?.addEventListener('click', () => { formChanged = false; modalPindah.style.display = 'none'; tutupModal(); });
-    modalPindah?.addEventListener('click', e => { if (e.target === modalPindah) modalPindah.style.display = 'none'; });
-
+    
     btnOkSukses?.addEventListener('click', () => { modalSukses.style.display = 'none'; tutupModal(); window.location.reload(); });
-    modalSukses?.addEventListener('click', e => { if (e.target === modalSukses) { modalSukses.style.display = 'none'; tutupModal(); window.location.reload(); } });
-
+    
     function tutupModal() {
         const mf = document.getElementById('modalForm');
         if (mf) mf.style.display = 'none';

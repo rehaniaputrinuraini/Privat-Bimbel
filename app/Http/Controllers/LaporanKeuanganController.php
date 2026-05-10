@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\TransaksiUmum;
-use App\Models\Penggajian;
-use App\Models\Pembayaran;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -16,11 +14,15 @@ class LaporanKeuanganController extends Controller
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $perPage = $request->get('per_page', 10);
         
-        // Default ke bulan dan tahun saat ini jika tidak ada filter
+        // Tipe laporan: 'bulan' atau 'periode'
+        $tipe = $request->tipe ?? 'bulan';
+        
+        // Default ke bulan dan tahun saat ini
         $bulan = $request->bulan ?? date('n');
         $tahun = $request->tahun ?? date('Y');
+        $periode = $request->periode ?? $this->getPeriodeSekarang();
         
-        // Query semua transaksi
+        // Query transaksi
         $query = TransaksiUmum::orderBy('tanggal_bayar', 'desc');
         
         // Filter kategori
@@ -37,7 +39,7 @@ class LaporanKeuanganController extends Controller
                           ->where('keterangan', 'not like', '%Pendaftaran%')
                           ->where('keterangan', 'not like', '%SPP%');
                     break;
-                case 'Pengeluaran':
+                case 'Pengeluaran Lainnya':
                     $query->where('kredit', '>', 0)
                           ->where('keterangan', 'not like', '%Gaji%')
                           ->where('keterangan', 'not like', '%Penggajian%');
@@ -52,11 +54,24 @@ class LaporanKeuanganController extends Controller
             }
         }
         
-        // Filter BULAN (WAJIB - default bulan saat ini)
-        $query->whereMonth('tanggal_bayar', $bulan);
-        
-        // Filter TAHUN (WAJIB - default tahun saat ini)
-        $query->whereYear('tanggal_bayar', $tahun);
+        // Filter berdasarkan tipe
+        if ($tipe == 'periode') {
+            $tahunMulai = substr($periode, 0, 4);
+            $tahunAkhir = substr($periode, 5, 4);
+            
+            $query->where(function($q) use ($tahunMulai, $tahunAkhir) {
+                $q->where(function($sub) use ($tahunMulai) {
+                    $sub->whereYear('tanggal_bayar', $tahunMulai)
+                        ->whereMonth('tanggal_bayar', '>=', 7);
+                })->orWhere(function($sub) use ($tahunAkhir) {
+                    $sub->whereYear('tanggal_bayar', $tahunAkhir)
+                        ->whereMonth('tanggal_bayar', '<=', 6);
+                });
+            });
+        } else {
+            if ($bulan) $query->whereMonth('tanggal_bayar', $bulan);
+            if ($tahun) $query->whereYear('tanggal_bayar', $tahun);
+        }
         
         $laporan = $query->paginate($perPage)->through(function ($item) {
             $isPendaftaran = str_contains($item->keterangan, 'Pendaftaran');
@@ -64,7 +79,6 @@ class LaporanKeuanganController extends Controller
             $isGaji = str_contains($item->keterangan, 'Gaji') || str_contains($item->keterangan, 'Penggajian');
             $isPemasukanLain = str_contains($item->keterangan, 'Pemasukan Lainnya');
             
-            // Tentukan kategori
             if ($isPendaftaran || $isSPP) {
                 $kategori = 'Pembayaran Murid';
             } elseif ($isPemasukanLain) {
@@ -72,7 +86,7 @@ class LaporanKeuanganController extends Controller
             } elseif ($isGaji) {
                 $kategori = 'Penggajian';
             } elseif ($item->kredit > 0) {
-                $kategori = 'Pengeluaran';
+                $kategori = 'Pengeluaran Lainnya';
             } else {
                 $kategori = 'Pemasukan Lainnya';
             }
@@ -87,71 +101,112 @@ class LaporanKeuanganController extends Controller
             ];
         });
         
-        // Total pemasukan berdasarkan filter bulan & tahun
-        $totalPemasukan = TransaksiUmum::where('debit', '>', 0)
-                            ->whereMonth('tanggal_bayar', $bulan)
-                            ->whereYear('tanggal_bayar', $tahun)
-                            ->sum('debit');
+        // Hitung total berdasarkan tipe
+        if ($tipe == 'periode') {
+            $tahunMulai = substr($periode, 0, 4);
+            $tahunAkhir = substr($periode, 5, 4);
+            
+            $totalPemasukan = TransaksiUmum::where('debit', '>', 0)
+                ->where(function($q) use ($tahunMulai, $tahunAkhir) {
+                    $q->where(function($sub) use ($tahunMulai) {
+                        $sub->whereYear('tanggal_bayar', $tahunMulai)->whereMonth('tanggal_bayar', '>=', 7);
+                    })->orWhere(function($sub) use ($tahunAkhir) {
+                        $sub->whereYear('tanggal_bayar', $tahunAkhir)->whereMonth('tanggal_bayar', '<=', 6);
+                    });
+                })->sum('debit');
+            
+            $totalPengeluaran = TransaksiUmum::where('kredit', '>', 0)
+                ->where(function($q) use ($tahunMulai, $tahunAkhir) {
+                    $q->where(function($sub) use ($tahunMulai) {
+                        $sub->whereYear('tanggal_bayar', $tahunMulai)->whereMonth('tanggal_bayar', '>=', 7);
+                    })->orWhere(function($sub) use ($tahunAkhir) {
+                        $sub->whereYear('tanggal_bayar', $tahunAkhir)->whereMonth('tanggal_bayar', '<=', 6);
+                    });
+                })->sum('kredit');
+        } else {
+            $totalPemasukan = TransaksiUmum::where('debit', '>', 0)
+                ->whereMonth('tanggal_bayar', $bulan)
+                ->whereYear('tanggal_bayar', $tahun)
+                ->sum('debit');
+            
+            $totalPengeluaran = TransaksiUmum::where('kredit', '>', 0)
+                ->whereMonth('tanggal_bayar', $bulan)
+                ->whereYear('tanggal_bayar', $tahun)
+                ->sum('kredit');
+        }
         
-        // Total pengeluaran berdasarkan filter bulan & tahun
-        $totalPengeluaran = TransaksiUmum::where('kredit', '>', 0)
-                             ->whereMonth('tanggal_bayar', $bulan)
-                             ->whereYear('tanggal_bayar', $tahun)
-                             ->sum('kredit');
+        // Data untuk dropdown
+        $bulanTersedia = TransaksiUmum::selectRaw('DISTINCT MONTH(tanggal_bayar) as bulan')
+            ->whereNotNull('tanggal_bayar')
+            ->orderBy('bulan')
+            ->pluck('bulan');
+        
+        $tahunTersedia = TransaksiUmum::selectRaw('DISTINCT YEAR(tanggal_bayar) as tahun')
+            ->whereNotNull('tanggal_bayar')
+            ->orderBy('tahun', 'desc')
+            ->pluck('tahun');
+        
+        $periodeTersedia = $this->getPeriodeTersedia();
         
         return view('dashboard.shared.laporan-keuangan.laporan-keuangan', compact(
-            'role', 'laporan', 'totalPemasukan', 'totalPengeluaran'
+            'role', 'laporan', 'totalPemasukan', 'totalPengeluaran',
+            'tipe', 'bulan', 'tahun', 'periode',
+            'bulanTersedia', 'tahunTersedia', 'periodeTersedia'
         ));
     }
 
-    /**
-     * Export PDF Laporan Keuangan format Rekap Kas
-     */
     public function exportPdf(Request $request)
     {
-        $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
-        
-        // Default ke bulan dan tahun saat ini jika tidak ada filter
+        $tipe = $request->tipe ?? 'bulan';
         $bulan = $request->bulan ?? date('n');
         $tahun = $request->tahun ?? date('Y');
+        $periode = $request->periode ?? $this->getPeriodeSekarang();
         
-        // Ambil data pemasukan per kategori
         $pemasukanData = [
-            'Pendaftaran' => 0,
-            'Bimbingan' => 0,
-            'Modal_Owner' => 0,
-            'TryOut' => 0,
-            'Lainnya_Pemasukan' => 0,
+            'Pendaftaran' => 0, 'Bimbingan' => 0, 'Modal_Owner' => 0,
+            'TryOut' => 0, 'Lainnya_Pemasukan' => 0,
         ];
         
-        // Ambil data pengeluaran per kategori
         $pengeluaranData = [
-            'BiayaOperasional' => 0,
-            'BiayaRapatPelatihan' => 0,
-            'FeeManagement' => 0,
-            'PembelianAktiva' => 0,
-            'Modul' => 0,
-            'BiayaAkademik' => 0,
-            'BiayaPemasaran' => 0,
-            'BiayaKeuangan' => 0,
-            'SetorKePusat' => 0,
-            'Lainnya_Pengeluaran' => 0,
-            'Penggajian' => 0,
+            'BiayaOperasional' => 0, 'BiayaRapatPelatihan' => 0, 'FeeManagement' => 0,
+            'PembelianAktiva' => 0, 'Modul' => 0, 'BiayaAkademik' => 0,
+            'BiayaPemasaran' => 0, 'BiayaKeuangan' => 0, 'SetorKePusat' => 0,
+            'Lainnya_Pengeluaran' => 0, 'Penggajian' => 0,
         ];
         
-        // Query pemasukan dengan filter bulan & tahun
-        $queryPemasukan = TransaksiUmum::where('debit', '>', 0)
-                            ->whereMonth('tanggal_bayar', $bulan)
-                            ->whereYear('tanggal_bayar', $tahun);
-        
-        // Query pengeluaran dengan filter bulan & tahun
-        $queryPengeluaran = TransaksiUmum::where('kredit', '>', 0)
-                             ->whereMonth('tanggal_bayar', $bulan)
-                             ->whereYear('tanggal_bayar', $tahun);
+        if ($tipe == 'periode') {
+            $tahunMulai = substr($periode, 0, 4);
+            $tahunAkhir = substr($periode, 5, 4);
+            
+            $queryPemasukan = TransaksiUmum::where('debit', '>', 0)
+                ->where(function($q) use ($tahunMulai, $tahunAkhir) {
+                    $q->where(function($sub) use ($tahunMulai) {
+                        $sub->whereYear('tanggal_bayar', $tahunMulai)->whereMonth('tanggal_bayar', '>=', 7);
+                    })->orWhere(function($sub) use ($tahunAkhir) {
+                        $sub->whereYear('tanggal_bayar', $tahunAkhir)->whereMonth('tanggal_bayar', '<=', 6);
+                    });
+                });
+            
+            $queryPengeluaran = TransaksiUmum::where('kredit', '>', 0)
+                ->where(function($q) use ($tahunMulai, $tahunAkhir) {
+                    $q->where(function($sub) use ($tahunMulai) {
+                        $sub->whereYear('tanggal_bayar', $tahunMulai)->whereMonth('tanggal_bayar', '>=', 7);
+                    })->orWhere(function($sub) use ($tahunAkhir) {
+                        $sub->whereYear('tanggal_bayar', $tahunAkhir)->whereMonth('tanggal_bayar', '<=', 6);
+                    });
+                });
+        } else {
+            $queryPemasukan = TransaksiUmum::where('debit', '>', 0)
+                ->whereMonth('tanggal_bayar', $bulan)
+                ->whereYear('tanggal_bayar', $tahun);
+            
+            $queryPengeluaran = TransaksiUmum::where('kredit', '>', 0)
+                ->whereMonth('tanggal_bayar', $bulan)
+                ->whereYear('tanggal_bayar', $tahun);
+        }
         
         // Proses pemasukan
-        $pemasukan = $queryPemasukan->get();
-        foreach ($pemasukan as $item) {
+        foreach ($queryPemasukan->get() as $item) {
             $ket = $item->keterangan;
             if (str_contains($ket, 'Pendaftaran')) {
                 $pemasukanData['Pendaftaran'] += $item->debit;
@@ -167,8 +222,7 @@ class LaporanKeuanganController extends Controller
         }
         
         // Proses pengeluaran
-        $pengeluaran = $queryPengeluaran->get();
-        foreach ($pengeluaran as $item) {
+        foreach ($queryPengeluaran->get() as $item) {
             $ket = $item->keterangan;
             if (str_contains($ket, 'Operasional') && !str_contains($ket, 'Gaji')) {
                 $pengeluaranData['BiayaOperasional'] += $item->kredit;
@@ -195,18 +249,20 @@ class LaporanKeuanganController extends Controller
             }
         }
         
-        // Hitung total
         $totalPemasukan = array_sum($pemasukanData);
         $totalPengeluaran = array_sum($pengeluaranData);
-        
-        // Saldo kas akhir
         $saldoAwal = 0;
         $saldoAkhir = $saldoAwal + $totalPemasukan - $totalPengeluaran;
         
-        // Data untuk PDF
+        if ($tipe == 'periode') {
+            $judulPeriode = 'PERIODE ' . $periode;
+        } else {
+            $judulPeriode = $this->getNamaBulan($bulan) . ' ' . $tahun;
+        }
+        
         $data = [
             'cabang' => 'UTERAN',
-            'periode' => $this->getNamaBulan($bulan) . ' ' . $tahun,
+            'periode' => $judulPeriode,
             'saldoAwal' => $saldoAwal,
             'pemasukanData' => $pemasukanData,
             'pengeluaranData' => $pengeluaranData,
@@ -221,7 +277,13 @@ class LaporanKeuanganController extends Controller
         $pdf = Pdf::loadView('dashboard.shared.laporan-keuangan.laporan-keuangan-pdf', $data);
         $pdf->setPaper('a4', 'portrait');
         
-        return $pdf->download('Laporan_Keuangan_' . $data['periode'] . '.pdf');
+        if ($tipe == 'periode') {
+            $filename = 'Laporan_Keuangan_Periode_' . $periode;
+        } else {
+            $filename = 'Laporan_Keuangan_' . $this->getNamaBulan($bulan) . '_' . $tahun;
+        }
+        
+        return $pdf->download($filename . '.pdf');
     }
     
     private function getNamaBulan($bulan)
@@ -232,5 +294,35 @@ class LaporanKeuanganController extends Controller
             9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
         return $namaBulan[$bulan] ?? 'Semua Bulan';
+    }
+    
+    private function getPeriodeSekarang()
+    {
+        $tahun = date('Y');
+        $bulan = date('n');
+        if ($bulan >= 7) {
+            return $tahun . '/' . ($tahun + 1);
+        } else {
+            return ($tahun - 1) . '/' . $tahun;
+        }
+    }
+    
+    private function getPeriodeTersedia()
+    {
+        $tahunList = TransaksiUmum::selectRaw('DISTINCT YEAR(tanggal_bayar) as tahun')
+            ->whereNotNull('tanggal_bayar')
+            ->orderBy('tahun', 'desc')
+            ->pluck('tahun');
+        
+        $periodeList = [];
+        foreach ($tahunList as $tahun) {
+            $periodeList[] = $tahun . '/' . ($tahun + 1);
+            if ($tahun > date('Y') - 5) {
+                $periodeList[] = ($tahun - 1) . '/' . $tahun;
+            }
+        }
+        $periodeList = array_unique($periodeList);
+        sort($periodeList);
+        return $periodeList;
     }
 }

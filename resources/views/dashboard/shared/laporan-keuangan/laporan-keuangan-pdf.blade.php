@@ -153,8 +153,10 @@
     <table class="header-table">
         <tr>
             <td class="logo-cell">
-                @if($logoBase64)
-                    <img src="data:image/png;base64,{{ $logoBase64 }}" class="logo-img" alt="Logo">
+                @if(file_exists(public_path('images/logo/foto_logo.png')))
+                    <img src="{{ public_path('images/logo/foto_logo.png') }}" class="logo-img" alt="Logo">
+                @else
+                    <div style="width:70px;height:70px;"></div>
                 @endif
             </td>
             <td class="title-cell">
@@ -308,7 +310,6 @@
             <td class="c-tot"></td>
         </tr>
         <tr class="r-item">
-            {{-- Penggajian digabung ke Lain-lain sesuai tampilan template --}}
             <td class="c-label">&nbsp;&nbsp;&nbsp;-&nbsp; Lain-lain</td>
             <td class="c-rp-item">Rp.</td>
             <td class="c-nom">{{ number_format($pengeluaranData['Lainnya_Pengeluaran'] + $pengeluaranData['Penggajian'], 0, ',', '.') }}</td>
@@ -346,7 +347,7 @@
         <tr>
             <td style="text-align:center;"><span class="sig-name">{{ $mengetahui }}</span></td>
             <td style="text-align:center;"><span class="sig-name">{{ $dibuatOleh }}</span></td>
-            <td></td>
+            <td style="text-align:right;"></td>
         </tr>
     </table>
 

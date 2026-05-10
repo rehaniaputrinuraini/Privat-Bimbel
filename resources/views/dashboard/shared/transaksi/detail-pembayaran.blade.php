@@ -2,14 +2,10 @@
 <div style="padding: 25px;">
     
     {{-- HEADER --}}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #F3E8FF; padding-bottom: 15px;">
+    <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #F3E8FF;">
         <h3 style="font-size: 18px; font-weight: 700; color: #111827; margin: 0;">
             <i class="fas fa-receipt" style="color: #4D0B87; margin-right: 8px;"></i> Detail Pembayaran Murid
         </h3>
-        <button onclick="tutupModalDetail()" 
-                style="background: #FEE2E2; color: #EF4444; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-times"></i>
-        </button>
     </div>
     
     {{-- INFO MURID --}}
@@ -28,22 +24,48 @@
                 <p style="color: #111827; font-weight: 600; font-size: 15px; margin: 0;">{{ $namaPaket }}</p>
             </div>
             <div>
-                <p style="color: #6B7280; font-size: 12px; margin: 0 0 2px 0;">Status Pendaftaran</p>
-                <p style="margin: 0;">
-                    @if($sudahBayarPendaftaran)
-                        <span style="padding:4px 10px;border-radius:20px;background:#D1FAE5;color:#065F46;font-size:12px;font-weight:600;">Lunas</span>
-                    @else
-                        <span style="padding:4px 10px;border-radius:20px;background:#FEE2E2;color:#EF4444;font-size:12px;font-weight:600;">Belum</span>
-                    @endif
-                </p>
-            </div>
-            <div>
                 <p style="color: #6B7280; font-size: 12px; margin: 0 0 2px 0;">Harga Paket/Bulan</p>
                 <p style="color: #111827; font-weight: 600; font-size: 15px; margin: 0;">Rp {{ number_format($hargaPerBulan, 0, ',', '.') }}</p>
             </div>
             <div>
                 <p style="color: #6B7280; font-size: 12px; margin: 0 0 2px 0;">Total Pembayaran</p>
                 <p style="color: #4D0B87; font-weight: 700; font-size: 15px; margin: 0;">Rp {{ number_format($totalBayar, 0, ',', '.') }}</p>
+            </div>
+        </div>
+    </div>
+
+    {{-- STATUS --}}
+    <div style="background: #F9FAFB; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+        <h4 style="font-size: 15px; font-weight: 700; color: #111827; margin: 0 0 15px 0;">
+            <i class="fas fa-info-circle" style="color: #4D0B87; margin-right: 6px;"></i> Status
+        </h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+            {{-- Pendaftaran --}}
+            <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; border: 1px solid #E5E7EB;">
+                <p style="color: #6B7280; font-size: 11px; margin: 0 0 4px 0;">Pendaftaran</p>
+                @if($sudahBayarPendaftaran)
+                    <span style="padding:4px 10px;border-radius:20px;background:#D1FAE5;color:#065F46;font-size:11px;font-weight:600;">Lunas</span>
+                @else
+                    <span style="padding:4px 10px;border-radius:20px;background:#FEE2E2;color:#EF4444;font-size:11px;font-weight:600;">Belum</span>
+                @endif
+            </div>
+            {{-- Pembayaran SPP --}}
+            <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; border: 1px solid #E5E7EB;">
+                <p style="color: #6B7280; font-size: 11px; margin: 0 0 4px 0;">Pembayaran SPP</p>
+                <span style="padding:4px 10px;border-radius:20px;background:#D1FAE5;color:#065F46;font-size:11px;font-weight:600;">{{ $jumlahBayarSPP ?? 0 }}x Bayar</span>
+            </div>
+            {{-- Status Tagihan --}}
+            <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; border: 1px solid #E5E7EB;">
+                <p style="color: #6B7280; font-size: 11px; margin: 0 0 4px 0;">Status Tagihan</p>
+                @if($statusTagihan == 'Lunas')
+                    <span style="padding:4px 10px;border-radius:20px;background:#D1FAE5;color:#065F46;font-size:11px;font-weight:600;">Lunas</span>
+                @elseif($statusTagihan == 'Uang Muka')
+                    <span style="padding:4px 10px;border-radius:20px;background:#E0E7FF;color:#4338CA;font-size:11px;font-weight:600;">Uang Muka</span>
+                @elseif($statusTagihan == 'Tunggak')
+                    <span style="padding:4px 10px;border-radius:20px;background:#FEF3C7;color:#92400E;font-size:11px;font-weight:600;">Tunggak</span>
+                @else
+                    <span style="padding:4px 10px;border-radius:20px;background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:600;">Belum Daftar</span>
+                @endif
             </div>
         </div>
     </div>
@@ -58,7 +80,7 @@
             <table style="width: 100%; border-collapse: collapse; font-size: 13px; font-family: 'Poppins', sans-serif;">
                 <thead>
                     <tr style="background: #F3E8FF;">
-                        <th style="padding: 10px 14px; text-align: left;">No</th>
+                        <th style="padding: 10px 14px; text-align: center;">No</th>
                         <th style="padding: 10px 14px; text-align: left;">Tanggal</th>
                         <th style="padding: 10px 14px; text-align: left;">Jenis</th>
                         <th style="padding: 10px 14px; text-align: right;">Jumlah</th>
@@ -68,7 +90,7 @@
                 <tbody>
                     @foreach($riwayatPembayaran as $i => $r)
                     <tr style="border-bottom: 1px solid #F3F4F6; {{ $i % 2 == 0 ? 'background: #FAFAFA;' : '' }}">
-                        <td style="padding: 10px 14px;">{{ $i + 1 }}</td>
+                        <td style="padding: 10px 14px; text-align: center;">{{ $i + 1 }}</td>
                         <td style="padding: 10px 14px;">{{ $r->tanggal }}</td>
                         <td style="padding: 10px 14px;">{{ $r->jenis_pembayaran }}</td>
                         <td style="padding: 10px 14px; text-align: right; font-weight: 600; color: #10B981;">{{ $r->jumlah }}</td>
@@ -88,8 +110,8 @@
     {{-- TUTUP --}}
     <div style="text-align: right; margin-top: 20px;">
         <button onclick="tutupModalDetail()" 
-                style="background: #E5E7EB; color: #374151; border: none; padding: 10px 24px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 13px; font-family: 'Poppins', sans-serif;">
-            <i class="fas fa-times"></i> Tutup
+                style="padding: 11px 40px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 15px; background: #FFFFFF; cursor: pointer; font-family: 'Poppins', sans-serif;">
+            Tutup
         </button>
     </div>
     

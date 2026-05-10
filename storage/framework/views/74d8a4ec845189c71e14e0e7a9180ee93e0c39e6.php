@@ -21,17 +21,24 @@
         <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
             <select id="filterBulan" onchange="filterGaji()"
                     style="flex: 1; min-width: 130px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
-                <option value="">Pilih Bulan</option>
+                <option value="">Semua Bulan</option>
                 <?php for($i=1; $i<=12; $i++): ?>
-                    <option value="<?php echo e($i); ?>" <?php echo e($bulan == $i ? 'selected' : ''); ?>><?php echo e(Carbon\Carbon::create()->month($i)->translatedFormat('F')); ?></option>
+                    <option value="<?php echo e($i); ?>" <?php echo e(($bulan == $i || (!request('bulan') && date('n') == $i)) ? 'selected' : ''); ?>><?php echo e(Carbon\Carbon::create()->month($i)->translatedFormat('F')); ?></option>
                 <?php endfor; ?>
             </select>
             <select id="filterTahun" onchange="filterGaji()"
                     style="flex: 1; min-width: 100px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
-                <option value="">Pilih Tahun</option>
+                <option value="">Semua Tahun</option>
                 <?php for($i=date('Y'); $i>=2020; $i--): ?>
-                    <option value="<?php echo e($i); ?>" <?php echo e($tahun == $i ? 'selected' : ''); ?>><?php echo e($i); ?></option>
+                    <option value="<?php echo e($i); ?>" <?php echo e(($tahun == $i || (!request('tahun') && date('Y') == $i)) ? 'selected' : ''); ?>><?php echo e($i); ?></option>
                 <?php endfor; ?>
+            </select>
+            <select id="filterPeriode" onchange="filterGaji()"
+                    style="flex: 1; min-width: 130px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
+                <option value="">Semua Periode</option>
+                <?php $__currentLoopData = $periodeList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $periode): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($periode->tahun_periode); ?>" <?php echo e(($periodeAktif && $periodeAktif->tahun_periode == $periode->tahun_periode) ? 'selected' : ''); ?>><?php echo e($periode->tahun_periode); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </select>
         </div>
     </div>
@@ -179,9 +186,12 @@
     function filterGaji() {
         const bulan = document.getElementById('filterBulan').value;
         const tahun = document.getElementById('filterTahun').value;
-        if (bulan && tahun) {
-            window.location.href = `?bulan=${bulan}&tahun=${tahun}`;
-        }
+        const periode = document.getElementById('filterPeriode')?.value || '';
+        let params = [];
+        if (bulan) params.push(`bulan=${bulan}`);
+        if (tahun) params.push(`tahun=${tahun}`);
+        if (periode) params.push(`periode=${periode}`);
+        window.location.href = params.length ? `?${params.join('&')}` : window.location.pathname;
     }
 
     /* ================================================================
@@ -212,10 +222,6 @@
         document.getElementById('modalDetailGaji').style.display = 'none';
         document.getElementById('modalDetailGajiContent').innerHTML = '';
     }
-
-    document.getElementById('modalDetailGaji').addEventListener('click', function(e) {
-        if (e.target === this) tutupModalDetailGaji();
-    });
 
     /* ================================================================
        BAYAR GAJI
@@ -286,7 +292,14 @@
         })
         .then(function(data) {
             if (data.success) {
-                window.location.reload();
+                // Download slip gaji
+                const urlSlip = "<?php echo e(url($role . '/penggajian/slip')); ?>/" + bayarData.id + "?bulan=" + bulan + "&tahun=" + tahun;
+                window.open(urlSlip, '_blank');
+                
+                // Reload halaman setelah jeda
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
             } else {
                 alert(data.message || 'Gagal membayar gaji');
                 btn.disabled = false;
@@ -299,14 +312,6 @@
             btn.innerHTML = 'Ya, Bayar';
         });
     }
-
-    document.getElementById('modalPeringatan').addEventListener('click', function(e) { 
-        if (e.target === this) tutupModalPeringatan(); 
-    });
-
-    document.getElementById('modalBayar').addEventListener('click', function(e) { 
-        if (e.target === this) tutupModalBayar(); 
-    });
 
     document.getElementById('pageSelect').addEventListener('change', function() {
         let url = new URL(window.location.href);

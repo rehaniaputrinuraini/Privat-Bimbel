@@ -27,7 +27,7 @@
     {{-- BUTTON INPUT --}}
     <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
         <button onclick="bukaModalCreate()"
-                style="background-color: #10B981; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; box-shadow: 0 4px 6px rgba(16,185,129,0.2); font-family: 'Poppins', sans-serif;">
+                style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; box-shadow: 0 4px 6px rgba(77,11,135,0.2); font-family: 'Poppins', sans-serif;">
             <i class="fas fa-plus"></i> Input Pemasukan
         </button>
     </div>
@@ -38,27 +38,38 @@
 
     {{-- FILTER --}}
     <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 20px;">
+        <div style="position: relative; margin-bottom: 12px;">
+            <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
+            <input type="text" id="searchPemasukan" placeholder="Cari Sumber Pemasukan..."
+                   style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 14px; font-family: 'Poppins', sans-serif; box-sizing: border-box; outline: none;">
+        </div>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-            <div style="position: relative; flex: 2; min-width: 200px;">
-                <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
-                <input type="text" id="searchPemasukan" placeholder="Cari Sumber Pemasukan..."
-                       style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 14px; font-family: 'Poppins', sans-serif; outline: none;">
-            </div>
             <select id="filterJenis"
-                    style="flex: 1; min-width: 130px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
-                <option value="">Jenis</option>
+                    style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
+                <option value="">Semua Jenis</option>
                 <option value="Tunai">Tunai</option>
                 <option value="Transfer">Transfer</option>
             </select>
             <select id="filterBulan"
-                    style="flex: 1; min-width: 110px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
-                <option value="">Bulan</option>
-                @for($i=1; $i<=12; $i++)<option value="{{ $i }}">{{ Carbon\Carbon::create()->month($i)->translatedFormat('F') }}</option>@endfor
+                    style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
+                <option value="">Semua Bulan</option>
+                @for($i=1; $i<=12; $i++)
+                    <option value="{{ $i }}" {{ date('n') == $i ? 'selected' : '' }}>{{ Carbon\Carbon::create()->month($i)->translatedFormat('F') }}</option>
+                @endfor
             </select>
             <select id="filterTahun"
-                    style="flex: 1; min-width: 100px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
-                <option value="">Tahun</option>
-                @for($i=date('Y'); $i>=2020; $i--)<option value="{{ $i }}">{{ $i }}</option>@endfor
+                    style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
+                <option value="">Semua Tahun</option>
+                @for($i=date('Y'); $i>=2020; $i--)
+                    <option value="{{ $i }}" {{ date('Y') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                @endfor
+            </select>
+            <select id="filterPeriode"
+                    style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
+                <option value="">Semua Periode</option>
+                @foreach($periodeList as $periode)
+                    <option value="{{ $periode->tahun_periode }}" {{ ($periodeAktif && $periodeAktif->tahun_periode == $periode->tahun_periode) ? 'selected' : '' }}>{{ $periode->tahun_periode }}</option>
+                @endforeach
             </select>
         </div>
     </div>
@@ -114,7 +125,7 @@
             @php $start = max(1, $pemasukanLain->currentPage() - 2); $end = min($pemasukanLain->lastPage(), $pemasukanLain->currentPage() + 2); @endphp
             @for ($i = $start; $i <= $end; $i++)
                 @if ($i == $pemasukanLain->currentPage())
-                    <button style="width:35px;height:35px;border-radius:8px;background:#10B981;color:white;border:none;font-weight:600;font-family:'Poppins',sans-serif;">{{ $i }}</button>
+                    <button style="width:35px;height:35px;border-radius:8px;background:#4D0B87;color:white;border:none;font-weight:600;font-family:'Poppins',sans-serif;">{{ $i }}</button>
                 @else
                     <a href="{{ $pemasukanLain->url($i) }}&per_page={{ request('per_page', 10) }}" style="width:35px;height:35px;border-radius:8px;border:1px solid #E5E7EB;background:white;color:#374151;display:flex;align-items:center;justify-content:center;text-decoration:none;">{{ $i }}</a>
                 @endif
@@ -138,20 +149,26 @@
 
 <script>
     function bukaModalCreate() {
-    fetch("{{ route($role . '.pemasukan-lain.create') }}").then(r => r.text()).then(html => {
-        const cont = document.getElementById('modalContent');
-        cont.innerHTML = html;
-        document.getElementById('modalForm').style.display = 'flex';
-        cont.querySelectorAll('script').forEach(oldScript => {
-            const newScript = document.createElement('script');
-            newScript.textContent = oldScript.textContent;
-            document.body.appendChild(newScript);
-            document.body.removeChild(newScript);
-        });
-    }).catch(() => alert('Gagal memuat form.'));
-}
-    function tutupModalForm() { document.getElementById('modalForm').style.display = 'none'; document.getElementById('modalContent').innerHTML = ''; }
-    document.getElementById('modalForm').addEventListener('click', function(e) { if (e.target === this) tutupModalForm(); });
+        fetch("{{ route($role . '.pemasukan-lain.create') }}")
+            .then(r => r.text())
+            .then(html => {
+                const cont = document.getElementById('modalContent');
+                cont.innerHTML = html;
+                document.getElementById('modalForm').style.display = 'flex';
+                cont.querySelectorAll('script').forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = oldScript.textContent;
+                    document.body.appendChild(newScript);
+                    document.body.removeChild(newScript);
+                });
+            })
+            .catch(() => alert('Gagal memuat form.'));
+    }
+
+    function tutupModalForm() { 
+        document.getElementById('modalForm').style.display = 'none'; 
+        document.getElementById('modalContent').innerHTML = ''; 
+    }
 
     document.getElementById('pageSelect').addEventListener('change', function() {
         const url = new URL(window.location.href);
@@ -164,11 +181,15 @@
     document.getElementById('filterJenis')?.addEventListener('change', filterTable);
     document.getElementById('filterBulan')?.addEventListener('change', filterTable);
     document.getElementById('filterTahun')?.addEventListener('change', filterTable);
+    document.getElementById('filterPeriode')?.addEventListener('change', filterTable);
+
     function filterTable() {
         const s = (document.getElementById('searchPemasukan')?.value || '').toLowerCase();
         const jenis = document.getElementById('filterJenis')?.value || '';
         const bulan = document.getElementById('filterBulan')?.value || '';
         const tahun = document.getElementById('filterTahun')?.value || '';
+        const periode = document.getElementById('filterPeriode')?.value || '';
+
         document.querySelectorAll('#tableBody tr').forEach(row => {
             if (!row.cells || row.cells.length < 6) return;
             const sumber = (row.cells[2]?.innerText || '').toLowerCase();
@@ -177,11 +198,15 @@
             const parts = tgl.split('/');
             const b = parts[1] ? parseInt(parts[1]) : 0;
             const t = parts[2] ? parseInt(parts[2]) : 0;
+
             let show = true;
             if (s && !sumber.includes(s)) show = false;
             if (jenis && j !== jenis) show = false;
             if (bulan && b !== parseInt(bulan)) show = false;
             if (tahun && t !== parseInt(tahun)) show = false;
+            // Filter periode belum bisa jalan tanpa data-periode di row
+            // Bisa ditambah nanti kalau Controller udah ngirim data periode per row
+
             row.style.display = show ? '' : 'none';
         });
     }

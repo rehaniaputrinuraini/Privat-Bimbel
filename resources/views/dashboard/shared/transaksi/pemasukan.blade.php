@@ -56,23 +56,30 @@
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
             <select id="filterPaket"
                     style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
-                <option value="">Status Paket</option>
+                <option value="">Semua Paket</option>
                 @foreach($paketList as $paket)
                     <option value="{{ $paket->tingkat }}">{{ $paket->tingkat }}</option>
                 @endforeach
             </select>
             <select id="filterPembayaran"
                     style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
-                <option value="">Status Pembayaran</option>
+                <option value="">Semua Pembayaran</option>
                 <option value="Lunas">Lunas</option>
                 <option value="Belum">Belum</option>
             </select>
             <select id="filterTagihan"
                     style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
-                <option value="">Status Tagihan</option>
+                <option value="">Semua Tagihan</option>
                 <option value="Lunas">Lunas</option>
                 <option value="Tunggak">Tunggak</option>
                 <option value="Uang Muka">Uang Muka</option>
+            </select>
+            <select id="filterPeriode"
+                    style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
+                <option value="">Semua Periode</option>
+                @foreach($periodeList as $periode)
+                    <option value="{{ $periode->tahun_periode }}" {{ ($periodeAktif && $periodeAktif->tahun_periode == $periode->tahun_periode) ? 'selected' : '' }}>{{ $periode->tahun_periode }}</option>
+                @endforeach
             </select>
         </div>
     </div>
@@ -94,7 +101,7 @@
             </thead>
             <tbody id="tagihanTableBody">
                 @forelse($tagihan as $index => $t)
-                <tr style="border-bottom: 1px solid #F3F4F6;">
+                <tr style="border-bottom: 1px solid #F3F4F6;" data-periode="{{ $t->periode ?? '' }}">
                     <td style="padding: 15px;">{{ $tagihan->firstItem() + $index }}</td>
                     <td style="padding: 15px; font-weight: 500;">{{ $t->nama_murid }}</td>
                     <td style="padding: 15px;">{{ $t->kelas ?? '-' }}</td>
@@ -236,10 +243,6 @@
         document.getElementById('modalContent').innerHTML = '';
     }
 
-    document.getElementById('modalForm').addEventListener('click', function (e) {
-        if (e.target === this) tutupModalForm();
-    });
-
     /* ================================================================
     BUKA MODAL DETAIL PEMBAYARAN MURID
     =============================================================== */
@@ -266,10 +269,6 @@
         document.getElementById('modalDetail').style.display = 'none';
         document.getElementById('modalDetailContent').innerHTML = '';
     }
-
-    document.getElementById('modalDetail').addEventListener('click', function (e) {
-        if (e.target === this) tutupModalDetail();
-    });
     
     /* ================================================================
        PAGINATION: ganti jumlah baris
@@ -282,18 +281,20 @@
     });
 
     /* ================================================================
-       FILTER TABEL CLIENT-SIDE (update index kolom)
+       FILTER TABEL CLIENT-SIDE
     ================================================================ */
     document.getElementById('searchTagihan')?.addEventListener('keyup', filterTagihan);
     document.getElementById('filterPaket')?.addEventListener('change', filterTagihan);
     document.getElementById('filterPembayaran')?.addEventListener('change', filterTagihan);
     document.getElementById('filterTagihan')?.addEventListener('change', filterTagihan);
+    document.getElementById('filterPeriode')?.addEventListener('change', filterTagihan);
 
     function filterTagihan() {
         const s   = (document.getElementById('searchTagihan')?.value || '').toLowerCase();
         const fp  = document.getElementById('filterPaket')?.value || '';
         const fby = document.getElementById('filterPembayaran')?.value || '';
         const ftg = document.getElementById('filterTagihan')?.value || '';
+        const fpr = document.getElementById('filterPeriode')?.value || '';
 
         document.querySelectorAll('#tagihanTableBody tr').forEach(row => {
             if (!row.cells || row.cells.length < 8) return;
@@ -301,12 +302,14 @@
             const paket = row.cells[3]?.innerText.trim() || '';
             const statusPembayaran = row.cells[5]?.innerText.trim() || '';
             const statusTagihan    = row.cells[6]?.innerText.trim() || '';
+            const periodeRow       = row.getAttribute('data-periode') || '';
 
             let show = true;
             if (s   && !nama.includes(s))              show = false;
             if (fp  && paket !== fp)                    show = false;
             if (fby && statusPembayaran !== fby)        show = false;
             if (ftg && statusTagihan !== ftg)           show = false;
+            if (fpr && periodeRow && periodeRow !== fpr) show = false;
 
             row.style.display = show ? '' : 'none';
         });

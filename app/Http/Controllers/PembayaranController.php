@@ -11,6 +11,7 @@ use App\Models\TransaksiPaket;
 use App\Models\TransaksiKelas;
 use App\Models\TransaksiUmum;
 use App\Models\Periode;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
 class PembayaranController extends Controller
@@ -647,8 +648,16 @@ class PembayaranController extends Controller
         $totalMurid       = TransaksiUmum::where('debit', '>', 0)->where(function ($q) { $q->where('keterangan', 'like', '%Pendaftaran%')->orWhere('keterangan', 'like', '%SPP%'); })->sum('debit');
         $totalLainnya     = TransaksiUmum::where('debit', '>', 0)->where('keterangan', 'not like', '%Pendaftaran%')->where('keterangan', 'not like', '%SPP%')->sum('debit');
 
+        $periodeList = Periode::orderBy('tahun_periode', 'desc')->get();
+        
+        // Ambil periode aktif
+        $today = date('Y-m-d');
+        $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
+            ->where('tanggal_selesai', '>=', $today)
+            ->first();
+
         return view('dashboard.shared.transaksi.pemasukan', compact(
-            'role', 'tagihan', 'pemasukan', 'paketList',
+            'role', 'tagihan', 'pemasukan', 'paketList', 'periodeList', 'periodeAktif',
             'totalBulanIni', 'totalKeseluruhan', 'totalMurid', 'totalLainnya'
         ));
     }
@@ -684,14 +693,24 @@ class PembayaranController extends Controller
             ->whereYear('tanggal_bayar', now()->year)
             ->sum('kredit');
         
-        $totalKeseluruhan = TransaksiUmum::where('kredit', '>', 0)
+            $totalKeseluruhan = TransaksiUmum::where('kredit', '>', 0)
             ->where('keterangan', 'not like', '%Gaji%')
             ->where('keterangan', 'not like', '%Honor%')
             ->sum('kredit');
         
-        return view('dashboard.shared.transaksi.pengeluaran', compact(
-            'role', 'pengeluaran', 'totalBulanIni', 'totalKeseluruhan'
-        ));
+            // Ambil daftar periode
+            $periodeList = Periode::orderBy('tahun_periode', 'desc')->get();
+            
+            // Ambil periode aktif
+            $today = date('Y-m-d');
+            $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
+                ->where('tanggal_selesai', '>=', $today)
+                ->first();
+            
+            return view('dashboard.shared.transaksi.pengeluaran', compact(
+                'role', 'pengeluaran', 'totalBulanIni', 'totalKeseluruhan',
+                'periodeList', 'periodeAktif'
+            ));
     }
 
     public function createPengeluaran(Request $request)
@@ -834,15 +853,24 @@ class PembayaranController extends Controller
             ]);
         }
         
-        $total = $penggajian->count();
-        $currentPage = $request->get('page', 1);
-        $penggajian = new \Illuminate\Pagination\LengthAwarePaginator(
-            $penggajian->forPage($currentPage, $perPage),
-            $total, $perPage, $currentPage,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
-        
-        return view('dashboard.shared.transaksi.penggajian', compact('role', 'penggajian', 'bulan', 'tahun', 'isAkhirBulan'));
+            $total = $penggajian->count();
+            $currentPage = $request->get('page', 1);
+            $penggajian = new \Illuminate\Pagination\LengthAwarePaginator(
+                $penggajian->forPage($currentPage, $perPage),
+                $total, $perPage, $currentPage,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+            
+            // Ambil daftar periode
+            $periodeList = Periode::orderBy('tahun_periode', 'desc')->get();
+            
+            // Ambil periode aktif
+            $today = date('Y-m-d');
+            $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
+                ->where('tanggal_selesai', '>=', $today)
+                ->first();
+            
+            return view('dashboard.shared.transaksi.penggajian', compact('role', 'penggajian', 'bulan', 'tahun', 'isAkhirBulan', 'periodeList', 'periodeAktif'));
     }
 
     public function bayarGaji(Request $request, $id)
@@ -945,6 +973,81 @@ class PembayaranController extends Controller
             ->where('debit', '>', 0)
             ->sum('debit');
         
+        // Jumlah bayar SPP (gak termasuk pendaftaran)
+        $jumlahBayarSPP = TransaksiUmum::where('id_murid', $murid->id_murid)
+            ->where('keterangan', 'like', '%SPP%')
+            ->where('debit', '>', 0)
+            ->count();
+        
+        // Status tagihan
+        $currentMonth = Carbon::now()->month;
+        $currentYear  = Carbon::now()->year;
+        
+        $semuaPembayaranSPP = TransaksiUmum::where('id_murid', $murid->id_murid)
+            ->where('keterangan', 'like', '%SPP%')
+            ->where('debit', '>', 0)
+            ->orderBy('tanggal_bayar', 'desc')
+            ->get();
+        
+        $pembayaranBulanIni = $semuaPembayaranSPP->filter(function ($item) use ($currentMonth, $currentYear) {
+            preg_match('/SPP\s+(\w+)\s+(\d+)/', $item->keterangan, $matches);
+            if (isset($matches[1]) && isset($matches[2])) {
+                try {
+                    $bulanDibayar = Carbon::parse($matches[1])->month;
+                    $tahunDibayar = (int) $matches[2];
+                    return $bulanDibayar == $currentMonth && $tahunDibayar == $currentYear;
+                } catch (\Exception $e) {
+                    return false;
+                }
+            }
+            return false;
+        })->first();
+        
+        $totalUangMuka = 0;
+        $totalPiutang  = 0;
+        
+        foreach ($semuaPembayaranSPP as $pemb) {
+            preg_match('/SPP\s+(\w+)\s+(\d+)/', $pemb->keterangan, $matches);
+            if (isset($matches[1]) && isset($matches[2])) {
+                try {
+                    $bulanDibayar = Carbon::parse($matches[1])->month;
+                    $tahunDibayar = (int) $matches[2];
+                    
+                    if ($tahunDibayar > $currentYear || ($tahunDibayar == $currentYear && $bulanDibayar > $currentMonth)) {
+                        $totalUangMuka += $pemb->debit;
+                    }
+                    if ($tahunDibayar < $currentYear || ($tahunDibayar == $currentYear && $bulanDibayar < $currentMonth)) {
+                        $kekurangan = $hargaPerBulan - $pemb->debit;
+                        if ($kekurangan > 0) $totalPiutang += $kekurangan;
+                    }
+                } catch (\Exception $e) {
+                    continue;
+                }
+            }
+        }
+        
+        // Bulan belum dibayar
+        $bulanMulai = 1;
+        if ($murid->tanggal_daftar) {
+            $bulanMulai = (int) date('m', strtotime($murid->tanggal_daftar));
+        }
+        for ($i = $bulanMulai; $i <= $currentMonth; $i++) {
+            $bulanTahun  = Carbon::create()->month($i)->translatedFormat('F') . ' ' . $currentYear;
+            $sudahDibayar = false;
+            if ($i == $bulanMulai && !$sudahBayarPendaftaran) continue;
+            foreach ($semuaPembayaranSPP as $pemb) {
+                if (str_contains($pemb->keterangan, $bulanTahun)) { $sudahDibayar = true; break; }
+            }
+            if (!$sudahDibayar) $totalPiutang += $hargaPerBulan;
+        }
+        
+        $statusTagihan = '-';
+        if (!$sudahBayarPendaftaran) $statusTagihan = 'Belum Daftar';
+        elseif ($totalUangMuka > 0)  $statusTagihan = 'Uang Muka';
+        elseif ($totalPiutang > 0)   $statusTagihan = 'Tunggak';
+        elseif ($pembayaranBulanIni) $statusTagihan = 'Lunas';
+        else $statusTagihan = 'Tunggak';
+
         $data = [
             'role'                    => $role,
             'murid'                   => $murid,
@@ -954,6 +1057,8 @@ class PembayaranController extends Controller
             'riwayatPembayaran'       => $riwayatPembayaran,
             'sudahBayarPendaftaran'   => $sudahBayarPendaftaran,
             'totalBayar'              => $totalBayar,
+            'jumlahBayarSPP'          => $jumlahBayarSPP,
+            'statusTagihan'           => $statusTagihan,
         ];
         
         return view('dashboard.shared.transaksi.detail-pembayaran', $data);
@@ -991,14 +1096,24 @@ class PembayaranController extends Controller
             ->whereYear('tanggal_bayar', now()->year)
             ->sum('debit');
         
-        $totalKeseluruhan = TransaksiUmum::where('debit', '>', 0)
+            $totalKeseluruhan = TransaksiUmum::where('debit', '>', 0)
             ->where('keterangan', 'not like', '%Pendaftaran%')
             ->where('keterangan', 'not like', '%SPP%')
             ->sum('debit');
         
-        return view('dashboard.shared.transaksi.pemasukan-lain', compact(
-            'role', 'pemasukanLain', 'totalBulanIni', 'totalKeseluruhan'
-        ));
+            // Ambil daftar periode
+            $periodeList = Periode::orderBy('tahun_periode', 'desc')->get();
+            
+            // Ambil periode aktif
+            $today = date('Y-m-d');
+            $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
+                ->where('tanggal_selesai', '>=', $today)
+                ->first();
+            
+            return view('dashboard.shared.transaksi.pemasukan-lain', compact(
+                'role', 'pemasukanLain', 'totalBulanIni', 'totalKeseluruhan',
+                'periodeList', 'periodeAktif'
+            ));
     }
     // =============================================
     // CREATE PEMASUKAN LAIN
@@ -1009,7 +1124,7 @@ class PembayaranController extends Controller
         return view('dashboard.shared.pembayaran.create-pemasukan-lain', compact('role'));
     }
 
-        // =============================================
+    // =============================================
     // DETAIL PENGGAJIAN (POP-UP) - CENTINO
     // =============================================
     public function detailPenggajian(Request $request, $id)
@@ -1108,5 +1223,99 @@ class PembayaranController extends Controller
         ];
         
         return view('dashboard.shared.transaksi.detail-penggajian', $data);
+    }
+
+    // =============================================
+    // SLIP GAJI (PDF)
+    // =============================================
+    public function slipGaji(Request $request, $id)
+    {
+        $bulan = $request->get('bulan', now()->month);
+        $tahun = $request->get('tahun', now()->year);
+        
+        $tentor = Pegawai::findOrFail($id);
+        
+        // Ambil presensi bulan ini
+        $presensi = Mengajar::with('kelas')
+            ->where('id_pegawai', $tentor->id_pegawai)
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->get();
+        
+        $daftarTanggal = $presensi->pluck('tanggal')->unique()->values();
+        $hariHadir = $daftarTanggal->count();
+        
+        $detailPresensi = collect();
+        $totalHonor = 0;
+        
+        foreach ($daftarTanggal as $tanggal) {
+            $presensiHarian = $presensi->where('tanggal', $tanggal);
+            $adaHadir = $presensiHarian->where('murid_hadir', 'Hadir')->count() > 0;
+            $adaTidakHadir = $presensiHarian->where('murid_hadir', 'Tidak Hadir')->count() > 0;
+            
+            $jenjang = $presensiHarian->first()->kelas->jenjang ?? null;
+            $hr = 0;
+            if ($jenjang == 'SD') $hr = $tentor->hr_sd ?? 0;
+            elseif ($jenjang == 'SMP') $hr = $tentor->hr_smp ?? 0;
+            elseif ($jenjang == 'SMA') $hr = $tentor->hr_sma ?? 0;
+            
+            $honorHarian = 0;
+            $statusHadir = 'Tidak Hadir';
+            if ($adaHadir) {
+                $honorHarian = $hr;
+                $statusHadir = 'Hadir';
+                $totalHonor += $hr;
+            } elseif ($adaTidakHadir) {
+                $honorHarian = $hr / 2;
+                $statusHadir = 'Tidak Hadir (50%)';
+                $totalHonor += ($hr / 2);
+            }
+            
+            $muridList = $presensiHarian->map(function($p) {
+                return [
+                    'nama_murid' => $p->nama_murid ?? '-',
+                    'kelas' => $p->kelas->nama_kelas ?? '-',
+                    'status' => $p->murid_hadir ?? '-',
+                ];
+            })->toArray();
+            
+            $detailPresensi->push((object)[
+                'tanggal' => Carbon::parse($tanggal)->format('d/m/Y'),
+                'hari' => Carbon::parse($tanggal)->translatedFormat('l'),
+                'status' => $statusHadir,
+                'honor' => $honorHarian,
+                'murid_list' => $muridList,
+            ]);
+        }
+        
+        $uangMakanPerHari = $tentor->uang_makan ?? 0;
+        $totalUangMakan = $hariHadir * $uangMakanPerHari;
+        $uangTransportPerHari = $tentor->uang_transport ?? 0;
+        $totalUangTransport = $hariHadir * $uangTransportPerHari;
+        $totalGaji = $totalHonor + $totalUangMakan + $totalUangTransport;
+        
+        $namaBulan = Carbon::create()->month($bulan)->translatedFormat('F');
+        
+        $data = [
+            'tentor' => $tentor,
+            'bulan' => $bulan,
+            'tahun' => $tahun,
+            'namaBulan' => $namaBulan,
+            'hariHadir' => $hariHadir,
+            'detailPresensi' => $detailPresensi,
+            'totalHonor' => $totalHonor,
+            'uangMakanPerHari' => $uangMakanPerHari,
+            'totalUangMakan' => $totalUangMakan,
+            'uangTransportPerHari' => $uangTransportPerHari,
+            'totalUangTransport' => $totalUangTransport,
+            'totalGaji' => $totalGaji,
+        ];
+        
+        $pdf = Pdf::loadView('dashboard.shared.transaksi.slip-gaji', $data);
+        $pdf->setPaper('a4', 'portrait');
+        
+        $filename = 'Slip_Gaji_' . str_replace(' ', '_', $tentor->nama_lengkap) . '_' . $namaBulan . '_' . $tahun . '.pdf';
+        
+        return $pdf->download($filename);
     }
 }
