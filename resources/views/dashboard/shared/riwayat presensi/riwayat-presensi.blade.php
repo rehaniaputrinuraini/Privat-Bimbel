@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Riwayat Presensi')
+@section('title', 'Riwayat Pengajaran')
 
 @push('styles')
 <style>
@@ -62,7 +62,7 @@
         font-size: 10px;
     }
     
-    /* ========== MODAL PREVIEW FOTO - GOOGLE DRIVE STYLE ========== */
+    /* MODAL PREVIEW FOTO */
     .modal-preview-foto {
         display: none;
         position: fixed;
@@ -377,7 +377,7 @@
                         </td>
                         <td style="padding: 15px; text-align: center;">
                             @if($item->bukti_mengajar)
-                                <button onclick="bukaPreviewFoto('{{ $downloadUrl }}', '{{ addslashes($namaTentor) }}', '{{ addslashes($tanggal) }}', '{{ $downloadUrl }}')" class="btn-foto" title="Lihat Foto">
+                                <button onclick="bukaPreviewFoto('{{ asset('storage/' . $item->bukti_mengajar) }}', '{{ addslashes($namaTentor) }}', '{{ addslashes($tanggal) }}', '{{ asset('storage/' . $item->bukti_mengajar) }}')" class="btn-foto" title="Lihat Foto">
                                     <i class="fas fa-image"></i>
                                 </button>
                             @else
@@ -483,7 +483,7 @@
 
 </div>
 
-{{-- MODAL PREVIEW FOTO - GOOGLE DRIVE STYLE --}}
+{{-- MODAL PREVIEW FOTO --}}
 <div id="modalPreviewFoto" class="modal-preview-foto" onclick="tutupPreviewFoto(event)">
     <div class="modal-preview-header">
         <span class="tentor-info" id="previewTentorInfo">-</span>
@@ -501,12 +501,12 @@
     </div>
 </div>
 
-{{-- MODAL HAPUS --}}
+{{-- MODAL HAPUS - HANYA BISA DITUTUP DENGAN TOMBOL BATAL --}}
 <div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
-    <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
+    <div style="background: white; padding: 25px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #E35D5D; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-trash-alt"></i></div>
-        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Hapus Data?</h2>
-        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0;" id="pesanHapus">Apakah Anda yakin ingin menghapus data presensi ini?</p>
+        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Hapus Data Presensi?</h2>
+        <p style="color: #6B7280; font-size: 13px; margin: 8px 0 20px 0; line-height: 1.5;" id="pesanHapus"></p>
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button onclick="tutupModalHapus()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
             <form id="formHapus" method="POST" style="flex: 1;">
@@ -518,11 +518,13 @@
 </div>
 
 <script>
+    // ========== PER PAGE ==========
     document.getElementById('perPageSelect')?.addEventListener('change', function() {
         document.getElementById('perPageInput').value = this.value;
         document.getElementById('filterForm').submit();
     });
 
+    // ========== PREVIEW FOTO ==========
     function bukaPreviewFoto(url, namaTentor, tanggal, downloadUrl) {
         document.getElementById('previewFotoImg').src = url;
         document.getElementById('previewTentorInfo').innerHTML = '<strong>' + namaTentor + '</strong> <small>- ' + tanggal + '</small>';
@@ -542,19 +544,21 @@
         }
     });
 
+    // ========== MODAL HAPUS - TIDAK BISA TUTUP DENGAN KLIK DI LUAR ==========
     function bukaModalHapus(id, nama, tanggal) {
         let form = document.getElementById('formHapus');
         let url = "{{ route($role . '.kelola-presensi.destroy', ':id') }}";
         url = url.replace(':id', id);
         form.action = url;
-        document.getElementById('pesanHapus').innerHTML = 'Apakah Anda yakin ingin menghapus data presensi <strong>' + nama + '</strong><br>tanggal <strong>' + tanggal + '</strong>?';
+        document.getElementById('pesanHapus').innerHTML = 'Apakah Anda <strong>benar-benar yakin</strong> ingin menghapus data presensi <strong>' + nama + '</strong><br>tanggal <strong>' + tanggal + '</strong>?<br><br><small style="color:#EF4444;">⚠️ <strong>PERINGATAN:</strong> Data yang dihapus tidak dapat dikembalikan.</small>';
         document.getElementById('modalHapus').style.display = 'flex';
     }
 
-    function tutupModalHapus() { document.getElementById('modalHapus').style.display = 'none'; }
+    function tutupModalHapus() { 
+        document.getElementById('modalHapus').style.display = 'none'; 
+    }
 
-    window.addEventListener('click', function(event) {
-        if (event.target == document.getElementById('modalHapus')) tutupModalHapus();
-    });
+    // ⛔ TIDAK ADA EVENT LISTENER UNTUK TUTUP MODAL HAPUS DENGAN KLIK DI LUAR
+    // HANYA BISA DITUTUP DENGAN TOMBOL BATAL
 </script>
 @endsection

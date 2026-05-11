@@ -8,7 +8,7 @@
     {{-- HEADER --}}
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
-            {{ isset($bulan) && isset($tahun) ? \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('F Y') : \Carbon\Carbon::now()->translatedFormat('F Y') }}
+            {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
         </p>
         <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
             Riwayat Presensi
@@ -16,7 +16,7 @@
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Lihat riwayat kehadiran mengajar Anda setiap bulannya</p>
     </div>
 
-    {{-- FILTER FORM --}}
+    {{-- FILTER FORM -- DEFAULT BULAN & TAHUN SAAT INI --}}
     <form method="GET" action="{{ route('tentor.riwayat-presensi') }}" id="filterForm">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
             <div style="display: flex; align-items: center; gap: 12px; flex: 1; flex-wrap: wrap;">
@@ -28,27 +28,50 @@
                            style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
                 </div>
 
-                {{-- FILTER BULAN --}}
+                {{-- FILTER BULAN -- DEFAULT BULAN SAAT INI --}}
                 <select name="bulan" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 140px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
-                    <option value="">--- Pilih Bulan ---</option>
-                    @foreach(range(1, 12) as $b)
-                        <option value="{{ $b }}" {{ ($bulan ?? '') == $b ? 'selected' : '' }}>
-                            {{ \Carbon\Carbon::create()->month($b)->translatedFormat('F') }}
+                    @php
+                        $bulanSekarang = date('n');
+                        $requestBulan = request('bulan');
+                    @endphp
+                    @for($i = 1; $i <= 12; $i++)
+                        @php
+                            $selected = false;
+                            if ($requestBulan) {
+                                $selected = ($requestBulan == $i);
+                            } else {
+                                $selected = ($bulanSekarang == $i);
+                            }
+                        @endphp
+                        <option value="{{ $i }}" {{ $selected ? 'selected' : '' }}>
+                            {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
                         </option>
-                    @endforeach
+                    @endfor
                 </select>
 
-                {{-- FILTER TAHUN --}}
+                {{-- FILTER TAHUN -- DEFAULT TAHUN SAAT INI --}}
                 <select name="tahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 100px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
-                    <option value="">--- Tahun ---</option>
-                    @php $currentYear = date('Y'); @endphp
-                    @for($year = $currentYear - 2; $year <= $currentYear + 1; $year++)
-                        <option value="{{ $year }}" {{ ($tahun ?? '') == $year ? 'selected' : '' }}>{{ $year }}</option>
+                    @php
+                        $tahunSekarang = date('Y');
+                        $requestTahun = request('tahun');
+                        $tahunMulai = $tahunSekarang - 2;
+                        $tahunAkhir = $tahunSekarang + 1;
+                    @endphp
+                    @for($year = $tahunMulai; $year <= $tahunAkhir; $year++)
+                        @php
+                            $selected = false;
+                            if ($requestTahun) {
+                                $selected = ($requestTahun == $year);
+                            } else {
+                                $selected = ($tahunSekarang == $year);
+                            }
+                        @endphp
+                        <option value="{{ $year }}" {{ $selected ? 'selected' : '' }}>{{ $year }}</option>
                     @endfor
                 </select>
                 
                 {{-- RESET BUTTON --}}
-                @if(($bulan ?? '') || ($tahun ?? '') || ($search ?? ''))
+                @if(request('bulan') || request('tahun') || request('search'))
                     <a href="{{ route('tentor.riwayat-presensi') }}" style="padding: 10px 15px; border-radius: 12px; background: #F3F4F6; color: #374151; text-decoration: none; font-size: 13px;">
                         <i class="fas fa-times"></i> Reset
                     </a>
@@ -56,7 +79,7 @@
             </div>
         </div>
         
-        <input type="hidden" name="perPage" id="perPageInput" value="{{ $perPage ?? 10 }}">
+        <input type="hidden" name="perPage" id="perPageInput" value="{{ request('perPage', 10) }}">
     </form>
 
     {{-- TABEL RIWAYAT --}}
@@ -77,17 +100,14 @@
                 <tbody id="tableBody" style="color: #374151;">
                     @forelse($riwayat as $index => $item)
                         @php
-                            // Ambil data dari relasi
                             $namaKelas = $item->kelas ? $item->kelas->jenjang . ' - ' . $item->kelas->nama_kelas : '-';
                             $namaRuang = $item->ruang ? $item->ruang->nama_ruang : '-';
                             
-                            // Status murid
                             $statusText = $item->murid_hadir == 'Hadir' ? 'Hadir' : 'Tidak Hadir';
                             $statusClass = $item->murid_hadir == 'Hadir' 
                                 ? 'background: #D1FAE5; color: #065F46;' 
                                 : 'background: #FEE2E2; color: #991B1B;';
                             
-                            // Jam
                             $jamMasuk = $item->jam_mulai ? \Carbon\Carbon::parse($item->jam_mulai)->format('H:i') : '-';
                             $jamKeluar = $item->jam_selesai ? \Carbon\Carbon::parse($item->jam_selesai)->format('H:i') : '-';
                         @endphp
@@ -126,9 +146,9 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
             <select id="perPageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
-                <option value="10" {{ ($perPage ?? 10) == 10 ? 'selected' : '' }}>10 baris</option>
-                <option value="25" {{ ($perPage ?? 10) == 25 ? 'selected' : '' }}>25 baris</option>
-                <option value="50" {{ ($perPage ?? 10) == 50 ? 'selected' : '' }}>50 baris</option>
+                <option value="10" {{ request('perPage', 10) == 10 ? 'selected' : '' }}>10 baris</option>
+                <option value="25" {{ request('perPage', 10) == 25 ? 'selected' : '' }}>25 baris</option>
+                <option value="50" {{ request('perPage', 10) == 50 ? 'selected' : '' }}>50 baris</option>
             </select>
             <span style="color: #374151; font-size: 13px;">
                 Menampilkan {{ $riwayat->total() }} data
