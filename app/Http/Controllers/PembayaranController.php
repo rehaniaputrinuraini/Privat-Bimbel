@@ -1098,6 +1098,82 @@ class PembayaranController extends Controller
         elseif ($pembayaranBulanIni) $statusTagihan = 'Lunas';
         else $statusTagihan = 'Tunggak';
 
+        // ============================================================
+        // BUAT DETAIL TAGIHAN PER BULAN (dari bulan daftar sampai sekarang)
+        // ============================================================
+        $detailTagihan = collect();
+
+        // Tentukan bulan dan tahun mulai (dari tanggal daftar)
+        $tanggalDaftar = $murid->tanggal_daftar ?? date('Y-m-d');
+        $bulanMulai = (int) date('m', strtotime($tanggalDaftar));
+        $tahunMulai = (int) date('Y', strtotime($tanggalDaftar));
+
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+
+        // Daftar bulan yang sudah dibayar (untuk cek status)
+        $bulanDibayar = [];
+        foreach ($semuaPembayaranSPP as $pemb) {
+            preg_match('/SPP\s+(\w+)\s+(\d+)/', $pemb->keterangan, $matches);
+            if (isset($matches[1]) && isset($matches[2])) {
+                try {
+                    $bulan = Carbon::parse($matches[1])->month;
+                    $tahun = (int) $matches[2];
+                    $bulanDibayar["{$tahun}-{$bulan}"] = [
+                        'tanggal_bayar' => $pemb->tanggal_bayar,
+                        'jenis_pembayaran' => $pemb->jenis_pembayaran,
+                        'jumlah' => $pemb->debit,
+                    ];
+                } catch (\Exception $e) {}
+            }
+        }
+
+        // Loop dari bulan mulai sampai bulan sekarang
+        for ($year = $tahunMulai; $year <= $currentYear; $year++) {
+            $startMonth = ($year == $tahunMulai) ? $bulanMulai : 1;
+            $endMonth = ($year == $currentYear) ? $currentMonth : 12;
+            
+            for ($month = $startMonth; $month <= $endMonth; $month++) {
+                // Lewati bulan sebelum pendaftaran jika belum lunas pendaftaran
+                if ($year == $tahunMulai && $month == $bulanMulai && !$sudahBayarPendaftaran) {
+                    continue;
+                }
+                
+                $namaBulan = Carbon::create()->month($month)->translatedFormat('F') . ' ' . $year;
+                $key = "{$year}-{$month}";
+                
+                if (isset($bulanDibayar[$key])) {
+                    $bayar = $bulanDibayar[$key];
+                    $status = 'Lunas';
+                    $keterangan = 'SPP ' . $namaBulan;
+                    $jumlah = $bayar['jumlah'];
+                    $tanggalBayar = date('d/m/Y', strtotime($bayar['tanggal_bayar']));
+                    $jenisBayar = $bayar['jenis_pembayaran'];
+                    
+                    if ($bayar['jumlah'] > $hargaPerBulan) {
+                        $status = 'Uang Muka';
+                        $kelebihan = $bayar['jumlah'] - $hargaPerBulan;
+                        $keterangan = 'Uang Muka untuk ' . $namaBulan . ' (lebih Rp ' . number_format($kelebihan, 0, ',', '.') . ')';
+                    }
+                } else {
+                    $status = 'Belum Lunas';
+                    $keterangan = 'Belum dibayar';
+                    $jumlah = 0;
+                    $tanggalBayar = '-';
+                    $jenisBayar = '-';
+                }
+                
+                $detailTagihan->push((object)[
+                    'bulan' => $namaBulan,
+                    'tanggal_bayar' => $tanggalBayar,
+                    'jenis_pembayaran' => $jenisBayar,
+                    'jumlah' => $jumlah,
+                    'keterangan' => $keterangan,
+                    'status' => $status,
+                ]);
+            }
+        }
+
         $data = [
             'role'                    => $role,
             'murid'                   => $murid,
@@ -1109,8 +1185,9 @@ class PembayaranController extends Controller
             'totalBayar'              => $totalBayar,
             'jumlahBayarSPP'          => $jumlahBayarSPP,
             'statusTagihan'           => $statusTagihan,
+            'detailTagihan'           => $detailTagihan,  // <-- TAMBAHKAN INI
         ];
-        
+
         return view('dashboard.shared.transaksi.detail-pembayaran', $data);
     }
 

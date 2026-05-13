@@ -87,29 +87,6 @@
         </div>
 
         
-        <div id="bulanGroup" style="margin-bottom: 15px; display: none;">
-            <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                Untuk Bulan
-            </label>
-            <select name="bulan_dibayar" id="bulan_dibayar"
-                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; cursor: pointer; color: #374151;">
-                <option value="">Pilih Bulan</option>
-                <option value="1">Januari</option>
-                <option value="2">Februari</option>
-                <option value="3">Maret</option>
-                <option value="4">April</option>
-                <option value="5">Mei</option>
-                <option value="6">Juni</option>
-                <option value="7">Juli</option>
-                <option value="8">Agustus</option>
-                <option value="9">September</option>
-                <option value="10">Oktober</option>
-                <option value="11">November</option>
-                <option value="12">Desember</option>
-            </select>
-        </div>
-
-        
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
                 Total Pembayaran <span style="color: #EF4444;">*</span>
@@ -130,6 +107,9 @@
             <textarea name="keterangan" id="keterangan" rows="3" placeholder="Masukkan Keterangan (opsional)"
                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; resize: vertical; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;"></textarea>
         </div>
+
+        
+        <input type="hidden" name="bulan_dibayar" id="bulan_dibayar" value="">
 
         
         <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 28px; padding-top: 16px; border-top: 1.5px solid #F3F4F6;">
@@ -210,15 +190,15 @@
     const infoStatus      = document.querySelector('#infoStatusMurid');
     const paketSelect     = document.querySelector('#paket_selanjutnya');
     const totalInput      = document.querySelector('#total_pembayaran');
-    const bulanGroup      = document.querySelector('#bulanGroup');
-    const bulanSelect     = document.querySelector('#bulan_dibayar');
     const infoHarga       = document.querySelector('#infoHarga');
     const hargaValue      = document.querySelector('#hargaPaketValue');
     const previewStatus   = document.querySelector('#previewStatus');
+    const bulanHidden     = document.querySelector('#bulan_dibayar');
 
     let formChanged  = false;
     let formSubmitted = false;
     let _hargaPaket  = 0;
+    let _bulanTagihan = ''; // untuk menyimpan bulan yang harus dibayar
 
     /* TRACK perubahan */
     if (form) {
@@ -246,8 +226,6 @@
 
     btnOkSukses?.addEventListener('click', () => { modalSukses.style.display = 'none'; tutupModal(); window.location.reload(); });
 
-    // ⬅️ BACKDROP DIHAPUS - HANYA BISA TUTUP LEWAT TOMBOL
-
     function tutupModal() {
         const mf = document.getElementById('modalForm');
         if (mf) mf.style.display = 'none';
@@ -260,6 +238,12 @@
         form.addEventListener('submit', function (e) {
             e.preventDefault();
             if (!idHidden.value) { tampilError('Silakan pilih nama murid terlebih dahulu.'); return; }
+            if (!_bulanTagihan && _hargaPaket > 0) { tampilError('Tidak ada tagihan yang perlu dibayar.'); return; }
+
+            // Set bulan hidden
+            if (bulanHidden && _bulanTagihan) {
+                bulanHidden.value = _bulanTagihan;
+            }
 
             const orig = btnSimpan.innerHTML;
             btnSimpan.disabled = true;
@@ -323,41 +307,62 @@
         if (searchInput && !searchInput.contains(e.target) && autocompleteDiv && !autocompleteDiv.contains(e.target)) autocompleteDiv.style.display = 'none';
     });
 
-    /* CEK STATUS */
+    /* CEK STATUS MURID - OTOMATIS TENTUKAN BULAN TAGIHAN */
     function cekStatusMurid(id) {
         fetch('/cek-status-pembayaran/' + id)
             .then(r => r.json())
             .then(d => {
-                if (bulanSelect) { Array.from(bulanSelect.options).forEach(opt => { opt.disabled = false; opt.text = opt.text.replace(' ✓ Lunas', ''); }); }
                 if (!d.sudah_bayar_pendaftaran) {
+                    // Belum daftar
                     infoStatus.innerHTML = `<div style="padding:12px 15px;border-radius:10px;background:#FEF3C7;color:#92400E;border-left:4px solid #F59E0B;"><strong><i class="fas fa-exclamation-triangle"></i> Pendaftaran Baru!</strong><br><span style="font-size:13px;">Murid ini belum terdaftar. Wajib bayar biaya pendaftaran <strong>Rp 100.000</strong>.</span></div>`;
                     infoStatus.style.display = 'block';
                     if (paketSelect) paketSelect.disabled = true;
-                    if (bulanGroup) bulanGroup.style.display = 'none';
                     if (infoHarga) infoHarga.style.display = 'none';
                     if (previewStatus) previewStatus.style.display = 'none';
                     if (totalInput) totalInput.value = '100000';
                     _hargaPaket = 100000;
+                    _bulanTagihan = ''; // pendaftaran tidak perlu bulan
                     updatePreview();
                 } else {
-                    infoStatus.innerHTML = `<div style="padding:12px 15px;border-radius:10px;background:#D1FAE5;color:#065F46;border-left:4px solid #10B981;"><strong><i class="fas fa-check-circle"></i> Sudah Terdaftar!</strong><br><span style="font-size:13px;">Pilih paket dan bulan pembayaran.</span></div>`;
+                    // Sudah terdaftar
+                    infoStatus.innerHTML = `<div style="padding:12px 15px;border-radius:10px;background:#D1FAE5;color:#065F46;border-left:4px solid #10B981;"><strong><i class="fas fa-check-circle"></i> Sudah Terdaftar!</strong><br><span style="font-size:13px;">Membayar tagihan bulan <strong>${d.bulan_tunggakan ? getNamaBulan(d.bulan_tunggakan) : 'yang tertunggak'}</strong>.</span></div>`;
                     infoStatus.style.display = 'block';
                     if (paketSelect) paketSelect.disabled = false;
+                    
+                    // Set paket aktif jika ada
                     if (d.paket_aktif && paketSelect) {
                         paketSelect.value = d.paket_aktif;
                         const selOpt = paketSelect.options[paketSelect.selectedIndex];
                         const h = parseInt(selOpt?.dataset?.harga) || 0;
                         _hargaPaket = h;
                         if (totalInput && h > 0) totalInput.value = h;
-                        if (infoHarga && hargaValue && h > 0) { hargaValue.textContent = 'Rp ' + h.toLocaleString('id-ID'); infoHarga.style.display = 'block'; }
+                        if (infoHarga && hargaValue && h > 0) { 
+                            hargaValue.textContent = 'Rp ' + h.toLocaleString('id-ID'); 
+                            infoHarga.style.display = 'block'; 
+                        }
                     }
-                    if (bulanGroup) bulanGroup.style.display = 'block';
-                    if (d.bulan_lunas && bulanSelect) { d.bulan_lunas.forEach(bulan => { Array.from(bulanSelect.options).forEach(opt => { if (parseInt(opt.value) === bulan) { opt.disabled = true; opt.text += ' ✓ Lunas'; } }); }); }
-                    if (bulanSelect) { if (d.bulan_tunggakan) bulanSelect.value = d.bulan_tunggakan; else if (d.bulan_berikutnya) bulanSelect.value = d.bulan_berikutnya; }
+                    
+                    // Tentukan bulan tagihan (prioritas: bulan tunggakan, lalu bulan berikutnya)
+                    if (d.bulan_tunggakan) {
+                        _bulanTagihan = d.bulan_tunggakan;
+                    } else if (d.bulan_berikutnya) {
+                        _bulanTagihan = d.bulan_berikutnya;
+                    } else {
+                        _bulanTagihan = new Date().getMonth() + 1;
+                    }
+                    
                     updatePreview();
                 }
             })
-            .catch(() => { infoStatus.innerHTML = '<div style="padding:12px 15px;border-radius:10px;background:#FEE2E2;color:#991B1B;">Gagal memuat data murid.</div>'; infoStatus.style.display = 'block'; });
+            .catch(() => { 
+                infoStatus.innerHTML = '<div style="padding:12px 15px;border-radius:10px;background:#FEE2E2;color:#991B1B;">Gagal memuat data murid.</div>'; 
+                infoStatus.style.display = 'block'; 
+            });
+    }
+    
+    function getNamaBulan(bulan) {
+        const nama = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        return nama[bulan - 1] || '';
     }
 
     /* PAKET CHANGE */
@@ -365,8 +370,15 @@
         const selOpt = this.options[this.selectedIndex];
         const h = parseInt(selOpt?.dataset?.harga) || 0;
         _hargaPaket = h;
-        if (h > 0) { if (totalInput) totalInput.value = h; if (infoHarga && hargaValue) { hargaValue.textContent = 'Rp ' + h.toLocaleString('id-ID'); infoHarga.style.display = 'block'; } }
-        else { if (infoHarga) infoHarga.style.display = 'none'; }
+        if (h > 0) { 
+            if (totalInput) totalInput.value = h; 
+            if (infoHarga && hargaValue) { 
+                hargaValue.textContent = 'Rp ' + h.toLocaleString('id-ID'); 
+                infoHarga.style.display = 'block'; 
+            } 
+        } else { 
+            if (infoHarga) infoHarga.style.display = 'none'; 
+        }
         updatePreview();
     });
 

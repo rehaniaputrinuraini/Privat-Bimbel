@@ -62,18 +62,11 @@
                     <option value="<?php echo e($paket->tingkat); ?>"><?php echo e($paket->tingkat); ?></option>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </select>
-            <select id="filterPembayaran"
-                    style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
-                <option value="">Semua Pembayaran</option>
-                <option value="Lunas">Lunas</option>
-                <option value="Belum">Belum</option>
-            </select>
             <select id="filterTagihan"
                     style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
                 <option value="">Semua Tagihan</option>
-                <option value="Lunas">Lunas</option>
-                <option value="Tunggak">Tunggak</option>
-                <option value="Uang Muka">Uang Muka</option>
+                <option value="Tidak Ada">Tidak Ada Tagihan</option>
+                <option value="Ada">Ada Tagihan</option>
             </select>
             <select id="filterPeriode"
                     style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
@@ -95,14 +88,13 @@
                     <th style="padding: 15px; text-align: left;">Kelas</th>
                     <th style="padding: 15px; text-align: left;">Status Paket</th>
                     <th style="padding: 15px; text-align: center;">Pendaftaran</th>
-                    <th style="padding: 15px; text-align: center;">Pembayaran</th>
                     <th style="padding: 15px; text-align: center;">Tagihan</th>
                     <th style="padding: 15px; text-align: center;">Aksi</th>
                 </tr>
             </thead>
             <tbody id="tagihanTableBody">
                 <?php $__empty_1 = true; $__currentLoopData = $tagihan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                <tr style="border-bottom: 1px solid #F3F4F6;" data-periode="<?php echo e($t->periode ?? ''); ?>">
+                <tr style="border-bottom: 1px solid #F3F4F6;" data-periode="<?php echo e($t->periode ?? ''); ?>" data-status-tagihan="<?php echo e($t->status_tagihan); ?>">
                     <td style="padding: 15px;"><?php echo e($tagihan->firstItem() + $index); ?></td>
                     <td style="padding: 15px; font-weight: 500;"><?php echo e($t->nama_murid); ?></td>
                     <td style="padding: 15px;"><?php echo e($t->kelas ?? '-'); ?></td>
@@ -115,25 +107,10 @@
                         <?php endif; ?>
                     </td>
                     <td style="padding: 15px; text-align: center;">
-                        <?php if($t->status_pembayaran == 'Lunas'): ?>
-                            <span style="padding:5px 12px;border-radius:20px;background:#D1FAE5;color:#065F46;font-size:12px;font-weight:600;">Lunas</span>
-                        <?php elseif($t->status_pembayaran == 'Belum'): ?>
-                            <span style="padding:5px 12px;border-radius:20px;background:#FEE2E2;color:#EF4444;font-size:12px;font-weight:600;">Belum</span>
+                        <?php if($t->status_tagihan == 'Lunas' || $t->status_tagihan == 'Uang Muka'): ?>
+                            <span style="padding:5px 12px;border-radius:20px;background:#D1FAE5;color:#065F46;font-size:12px;font-weight:600;">Tidak Ada</span>
                         <?php else: ?>
-                            <span>-</span>
-                        <?php endif; ?>
-                    </td>
-                    <td style="padding: 15px; text-align: center;">
-                        <?php if($t->status_tagihan == 'Lunas'): ?>
-                            <span style="padding:5px 12px;border-radius:20px;background:#D1FAE5;color:#065F46;font-size:12px;font-weight:600;">Lunas</span>
-                        <?php elseif($t->status_tagihan == 'Tunggak'): ?>
-                            <span style="padding:5px 12px;border-radius:20px;background:#FEF3C7;color:#92400E;font-size:12px;font-weight:600;">Tunggak</span>
-                        <?php elseif($t->status_tagihan == 'Uang Muka'): ?>
-                            <span style="padding:5px 12px;border-radius:20px;background:#E0E7FF;color:#4338CA;font-size:12px;font-weight:600;">Uang Muka</span>
-                        <?php elseif($t->status_tagihan == 'Belum Daftar'): ?>
-                            <span style="padding:5px 12px;border-radius:20px;background:#FEE2E2;color:#991B1B;font-size:12px;font-weight:600;">Belum Daftar</span>
-                        <?php else: ?>
-                            <span>-</span>
+                            <span style="padding:5px 12px;border-radius:20px;background:#FEE2E2;color:#EF4444;font-size:12px;font-weight:600;">Ada</span>
                         <?php endif; ?>
                     </td>
                     <td style="padding: 15px; text-align: center;">
@@ -145,7 +122,7 @@
                 </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
-                    <td colspan="8" style="padding: 50px; text-align: center; color: #9CA3AF; font-size: 14px;">
+                    <td colspan="7" style="padding: 50px; text-align: center; color: #9CA3AF; font-size: 14px;">
                         <i class="fas fa-inbox" style="font-size: 32px; margin-bottom: 10px; display: block; opacity: .4;"></i>
                         Belum ada data pembayaran murid
                     </td>
@@ -287,29 +264,25 @@
     ================================================================ */
     document.getElementById('searchTagihan')?.addEventListener('keyup', filterTagihan);
     document.getElementById('filterPaket')?.addEventListener('change', filterTagihan);
-    document.getElementById('filterPembayaran')?.addEventListener('change', filterTagihan);
     document.getElementById('filterTagihan')?.addEventListener('change', filterTagihan);
     document.getElementById('filterPeriode')?.addEventListener('change', filterTagihan);
 
     function filterTagihan() {
         const s   = (document.getElementById('searchTagihan')?.value || '').toLowerCase();
         const fp  = document.getElementById('filterPaket')?.value || '';
-        const fby = document.getElementById('filterPembayaran')?.value || '';
         const ftg = document.getElementById('filterTagihan')?.value || '';
         const fpr = document.getElementById('filterPeriode')?.value || '';
 
         document.querySelectorAll('#tagihanTableBody tr').forEach(row => {
-            if (!row.cells || row.cells.length < 8) return;
+            if (!row.cells || row.cells.length < 7) return;
             const nama = (row.cells[1]?.innerText || '').toLowerCase();
             const paket = row.cells[3]?.innerText.trim() || '';
-            const statusPembayaran = row.cells[5]?.innerText.trim() || '';
-            const statusTagihan    = row.cells[6]?.innerText.trim() || '';
-            const periodeRow       = row.getAttribute('data-periode') || '';
+            const statusTagihan = row.cells[5]?.innerText.trim() || '';
+            const periodeRow = row.getAttribute('data-periode') || '';
 
             let show = true;
             if (s   && !nama.includes(s))              show = false;
             if (fp  && paket !== fp)                    show = false;
-            if (fby && statusPembayaran !== fby)        show = false;
             if (ftg && statusTagihan !== ftg)           show = false;
             if (fpr && periodeRow && periodeRow !== fpr) show = false;
 
