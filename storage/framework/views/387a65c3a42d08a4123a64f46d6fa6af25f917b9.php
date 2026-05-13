@@ -10,24 +10,24 @@
         <span id="alertErrorText"></span>
     </div>
 
-    <form action="{{ route('superadmin.kelola-admin.store') }}" method="POST" id="mainForm">
-        @csrf
+    <form action="<?php echo e(route('superadmin.kelola-admin.store')); ?>" method="POST" id="mainForm">
+        <?php echo csrf_field(); ?>
         
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Nama Lengkap <span style="color: #EF4444;">*</span></label>
-            <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap') }}" placeholder="Masukkan Nama Lengkap" required
+            <input type="text" name="nama_lengkap" value="<?php echo e(old('nama_lengkap')); ?>" placeholder="Masukkan Nama Lengkap" required
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; box-sizing: border-box;">
         </div>
 
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Alamat</label>
             <textarea name="alamat" rows="2" placeholder="Masukkan Alamat"
-                      style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-family: 'Poppins', sans-serif; font-size: 14px; resize: vertical; box-sizing: border-box;">{{ old('alamat') }}</textarea>
+                      style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-family: 'Poppins', sans-serif; font-size: 14px; resize: vertical; box-sizing: border-box;"><?php echo e(old('alamat')); ?></textarea>
         </div>
 
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">No HP</label>
-            <input type="text" name="no_hp" value="{{ old('no_hp') }}" placeholder="Masukkan No HP"
+            <input type="text" name="no_hp" value="<?php echo e(old('no_hp')); ?>" placeholder="Masukkan No HP"
                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; box-sizing: border-box;">
         </div>
@@ -35,13 +35,13 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; margin-bottom: 15px;">
             <div>
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Gaji Pokok (Rp)</label>
-                <input type="text" name="gaji_pokok" value="{{ old('gaji_pokok') }}" placeholder="Masukkan Gaji Pokok"
+                <input type="text" name="gaji_pokok" value="<?php echo e(old('gaji_pokok')); ?>" placeholder="Masukkan Gaji Pokok"
                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; box-sizing: border-box;">
             </div>
             <div>
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Email <span style="color: #EF4444;">*</span></label>
-                <input type="email" name="email" value="{{ old('email') }}" placeholder="Masukkan Email" required
+                <input type="email" name="email" value="<?php echo e(old('email')); ?>" placeholder="Masukkan Email" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; box-sizing: border-box;">
             </div>
         </div>
@@ -49,7 +49,7 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; margin-bottom: 15px;">
             <div>
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Username <span style="color: #EF4444;">*</span></label>
-                <input type="text" name="username" value="{{ old('username') }}" placeholder="Masukkan Username" required
+                <input type="text" name="username" value="<?php echo e(old('username')); ?>" placeholder="Masukkan Username" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; box-sizing: border-box;">
             </div>
             <div>
@@ -78,7 +78,7 @@
     </form>
 </div>
 
-{{-- MODAL KONFIRMASI BATAL --}}
+
 <div id="modalBatal" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -91,7 +91,7 @@
     </div>
 </div>
 
-{{-- MODAL PERINGATAN PERUBAHAN BELUM DISIMPAN --}}
+
 <div id="modalPindahHalaman" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -104,7 +104,7 @@
     </div>
 </div>
 
-{{-- MODAL SUKSES --}}
+
 <div id="modalSukses" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #10B981; font-size: 50px; margin-bottom: 10px;"><i class="fas fa-check-circle"></i></div>
@@ -218,4 +218,4 @@
             });
         });
     }
-</script>
+</script><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/superadmin/kelola-admin/create-admin.blade.php ENDPATH**/ ?>

@@ -168,11 +168,13 @@ Route::middleware(['auth'])->group(function () {
         // TRANSAKSI PEMASUKAN LAIN
         Route::get('/transaksi/pemasukan-lain', [PembayaranController::class, 'indexPemasukanLain'])->name('transaksi.pemasukan-lain');
         Route::get('/pemasukan-lain/create', [PembayaranController::class, 'createPemasukanLain'])->name('pemasukan-lain.create');
+        Route::delete('/pemasukan-lain/destroy/{id}', [PembayaranController::class, 'destroyPemasukanLain'])->name('pemasukan-lain.destroy');
 
         // TRANSAKSI PENGELUARAN (Pengeluaran Lain)
         Route::get('/transaksi/pengeluaran', [PembayaranController::class, 'indexPengeluaran'])->name('transaksi.pengeluaran');
         Route::get('/pengeluaran/create', [PembayaranController::class, 'createPengeluaran'])->name('pengeluaran.create');
         Route::post('/pengeluaran/store', [PembayaranController::class, 'storePengeluaran'])->name('pengeluaran.store');
+        Route::delete('/pengeluaran/destroy/{id}', [PembayaranController::class, 'destroyPengeluaran'])->name('pengeluaran.destroy');
 
         // TRANSAKSI PENGGAJIAN
         Route::get('/transaksi/penggajian', [PembayaranController::class, 'indexPenggajian'])->name('transaksi.penggajian');
@@ -282,11 +284,13 @@ Route::middleware(['auth'])->group(function () {
         // TRANSAKSI PEMASUKAN LAIN
         Route::get('/transaksi/pemasukan-lain', [PembayaranController::class, 'indexPemasukanLain'])->name('transaksi.pemasukan-lain');
         Route::get('/pemasukan-lain/create', [PembayaranController::class, 'createPemasukanLain'])->name('pemasukan-lain.create');
+        Route::delete('/pemasukan-lain/destroy/{id}', [PembayaranController::class, 'destroyPemasukanLain'])->name('pemasukan-lain.destroy');
 
         // TRANSAKSI PENGELUARAN (Pengeluaran Lain)
         Route::get('/transaksi/pengeluaran', [PembayaranController::class, 'indexPengeluaran'])->name('transaksi.pengeluaran');
         Route::get('/pengeluaran/create', [PembayaranController::class, 'createPengeluaran'])->name('pengeluaran.create');
         Route::post('/pengeluaran/store', [PembayaranController::class, 'storePengeluaran'])->name('pengeluaran.store');
+        Route::delete('/pengeluaran/destroy/{id}', [PembayaranController::class, 'destroyPengeluaran'])->name('pengeluaran.destroy');
 
         // TRANSAKSI PENGGAJIAN
         Route::get('/transaksi/penggajian', [PembayaranController::class, 'indexPenggajian'])->name('transaksi.penggajian');

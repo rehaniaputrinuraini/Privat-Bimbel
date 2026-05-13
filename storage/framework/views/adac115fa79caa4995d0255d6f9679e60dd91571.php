@@ -147,92 +147,92 @@
 </head>
 <body>
 
-    {{-- ======== HEADER ======== --}}
+    
     <table class="header-table">
         <tr>
             <td class="logo-cell">
-                @if(file_exists(public_path('images/logo/foto_logo.png')))
-                    <img src="{{ public_path('images/logo/foto_logo.png') }}" class="logo-img" alt="Logo">
-                @else
+                <?php if(file_exists(public_path('images/logo/foto_logo.png'))): ?>
+                    <img src="<?php echo e(public_path('images/logo/foto_logo.png')); ?>" class="logo-img" alt="Logo">
+                <?php else: ?>
                     <div style="width:70px;height:70px;"></div>
-                @endif
+                <?php endif; ?>
             </td>
             <td class="title-cell">
                 <div class="title-main">LAPORAN KEUANGAN</div>
-                <div class="title-sub">REKAP KAS &mdash; CABANG {{ strtoupper($cabang) }}</div>
+                <div class="title-sub">REKAP KAS &mdash; CABANG <?php echo e(strtoupper($cabang)); ?></div>
             </td>
         </tr>
     </table>
     <hr class="header-line">
 
-    {{-- ======== INFO CABANG & PERIODE ======== --}}
+    
     <table class="info-table">
         <tr>
             <td style="width:80px; font-weight:bold;">CABANG</td>
             <td style="width:14px; text-align:center;">:</td>
-            <td style="width:200px;">{{ strtoupper($cabang) }}</td>
+            <td style="width:200px;"><?php echo e(strtoupper($cabang)); ?></td>
             <td style="width:80px; font-weight:bold;">PERIODE</td>
             <td style="width:14px; text-align:center;">:</td>
-            <td>{{ strtoupper($periode) }}</td>
+            <td><?php echo e(strtoupper($periode)); ?></td>
         </tr>
     </table>
 
-    {{-- ======== DATA TABLE ======== --}}
+    
     <table class="data-table">
 
-        {{-- A. SALDO KAS AWAL --}}
+        
         <tr class="r-section">
             <td class="c-label"><strong>A.&nbsp; SALDO KAS AWAL</strong></td>
             <td class="c-rp-item"></td>
-            <td class="c-nom"><strong>Rp {{ number_format($saldoAwal, 0, ',', '.') }}</strong></td>
+            <td class="c-nom"><strong>Rp <?php echo e(number_format($saldoAwal, 0, ',', '.')); ?></strong></td>
         </tr>
 
         <tr class="r-gap"><td colspan="3"></td></tr>
 
-        {{-- B. PENERIMAAN --}}
+        
         <tr class="r-section">
             <td colspan="3"><strong>B.&nbsp; PENERIMAAN</strong></td>
         </tr>
         <tr class="r-item">
             <td class="c-label">&nbsp;&nbsp;&nbsp;-&nbsp; Pembayaran Murid (Pendaftaran & SPP)</td>
             <td class="c-rp-item">Rp</td>
-            <td class="c-nom">{{ number_format(($pemasukanData['Pendaftaran'] ?? 0) + ($pemasukanData['Bimbingan'] ?? 0), 0, ',', '.') }}</td>
+            <td class="c-nom"><?php echo e(number_format(($pemasukanData['Pendaftaran'] ?? 0) + ($pemasukanData['Bimbingan'] ?? 0), 0, ',', '.')); ?></td>
         </tr>
-        @if(($pemasukanData['Modal_Owner'] ?? 0) > 0)
+        <?php if(($pemasukanData['Modal_Owner'] ?? 0) > 0): ?>
         <tr class="r-item">
             <td class="c-label">&nbsp;&nbsp;&nbsp;-&nbsp; Modal (Owner)</td>
             <td class="c-rp-item">Rp</td>
-            <td class="c-nom">{{ number_format($pemasukanData['Modal_Owner'] ?? 0, 0, ',', '.') }}</td>
+            <td class="c-nom"><?php echo e(number_format($pemasukanData['Modal_Owner'] ?? 0, 0, ',', '.')); ?></td>
         </tr>
-        @endif
-        @if(($pemasukanData['TryOut'] ?? 0) > 0)
+        <?php endif; ?>
+        <?php if(($pemasukanData['TryOut'] ?? 0) > 0): ?>
         <tr class="r-item">
             <td class="c-label">&nbsp;&nbsp;&nbsp;-&nbsp; Try Out</td>
             <td class="c-rp-item">Rp</td>
-            <td class="c-nom">{{ number_format($pemasukanData['TryOut'] ?? 0, 0, ',', '.') }}</td>
+            <td class="c-nom"><?php echo e(number_format($pemasukanData['TryOut'] ?? 0, 0, ',', '.')); ?></td>
         </tr>
-        @endif
+        <?php endif; ?>
         <tr class="r-item">
             <td class="c-label">&nbsp;&nbsp;&nbsp;-&nbsp; Pemasukan Lainnya</td>
             <td class="c-rp-item">Rp</td>
-            <td class="c-nom">{{ number_format($pemasukanData['Lainnya_Pemasukan'] ?? 0, 0, ',', '.') }}</td>
+            <td class="c-nom"><?php echo e(number_format($pemasukanData['Lainnya_Pemasukan'] ?? 0, 0, ',', '.')); ?></td>
         </tr>
         <tr class="r-total">
             <td class="c-label"><strong>JUMLAH PENERIMAAN</strong></td>
             <td class="c-rp-item"></td>
-            <td class="c-nom"><strong>Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</strong></td>
+            <td class="c-nom"><strong>Rp <?php echo e(number_format($totalPemasukan, 0, ',', '.')); ?></strong></td>
         </tr>
 
         <tr class="r-gap"><td colspan="3"></td></tr>
 
-        {{-- C. PENGELUARAN --}}
+        
         <tr class="r-section">
             <td colspan="3"><strong>C.&nbsp; PENGELUARAN</strong></td>
         </tr>
         <tr class="r-item">
             <td class="c-label">&nbsp;&nbsp;&nbsp;-&nbsp; Pengeluaran Lainnya (Operasional, Pembelian, dll)</td>
             <td class="c-rp-item">Rp</td>
-            <td class="c-nom">{{ number_format(
+            <td class="c-nom"><?php echo e(number_format(
                 ($pengeluaranData['Lainnya_Pengeluaran'] ?? 0) + 
                 ($pengeluaranData['BiayaOperasional'] ?? 0) + 
                 ($pengeluaranData['BiayaRapatPelatihan'] ?? 0) + 
@@ -242,69 +242,69 @@
                 ($pengeluaranData['BiayaAkademik'] ?? 0) + 
                 ($pengeluaranData['BiayaPemasaran'] ?? 0) + 
                 ($pengeluaranData['BiayaKeuangan'] ?? 0) + 
-                ($pengeluaranData['SetorKePusat'] ?? 0), 0, ',', '.') }}</td>
+                ($pengeluaranData['SetorKePusat'] ?? 0), 0, ',', '.')); ?></td>
         </tr>
-        @if(($pengeluaranData['Penggajian'] ?? 0) > 0)
+        <?php if(($pengeluaranData['Penggajian'] ?? 0) > 0): ?>
         <tr class="r-item">
             <td class="c-label">&nbsp;&nbsp;&nbsp;-&nbsp; Penggajian (Gaji Tentor & Admin)</td>
             <td class="c-rp-item">Rp</td>
-            <td class="c-nom">{{ number_format($pengeluaranData['Penggajian'] ?? 0, 0, ',', '.') }}</td>
+            <td class="c-nom"><?php echo e(number_format($pengeluaranData['Penggajian'] ?? 0, 0, ',', '.')); ?></td>
         </tr>
-        @endif
+        <?php endif; ?>
         <tr class="r-total">
             <td class="c-label"><strong>JUMLAH PENGELUARAN</strong></td>
             <td class="c-rp-item"></td>
-            <td class="c-nom"><strong>Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</strong></td>
+            <td class="c-nom"><strong>Rp <?php echo e(number_format($totalPengeluaran, 0, ',', '.')); ?></strong></td>
         </tr>
 
         <tr class="r-gap"><td colspan="3"></td></tr>
 
-        {{-- D. SALDO KAS AKHIR --}}
+        
         <tr class="r-saldo">
             <td class="c-label"><strong>D.&nbsp; SALDO KAS AKHIR</strong></td>
             <td class="c-rp-item"></td>
-            <td class="c-nom"><strong>Rp {{ number_format($saldoAkhir, 0, ',', '.') }}</strong></td>
+            <td class="c-nom"><strong>Rp <?php echo e(number_format($saldoAkhir, 0, ',', '.')); ?></strong></td>
         </tr>
 
     </table>
 
-    {{-- ======== PERHITUNGAN SALDO ======== --}}
+    
     <table class="data-table" style="margin-top: 10px;">
         <tr class="r-item">
             <td class="c-label">Saldo Kas Awal</td>
             <td class="c-rp-item">Rp</td>
-            <td class="c-nom">{{ number_format($saldoAwal, 0, ',', '.') }}</td>
+            <td class="c-nom"><?php echo e(number_format($saldoAwal, 0, ',', '.')); ?></td>
         </tr>
         <tr class="r-item">
             <td class="c-label">Penerimaan</td>
             <td class="c-rp-item">Rp</td>
-            <td class="c-nom">{{ number_format($totalPemasukan, 0, ',', '.') }}</td>
+            <td class="c-nom"><?php echo e(number_format($totalPemasukan, 0, ',', '.')); ?></td>
         </tr>
         <tr class="r-item">
             <td class="c-label">Pengeluaran</td>
             <td class="c-rp-item">Rp</td>
-            <td class="c-nom">({{ number_format($totalPengeluaran, 0, ',', '.') }})</td>
+            <td class="c-nom">(<?php echo e(number_format($totalPengeluaran, 0, ',', '.')); ?>)</td>
         </tr>
         <tr class="r-saldo">
             <td class="c-label"><strong>Saldo Kas Akhir</strong></td>
             <td class="c-rp-item"><strong>Rp</strong></td>
-            <td class="c-nom"><strong>{{ number_format($saldoAkhir, 0, ',', '.') }}</strong></td>
+            <td class="c-nom"><strong><?php echo e(number_format($saldoAkhir, 0, ',', '.')); ?></strong></td>
         </tr>
     </table>
 
-    {{-- ======== TANDA TANGAN ======== --}}
+    
     <table class="sig-table">
         <tr>
             <td style="width:33%; text-align:center;">Mengetahui,</td>
             <td style="width:34%; text-align:center;">Dibuat oleh,</td>
-            <td style="width:33%; text-align:right;">{{ $cabang }}, {{ $tanggalCetak }}</td>
+            <td style="width:33%; text-align:right;"><?php echo e($cabang); ?>, <?php echo e($tanggalCetak); ?></td>
         </tr>
         <tr>
-            <td style="text-align:center;"><span class="sig-name">{{ $mengetahui }}</span></td>
-            <td style="text-align:center;"><span class="sig-name">{{ $dibuatOleh }}</span></td>
+            <td style="text-align:center;"><span class="sig-name"><?php echo e($mengetahui); ?></span></td>
+            <td style="text-align:center;"><span class="sig-name"><?php echo e($dibuatOleh); ?></span></td>
             <td style="text-align:right;"></td>
         </tr>
     </table>
 
 </body>
-</html>
+</html><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/laporan-keuangan/laporan-keuangan-pdf.blade.php ENDPATH**/ ?>

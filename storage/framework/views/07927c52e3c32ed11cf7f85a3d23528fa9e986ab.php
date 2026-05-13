@@ -33,10 +33,18 @@
                 <select name="bulan" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 140px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
                     <?php
                         $bulanSekarang = date('n');
-                        $bulanTerpilih = request('bulan', $bulanSekarang);
+                        $requestBulan = request('bulan');
                     ?>
                     <?php for($i = 1; $i <= 12; $i++): ?>
-                        <option value="<?php echo e($i); ?>" <?php echo e($bulanTerpilih == $i ? 'selected' : ''); ?>>
+                        <?php
+                            $selected = false;
+                            if ($requestBulan) {
+                                $selected = ($requestBulan == $i);
+                            } else {
+                                $selected = ($bulanSekarang == $i);
+                            }
+                        ?>
+                        <option value="<?php echo e($i); ?>" <?php echo e($selected ? 'selected' : ''); ?>>
                             <?php echo e(\Carbon\Carbon::create()->month($i)->translatedFormat('F')); ?>
 
                         </option>
@@ -47,12 +55,20 @@
                 <select name="tahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 100px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
                     <?php
                         $tahunSekarang = date('Y');
-                        $tahunTerpilih = request('tahun', $tahunSekarang);
+                        $requestTahun = request('tahun');
                         $tahunMulai = $tahunSekarang - 2;
                         $tahunAkhir = $tahunSekarang + 1;
                     ?>
                     <?php for($year = $tahunMulai; $year <= $tahunAkhir; $year++): ?>
-                        <option value="<?php echo e($year); ?>" <?php echo e($tahunTerpilih == $year ? 'selected' : ''); ?>><?php echo e($year); ?></option>
+                        <?php
+                            $selected = false;
+                            if ($requestTahun) {
+                                $selected = ($requestTahun == $year);
+                            } else {
+                                $selected = ($tahunSekarang == $year);
+                            }
+                        ?>
+                        <option value="<?php echo e($year); ?>" <?php echo e($selected ? 'selected' : ''); ?>><?php echo e($year); ?></option>
                     <?php endfor; ?>
                 </select>
                 
@@ -119,8 +135,7 @@
                                     <?php echo e($error); ?>
 
                                 <?php else: ?>
-                                    Belum ada data presensi untuk bulan <?php echo e($bulan ? Carbon\Carbon::create()->month($bulan)->translatedFormat('F') : ''); ?> <?php echo e($tahun ?? ''); ?>
-
+                                    Belum ada data presensi
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -140,32 +155,64 @@
                 <option value="50" <?php echo e(request('perPage', 10) == 50 ? 'selected' : ''); ?>>50 baris</option>
             </select>
             <span style="color: #374151; font-size: 13px;">
-                Menampilkan <?php echo e($riwayat->firstItem()); ?> - <?php echo e($riwayat->lastItem()); ?> dari <?php echo e($riwayat->total()); ?> data
+                Menampilkan <?php echo e($riwayat->total()); ?> data
             </span>
         </div>
 
         
         <div style="display: flex; gap: 5px;">
+            
             <?php if($riwayat->onFirstPage()): ?>
-                <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled><i class="fas fa-angle-double-left"></i></button>
+                <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled>
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
             <?php else: ?>
-                <a href="<?php echo e($riwayat->url(1)); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-left"></i></a>
+                <a href="<?php echo e($riwayat->url(1)); ?>" 
+                   style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
             <?php endif; ?>
+
+            
             <?php if($riwayat->onFirstPage()): ?>
-                <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled><i class="fas fa-angle-left"></i></button>
+                <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled>
+                    <i class="fas fa-angle-left"></i>
+                </button>
             <?php else: ?>
-                <a href="<?php echo e($riwayat->previousPageUrl()); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-left"></i></a>
+                <a href="<?php echo e($riwayat->previousPageUrl()); ?>" 
+                   style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                    <i class="fas fa-angle-left"></i>
+                </a>
             <?php endif; ?>
-            <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: default;"><?php echo e($riwayat->currentPage()); ?></button>
+
+            
+            <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: default;">
+                <?php echo e($riwayat->currentPage()); ?>
+
+            </button>
+
+            
             <?php if($riwayat->hasMorePages()): ?>
-                <a href="<?php echo e($riwayat->nextPageUrl()); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-right"></i></a>
+                <a href="<?php echo e($riwayat->nextPageUrl()); ?>" 
+                   style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                    <i class="fas fa-angle-right"></i>
+                </a>
             <?php else: ?>
-                <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled><i class="fas fa-angle-right"></i></button>
+                <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled>
+                    <i class="fas fa-angle-right"></i>
+                </button>
             <?php endif; ?>
+
+            
             <?php if($riwayat->hasMorePages()): ?>
-                <a href="<?php echo e($riwayat->url($riwayat->lastPage())); ?>" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fas fa-angle-double-right"></i></a>
+                <a href="<?php echo e($riwayat->url($riwayat->lastPage())); ?>" 
+                   style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
             <?php else: ?>
-                <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled><i class="fas fa-angle-double-right"></i></button>
+                <button style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;" disabled>
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
             <?php endif; ?>
         </div>
     </div>

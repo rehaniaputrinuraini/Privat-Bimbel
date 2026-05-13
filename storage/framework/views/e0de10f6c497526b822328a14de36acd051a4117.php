@@ -1,32 +1,32 @@
 <div style="padding: 24px; font-family: 'Poppins', sans-serif; background: #FFFFFF; border-radius: 16px;">
 
-    {{-- HEADER --}}
+    
     <div style="margin-bottom: 22px; padding-bottom: 14px; border-bottom: 1.5px solid #F3F4F6;">
         <h2 style="font-size: 19px; font-weight: 700; color: #111827; margin: 0;">Input Pemasukan Lain</h2>
         <p style="color: #9CA3AF; font-size: 12px; margin: 3px 0 0 0;">Form pemasukan non-murid (Donasi, Sponsor, dll)</p>
     </div>
 
-    {{-- ALERT ERROR --}}
+    
     <div id="alertError" style="display: none; background: #FEE2E2; color: #991B1B; padding: 12px 15px; border-radius: 10px; margin-bottom: 15px; align-items: center; gap: 10px;">
         <i class="fas fa-exclamation-circle" style="font-size: 18px; flex-shrink: 0;"></i>
         <span id="alertErrorText"></span>
     </div>
 
-    <form id="mainForm" action="{{ route($role . '.pembayaran.store') }}" method="POST">
-        @csrf
+    <form id="mainForm" action="<?php echo e(route($role . '.pembayaran.store')); ?>" method="POST">
+        <?php echo csrf_field(); ?>
 
         <input type="hidden" name="kategori_pemasukan" value="lainnya">
 
-        {{-- Tanggal --}}
+        
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
                 Tanggal <span style="color: #EF4444;">*</span>
             </label>
-            <input type="date" name="tanggal_lainnya" id="tanggal_lainnya" value="{{ date('Y-m-d') }}"
+            <input type="date" name="tanggal_lainnya" id="tanggal_lainnya" value="<?php echo e(date('Y-m-d')); ?>"
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;">
         </div>
 
-        {{-- Jenis --}}
+        
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
                 Jenis <span style="color: #EF4444;">*</span>
@@ -39,7 +39,7 @@
             </select>
         </div>
 
-        {{-- Sumber Pemasukan --}}
+        
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
                 Sumber Pemasukan <span style="color: #EF4444;">*</span>
@@ -48,7 +48,7 @@
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;">
         </div>
 
-        {{-- Total --}}
+        
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
                 Total <span style="color: #EF4444;">*</span>
@@ -58,7 +58,7 @@
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;">
         </div>
 
-        {{-- Keterangan --}}
+        
         <div style="margin-bottom: 5px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
                 Keterangan
@@ -67,7 +67,7 @@
                       style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; resize: vertical; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;"></textarea>
         </div>
 
-        {{-- TOMBOL AKSI --}}
+        
         <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 28px; padding-top: 16px; border-top: 1.5px solid #F3F4F6;">
             <button type="button" id="btnKeluar"
                     style="padding: 11px 40px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 15px; background: #FFFFFF; cursor: pointer; font-family: 'Poppins', sans-serif;">
@@ -81,7 +81,7 @@
     </form>
 </div>
 
-{{-- MODAL: BATAL --}}
+
 <div id="modalBatal" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); backdrop-filter: blur(3px); align-items: center; justify-content: center; font-family: 'Poppins', sans-serif;">
     <div style="background: white; padding: 28px 24px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.18);">
         <div style="color: #F59E0B; font-size: 42px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -96,7 +96,7 @@
     </div>
 </div>
 
-{{-- MODAL: PERINGATAN --}}
+
 <div id="modalPindahHalaman" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); backdrop-filter: blur(3px); align-items: center; justify-content: center; font-family: 'Poppins', sans-serif;">
     <div style="background: white; padding: 28px 24px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.18);">
         <div style="color: #F59E0B; font-size: 42px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -111,7 +111,7 @@
     </div>
 </div>
 
-{{-- MODAL: SUKSES --}}
+
 <div id="modalSukses" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); backdrop-filter: blur(3px); align-items: center; justify-content: center; font-family: 'Poppins', sans-serif;">
     <div style="background: white; padding: 28px 24px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.18);">
         <div style="color: #10B981; font-size: 52px; margin-bottom: 10px;"><i class="fas fa-check-circle"></i></div>
@@ -212,4 +212,4 @@
         if (alertError && alertErrorText) { alertErrorText.textContent = msg; alertError.style.display = 'flex'; setTimeout(() => alertError.style.display = 'none', 5000); }
     }
 })();
-</script>
+</script><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/shared/pembayaran/create-pemasukan-lain.blade.php ENDPATH**/ ?>

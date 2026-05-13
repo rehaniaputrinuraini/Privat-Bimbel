@@ -84,6 +84,7 @@
                 <th style="padding: 15px; text-align: center; width: 80px;">Jenis</th>
                 <th style="padding: 15px; text-align: right; width: 130px;">Jumlah</th>
                 <th style="padding: 15px; text-align: left; width: 200px;">Keterangan</th>
+                <th style="padding: 15px; text-align: center; width: 60px;">Aksi</th>
             </tr></thead>
             <tbody id="tableBody">
                 @forelse($pemasukanLain as $index => $item)
@@ -94,9 +95,15 @@
                     <td style="padding: 15px; text-align: center;">{{ $item->jenis_pembayaran }}</td>
                     <td style="padding: 15px; text-align: right; font-weight: 700; color: #10B981;">Rp {{ number_format($item->jumlah, 0, ',', '.') }}</td>
                     <td style="padding: 15px; text-align: left; max-width: 200px; overflow: hidden; text-overflow: ellipsis;">{{ $item->keterangan }}</td>
+                    <td style="padding: 15px; text-align: center;">
+                        <button type="button" onclick="bukaModalHapus('{{ $item->id }}', '{{ addslashes($item->sumber) }}')" 
+                                style="background: #E35D5D; color: white; padding: 4px 7px; border-radius: 5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 10px; white-space: nowrap;">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    </td>
                 </tr>
                 @empty
-                <tr><td colspan="6" style="padding: 50px; text-align: center; color: #9CA3AF;">Belum ada data pemasukan lain</td></tr>
+                <tr><td colspan="7" style="padding: 50px; text-align: center; color: #9CA3AF;">Belum ada data pemasukan lain</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -147,6 +154,23 @@
     <div style="background: white; border-radius: 20px; width: 600px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.15);" id="modalContent"></div>
 </div>
 
+{{-- MODAL KONFIRMASI HAPUS (SAMA SEPERTI DI HALAMAN MURID) --}}
+<div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
+        <div style="color: #E35D5D; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-trash-alt"></i></div>
+        <h2 style="margin: 0; font-size: 18px; color: #111827; font-weight: 700;">Hapus Data?</h2>
+        <p style="color: #6B7280; font-size: 12px; margin: 8px 0 20px 0; line-height: 1.5;" id="pesanHapus">Apakah Anda yakin ingin menghapus data pemasukan ini?</p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button onclick="tutupModalHapus()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #E5E7EB; background: white; font-weight: 600; font-size: 13px; cursor: pointer;">Batal</button>
+            <form id="formHapus" method="POST" style="flex: 1;" action="">
+                @csrf
+                @method('DELETE')
+                <button type="submit" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #E35D5D; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">Ya, Hapus</button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     function bukaModalCreate() {
         fetch("{{ route($role . '.pemasukan-lain.create') }}")
@@ -168,6 +192,21 @@
     function tutupModalForm() { 
         document.getElementById('modalForm').style.display = 'none'; 
         document.getElementById('modalContent').innerHTML = ''; 
+    }
+
+    // =============================================
+    // MODAL HAPUS (SAMA SEPERTI DI HALAMAN MURID)
+    // =============================================
+    function bukaModalHapus(id, sumber) {
+        // Set action form ke route hapus yang sesuai
+        let url = "{{ route($role . '.pemasukan-lain.destroy', '') }}/" + id;
+        document.getElementById('formHapus').action = url;
+        document.getElementById('pesanHapus').innerHTML = `Apakah Anda <strong>benar-benar yakin</strong> ingin menghapus data pemasukan dari <strong>${sumber}</strong>?<br><br><small style="color:#EF4444;">⚠️ <strong>PERINGATAN:</strong> Data akan dihapus <strong>secara permanen</strong> dari database.</small>`;
+        document.getElementById('modalHapus').style.display = 'flex';
+    }
+
+    function tutupModalHapus() {
+        document.getElementById('modalHapus').style.display = 'none';
     }
 
     document.getElementById('pageSelect').addEventListener('change', function() {
@@ -204,8 +243,6 @@
             if (jenis && j !== jenis) show = false;
             if (bulan && b !== parseInt(bulan)) show = false;
             if (tahun && t !== parseInt(tahun)) show = false;
-            // Filter periode belum bisa jalan tanpa data-periode di row
-            // Bisa ditambah nanti kalau Controller udah ngirim data periode per row
 
             row.style.display = show ? '' : 'none';
         });
