@@ -26,26 +26,21 @@
         <ul>
 
             
-            <?php if($role == 'tentor'): ?>
-                
-                <li>
-                    <a href="<?php echo e(route('tentor.dashboard')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('tentor.dashboard') ? 'nav-active' : ''); ?>">
-                        <img src="<?php echo e(asset('images/dashboard/icons/icon_dashboard.png')); ?>" class="sidebar-icon"> Dashboard
-                    </a>
-                </li>
-                
-                <li>
-                    <a href="<?php echo e(route('tentor.presensi')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('tentor.presensi') ? 'nav-active' : ''); ?>">
-                        <img src="<?php echo e(asset('images/dashboard/icons/icon_presensi.png')); ?>" class="sidebar-icon"> Presensi
-                    </a>
-                </li>
-                
-                <li>
-                    <a href="<?php echo e(route('tentor.riwayat-presensi')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('tentor.riwayat-presensi') ? 'nav-active' : ''); ?>">
-                        <img src="<?php echo e(asset('images/dashboard/icons/icon_riwayatpresensi.png')); ?>" class="sidebar-icon"> Riwayat Pengajaran
-                    </a>
-                </li>
-            <?php endif; ?>
+<?php if($role == 'tentor'): ?>
+    
+    <li>
+        <a href="<?php echo e(route('tentor.dashboard')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('tentor.dashboard') ? 'nav-active' : ''); ?>">
+            <img src="<?php echo e(asset('images/dashboard/icons/icon_dashboard.png')); ?>" class="sidebar-icon"> Dashboard
+        </a>
+    </li>
+    
+    
+    <li>
+        <a href="<?php echo e(route('tentor.pengajaran')); ?>" class="nav-link-custom <?php echo e(request()->routeIs('tentor.pengajaran*') ? 'nav-active' : ''); ?>">
+            <img src="<?php echo e(asset('images/dashboard/icons/icon_presensi.png')); ?>" class="sidebar-icon"> Pengajaran
+        </a>
+    </li>
+<?php endif; ?>
 
             
             <?php if($role == 'admin'): ?>

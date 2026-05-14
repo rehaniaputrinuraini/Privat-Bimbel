@@ -321,18 +321,22 @@ Route::middleware(['auth'])->group(function () {
     });
     
     // ========== TENTOR ONLY ==========
-    Route::middleware(['role:tentor'])->prefix('tentor')->name('tentor.')->group(function () {
-        
-        // PRESENSI
-        Route::get('/presensi', [PresensiController::class, 'index'])->name('presensi');
-        Route::post('/presensi/masuk', [PresensiController::class, 'masuk'])->name('presensi.masuk');
-        Route::post('/presensi/laporan', [PresensiController::class, 'simpanLaporan'])->name('presensi.laporan');
-        Route::post('/presensi/keluar', [PresensiController::class, 'keluar'])->name('presensi.keluar');
-        Route::get('/presensi/cek-status', [PresensiController::class, 'cekStatus'])->name('presensi.cek-status');
-        
-        // RIWAYAT PRESENSI
-        Route::get('/riwayat-presensi', [PresensiController::class, 'riwayat'])->name('riwayat-presensi');
-    });
+Route::middleware(['role:tentor'])->prefix('tentor')->name('tentor.')->group(function () {
+    
+    // PENGAJARAN (Gabungan Presensi + Riwayat)
+    Route::get('/pengajaran', [PresensiController::class, 'pengajaran'])->name('pengajaran');
+
+    Route::post('/presensi/batal', [PresensiController::class, 'batal'])->name('presensi.batal');
+    
+    // PRESENSI
+    Route::post('/presensi/masuk', [PresensiController::class, 'masuk'])->name('presensi.masuk');
+    Route::post('/presensi/laporan', [PresensiController::class, 'simpanLaporan'])->name('presensi.laporan');
+    Route::post('/presensi/keluar', [PresensiController::class, 'keluar'])->name('presensi.keluar');
+    Route::get('/presensi/cek-status', [PresensiController::class, 'cekStatus'])->name('presensi.cek-status');
+    
+    // RIWAYAT PRESENSI (tetap ada untuk keperluan AJAX)
+    Route::get('/riwayat-presensi', [PresensiController::class, 'riwayat'])->name('riwayat-presensi');
+});
 });
 
 // ========== API ROUTES ==========

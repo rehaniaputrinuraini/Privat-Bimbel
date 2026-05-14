@@ -285,8 +285,8 @@ class PresensiController extends Controller
             ]);
         }
         
-        $bulan = $request->get('bulan');
-        $tahun = $request->get('tahun');
+        $bulan = $request->get('bulan', date('n'));
+        $tahun = $request->get('tahun', date('Y'));
         $perPage = $request->get('perPage', 10);
         $search = $request->get('search');
         
@@ -323,4 +323,99 @@ class PresensiController extends Controller
             'riwayat', 'bulan', 'tahun', 'perPage', 'search'
         ));
     }
+    public function pengajaran(Request $request)
+{
+    $tentor = $this->getTentorLogin();
+    
+    if (!$tentor) {
+        return view('dashboard.tentor.pengajaran', [
+            'presensiHariIni' => null,
+            'kelasList' => [],
+            'ruangList' => [],
+            'riwayat' => collect([]),
+            'search' => null,
+            'error' => 'Data tentor tidak ditemukan'
+        ]);
+    }
+    
+    // Data presensi hari ini
+    $presensiHariIni = Mengajar::where('id_pegawai', $tentor->id_pegawai)
+        ->whereDate('tanggal', today())
+        ->whereNull('jam_selesai')
+        ->first();
+    
+    $kelasList = Kelas::orderBy('jenjang')->orderBy('nama_kelas')->get();
+    $ruangList = Ruang::orderBy('nama_ruang')->get();
+    
+    // Data riwayat
+    $bulan = $request->get('bulan', date('n'));
+    $tahun = $request->get('tahun', date('Y'));
+    $perPage = $request->get('perPage', 10);
+    $search = $request->get('search');
+    
+    $query = Mengajar::with(['kelas', 'ruang'])
+        ->where('id_pegawai', $tentor->id_pegawai);
+    
+    if ($bulan) $query->whereMonth('tanggal', $bulan);
+    if ($tahun) $query->whereYear('tanggal', $tahun);
+    if ($search) {
+        $query->where(function($q) use ($search) {
+            $q->whereHas('kelas', function($subQ) use ($search) {
+                $subQ->where('nama_kelas', 'like', '%' . $search . '%')
+                     ->orWhere('jenjang', 'like', '%' . $search . '%');
+            })
+            ->orWhereHas('ruang', function($subQ) use ($search) {
+                $subQ->where('nama_ruang', 'like', '%' . $search . '%');
+            });
+        });
+    }
+    
+    $riwayat = $query->orderBy('tanggal', 'desc')
+        ->orderBy('jam_mulai', 'desc')
+        ->paginate($perPage)
+        ->appends($request->all());
+    
+    return view('dashboard.tentor.pengajaran', compact(
+        'presensiHariIni', 'kelasList', 'ruangList', 'riwayat', 'search'
+    ));
+}
+public function batal()
+{
+    try {
+        $tentor = $this->getTentorLogin();
+        
+        if (!$tentor) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Data tentor tidak ditemukan'
+            ], 404);
+        }
+        
+        $presensi = Mengajar::where('id_pegawai', $tentor->id_pegawai)
+            ->whereDate('tanggal', today())
+            ->whereNull('jam_selesai')
+            ->first();
+        
+        if (!$presensi) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Tidak ada presensi aktif!'
+            ], 400);
+        }
+        
+        // Hapus presensi yang belum selesai
+        Mengajar::where('id_mengajar', $presensi->id_mengajar)->delete();
+        
+        return response()->json([
+            'success' => true, 
+            'message' => '✅ Presensi masuk telah dibatalkan.'
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false, 
+            'message' => 'Gagal: ' . $e->getMessage()
+        ], 500);
+    }
+}
 }

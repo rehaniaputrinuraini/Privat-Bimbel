@@ -317,109 +317,151 @@
     }
 
     // ========== MODAL UBAH PASSWORD ==========
-    function bukaModalPassword(id, nama) {
-        const html = `
-        <div style="padding:20px;font-family:'Poppins',sans-serif;background:#FFF;border-radius:16px">
-            <div style="margin-bottom:20px;padding-bottom:14px;border-bottom:1.5px solid #F3F4F6">
-                <h2 style="font-size:19px;font-weight:700;color:#111827;margin:0">Ubah Password</h2>
-                <p style="color:#9CA3AF;font-size:12px;margin:2px 0 0 0">${nama}</p>
-            </div>
-            <div id="alertErrorPass" style="display:none;background:#FEE2E2;color:#991B1B;padding:12px 15px;border-radius:10px;margin-bottom:15px;align-items:center;gap:10px">
-                <i class="fas fa-exclamation-circle" style="font-size:18px"></i>
-                <span id="alertErrorPassText"></span>
-            </div>
-            <form id="formPassword">
-                <div style="margin-bottom:15px">
-                    <label style="display:block;font-weight:600;font-size:14px;color:#374151;margin-bottom:6px">Password Baru <span style="color:#EF4444">*</span></label>
-                    <input type="password" id="pass1" required placeholder="Masukkan password baru" style="width:100%;padding:12px 15px;border-radius:12px;border:1.5px solid #E5E7EB;background:#FFF;outline:none;font-size:14px;font-family:'Poppins',sans-serif">
-                </div>
-                <div style="margin-bottom:15px">
-                    <label style="display:block;font-weight:600;font-size:14px;color:#374151;margin-bottom:6px">Konfirmasi Password <span style="color:#EF4444">*</span></label>
-                    <input type="password" id="pass2" required placeholder="Konfirmasi password baru" style="width:100%;padding:12px 15px;border-radius:12px;border:1.5px solid #E5E7EB;background:#FFF;outline:none;font-size:14px;font-family:'Poppins',sans-serif">
-                </div>
-                <div style="display:flex;justify-content:flex-end;gap:20px;margin-top:30px;padding-top:16px;border-top:1.5px solid #F3F4F6">
-                    <button type="button" id="btnKeluarPass" style="padding:10px 45px;border:1.5px solid #4D0B87;color:#4D0B87;border-radius:10px;font-weight:600;font-size:16px;background:#FFF;cursor:pointer">Keluar</button>
-                    <button type="submit" id="btnSimpanPass" style="padding:10px 45px;border:none;background:#4D0B87;color:#fff;border-radius:10px;font-weight:600;font-size:16px;cursor:pointer;box-shadow:0 4px 6px rgba(77,11,135,0.2)">Simpan</button>
-                </div>
-            </form>
+function bukaModalPassword(id, nama) {
+    const html = `
+    <div style="padding:20px;font-family:'Poppins',sans-serif;background:#FFF;border-radius:16px">
+        <div style="margin-bottom:20px;padding-bottom:14px;border-bottom:1.5px solid #F3F4F6">
+            <h2 style="font-size:19px;font-weight:700;color:#111827;margin:0">Ubah Password</h2>
+            <p style="color:#9CA3AF;font-size:12px;margin:2px 0 0 0">${nama}</p>
         </div>
-        <div id="modalSuksesPass" style="display:none;position:fixed;z-index:99999;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.4);backdrop-filter:blur(3px);align-items:center;justify-content:center">
-            <div style="background:#fff;padding:25px;border-radius:20px;width:320px;text-align:center;box-shadow:0 15px 30px rgba(0,0,0,0.15);font-family:'Poppins',sans-serif">
-                <div style="color:#10B981;font-size:50px;margin-bottom:10px"><i class="fas fa-check-circle"></i></div>
-                <h2 style="margin:0;font-size:18px;color:#111827;font-weight:700">Berhasil!</h2>
-                <p style="color:#6B7280;font-size:13px;margin:8px 0 20px 0">Password berhasil diubah.</p>
-                <button type="button" id="btnOkPass" style="width:100%;padding:10px;border-radius:10px;border:none;background:#10B981;color:#fff;font-weight:600;font-size:13px;cursor:pointer">OK</button>
+        <div id="alertErrorPass" style="display:none;background:#FEE2E2;color:#991B1B;padding:12px 15px;border-radius:10px;margin-bottom:15px;align-items:center;gap:10px">
+            <i class="fas fa-exclamation-circle" style="font-size:18px"></i>
+            <span id="alertErrorPassText"></span>
+        </div>
+        <form id="formPassword">
+            <div style="margin-bottom:15px">
+                <label style="display:block;font-weight:600;font-size:14px;color:#374151;margin-bottom:6px">Password Baru <span style="color:#EF4444">*</span></label>
+                <div style="position: relative; width: 100%;">
+                    <input type="password" id="pass1" required placeholder="Masukkan password baru" style="width:100%;padding:12px 45px 12px 15px;border-radius:12px;border:1.5px solid #E5E7EB;background:#FFF;outline:none;font-size:14px;font-family:'Poppins',sans-serif;box-sizing:border-box">
+                    <button type="button" id="togglePass1"
+                            onclick="
+                                var p = document.getElementById('pass1');
+                                var e = document.getElementById('eyePass1');
+                                if (p.type === 'password') {
+                                    p.type = 'text';
+                                    e.classList.remove('fa-eye-slash');
+                                    e.classList.add('fa-eye');
+                                    this.style.color = '#4D0B87';
+                                } else {
+                                    p.type = 'password';
+                                    e.classList.remove('fa-eye');
+                                    e.classList.add('fa-eye-slash');
+                                    this.style.color = '#9CA3AF';
+                                }
+                            "
+                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #9CA3AF; font-size: 14px; padding: 0; transition: color 0.2s;">
+                        <i class="fas fa-eye-slash" id="eyePass1"></i>
+                    </button>
+                </div>
             </div>
-        </div>`;
+            <div style="margin-bottom:15px">
+                <label style="display:block;font-weight:600;font-size:14px;color:#374151;margin-bottom:6px">Konfirmasi Password <span style="color:#EF4444">*</span></label>
+                <div style="position: relative; width: 100%;">
+                    <input type="password" id="pass2" required placeholder="Konfirmasi password baru" style="width:100%;padding:12px 45px 12px 15px;border-radius:12px;border:1.5px solid #E5E7EB;background:#FFF;outline:none;font-size:14px;font-family:'Poppins',sans-serif;box-sizing:border-box">
+                    <button type="button" id="togglePass2"
+                            onclick="
+                                var p = document.getElementById('pass2');
+                                var e = document.getElementById('eyePass2');
+                                if (p.type === 'password') {
+                                    p.type = 'text';
+                                    e.classList.remove('fa-eye-slash');
+                                    e.classList.add('fa-eye');
+                                    this.style.color = '#4D0B87';
+                                } else {
+                                    p.type = 'password';
+                                    e.classList.remove('fa-eye');
+                                    e.classList.add('fa-eye-slash');
+                                    this.style.color = '#9CA3AF';
+                                }
+                            "
+                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #9CA3AF; font-size: 14px; padding: 0; transition: color 0.2s;">
+                        <i class="fas fa-eye-slash" id="eyePass2"></i>
+                    </button>
+                </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:20px;margin-top:30px;padding-top:16px;border-top:1.5px solid #F3F4F6">
+                <button type="button" id="btnKeluarPass" style="padding:10px 45px;border:1.5px solid #4D0B87;color:#4D0B87;border-radius:10px;font-weight:600;font-size:16px;background:#FFF;cursor:pointer">Keluar</button>
+                <button type="submit" id="btnSimpanPass" style="padding:10px 45px;border:none;background:#4D0B87;color:#fff;border-radius:10px;font-weight:600;font-size:16px;cursor:pointer;box-shadow:0 4px 6px rgba(77,11,135,0.2)">Simpan</button>
+            </div>
+        </form>
+    </div>
+    <div id="modalSuksesPass" style="display:none;position:fixed;z-index:99999;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.4);backdrop-filter:blur(3px);align-items:center;justify-content:center">
+        <div style="background:#fff;padding:25px;border-radius:20px;width:320px;text-align:center;box-shadow:0 15px 30px rgba(0,0,0,0.15);font-family:'Poppins',sans-serif">
+            <div style="color:#10B981;font-size:50px;margin-bottom:10px"><i class="fas fa-check-circle"></i></div>
+            <h2 style="margin:0;font-size:18px;color:#111827;font-weight:700">Berhasil!</h2>
+            <p style="color:#6B7280;font-size:13px;margin:8px 0 20px 0">Password berhasil diubah.</p>
+            <button type="button" id="btnOkPass" style="width:100%;padding:10px;border-radius:10px;border:none;background:#10B981;color:#fff;font-weight:600;font-size:13px;cursor:pointer">OK</button>
+        </div>
+    </div>`;
+    
+    document.getElementById('modalContent').innerHTML = html;
+    document.getElementById('modalForm').style.display = 'flex';
+
+    setTimeout(() => {
+        document.getElementById('btnKeluarPass').addEventListener('click', () => tutupModalForm());
         
-        document.getElementById('modalContent').innerHTML = html;
-        document.getElementById('modalForm').style.display = 'flex';
+        document.getElementById('btnOkPass').addEventListener('click', () => {
+            document.getElementById('modalSuksesPass').style.display = 'none';
+            tutupModalForm();
+            window.location.reload();
+        });
 
-        setTimeout(() => {
-            document.getElementById('btnKeluarPass').addEventListener('click', () => tutupModalForm());
-            
-            document.getElementById('btnOkPass').addEventListener('click', () => {
-                document.getElementById('modalSuksesPass').style.display = 'none';
-                tutupModalForm();
-                window.location.reload();
-            });
+        document.getElementById('formPassword').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const p1 = document.getElementById('pass1').value;
+            const p2 = document.getElementById('pass2').value;
+            const btn = document.getElementById('btnSimpanPass');
+            const eDiv = document.getElementById('alertErrorPass');
+            const eTxt = document.getElementById('alertErrorPassText');
+            const sDiv = document.getElementById('modalSuksesPass');
 
-            document.getElementById('formPassword').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const p1 = document.getElementById('pass1').value;
-                const p2 = document.getElementById('pass2').value;
-                const btn = document.getElementById('btnSimpanPass');
-                const eDiv = document.getElementById('alertErrorPass');
-                const eTxt = document.getElementById('alertErrorPassText');
-                const sDiv = document.getElementById('modalSuksesPass');
+            if (p1 !== p2) {
+                eTxt.textContent = 'Konfirmasi password tidak cocok!';
+                eDiv.style.display = 'flex';
+                setTimeout(() => eDiv.style.display = 'none', 3000);
+                return;
+            }
+            if (p1.length < 6) {
+                eTxt.textContent = 'Password minimal 6 karakter!';
+                eDiv.style.display = 'flex';
+                setTimeout(() => eDiv.style.display = 'none', 3000);
+                return;
+            }
 
-                if (p1 !== p2) {
-                    eTxt.textContent = 'Konfirmasi password tidak cocok!';
-                    eDiv.style.display = 'flex';
-                    setTimeout(() => eDiv.style.display = 'none', 3000);
-                    return;
-                }
-                if (p1.length < 6) {
-                    eTxt.textContent = 'Password minimal 6 karakter!';
-                    eDiv.style.display = 'flex';
-                    setTimeout(() => eDiv.style.display = 'none', 3000);
-                    return;
-                }
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
 
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-
-                fetch("<?php echo e(route('superadmin.kelola-admin.updatePassword', '')); ?>/" + id, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ password: p1, password_confirmation: p2 })
-                })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        sDiv.style.display = 'flex';
-                    } else {
-                        eTxt.textContent = data.message || 'Gagal';
-                        eDiv.style.display = 'flex';
-                        setTimeout(() => eDiv.style.display = 'none', 3000);
-                        btn.disabled = false;
-                        btn.innerHTML = 'Simpan';
-                    }
-                })
-                .catch(err => {
-                    eTxt.textContent = 'Error: ' + err.message;
+            fetch("<?php echo e(route('superadmin.kelola-admin.updatePassword', '')); ?>/" + id, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ password: p1, password_confirmation: p2 })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    sDiv.style.display = 'flex';
+                } else {
+                    eTxt.textContent = data.message || 'Gagal';
                     eDiv.style.display = 'flex';
                     setTimeout(() => eDiv.style.display = 'none', 3000);
                     btn.disabled = false;
                     btn.innerHTML = 'Simpan';
-                });
+                }
+            })
+            .catch(err => {
+                eTxt.textContent = 'Error: ' + err.message;
+                eDiv.style.display = 'flex';
+                setTimeout(() => eDiv.style.display = 'none', 3000);
+                btn.disabled = false;
+                btn.innerHTML = 'Simpan';
             });
-        }, 150);
-    }
+        });
+    }, 150);
+}
 
     // ========== MODAL TOGGLE STATUS ==========
     function bukaModalToggle(id, nama, status) {

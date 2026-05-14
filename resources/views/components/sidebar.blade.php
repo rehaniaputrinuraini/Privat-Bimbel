@@ -29,26 +29,21 @@
         <ul>
 
             {{-- ==================== TENTOR ==================== --}}
-            @if($role == 'tentor')
-                {{-- Dashboard --}}
-                <li>
-                    <a href="{{ route('tentor.dashboard') }}" class="nav-link-custom {{ request()->routeIs('tentor.dashboard') ? 'nav-active' : '' }}">
-                        <img src="{{ asset('images/dashboard/icons/icon_dashboard.png') }}" class="sidebar-icon"> Dashboard
-                    </a>
-                </li>
-                {{-- Presensi --}}
-                <li>
-                    <a href="{{ route('tentor.presensi') }}" class="nav-link-custom {{ request()->routeIs('tentor.presensi') ? 'nav-active' : '' }}">
-                        <img src="{{ asset('images/dashboard/icons/icon_presensi.png') }}" class="sidebar-icon"> Presensi
-                    </a>
-                </li>
-                {{-- Riwayat Pengajaran --}}
-                <li>
-                    <a href="{{ route('tentor.riwayat-presensi') }}" class="nav-link-custom {{ request()->routeIs('tentor.riwayat-presensi') ? 'nav-active' : '' }}">
-                        <img src="{{ asset('images/dashboard/icons/icon_riwayatpresensi.png') }}" class="sidebar-icon"> Riwayat Pengajaran
-                    </a>
-                </li>
-            @endif
+@if($role == 'tentor')
+    {{-- Dashboard --}}
+    <li>
+        <a href="{{ route('tentor.dashboard') }}" class="nav-link-custom {{ request()->routeIs('tentor.dashboard') ? 'nav-active' : '' }}">
+            <img src="{{ asset('images/dashboard/icons/icon_dashboard.png') }}" class="sidebar-icon"> Dashboard
+        </a>
+    </li>
+    
+    {{-- Pengajaran (Gabungan Presensi + Riwayat) --}}
+    <li>
+        <a href="{{ route('tentor.pengajaran') }}" class="nav-link-custom {{ request()->routeIs('tentor.pengajaran*') ? 'nav-active' : '' }}">
+            <img src="{{ asset('images/dashboard/icons/icon_presensi.png') }}" class="sidebar-icon"> Pengajaran
+        </a>
+    </li>
+@endif
 
             {{-- ==================== ADMIN ==================== --}}
             @if($role == 'admin')
