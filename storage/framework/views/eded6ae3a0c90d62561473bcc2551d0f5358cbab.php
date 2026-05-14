@@ -48,11 +48,7 @@
                         <th style="padding: 15px; width: 90px;">No HP</th>
                         <th style="padding: 15px; width: 70px;">Mapel</th>
                         <th style="padding: 15px; text-align: center; width: 50px;">Grade</th>
-                        <th style="padding: 15px; width: 90px;">HR SD</th>
-                        <th style="padding: 15px; width: 90px;">HR SMP</th>
-                        <th style="padding: 15px; width: 90px;">HR SMA</th>
-                        <th style="padding: 15px; width: 80px;">Makan</th>
-                        <th style="padding: 15px; width: 80px;">Transport</th>
+                        <th style="padding: 15px; text-align: center; width: 100px;">Detail Gaji</th>
                         <th style="padding: 15px; width: 130px;">Email</th>
                         <th style="padding: 15px; width: 80px;">Username</th>
                         <th style="padding: 15px; text-align: center; width: 60px;">Status</th>
@@ -65,8 +61,9 @@
                         $status = $t->user->status ?? 1;
                         $nama = $t->nama_lengkap;
                         $id = $t->id_pegawai;
+                        $rowId = 'row_' . $id;
                     ?>
-                    <tr style="border-bottom: 1px solid #F3F4F6;">
+                    <tr id="<?php echo e($rowId); ?>" style="border-bottom: 1px solid #F3F4F6;">
                         <td style="padding: 15px; text-align: center;"><?php echo e($tentors->firstItem() + $index); ?></td>
                         <td style="padding: 15px;">TE<?php echo e(str_pad($id, 4, '0', STR_PAD_LEFT)); ?></td>
                         <td style="padding: 15px; max-width: 130px; overflow: hidden; text-overflow: ellipsis;"><?php echo e($nama); ?></td>
@@ -74,11 +71,12 @@
                         <td style="padding: 15px;"><?php echo e($t->no_hp ?? '-'); ?></td>
                         <td style="padding: 15px;"><?php echo e($t->mapel ?? '-'); ?></td>
                         <td style="padding: 15px; text-align: center;"><?php echo e($t->grade ?? '-'); ?></td>
-                        <td style="padding: 15px;"><?php echo e($t->hr_sd ? 'Rp '.number_format($t->hr_sd,0,',','.') : '-'); ?></td>
-                        <td style="padding: 15px;"><?php echo e($t->hr_smp ? 'Rp '.number_format($t->hr_smp,0,',','.') : '-'); ?></td>
-                        <td style="padding: 15px;"><?php echo e($t->hr_sma ? 'Rp '.number_format($t->hr_sma,0,',','.') : '-'); ?></td>
-                        <td style="padding: 15px;"><?php echo e($t->uang_makan ? 'Rp '.number_format($t->uang_makan,0,',','.') : '-'); ?></td>
-                        <td style="padding: 15px;"><?php echo e($t->uang_transport ? 'Rp '.number_format($t->uang_transport,0,',','.') : '-'); ?></td>
+                        <td style="padding: 15px; text-align: center;">
+                            <button onclick="toggleDetail('<?php echo e($rowId); ?>', <?php echo e($id); ?>)" 
+                                    style="background: #4D0B87; color: white; border: none; padding: 5px 12px; border-radius: 15px; cursor: pointer; font-size: 11px; font-weight: 600;">
+                                <i class="fas fa-chevron-down"></i> Lihat Detail
+                            </button>
+                        </td>
                         <td style="padding: 15px; max-width: 130px; overflow: hidden; text-overflow: ellipsis;"><?php echo e($t->user->email ?? '-'); ?></td>
                         <td style="padding: 15px;"><?php echo e($t->user->username ?? '-'); ?></td>
                         <td style="padding: 15px; text-align: center;">
@@ -98,7 +96,7 @@
                         </td>
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                    <tr><td colspan="16" style="padding: 40px; text-align: center; color: #9CA3AF;"><i class="fas fa-database" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>Belum ada data tentor.</td></tr>
+                    <tr><td colspan="12" style="padding: 40px; text-align: center; color: #9CA3AF;"><i class="fas fa-database" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>Belum ada data tentor.</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -181,6 +179,59 @@
 </div>
 
 <script>
+    // ========== TOGGLE DETAIL GAJI ==========
+    function toggleDetail(rowId, tentorId) {
+        const detailRowId = rowId + '_detail';
+        const existingDetail = document.getElementById(detailRowId);
+        const btn = document.querySelector(`#${rowId} button`);
+        
+        if (existingDetail) {
+            // Jika sudah ada, hapus
+            existingDetail.remove();
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-chevron-down"></i> Lihat Detail';
+            }
+        } else {
+            // Ambil data detail dari server
+            fetch("<?php echo e(route('superadmin.kelola-tentor.detail', '')); ?>/" + tentorId)
+                .then(r => r.json())
+                .then(data => {
+                    const newRow = document.createElement('tr');
+                    newRow.id = detailRowId;
+                    newRow.style.backgroundColor = '#F9FAFB';
+                    newRow.innerHTML = `
+                        <td colspan="12" style="padding: 12px 20px;">
+                            <div style="display: flex; gap: 20px; flex-wrap: wrap; font-size: 12px;">
+                                <div style="background: #F3E8FF; padding: 8px 15px; border-radius: 8px;">
+                                    <strong>HR SD:</strong> Rp ${data.hr_sd ? data.hr_sd.toLocaleString('id-ID') : '0'}
+                                </div>
+                                <div style="background: #F3E8FF; padding: 8px 15px; border-radius: 8px;">
+                                    <strong>HR SMP:</strong> Rp ${data.hr_smp ? data.hr_smp.toLocaleString('id-ID') : '0'}
+                                </div>
+                                <div style="background: #F3E8FF; padding: 8px 15px; border-radius: 8px;">
+                                    <strong>HR SMA:</strong> Rp ${data.hr_sma ? data.hr_sma.toLocaleString('id-ID') : '0'}
+                                </div>
+                                <div style="background: #E0E7FF; padding: 8px 15px; border-radius: 8px;">
+                                    <strong>Uang Makan:</strong> Rp ${data.uang_makan ? data.uang_makan.toLocaleString('id-ID') : '0'}
+                                </div>
+                                <div style="background: #E0E7FF; padding: 8px 15px; border-radius: 8px;">
+                                    <strong>Uang Transport:</strong> Rp ${data.uang_transport ? data.uang_transport.toLocaleString('id-ID') : '0'}
+                                </div>
+                            </div>
+                        </td>
+                    `;
+                    
+                    const currentRow = document.getElementById(rowId);
+                    currentRow.insertAdjacentElement('afterend', newRow);
+                    
+                    if (btn) {
+                        btn.innerHTML = '<i class="fas fa-chevron-up"></i> Sembunyikan';
+                    }
+                })
+                .catch(err => console.error('Gagal mengambil detail:', err));
+        }
+    }
+
     // ========== BUKA MODAL ==========
     function bukaModalCreate() {
         fetch("<?php echo e(route('superadmin.kelola-tentor.create')); ?>")
@@ -206,8 +257,6 @@
         document.getElementById('modalForm').style.display = 'none';
         document.getElementById('modalContent').innerHTML = '';
     }
-
-    // ⛔ TIDAK BISA TUTUP DENGAN KLIK DI LUAR
 
     // ========== PASANG EVENT HANDLER ==========
     function pasangEventHandler() {
@@ -330,8 +379,6 @@
     }
     function tutupModalToggle() { document.getElementById('modalToggle').style.display = 'none'; }
 
-    // ⛔ TIDAK BISA TUTUP MODAL TOGGLE DENGAN KLIK DI LUAR
-
     // ========== PAGE SELECT ==========
     document.getElementById('pageSelect').addEventListener('change', function() {
         let url = new URL(window.location.href);
@@ -343,7 +390,18 @@
     // ========== SEARCH ==========
     document.getElementById('searchInput').addEventListener('keyup', function() {
         let v = this.value.toLowerCase();
-        document.querySelectorAll('#tableBody tr').forEach(r => { if (r.cells && r.cells.length >= 3) r.style.display = r.cells[2]?.innerText.toLowerCase().includes(v) ? '' : 'none'; });
+        document.querySelectorAll('#tableBody tr').forEach(r => { 
+            if (r.id && r.id.includes('_detail')) return;
+            if (r.cells && r.cells.length >= 3) {
+                const shouldShow = r.cells[2]?.innerText.toLowerCase().includes(v);
+                r.style.display = shouldShow ? '' : 'none';
+                // Sembunyikan juga detail row jika ada
+                const detailRow = document.getElementById(r.id + '_detail');
+                if (detailRow) {
+                    detailRow.style.display = shouldShow ? '' : 'none';
+                }
+            }
+        });
     });
 
     // ========== MODAL HAPUS ==========
@@ -353,8 +411,6 @@
         document.getElementById('modalHapus').style.display = 'flex';
     }
     function tutupModalHapus() { document.getElementById('modalHapus').style.display = 'none'; }
-    
-    // ⛔ TIDAK BISA TUTUP MODAL HAPUS DENGAN KLIK DI LUAR
 </script>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/superadmin/kelola-tentor/kelola-tentor.blade.php ENDPATH**/ ?>

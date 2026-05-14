@@ -191,7 +191,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/kelola-tentor/password/{id}', [KelolaTentorController::class, 'updatePassword'])->name('kelola-tentor.updatePassword');
         Route::delete('/kelola-tentor/destroy/{id}', [KelolaTentorController::class, 'destroy'])->name('kelola-tentor.destroy');
         Route::patch('/kelola-tentor/toggle-status/{id}', [KelolaTentorController::class, 'toggleStatus'])->name('kelola-tentor.toggleStatus');
-        
+        Route::get('/kelola-tentor/detail/{id}', [KelolaTentorController::class, 'getDetailGaji'])->name('kelola-tentor.detail');
+
         // KELOLA ADMIN
         Route::get('/kelola-admin', [KelolaAdminController::class, 'index'])->name('kelola-admin');
         Route::get('/kelola-admin/create', [KelolaAdminController::class, 'create'])->name('kelola-admin.create');

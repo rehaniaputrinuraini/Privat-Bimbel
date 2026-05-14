@@ -262,4 +262,28 @@ class KelolaTentorController extends Controller
                 ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
+
+    // =============================================
+    // GET DETAIL GAJI TENTOR (UNTUK COLLAPSIBLE ROW)
+    // =============================================
+    public function getDetailGaji($id)
+    {
+        try {
+            $tentor = Pegawai::where('jenis_pegawai', 'tentor')->findOrFail($id);
+            
+            return response()->json([
+                'success' => true,
+                'hr_sd' => $tentor->hr_sd ?? 0,
+                'hr_smp' => $tentor->hr_smp ?? 0,
+                'hr_sma' => $tentor->hr_sma ?? 0,
+                'uang_makan' => $tentor->uang_makan ?? 0,
+                'uang_transport' => $tentor->uang_transport ?? 0,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
