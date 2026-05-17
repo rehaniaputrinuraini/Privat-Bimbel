@@ -9,6 +9,55 @@
         max-height: 350px;
         margin: 0 auto;
     }
+    .btn-hapus-foto {
+        position: absolute;
+        bottom: -10px;
+        right: -10px;
+        background: #EF4444;
+        color: white;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        z-index: 20;
+        transition: all 0.2s ease;
+    }
+    .btn-hapus-foto:hover {
+        background: #DC2626;
+        transform: scale(1.05);
+    }
+    .foto-wrapper {
+        position: relative;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        margin: 0 auto 25px;
+        overflow: visible;
+        border: 4px solid #4D0B87;
+        background: #F3F4F6;
+    }
+    .foto-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        overflow: hidden;
+        position: relative;
+        background: #4D0B87;
+    }
+    .foto-inner img,
+    .foto-inner span {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 </style>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
 @endpush
@@ -77,17 +126,23 @@
             {{-- KARTU FOTO PROFIL (KIRI) --}}
             <div style="flex: 1; background: white; padding: 40px 20px; border-radius: 20px; border: 1px solid #E5E7EB; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center;">
                 
-                {{-- CONTAINER FOTO/INISIAL --}}
-                <div id="fotoContainer" style="width: 180px; height: 180px; border-radius: 50%; margin: 0 auto 25px; overflow: hidden; position: relative; border: 4px solid #4D0B87;">
+                {{-- 🔥 CONTAINER FOTO DENGAN POSISI YANG BENAR 🔥 --}}
+                <div class="foto-wrapper">
+                    <div class="foto-inner">
+                        @if($user->foto)
+                            <img id="fotoProfilPreview" src="{{ asset('storage/' . $user->foto) }}" alt="Foto Profil">
+                            <span id="inisialText" style="display: none; background: #4D0B87; color: white; font-size: 70px; font-weight: 800;">{{ strtoupper(substr($pegawai->nama_lengkap ?? $user->username ?? 'U', 0, 2)) }}</span>
+                        @else
+                            <span id="inisialText" style="display: flex; background: #4D0B87; color: white; font-size: 70px; font-weight: 800;">{{ strtoupper(substr($pegawai->nama_lengkap ?? $user->username ?? 'U', 0, 2)) }}</span>
+                            <img id="fotoProfilPreview" src="" alt="Preview" style="display: none;">
+                        @endif
+                    </div>
+                    
+                    {{-- 🔥 TOMBOL HAPUS - SEKARANG TIDAK KELELEP 🔥 --}}
                     @if($user->foto)
-                        <img id="fotoProfilPreview" src="{{ asset('storage/' . $user->foto) }}" alt="Foto Profil" style="width: 100%; height: 100%; object-fit: cover; display: block;">
-                        <span id="inisialText" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #4D0B87; color: white; font-size: 70px; font-weight: 800; align-items: center; justify-content: center;">{{ strtoupper(substr($pegawai->nama_lengkap ?? $user->username ?? 'U', 0, 2)) }}</span>
-                        <button type="button" onclick="hapusFoto()" style="position: absolute; bottom: 5px; right: 5px; background: #EF4444; color: white; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10;">
-                            <i class="fas fa-trash-alt" style="font-size: 16px;"></i>
-                        </button>
-                    @else
-                        <span id="inisialText" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: #4D0B87; color: white; font-size: 70px; font-weight: 800;">{{ strtoupper(substr($pegawai->nama_lengkap ?? $user->username ?? 'U', 0, 2)) }}</span>
-                        <img id="fotoProfilPreview" src="" alt="Preview" style="display: none; width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
+                    <button type="button" onclick="hapusFoto()" class="btn-hapus-foto">
+                        <i class="fas fa-trash-alt" style="font-size: 16px;"></i>
+                    </button>
                     @endif
                 </div>
                 
@@ -196,6 +251,17 @@
                 document.getElementById('fotoProfilPreview').style.display = 'block';
                 document.getElementById('inisialText').style.display = 'none';
                 document.getElementById('hapus_foto').value = '0';
+                
+                // Tampilkan tombol hapus jika belum ada
+                const wrapper = document.querySelector('.foto-wrapper');
+                if (!wrapper.querySelector('.btn-hapus-foto')) {
+                    const btnHapus = document.createElement('button');
+                    btnHapus.type = 'button';
+                    btnHapus.className = 'btn-hapus-foto';
+                    btnHapus.onclick = function() { hapusFoto(); };
+                    btnHapus.innerHTML = '<i class="fas fa-trash-alt" style="font-size: 16px;"></i>';
+                    wrapper.appendChild(btnHapus);
+                }
             }, 'image/jpeg', 0.9);
             
             document.getElementById('modalCrop').style.display = 'none';
@@ -217,6 +283,10 @@
         document.getElementById('fotoProfilPreview').style.display = 'none';
         document.getElementById('inisialText').style.display = 'flex';
         document.getElementById('foto_profil').value = '';
+        
+        // Sembunyikan tombol hapus
+        const btnHapus = document.querySelector('.btn-hapus-foto');
+        if (btnHapus) btnHapus.style.display = 'none';
     }
 
     // ========== SUBMIT FORM (BIASA, TANPA FETCH) ==========

@@ -14,9 +14,6 @@ use Illuminate\Support\Facades\Validator;
 
 class MuridController extends Controller
 {
-    /**
-     * Menampilkan halaman daftar murid
-     */
     public function index(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
@@ -29,13 +26,11 @@ class MuridController extends Controller
             'transaksiKelas.kelas'
         ])->orderBy('id_murid', 'asc');
 
-        // Default filter: periode aktif
         $today = date('Y-m-d');
         $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
             ->where('tanggal_selesai', '>=', $today)
             ->first();
 
-        // Filter berdasarkan tahun periode (default: periode aktif)
         if ($request->has('tahun_periode') && $request->tahun_periode != '') {
             $query->whereHas('transaksiPaket', function($q) use ($request) {
                 $q->whereHas('periode', function($subQ) use ($request) {
@@ -48,7 +43,6 @@ class MuridController extends Controller
             });
         }
         
-        // Filter berdasarkan paket
         if ($request->has('paket') && $request->paket != '') {
             $query->whereHas('transaksiPaket', function($q) use ($request) {
                 $q->whereHas('paket', function($subQ) use ($request) {
@@ -59,7 +53,6 @@ class MuridController extends Controller
         
         $murids = $query->paginate($perPage)->appends($request->except('page'));
         
-        // Paket list
         $allMurids = Murid::with('transaksiPaket.paket')->get();
         $paketList = [];
         foreach($allMurids as $m) {
@@ -70,7 +63,6 @@ class MuridController extends Controller
         }
         sort($paketList);
         
-        // Tahun periode list
         $tahunPeriodeList = Periode::orderBy('tahun_periode', 'desc')
             ->pluck('tahun_periode')
             ->unique()
@@ -85,9 +77,6 @@ class MuridController extends Controller
         ]);
     }
 
-    /**
-     * Menampilkan form tambah murid (via AJAX)
-     */
     public function create(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
@@ -99,7 +88,6 @@ class MuridController extends Controller
             
         $paketList = HargaPaket::orderBy('id_paket', 'asc')->get();
         
-        // Cari periode aktif
         $today = date('Y-m-d');
         $periodeAktif = Periode::where('tanggal_mulai', '<=', $today)
             ->where('tanggal_selesai', '>=', $today)
@@ -117,9 +105,6 @@ class MuridController extends Controller
         ]);
     }
 
-    /**
-     * Menyimpan data murid baru
-     */
     public function store(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
@@ -135,23 +120,6 @@ class MuridController extends Controller
             'id_kelas' => 'required|exists:ms_kelas,id_kelas',
             'id_paket' => 'required|exists:ms_paket,id_paket',
             'id_periode' => 'required|exists:ms_periode,id_periode',
-        ], [
-            'nama_lengkap.required' => 'Nama lengkap wajib diisi',
-            'nama_lengkap.max' => 'Nama lengkap maksimal 35 karakter',
-            'asal_sekolah.max' => 'Asal sekolah maksimal 20 karakter',
-            'alamat.max' => 'Alamat maksimal 100 karakter',
-            'no_hp.max' => 'No HP maksimal 15 karakter',
-            'nama_orang_tua.max' => 'Nama orang tua maksimal 35 karakter',
-            'no_hp_orang_tua.max' => 'No HP orang tua maksimal 15 karakter',
-            'tahun_masuk.integer' => 'Tahun masuk harus berupa angka',
-            'tahun_masuk.min' => 'Tahun masuk minimal 2000',
-            'tahun_masuk.max' => 'Tahun masuk maksimal tahun '.date('Y'),
-            'id_kelas.required' => 'Kelas wajib dipilih',
-            'id_kelas.exists' => 'Kelas tidak valid',
-            'id_paket.required' => 'Paket wajib dipilih',
-            'id_paket.exists' => 'Paket tidak valid',
-            'id_periode.required' => 'Periode wajib dipilih',
-            'id_periode.exists' => 'Periode tidak valid',
         ]);
 
         if ($validator->fails()) {
@@ -166,7 +134,6 @@ class MuridController extends Controller
         try {
             $tanggalDaftar = date('Y-m-d');
             
-            // Simpan data murid
             $murid = Murid::create([
                 'nama_lengkap' => $request->nama_lengkap,
                 'asal_sekolah' => $request->asal_sekolah,
@@ -178,13 +145,11 @@ class MuridController extends Controller
                 'tanggal_daftar' => $tanggalDaftar,
             ]);
             
-            // Simpan ke transaksi kelas
             TransaksiKelas::create([
                 'id_kelas' => $request->id_kelas,
                 'id_murid' => $murid->id_murid
             ]);
             
-            // Simpan ke transaksi paket DENGAN id_periode
             TransaksiPaket::create([
                 'id_periode' => $request->id_periode,
                 'id_murid' => $murid->id_murid,
@@ -194,7 +159,6 @@ class MuridController extends Controller
                 'biaya_pendaftaran' => 100000
             ]);
             
-            // Update jumlah murid di kelas
             $kelas = Kelas::find($request->id_kelas);
             if ($kelas) {
                 $kelas->increment('jumlah_murid');
@@ -217,11 +181,13 @@ class MuridController extends Controller
         }
     }
 
-    /**
-     * Menampilkan form edit murid (via AJAX)
-     */
-    public function edit(Request $request, $id)
+    public function edit(Request $request, $hashId)
     {
+        $id = unhash_id($hashId);
+        if (!$id) {
+            abort(404, 'Data tidak ditemukan');
+        }
+        
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $murid = Murid::with('transaksiPaket.periode')->findOrFail($id);
         
@@ -231,11 +197,13 @@ class MuridController extends Controller
         ]);
     }
 
-    /**
-     * Mengupdate data murid
-     */
-    public function update(Request $request, $id)
+    public function update(Request $request, $hashId)
     {
+        $id = unhash_id($hashId);
+        if (!$id) {
+            return response()->json(['success' => false, 'message' => 'Data tidak valid'], 404);
+        }
+        
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
         $validator = Validator::make($request->all(), [
@@ -246,17 +214,6 @@ class MuridController extends Controller
             'nama_orang_tua' => 'nullable|string|max:35',
             'no_hp_orang_tua' => 'nullable|string|max:15',
             'tahun_masuk' => 'nullable|integer|min:2000|max:'.date('Y'),
-        ], [
-            'nama_lengkap.required' => 'Nama lengkap wajib diisi',
-            'nama_lengkap.max' => 'Nama lengkap maksimal 35 karakter',
-            'asal_sekolah.max' => 'Asal sekolah maksimal 20 karakter',
-            'alamat.max' => 'Alamat maksimal 100 karakter',
-            'no_hp.max' => 'No HP maksimal 15 karakter',
-            'nama_orang_tua.max' => 'Nama orang tua maksimal 35 karakter',
-            'no_hp_orang_tua.max' => 'No HP orang tua maksimal 15 karakter',
-            'tahun_masuk.integer' => 'Tahun masuk harus berupa angka',
-            'tahun_masuk.min' => 'Tahun masuk minimal 2000',
-            'tahun_masuk.max' => 'Tahun masuk maksimal tahun '.date('Y'),
         ]);
 
         if ($validator->fails()) {
@@ -293,11 +250,13 @@ class MuridController extends Controller
         }
     }
 
-    /**
-     * Menghapus data murid
-     */
-    public function destroy($id)
+    public function destroy($hashId)
     {
+        $id = unhash_id($hashId);
+        if (!$id) {
+            return redirect()->back()->with('error', 'Data tidak valid');
+        }
+        
         $role = request()->is('superadmin*') ? 'superadmin' : 'admin';
         
         DB::beginTransaction();
@@ -333,11 +292,13 @@ class MuridController extends Controller
         }
     }
 
-    /**
-     * Menampilkan form lanjut periode (via AJAX)
-     */
-    public function lanjutPeriodeForm(Request $request, $id)
+    public function lanjutPeriodeForm(Request $request, $hashId)
     {
+        $id = unhash_id($hashId);
+        if (!$id) {
+            abort(404, 'Data tidak ditemukan');
+        }
+        
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         $murid = Murid::findOrFail($id);
         
@@ -360,9 +321,6 @@ class MuridController extends Controller
         ]);
     }
 
-    /**
-     * Melanjutkan murid ke periode berikutnya
-     */
     public function lanjutPeriode(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
@@ -384,7 +342,6 @@ class MuridController extends Controller
         
         DB::beginTransaction();
         try {
-            // Tambah transaksi paket baru
             TransaksiPaket::create([
                 'id_periode' => $request->id_periode_baru,
                 'id_murid' => $request->id_murid,
@@ -394,13 +351,11 @@ class MuridController extends Controller
                 'biaya_pendaftaran' => 0
             ]);
             
-            // Tambah transaksi kelas baru
             TransaksiKelas::create([
                 'id_kelas' => $request->id_kelas_baru,
                 'id_murid' => $request->id_murid
             ]);
             
-            // Update jumlah murid di kelas baru
             $kelas = Kelas::find($request->id_kelas_baru);
             if ($kelas) {
                 $kelas->increment('jumlah_murid');
@@ -422,9 +377,6 @@ class MuridController extends Controller
         }
     }
 
-    /**
-     * API untuk pencarian murid (autocomplete)
-     */
     public function search(Request $request)
     {
         $query = $request->get('q');
@@ -438,5 +390,25 @@ class MuridController extends Controller
             ->get(['id_murid', 'nama_lengkap', 'asal_sekolah', 'no_hp']);
             
         return response()->json($murids);
+    }
+    
+    public function getHargaPaket($hashId)
+    {
+        $id = unhash_id($hashId);
+        if (!$id) {
+            return response()->json(['error' => 'Data tidak valid'], 404);
+        }
+        
+        $paket = HargaPaket::find($id);
+        
+        if (!$paket) {
+            return response()->json(['error' => 'Paket tidak ditemukan'], 404);
+        }
+        
+        return response()->json([
+            'id_paket' => $paket->id_paket,
+            'tingkat' => $paket->tingkat,
+            'harga' => $paket->harga
+        ]);
     }
 }

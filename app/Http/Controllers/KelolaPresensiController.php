@@ -14,10 +14,8 @@ class KelolaPresensiController extends Controller
     {
         $role = auth()->user()->peran;
         
-        // Query dengan relasi
         $query = Mengajar::with(['pegawai', 'kelas', 'ruang']);
         
-        // Filter pencarian (nama tentor, kelas, ruang)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -34,18 +32,15 @@ class KelolaPresensiController extends Controller
             });
         }
         
-        // Filter tentor
         if ($request->filled('tentor')) {
             $query->where('id_pegawai', $request->tentor);
         }
         
-        // Filter bulan
-        if ($request->filled('bulan')) {
+        if ($request->filled('bulan') && $request->bulan !== '') {
             $query->whereMonth('tanggal', $request->bulan);
         }
         
-        // Filter tahun
-        if ($request->filled('tahun')) {
+        if ($request->filled('tahun') && $request->tahun !== '') {
             $query->whereYear('tanggal', $request->tahun);
         }
         
@@ -55,14 +50,11 @@ class KelolaPresensiController extends Controller
                           ->paginate($perPage)
                           ->appends($request->all());
         
-        // ✅ CARI SESI PERTAMA SETIAP TENTOR PER HARI
-        // Sesi pertama = jam_mulai paling awal di hari itu
         $sesiPertamaIds = [];
         foreach ($presensi as $item) {
             $tanggal = $item->tanggal;
             $idPegawai = $item->id_pegawai;
             
-            // Cari jam_mulai paling awal untuk tentor ini di tanggal ini
             $sesiPertama = Mengajar::where('id_pegawai', $idPegawai)
                 ->whereDate('tanggal', $tanggal)
                 ->orderBy('jam_mulai', 'asc')
@@ -74,20 +66,18 @@ class KelolaPresensiController extends Controller
         }
         $sesiPertamaIds = array_unique($sesiPertamaIds);
         
-        // Ambil daftar tahun dari data yang ada
         $tahunList = Mengajar::selectRaw('YEAR(tanggal) as tahun')
             ->distinct()
             ->orderBy('tahun', 'desc')
-            ->pluck('tahun');
+            ->pluck('tahun')
+            ->toArray();
         
-        if ($tahunList->isEmpty()) {
-            $tahunList = collect([date('Y')]);
+        if (empty($tahunList)) {
+            $tahunList = [date('Y')];
         }
         
-        // Ambil daftar tentor untuk filter
         $tentors = Pegawai::where('jenis_pegawai', 'tentor')->get();
         
-        // ✅ AMBIL DATA VERIFIKASI DARI SESSION
         $verifiedIds = session('verified_presensi', []);
         
         $bulan = $request->bulan;
@@ -105,13 +95,18 @@ class KelolaPresensiController extends Controller
             'tentorFilter',
             'tahunList',
             'verifiedIds',
-            'sesiPertamaIds'   // ✅ KIRIM KE VIEW
+            'sesiPertamaIds'
         ));
     }
     
-    public function verify($id)
+    public function verify($hashId)
     {
         try {
+            $id = unhash_id($hashId);
+            if (!$id) {
+                return redirect()->back()->with('error', 'Data tidak valid');
+            }
+            
             $verifiedIds = session('verified_presensi', []);
             if (!in_array($id, $verifiedIds)) {
                 $verifiedIds[] = $id;
@@ -124,9 +119,14 @@ class KelolaPresensiController extends Controller
         }
     }
     
-    public function unverify($id)
+    public function unverify($hashId)
     {
         try {
+            $id = unhash_id($hashId);
+            if (!$id) {
+                return redirect()->back()->with('error', 'Data tidak valid');
+            }
+            
             $verifiedIds = session('verified_presensi', []);
             $verifiedIds = array_diff($verifiedIds, [$id]);
             session(['verified_presensi' => $verifiedIds]);
@@ -137,13 +137,18 @@ class KelolaPresensiController extends Controller
         }
     }
     
-    public function destroy($id)
+    public function destroy($hashId)
     {
         if (auth()->user()->peran != 'superadmin') {
             return redirect()->back()->with('error', '❌ Anda tidak memiliki izin untuk menghapus data!');
         }
         
         try {
+            $id = unhash_id($hashId);
+            if (!$id) {
+                return redirect()->back()->with('error', 'Data tidak valid');
+            }
+            
             $presensi = Mengajar::findOrFail($id);
             
             if ($presensi->bukti_mengajar && Storage::exists('public/' . $presensi->bukti_mengajar)) {
@@ -164,8 +169,13 @@ class KelolaPresensiController extends Controller
         }
     }
     
-    public function downloadFoto($id)
+    public function downloadFoto($hashId)
     {
+        $id = unhash_id($hashId);
+        if (!$id) {
+            return redirect()->back()->with('error', 'Data tidak valid');
+        }
+        
         $presensi = Mengajar::findOrFail($id);
         
         if (!$presensi->bukti_mengajar) {
@@ -185,8 +195,13 @@ class KelolaPresensiController extends Controller
         return Storage::download($filePath, $filename);
     }
     
-    public function show($id)
+    public function show($hashId)
     {
+        $id = unhash_id($hashId);
+        if (!$id) {
+            abort(404, 'Data tidak ditemukan');
+        }
+        
         $presensi = Mengajar::with(['pegawai', 'kelas', 'ruang'])->findOrFail($id);
         $role = auth()->user()->peran;
         

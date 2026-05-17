@@ -53,6 +53,9 @@
                 </thead>
                 <tbody id="tableBody" style="color: #374151;">
                     @forelse($paket as $index => $item)
+                    @php
+                        $hashId = hash_id($item->id_paket);
+                    @endphp
                     <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                         <td style="padding: 15px; text-align: center;">{{ $loop->iteration }}</td>
                         <td style="padding: 15px; text-align: center;">PK{{ str_pad($item->id_paket, 4, '0', STR_PAD_LEFT) }}</td>
@@ -60,11 +63,11 @@
                         <td style="padding: 15px; text-align: center;">Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
                         <td style="padding: 15px; text-align: center;">
                             <div style="display: flex; gap: 8px; justify-content: center;">
-                                <button onclick="bukaModalEdit({{ $item->id_paket }})" 
+                                <button onclick="bukaModalEdit('{{ $hashId }}')" 
                                    style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; white-space: nowrap;">
                                     <i class="far fa-edit"></i> Edit
                                 </button>
-                                <button type="button" onclick="bukaModalHapus('{{ $item->id_paket }}', 'PK{{ str_pad($item->id_paket, 4, '0', STR_PAD_LEFT) }} - {{ $item->tingkat }}')" 
+                                <button type="button" onclick="bukaModalHapus('{{ $hashId }}', 'PK{{ str_pad($item->id_paket, 4, '0', STR_PAD_LEFT) }} - {{ $item->tingkat }}')" 
                                         style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; white-space: nowrap;">
                                     <i class="fas fa-trash"></i> Hapus
                                 </button>
@@ -154,8 +157,8 @@
             });
     }
 
-    function bukaModalEdit(id) {
-        fetch("{{ route($role . '.master-data.harga-paket.edit', '') }}/" + id)
+    function bukaModalEdit(hashId) {
+        fetch("{{ route($role . '.master-data.harga-paket.edit', '') }}/" + hashId)
             .then(r => r.text())
             .then(html => {
                 document.getElementById('modalContent').innerHTML = html;
@@ -272,8 +275,8 @@
         });
     });
 
-    function bukaModalHapus(id, nama) {
-        document.getElementById('formHapus').action = "{{ route($role . '.master-data.harga-paket.destroy', '') }}/" + id;
+    function bukaModalHapus(hashId, nama) {
+        document.getElementById('formHapus').action = "{{ route($role . '.master-data.harga-paket.destroy', '') }}/" + hashId;
         document.getElementById('pesanHapus').innerHTML = `Apakah Anda <strong>yakin</strong> ingin menghapus paket <strong>${nama}</strong>?<br><br><small style="color:#EF4444;">⚠️ <strong>PERINGATAN:</strong> Jika paket ini masih digunakan oleh data murid atau transaksi, maka <strong>tidak dapat dihapus</strong>. Data paket ini terhubung dengan sistem pembayaran dan data murid.</small>`;
         document.getElementById('modalHapus').style.display = 'flex';
     }

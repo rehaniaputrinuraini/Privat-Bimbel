@@ -311,7 +311,7 @@
                 <h1>Bimbel Privat</h1>
                 <h2 class="text-purple">Prestasi Lebih Baik</h2>
                 <p>Bimbingan belajar untuk SD, SMP, SMA dengan tentor berpengalaman untuk meningkatkan prestasi akademik Anda.</p>
-                <a href="https://wa.me/628986368457?text=Halo%20Admin%20Bimbel%20Privat,%20saya%20tertarik%20dengan%20Bimbel%20Privat" 
+                <a href="https://wa.me/6281997911330?text=Halo%20Admin%20Bimbel%20Privat%2C%0A%0ASaya%20tertarik%20dengan%20program%20Bimbel%20Privat%20yang%20ditawarkan.%20Mohon%20informasi%20lebih%20lanjut%20mengenai%3A%0A%0A✔️%20Program%20dan%20Mata%20Pelajaran%20yang%20tersedia%0A✔️%20Biaya%20pendaftaran%20dan%20biaya%20bulanan%0A✔️%20Metode%20belajar%20(Online%20%2F%20Tatap%20Muka)%0A✔️%20Jadwal%20dan%20durasi%20belajar%0A%0ASaya%20siap%20memberikan%20data%20diri%20setelah%20mendapatkan%20informasi%20awal.%0A%0ATerima%20kasih%20atas%20bantuannya."
                 class="btn-primary" target="_blank">
                 <i class="fas fa-phone-alt"></i> 
                 <span>Daftar atau Hubungi Kami</span></a> 
@@ -589,7 +589,7 @@
                 <div class="testimoni-card" data-aos="fade-up" data-aos-delay="200">
                     <div class="testimoni-header">
                         <i class="fas fa-user-circle"></i>
-                        <h4>Jaden Bachtera</h4>
+                        <h4>Oktavia Dian</h4>
                     </div>
                     <div class="rating">
                         <i class="fas fa-star"></i>
@@ -641,7 +641,7 @@
                 </div>
                 <div class="footer-section">
                     <h4><i class="fas fa-phone-alt"></i> Kontak</h4>
-                    <p>WhatsApp: 0822-4555-2901</p>
+                    <p>WhatsApp: 0819-9791-1330</p>
                     <p>Email: info@bimbelprivat.com</p>
                 </div>
                 <div class="footer-section">

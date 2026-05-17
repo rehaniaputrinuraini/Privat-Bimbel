@@ -5,19 +5,17 @@
         <p style="color: #9CA3AF; font-size: 12px; margin: 2px 0 0 0;">Perbarui data murid</p>
     </div>
 
-    {{-- ALERT SUKSES --}}
     <div id="alertSukses" style="display: none; background: #D1FAE5; color: #065F46; padding: 12px 15px; border-radius: 10px; margin-bottom: 15px; align-items: center; gap: 10px;">
         <i class="fas fa-check-circle" style="font-size: 18px;"></i>
         <span id="alertSuksesText"></span>
     </div>
 
-    {{-- ALERT ERROR --}}
     <div id="alertError" style="display: none; background: #FEE2E2; color: #991B1B; padding: 12px 15px; border-radius: 10px; margin-bottom: 15px; align-items: center; gap: 10px;">
         <i class="fas fa-exclamation-circle" style="font-size: 18px;"></i>
         <span id="alertErrorText"></span>
     </div>
 
-    <form id="mainForm" action="{{ route($role . '.murid.update', $murid->id_murid) }}" method="POST">
+    <form id="mainForm" action="{{ route($role . '.murid.update', ['hashId' => hash_id($murid->id_murid)]) }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -79,11 +77,9 @@
                 </div>
             </div>
             <div>
-                {{-- Tidak ada input tambahan, form tetap simpel --}}
             </div>
         </div>
 
-        {{-- Tombol Aksi --}}
         <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px; padding-top: 16px; border-top: 1.5px solid #F3F4F6;">
             <button type="button" id="btnKeluar"
                     style="padding: 10px 45px; border: 1.5px solid #4D0B87; color: #4D0B87; border-radius: 10px; font-weight: 600; font-size: 16px; background: #FFFFFF; cursor: pointer; transition: 0.3s;">
@@ -97,7 +93,6 @@
     </form>
 </div>
 
-{{-- MODAL KONFIRMASI BATAL --}}
 <div id="modalBatal" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -110,7 +105,6 @@
     </div>
 </div>
 
-{{-- MODAL PERINGATAN PERUBAHAN BELUM DISIMPAN --}}
 <div id="modalPindahHalaman" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -123,7 +117,6 @@
     </div>
 </div>
 
-{{-- MODAL SUKSES --}}
 <div id="modalSukses" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #10B981; font-size: 50px; margin-bottom: 10px;"><i class="fas fa-check-circle"></i></div>

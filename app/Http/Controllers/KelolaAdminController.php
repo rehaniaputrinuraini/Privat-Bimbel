@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Hash;
 
 class KelolaAdminController extends Controller
 {
-    // Menampilkan semua data admin
     public function index(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
@@ -27,14 +26,12 @@ class KelolaAdminController extends Controller
         ]);
     }
 
-    // Form tambah admin
     public function create(Request $request)
     {
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         return view('dashboard.superadmin.kelola-admin.create-admin', ['role' => $role]);
     }
 
-    // Simpan data admin
     public function store(Request $request)
     {
         $request->validate([
@@ -48,7 +45,6 @@ class KelolaAdminController extends Controller
         ]);
 
         try {
-            // Insert ke ms_pegawai dulu
             $pegawai = Pegawai::create([
                 'jenis_pegawai' => 'admin',
                 'nama_lengkap' => $request->nama_lengkap,
@@ -63,7 +59,6 @@ class KelolaAdminController extends Controller
                 'uang_transport' => null,
             ]);
 
-            // Insert ke ms_user
             User::create([
                 'id_pegawai' => $pegawai->id_pegawai,
                 'username' => $request->username,
@@ -79,9 +74,13 @@ class KelolaAdminController extends Controller
         }
     }
 
-    // Form edit admin
-    public function edit(Request $request, $id)
+    public function edit(Request $request, $hashId)
     {
+        $id = unhash_id($hashId);
+        if (!$id) {
+            abort(404, 'Data tidak ditemukan');
+        }
+        
         $role = str_contains($request->url(), 'superadmin') ? 'superadmin' : 'admin';
         
         $admin = User::where('peran', 'admin')
@@ -94,9 +93,13 @@ class KelolaAdminController extends Controller
         ]);
     }
 
-    // Update data admin
-    public function update(Request $request, $id)
+    public function update(Request $request, $hashId)
     {
+        $id = unhash_id($hashId);
+        if (!$id) {
+            return response()->json(['success' => false, 'message' => 'Data tidak valid'], 404);
+        }
+        
         $user = User::with('pegawai')->findOrFail($id);
         
         $request->validate([
@@ -110,20 +113,17 @@ class KelolaAdminController extends Controller
         ]);
 
         try {
-            // Update user
             $userData = [
                 'username' => $request->username,
                 'email' => $request->email,
             ];
             
-            // Update password jika diisi
             if ($request->filled('password')) {
                 $userData['password'] = Hash::make($request->password);
             }
             
             $user->update($userData);
 
-            // Update data pegawai
             if ($user->pegawai) {
                 $user->pegawai->update([
                     'nama_lengkap' => $request->nama_lengkap,
@@ -148,9 +148,13 @@ class KelolaAdminController extends Controller
         }
     }
 
-    // Update password admin
-    public function updatePassword(Request $request, $id)
+    public function updatePassword(Request $request, $hashId)
     {
+        $id = unhash_id($hashId);
+        if (!$id) {
+            return response()->json(['success' => false, 'message' => 'Data tidak valid'], 404);
+        }
+        
         $request->validate([
             'password' => 'required|string|min:6|confirmed',
         ]);
@@ -167,9 +171,13 @@ class KelolaAdminController extends Controller
         }
     }
 
-    // Toggle status admin (Aktif/Nonaktif)
-    public function toggleStatus($id)
+    public function toggleStatus($hashId)
     {
+        $id = unhash_id($hashId);
+        if (!$id) {
+            return redirect()->back()->with('error', 'Data tidak valid');
+        }
+        
         $user = User::findOrFail($id);
         $user->update(['status' => $user->status == 1 ? 0 : 1]);
         
@@ -179,17 +187,19 @@ class KelolaAdminController extends Controller
         return redirect()->route($role . '.kelola-admin')->with('success', 'Status admin berhasil diubah');
     }
 
-    // Hapus data admin
-    public function destroy($id)
+    public function destroy($hashId)
     {
+        $id = unhash_id($hashId);
+        if (!$id) {
+            return redirect()->back()->with('error', 'Data tidak valid');
+        }
+        
         $user = User::with('pegawai')->findOrFail($id);
         
-        // Hapus data pegawai terkait
         if ($user->pegawai) {
             $user->pegawai->delete();
         }
         
-        // Hapus user
         $user->delete();
         
         $referer = request()->headers->get('referer');

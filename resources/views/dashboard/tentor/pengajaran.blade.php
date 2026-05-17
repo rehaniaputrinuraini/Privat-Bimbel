@@ -230,7 +230,13 @@
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
     <div style="width: 100%;">
 
-        {{-- HEADER --}}
+        @php
+            $currentMonth = date('n');
+            $currentYear = date('Y');
+            $selectedBulan = request('bulan', $currentMonth);
+            $selectedTahun = request('tahun', $currentYear);
+        @endphp
+
         <div style="margin-bottom: 25px;">
             <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
                 {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
@@ -239,7 +245,6 @@
             <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Presensi & Riwayat Pengajaran</p>
         </div>
 
-        {{-- ALERT --}}
         <div id="alertSuccess" class="alert-custom alert-success">
             <i class="fas fa-check-circle"></i> <span id="successMessage"></span>
         </div>
@@ -247,7 +252,6 @@
             <i class="fas fa-exclamation-circle"></i> <span id="errorMessage"></span>
         </div>
 
-        {{-- ========== BAGIAN ATAS: PRESENSI HARI INI ========== --}}
         <div class="presensi-flex">
             <div class="presensi-card">
                 <div class="card-header-custom">
@@ -274,7 +278,6 @@
             </div>
         </div>
 
-        {{-- ========== BAGIAN BAWAH: RIWAYAT PENGAJARAN ========== --}}
         <div style="margin-top: 40px;">
             <div style="margin-bottom: 20px;">
                 <h2 style="font-size: 22px; font-weight: 700; color: #111827; margin: 0;">Riwayat Pengajaran</h2>
@@ -289,21 +292,21 @@
                                style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px;">
                     </div>
 
-                    @php $bulanSekarang = date('n'); $requestBulan = request('bulan'); @endphp
+                    {{-- FILTER BULAN (default: bulan saat ini) --}}
                     <select name="bulan" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; font-size: 13px; min-width: 140px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
+                        <option value="">Semua Bulan</option>
                         @for($i = 1; $i <= 12; $i++)
-                            @php $selected = $requestBulan ? ($requestBulan == $i) : ($bulanSekarang == $i); @endphp
-                            <option value="{{ $i }}" {{ $selected ? 'selected' : '' }}>
+                            <option value="{{ $i }}" {{ $selectedBulan == $i ? 'selected' : '' }}>
                                 {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
                             </option>
                         @endfor
                     </select>
 
-                    @php $tahunSekarang = date('Y'); $requestTahun = request('tahun'); @endphp
+                    {{-- FILTER TAHUN (default: tahun saat ini) --}}
                     <select name="tahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; font-size: 13px; min-width: 100px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
-                        @for($year = $tahunSekarang - 2; $year <= $tahunSekarang + 1; $year++)
-                            @php $selected = $requestTahun ? ($requestTahun == $year) : ($tahunSekarang == $year); @endphp
-                            <option value="{{ $year }}" {{ $selected ? 'selected' : '' }}>{{ $year }}</option>
+                        <option value="">Semua Tahun</option>
+                        @for($year = date('Y') - 2; $year <= date('Y') + 1; $year++)
+                            <option value="{{ $year }}" {{ $selectedTahun == $year ? 'selected' : '' }}>{{ $year }}</option>
                         @endfor
                     </select>
                     
@@ -328,7 +331,7 @@
                                 <th style="padding: 15px; font-weight: 700;">Jam Masuk</th>
                                 <th style="padding: 15px; font-weight: 700;">Jam Keluar</th>
                                 <th style="padding: 15px; font-weight: 700; text-align: center;">Status Murid</th>
-                            </tr>
+                            </td>
                         </thead>
                         <tbody style="color: #374151;">
                             @forelse($riwayat as $index => $item)
@@ -399,7 +402,6 @@
     </div>
 </div>
 
-{{-- ================== POPUP LAPORAN KEGIATAN ================== --}}
 <div class="modal-overlay" id="modalLaporan">
     <div class="modal-content">
         <div class="card-header-custom" style="margin-bottom: 20px;">
@@ -462,7 +464,6 @@
                 <img id="previewFoto" alt="Preview Foto">
             </div>
 
-            {{-- DUA TOMBOL: KELUAR & KIRIM --}}
             <div style="display: flex; gap: 12px;">
                 <button type="button" class="btn-submit" id="btnKeluarDariPopup" 
                         style="background: #EF4444; flex: 1;">
@@ -476,7 +477,6 @@
     </div>
 </div>
 
-{{-- ================== POPUP KONFIRMASI BATAL LAPORAN (KELUAR DARI POPUP) ================== --}}
 <div class="modal-overlay" id="modalKonfirmasiBatalLaporan">
     <div class="modal-confirm">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;">
@@ -497,7 +497,6 @@
     </div>
 </div>
 
-{{-- ================== POPUP KONFIRMASI SELESAI PENGAJARAN ================== --}}
 <div class="modal-overlay" id="modalKonfirmasiKeluar">
     <div class="modal-confirm">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;">
@@ -520,7 +519,6 @@
 </div>
 
 <script>
-    // ========== ELEMENTS ==========
     const btnMasuk = document.getElementById('btnMasuk');
     const btnKeluar = document.getElementById('btnKeluar');
     const modalLaporan = document.getElementById('modalLaporan');
@@ -556,13 +554,11 @@
         }
     }
     
-    // Auto-fill jenjang
     kelasSelect?.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         jenjangHidden.value = selectedOption.getAttribute('data-jenjang') || '';
     });
     
-    // Upload foto
     uploadArea?.addEventListener('click', function() { fotoInput.click(); });
     fotoInput?.addEventListener('change', function(e) {
         if (e.target.files && e.target.files[0]) {
@@ -578,7 +574,6 @@
         }
     });
     
-    // ========== BTN MASUK ==========
     btnMasuk?.addEventListener('click', function() {
         fetch('{{ route("tentor.presensi.masuk") }}', {
             method: 'POST',
@@ -598,17 +593,14 @@
         });
     });
     
-    // ========== BTN KELUAR DARI POPUP ==========
     btnKeluarDariPopup?.addEventListener('click', function() {
         modalKonfirmasiBatalLaporan.style.display = 'flex';
     });
     
-    // Tombol Tidak
     btnTidakBatalLaporan?.addEventListener('click', function() {
         modalKonfirmasiBatalLaporan.style.display = 'none';
     });
     
-    // Tombol Iya (batalkan presensi)
     btnYaBatalLaporan?.addEventListener('click', function() {
         modalKonfirmasiBatalLaporan.style.display = 'none';
         modalLaporan.style.display = 'none';
@@ -629,7 +621,6 @@
             }
         });
         
-        // Reset form
         ['kelasSelect','ruangSelect','keteranganInput','fotoInput'].forEach(id => {
             const el = document.getElementById(id); if (el) { el.disabled = false; el.value = ''; }
         });
@@ -646,7 +637,6 @@
         btnSubmit.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Laporan';
     });
     
-    // ========== BTN KIRIM LAPORAN ==========
     formLaporan?.addEventListener('submit', function(e) {
         e.preventDefault();
         if (!fotoInput.files[0]) { showAlert('error', 'Foto kegiatan wajib diupload!'); return; }
@@ -689,7 +679,6 @@
         });
     });
     
-    // ========== BTN KELUAR (HALAMAN UTAMA) ==========
     btnKeluar?.addEventListener('click', function() {
         if (!laporanTerkirim) {
             showAlert('error', 'Silakan isi laporan terlebih dahulu!');
@@ -749,7 +738,6 @@
         });
     });
     
-    // Tutup modal (klik di luar)
     modalKonfirmasiKeluar?.addEventListener('click', function(e) {
         if (e.target === modalKonfirmasiKeluar) modalKonfirmasiKeluar.style.display = 'none';
     });
@@ -758,7 +746,6 @@
         if (e.target === modalKonfirmasiBatalLaporan) modalKonfirmasiBatalLaporan.style.display = 'none';
     });
     
-    // Cek status saat load
     fetch('{{ route("tentor.presensi.cek-status") }}')
         .then(r => r.json())
         .then(data => {
@@ -789,8 +776,7 @@
                 }
             }
         });
-        
-    // Riwayat pagination
+    
     document.getElementById('perPageSelect')?.addEventListener('change', function() {
         document.getElementById('perPageInput').value = this.value;
         document.getElementById('filterForm').submit();

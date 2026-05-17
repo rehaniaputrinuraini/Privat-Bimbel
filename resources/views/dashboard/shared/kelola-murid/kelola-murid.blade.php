@@ -5,7 +5,6 @@
 @section('content')
 <div style="width: 100%;">
     
-    {{-- HEADER HALAMAN --}}
     <div style="margin-bottom: 25px;">
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
             {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
@@ -16,14 +15,12 @@
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Manajemen Data Murid</p>
     </div>
 
-    {{-- SESSION SUCCESS --}}
     @if(session('success'))
         <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
             <i class="fas fa-check-circle"></i> {{ session('success') }}
         </div>
     @endif
 
-    {{-- ACTIONS BAR --}}
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
         <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
             <div style="position: relative; width: 300px;">
@@ -40,11 +37,11 @@
             </select>
 
             <select id="filterTahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; min-width: 160px; background: white; outline: none; cursor: pointer;">
-            <option value="">Semua Periode</option>
-            @foreach($tahunPeriodeList as $tahunPeriode)
-                <option value="{{ $tahunPeriode }}" {{ $tahunPeriode == ($periodeAktif->tahun_periode ?? '') ? 'selected' : '' }}>{{ $tahunPeriode }}</option>
-            @endforeach
-        </select>
+                <option value="">Semua Periode</option>
+                @foreach($tahunPeriodeList as $tahunPeriode)
+                    <option value="{{ $tahunPeriode }}" {{ $tahunPeriode == ($periodeAktif->tahun_periode ?? '') ? 'selected' : '' }}>{{ $tahunPeriode }}</option>
+                @endforeach
+            </select>
         </div>
         
         <button onclick="bukaModalCreate()" style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: 0.3s; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
@@ -52,7 +49,6 @@
         </button>
     </div>
 
-    {{-- TABEL MURID --}}
     <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; white-space: nowrap;">
@@ -104,19 +100,19 @@
                         <td style="padding: 15px; text-align: center;">{{ $m->tahun_periode }}</td>
                         <td style="padding: 15px; text-align: center;">
                             <div style="display: flex; gap: 3px; justify-content: center; flex-wrap: nowrap;">
-                                <button onclick="bukaModalEdit({{ $m->id_murid }})" 
+                                <button onclick="bukaModalEdit('{{ hash_id($m->id_murid) }}')" 
                                    style="background: #5EB37E; color: white; padding: 4px 7px; border-radius: 5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 10px; white-space: nowrap;">
                                     <i class="far fa-edit"></i> Edit
                                 </button>
                                 
                                 @if($periodeAktif && !$sudahDiPeriodeAktif)
-                                <button onclick="bukaModalLanjutPeriode({{ $m->id_murid }}, '{{ $m->nama_lengkap }}')" 
+                                <button onclick="bukaModalLanjutPeriode('{{ hash_id($m->id_murid) }}', '{{ $m->nama_lengkap }}')" 
                                         style="background: #F59E0B; color: white; padding: 4px 7px; border-radius: 5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 10px; white-space: nowrap;">
                                     <i class="fas fa-arrow-right"></i> Lanjut
                                 </button>
                                 @endif
                                 
-                                <button type="button" onclick="bukaModalHapus('{{ $m->id_murid }}', '{{ $m->nama_lengkap }}')" 
+                                <button type="button" onclick="bukaModalHapus('{{ hash_id($m->id_murid) }}', '{{ $m->nama_lengkap }}')" 
                                         style="background: #E35D5D; color: white; padding: 4px 7px; border-radius: 5px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 10px; white-space: nowrap;">
                                     <i class="fas fa-trash"></i> Hapus
                                 </button>
@@ -136,7 +132,6 @@
         </div>
     </div>
     
-    {{-- PAGINATION --}}
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
             <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
@@ -171,16 +166,13 @@
             @endif
         </div>
     </div>
-
 </div>
 
-{{-- MODAL FORM (Create/Edit) --}}
 <div id="modalForm" style="display: none; position: fixed; z-index: 9998; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; overflow-y: auto;">
     <div style="background: white; border-radius: 20px; width: 700px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.15);" id="modalContent">
     </div>
 </div>
 
-{{-- MODAL KONFIRMASI HAPUS --}}
 <div id="modalHapus" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 380px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #E35D5D; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-trash-alt"></i></div>
@@ -196,16 +188,12 @@
     </div>
 </div>
 
-{{-- MODAL LANJUT PERIODE --}}
 <div id="modalLanjutPeriode" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center; overflow-y: auto;">
     <div style="background: white; border-radius: 20px; width: 500px; max-width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.15);" id="modalLanjutContent">
     </div>
 </div>
 
 <script>
-    // =============================================
-    // BUKA MODAL CREATE
-    // =============================================
     function bukaModalCreate() {
         fetch("{{ route($role . '.murid.create') }}")
             .then(r => r.text())
@@ -216,11 +204,8 @@
             });
     }
 
-    // =============================================
-    // BUKA MODAL EDIT
-    // =============================================
-    function bukaModalEdit(id) {
-        fetch("{{ route($role . '.murid.edit', '') }}/" + id)
+    function bukaModalEdit(hashId) {
+        fetch("{{ route($role . '.murid.edit', '') }}/" + hashId)
             .then(r => r.text())
             .then(html => {
                 document.getElementById('modalContent').innerHTML = html;
@@ -229,17 +214,11 @@
             });
     }
 
-    // =============================================
-    // TUTUP MODAL FORM
-    // =============================================
     function tutupModalForm() {
         document.getElementById('modalForm').style.display = 'none';
         document.getElementById('modalContent').innerHTML = '';
     }
 
-    // =============================================
-    // PASANG EVENT HANDLER UNTUK FORM DI DALAM MODAL
-    // =============================================
     function pasangEventHandler() {
         const mc = document.getElementById('modalContent');
         if (!mc) return;
@@ -316,7 +295,6 @@
             });
         }
 
-        // SELECT KELAS & PAKET
         const kelasSelect = mc.querySelector('#id_kelas');
         const paketSelect = mc.querySelector('#id_paket');
         const hargaPaket = mc.querySelector('#hargaPaket');
@@ -333,9 +311,6 @@
         }
     }
 
-    // =============================================
-    // SEARCH & FILTER
-    // =============================================
     document.getElementById('searchInput').addEventListener('keyup', function() {
         let val = this.value.toLowerCase();
         document.querySelectorAll('#tableBody tr').forEach(row => {
@@ -363,11 +338,8 @@
         });
     });
 
-    // =============================================
-    // MODAL HAPUS
-    // =============================================
-    function bukaModalHapus(id, nama) {
-        document.getElementById('formHapus').action = "{{ route($role . '.murid.destroy', '') }}/" + id;
+    function bukaModalHapus(hashId, nama) {
+        document.getElementById('formHapus').action = "{{ route($role . '.murid.destroy', '') }}/" + hashId;
         document.getElementById('pesanHapus').innerHTML = `Apakah Anda <strong>benar-benar yakin</strong> ingin menghapus data murid <strong>${nama}</strong>?<br><br><small style="color:#EF4444;">⚠️ <strong>PERINGATAN:</strong> Data akan dihapus <strong>secara permanen</strong> dari database.</small>`;
         document.getElementById('modalHapus').style.display = 'flex';
     }
@@ -376,11 +348,8 @@
         document.getElementById('modalHapus').style.display = 'none';
     }
 
-    // =============================================
-    // MODAL LANJUT PERIODE
-    // =============================================
-    function bukaModalLanjutPeriode(id, nama) {
-        fetch("{{ route($role . '.murid.lanjut-periode-form', '') }}/" + id)
+    function bukaModalLanjutPeriode(hashId, nama) {
+        fetch("{{ route($role . '.murid.lanjut-periode-form', '') }}/" + hashId)
             .then(r => r.text())
             .then(html => {
                 document.getElementById('modalLanjutContent').innerHTML = html;
@@ -430,9 +399,6 @@
         }
     }
 
-    // =============================================
-    // PAGE SELECT (PAGINATION)
-    // =============================================
     document.getElementById('pageSelect').addEventListener('change', function() {
         let url = new URL(window.location.href);
         url.searchParams.set('per_page', this.value);

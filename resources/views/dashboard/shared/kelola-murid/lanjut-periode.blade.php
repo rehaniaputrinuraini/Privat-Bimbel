@@ -6,14 +6,14 @@
 
     <form id="formLanjutPeriode" action="{{ route($role . '.murid.lanjut-periode') }}" method="POST">
         @csrf
-        <input type="hidden" name="id_murid" value="{{ $murid->id_murid }}">
+        <input type="hidden" name="id_murid" value="{{ hash_id($murid->id_murid) }}">
         
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Periode Tujuan</label>
             <select name="id_periode_baru" required style="width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid #E5E7EB;">
                 <option value="">-- Pilih Periode --</option>
                 @foreach($periodeList as $periode)
-                    <option value="{{ $periode->id_periode }}" {{ $periodeAktif && $periode->id_periode == $periodeAktif->id_periode ? 'selected' : '' }}>
+                    <option value="{{ hash_id($periode->id_periode) }}" {{ $periodeAktif && $periode->id_periode == $periodeAktif->id_periode ? 'selected' : '' }}>
                         {{ $periode->tahun_periode }} ({{ date('d/m/Y', strtotime($periode->tanggal_mulai)) }} - {{ date('d/m/Y', strtotime($periode->tanggal_selesai)) }})
                     </option>
                 @endforeach
@@ -25,7 +25,7 @@
             <select name="id_paket_baru" required style="width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid #E5E7EB;">
                 <option value="">-- Pilih Paket --</option>
                 @foreach($paketList as $paket)
-                    <option value="{{ $paket->id_paket }}">{{ $paket->tingkat }} - Rp {{ number_format($paket->harga, 0, ',', '.') }}</option>
+                    <option value="{{ hash_id($paket->id_paket) }}">{{ $paket->tingkat }} - Rp {{ number_format($paket->harga, 0, ',', '.') }}</option>
                 @endforeach
             </select>
         </div>
@@ -36,7 +36,7 @@
                 <option value="">-- Pilih Kelas --</option>
                 @foreach($kelasList as $kelas)
                     @php $sisa = 10 - $kelas->jumlah_murid; @endphp
-                    <option value="{{ $kelas->id_kelas }}">{{ $kelas->jenjang }} - {{ $kelas->nama_kelas }} ({{ $sisa }} kursi)</option>
+                    <option value="{{ hash_id($kelas->id_kelas) }}">{{ $kelas->jenjang }} - {{ $kelas->nama_kelas }} ({{ $sisa }} kursi)</option>
                 @endforeach
             </select>
         </div>

@@ -6,7 +6,6 @@ use App\Http\Controllers\MuridController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleAuthController;
-use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\KelolaAdminController;
 use App\Http\Controllers\KelolaTentorController;
@@ -15,6 +14,14 @@ use App\Http\Controllers\Tentor\PresensiController;
 use App\Http\Controllers\KelolaPresensiController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+
+// ========== CONTROLLER PEMISAHAN BARU ==========
+use App\Http\Controllers\Pembayaran\PembayaranMuridController;
+use App\Http\Controllers\Pembayaran\DetailPembayaranController;
+use App\Http\Controllers\Transaksi\PemasukanController;
+use App\Http\Controllers\Transaksi\PemasukanLainController;
+use App\Http\Controllers\Transaksi\PengeluaranController;
+use App\Http\Controllers\Transaksi\PenggajianController;
 
 /*
 |--------------------------------------------------------------------------
@@ -95,13 +102,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tentor/dashboard', [DashboardController::class, 'tentor'])->name('tentor.dashboard');
     
     // ========== PROFIL ==========
-
     Route::get('/profil', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profil/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profil/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::get('/profil/ubah-password', function () {
         return view('dashboard.shared.profil.ubah_password');
-            })->name('password.edit');
+    })->name('password.edit');
     Route::put('/profil/password-update', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('password.update.profile');
     
     // ========== SUPERADMIN ONLY ==========
@@ -111,12 +117,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kelola-murid', [MuridController::class, 'index'])->name('kelola-murid');
         Route::get('/kelola-murid/create', [MuridController::class, 'create'])->name('murid.create');
         Route::post('/kelola-murid/store', [MuridController::class, 'store'])->name('murid.store');
-        Route::get('/kelola-murid/edit/{id}', [MuridController::class, 'edit'])->name('murid.edit');
-        Route::put('/kelola-murid/update/{id}', [MuridController::class, 'update'])->name('murid.update');
-        Route::delete('/kelola-murid/destroy/{id}', [MuridController::class, 'destroy'])->name('murid.destroy');
-        
+        Route::get('/kelola-murid/edit/{hashId}', [MuridController::class, 'edit'])->name('murid.edit');
+        Route::put('/kelola-murid/update/{hashId}', [MuridController::class, 'update'])->name('murid.update');
+        Route::delete('/kelola-murid/destroy/{hashId}', [MuridController::class, 'destroy'])->name('murid.destroy');
+
         // LANJUT PERIODE
-        Route::get('/kelola-murid/lanjut-periode/{id}', [MuridController::class, 'lanjutPeriodeForm'])->name('murid.lanjut-periode-form');
+        Route::get('/kelola-murid/lanjut-periode/{hashId}', [MuridController::class, 'lanjutPeriodeForm'])->name('murid.lanjut-periode-form');
         Route::post('/kelola-murid/lanjut-periode', [MuridController::class, 'lanjutPeriode'])->name('murid.lanjut-periode');
         
         // ========== MASTER DATA (SUB MENU) ==========
@@ -125,83 +131,81 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/master-data/harga-paket', [MasterDataController::class, 'indexPaket'])->name('master-data.harga-paket');
         Route::get('/master-data/harga-paket/create', [MasterDataController::class, 'createPaket'])->name('master-data.harga-paket.create');
         Route::post('/master-data/harga-paket/store', [MasterDataController::class, 'storePaket'])->name('master-data.harga-paket.store');
-        Route::get('/master-data/harga-paket/edit/{id}', [MasterDataController::class, 'editPaket'])->name('master-data.harga-paket.edit');
-        Route::put('/master-data/harga-paket/update/{id}', [MasterDataController::class, 'updatePaket'])->name('master-data.harga-paket.update');
-        Route::delete('/master-data/harga-paket/destroy/{id}', [MasterDataController::class, 'destroyPaket'])->name('master-data.harga-paket.destroy');
+        Route::get('/master-data/harga-paket/edit/{hashId}', [MasterDataController::class, 'editPaket'])->name('master-data.harga-paket.edit');
+        Route::put('/master-data/harga-paket/update/{hashId}', [MasterDataController::class, 'updatePaket'])->name('master-data.harga-paket.update');
+        Route::delete('/master-data/harga-paket/destroy/{hashId}', [MasterDataController::class, 'destroyPaket'])->name('master-data.harga-paket.destroy');
         
         // Master Data - Kelas
         Route::get('/master-data/kelas', [MasterDataController::class, 'indexKelas'])->name('master-data.kelas');
         Route::get('/master-data/kelas/create', [MasterDataController::class, 'createKelas'])->name('master-data.kelas.create');
         Route::post('/master-data/kelas/store', [MasterDataController::class, 'storeKelas'])->name('master-data.kelas.store');
-        Route::get('/master-data/kelas/edit/{id}', [MasterDataController::class, 'editKelas'])->name('master-data.kelas.edit');
-        Route::put('/master-data/kelas/update/{id}', [MasterDataController::class, 'updateKelas'])->name('master-data.kelas.update');
-        Route::delete('/master-data/kelas/destroy/{id}', [MasterDataController::class, 'destroyKelas'])->name('master-data.kelas.destroy');
+        Route::get('/master-data/kelas/edit/{hashId}', [MasterDataController::class, 'editKelas'])->name('master-data.kelas.edit');
+        Route::put('/master-data/kelas/update/{hashId}', [MasterDataController::class, 'updateKelas'])->name('master-data.kelas.update');
+        Route::delete('/master-data/kelas/destroy/{hashId}', [MasterDataController::class, 'destroyKelas'])->name('master-data.kelas.destroy');
         
         // Master Data - Ruang
         Route::get('/master-data/ruang', [MasterDataController::class, 'indexRuang'])->name('master-data.ruang');
         Route::get('/master-data/ruang/create', [MasterDataController::class, 'createRuang'])->name('master-data.ruang.create');
         Route::post('/master-data/ruang/store', [MasterDataController::class, 'storeRuang'])->name('master-data.ruang.store');
-        Route::get('/master-data/ruang/edit/{id}', [MasterDataController::class, 'editRuang'])->name('master-data.ruang.edit');
-        Route::put('/master-data/ruang/update/{id}', [MasterDataController::class, 'updateRuang'])->name('master-data.ruang.update');
-        Route::delete('/master-data/ruang/destroy/{id}', [MasterDataController::class, 'destroyRuang'])->name('master-data.ruang.destroy');
+        Route::get('/master-data/ruang/edit/{hashId}', [MasterDataController::class, 'editRuang'])->name('master-data.ruang.edit');
+        Route::put('/master-data/ruang/update/{hashId}', [MasterDataController::class, 'updateRuang'])->name('master-data.ruang.update');
+        Route::delete('/master-data/ruang/destroy/{hashId}', [MasterDataController::class, 'destroyRuang'])->name('master-data.ruang.destroy');
         
         // Master Data - Periode
         Route::get('/master-data/periode', [MasterDataController::class, 'indexPeriode'])->name('master-data.periode');
         Route::get('/master-data/periode/create', [MasterDataController::class, 'createPeriode'])->name('master-data.periode.create');
         Route::post('/master-data/periode/store', [MasterDataController::class, 'storePeriode'])->name('master-data.periode.store');
-        Route::get('/master-data/periode/edit/{id}', [MasterDataController::class, 'editPeriode'])->name('master-data.periode.edit');
-        Route::put('/master-data/periode/update/{id}', [MasterDataController::class, 'updatePeriode'])->name('master-data.periode.update');
-        Route::delete('/master-data/periode/destroy/{id}', [MasterDataController::class, 'destroyPeriode'])->name('master-data.periode.destroy');
+        Route::get('/master-data/periode/edit/{hashId}', [MasterDataController::class, 'editPeriode'])->name('master-data.periode.edit');
+        Route::put('/master-data/periode/update/{hashId}', [MasterDataController::class, 'updatePeriode'])->name('master-data.periode.update');
+        Route::delete('/master-data/periode/destroy/{hashId}', [MasterDataController::class, 'destroyPeriode'])->name('master-data.periode.destroy');
 
         // ========== PEMBAYARAN (SUB MENU) ==========
-        Route::get('/pembayaran/tagihan', [PembayaranController::class, 'indexTagihan'])->name('pembayaran.tagihan');
-        Route::get('/pembayaran/riwayat', [PembayaranController::class, 'indexRiwayat'])->name('pembayaran.riwayat');
-        Route::get('/pembayaran/create', [PembayaranController::class, 'create'])->name('pembayaran.create');
-        Route::post('/pembayaran/store', [PembayaranController::class, 'store'])->name('pembayaran.store');
-        Route::get('/pembayaran/edit/{id}', [PembayaranController::class, 'edit'])->name('pembayaran.edit');
-        Route::put('/pembayaran/update/{id}', [PembayaranController::class, 'update'])->name('pembayaran.update');
-        Route::delete('/pembayaran/destroy/{id}', [PembayaranController::class, 'destroy'])->name('pembayaran.destroy');
-        // TRANSAKSI PEMASUKAN (Pembayaran Murid)
-        Route::get('/transaksi/pemasukan', [PembayaranController::class, 'indexPemasukan'])->name('transaksi.pemasukan');
-        Route::get('/pembayaran/detail/{id}', [PembayaranController::class, 'detail'])->name('pembayaran.detail');
+        Route::get('/pembayaran/create', [PembayaranMuridController::class, 'create'])->name('pembayaran.create');
+        Route::post('/pembayaran/store', [PembayaranMuridController::class, 'store'])->name('pembayaran.store');
+        Route::delete('/pembayaran/destroy/{hashId}', [PembayaranMuridController::class, 'destroy'])->name('pembayaran.destroy');
         
+        // TRANSAKSI PEMASUKAN (Pembayaran Murid)
+        Route::get('/transaksi/pemasukan', [PemasukanController::class, 'index'])->name('transaksi.pemasukan');
+        Route::get('/pembayaran/detail/{hashId}', [DetailPembayaranController::class, 'detail'])->name('pembayaran.detail');
+
         // TRANSAKSI PEMASUKAN LAIN
-        Route::get('/transaksi/pemasukan-lain', [PembayaranController::class, 'indexPemasukanLain'])->name('transaksi.pemasukan-lain');
-        Route::get('/pemasukan-lain/create', [PembayaranController::class, 'createPemasukanLain'])->name('pemasukan-lain.create');
-        Route::delete('/pemasukan-lain/destroy/{id}', [PembayaranController::class, 'destroyPemasukanLain'])->name('pemasukan-lain.destroy');
+        Route::get('/transaksi/pemasukan-lain', [PemasukanLainController::class, 'index'])->name('transaksi.pemasukan-lain');
+        Route::get('/pemasukan-lain/create', [PemasukanLainController::class, 'create'])->name('pemasukan-lain.create');
+        Route::post('/pemasukan-lain/store', [PemasukanLainController::class, 'store'])->name('pemasukan-lain.store');
+        Route::delete('/pemasukan-lain/destroy/{hashId}', [PemasukanLainController::class, 'destroy'])->name('pemasukan-lain.destroy');
 
         // TRANSAKSI PENGELUARAN (Pengeluaran Lain)
-        Route::get('/transaksi/pengeluaran', [PembayaranController::class, 'indexPengeluaran'])->name('transaksi.pengeluaran');
-        Route::get('/pengeluaran/create', [PembayaranController::class, 'createPengeluaran'])->name('pengeluaran.create');
-        Route::post('/pengeluaran/store', [PembayaranController::class, 'storePengeluaran'])->name('pengeluaran.store');
-        Route::delete('/pengeluaran/destroy/{id}', [PembayaranController::class, 'destroyPengeluaran'])->name('pengeluaran.destroy');
+        Route::get('/transaksi/pengeluaran', [PengeluaranController::class, 'index'])->name('transaksi.pengeluaran');
+        Route::get('/pengeluaran/create', [PengeluaranController::class, 'create'])->name('pengeluaran.create');
+        Route::post('/pengeluaran/store', [PengeluaranController::class, 'store'])->name('pengeluaran.store');
+        Route::delete('/pengeluaran/destroy/{hashId}', [PengeluaranController::class, 'destroy'])->name('pengeluaran.destroy');
 
         // TRANSAKSI PENGGAJIAN
-        Route::get('/transaksi/penggajian', [PembayaranController::class, 'indexPenggajian'])->name('transaksi.penggajian');
-        Route::post('/penggajian/bayar/{id}', [PembayaranController::class, 'bayarGaji'])->name('penggajian.bayar');
-        Route::get('/penggajian/detail/{id}', [PembayaranController::class, 'detailPenggajian'])->name('penggajian.detail');
-        Route::get('/penggajian/slip/{id}', [PembayaranController::class, 'slipGaji'])->name('penggajian.slip');
+        Route::get('/transaksi/penggajian', [PenggajianController::class, 'index'])->name('transaksi.penggajian');
+        Route::post('/penggajian/bayar/{hashId}', [PenggajianController::class, 'bayar'])->name('penggajian.bayar');
+        Route::get('/penggajian/detail/{hashId}', [PenggajianController::class, 'detail'])->name('penggajian.detail');
+        Route::get('/penggajian/slip/{hashId}', [PenggajianController::class, 'slip'])->name('penggajian.slip');
 
         // KELOLA TENTOR
         Route::get('/kelola-tentor', [KelolaTentorController::class, 'index'])->name('kelola-tentor');
         Route::get('/kelola-tentor/create', [KelolaTentorController::class, 'create'])->name('kelola-tentor.create');
         Route::post('/kelola-tentor/store', [KelolaTentorController::class, 'store'])->name('kelola-tentor.store');
-        Route::get('/kelola-tentor/edit/{id}', [KelolaTentorController::class, 'edit'])->name('kelola-tentor.edit');
-        Route::put('/kelola-tentor/update/{id}', [KelolaTentorController::class, 'update'])->name('kelola-tentor.update');
-        Route::put('/kelola-tentor/password/{id}', [KelolaTentorController::class, 'updatePassword'])->name('kelola-tentor.updatePassword');
-        Route::delete('/kelola-tentor/destroy/{id}', [KelolaTentorController::class, 'destroy'])->name('kelola-tentor.destroy');
-        Route::patch('/kelola-tentor/toggle-status/{id}', [KelolaTentorController::class, 'toggleStatus'])->name('kelola-tentor.toggleStatus');
-        Route::get('/kelola-tentor/detail/{id}', [KelolaTentorController::class, 'getDetailGaji'])->name('kelola-tentor.detail');
+        Route::get('/kelola-tentor/edit/{hashId}', [KelolaTentorController::class, 'edit'])->name('kelola-tentor.edit');
+        Route::put('/kelola-tentor/update/{hashId}', [KelolaTentorController::class, 'update'])->name('kelola-tentor.update');
+        Route::put('/kelola-tentor/password/{hashId}', [KelolaTentorController::class, 'updatePassword'])->name('kelola-tentor.updatePassword');
+        Route::delete('/kelola-tentor/destroy/{hashId}', [KelolaTentorController::class, 'destroy'])->name('kelola-tentor.destroy');
+        Route::patch('/kelola-tentor/toggle-status/{hashId}', [KelolaTentorController::class, 'toggleStatus'])->name('kelola-tentor.toggleStatus');
+        Route::get('/kelola-tentor/detail/{hashId}', [KelolaTentorController::class, 'getDetailGaji'])->name('kelola-tentor.detail');
 
         // KELOLA ADMIN
         Route::get('/kelola-admin', [KelolaAdminController::class, 'index'])->name('kelola-admin');
         Route::get('/kelola-admin/create', [KelolaAdminController::class, 'create'])->name('kelola-admin.create');
         Route::post('/kelola-admin/store', [KelolaAdminController::class, 'store'])->name('kelola-admin.store');
-        Route::get('/kelola-admin/edit/{id}', [KelolaAdminController::class, 'edit'])->name('kelola-admin.edit');
-        Route::put('/kelola-admin/update/{id}', [KelolaAdminController::class, 'update'])->name('kelola-admin.update');
-        Route::put('/kelola-admin/password/{id}', [KelolaAdminController::class, 'updatePassword'])->name('kelola-admin.updatePassword');
-        Route::patch('/kelola-admin/toggle-status/{id}', [KelolaAdminController::class, 'toggleStatus'])->name('kelola-admin.toggleStatus');
-        Route::delete('/kelola-admin/destroy/{id}', [KelolaAdminController::class, 'destroy'])->name('kelola-admin.destroy');
+        Route::get('/kelola-admin/edit/{hashId}', [KelolaAdminController::class, 'edit'])->name('kelola-admin.edit');
+        Route::put('/kelola-admin/update/{hashId}', [KelolaAdminController::class, 'update'])->name('kelola-admin.update');
+        Route::put('/kelola-admin/password/{hashId}', [KelolaAdminController::class, 'updatePassword'])->name('kelola-admin.updatePassword');
+        Route::patch('/kelola-admin/toggle-status/{hashId}', [KelolaAdminController::class, 'toggleStatus'])->name('kelola-admin.toggleStatus');
+        Route::delete('/kelola-admin/destroy/{hashId}', [KelolaAdminController::class, 'destroy'])->name('kelola-admin.destroy');
 
         // LAPORAN KEUANGAN (1 HALAMAN GABUNGAN)
         Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan-keuangan');
@@ -209,11 +213,11 @@ Route::middleware(['auth'])->group(function () {
         
         // KELOLA PRESENSI
         Route::get('/kelola-presensi', [KelolaPresensiController::class, 'index'])->name('kelola-presensi');
-        Route::get('/kelola-presensi/{id}', [KelolaPresensiController::class, 'show'])->name('kelola-presensi.show');
-        Route::post('/kelola-presensi/{id}/verify', [KelolaPresensiController::class, 'verify'])->name('kelola-presensi.verify');
-        Route::post('/kelola-presensi/{id}/unverify', [KelolaPresensiController::class, 'unverify'])->name('kelola-presensi.unverify');
-        Route::delete('/kelola-presensi/{id}', [KelolaPresensiController::class, 'destroy'])->name('kelola-presensi.destroy');
-        Route::get('/kelola-presensi/download/{id}', [KelolaPresensiController::class, 'downloadFoto'])->name('kelola-presensi.download');
+        Route::get('/kelola-presensi/{hashId}', [KelolaPresensiController::class, 'show'])->name('kelola-presensi.show');
+        Route::post('/kelola-presensi/{hashId}/verify', [KelolaPresensiController::class, 'verify'])->name('kelola-presensi.verify');
+        Route::post('/kelola-presensi/{hashId}/unverify', [KelolaPresensiController::class, 'unverify'])->name('kelola-presensi.unverify');
+        Route::delete('/kelola-presensi/{hashId}', [KelolaPresensiController::class, 'destroy'])->name('kelola-presensi.destroy');
+        Route::get('/kelola-presensi/download/{hashId}', [KelolaPresensiController::class, 'downloadFoto'])->name('kelola-presensi.download');
         
         // REKAP GAJI
         Route::get('/rekap-gaji', function () {
@@ -228,12 +232,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kelola-murid', [MuridController::class, 'index'])->name('kelola-murid');
         Route::get('/kelola-murid/create', [MuridController::class, 'create'])->name('murid.create');
         Route::post('/kelola-murid/store', [MuridController::class, 'store'])->name('murid.store');
-        Route::get('/kelola-murid/edit/{id}', [MuridController::class, 'edit'])->name('murid.edit');
-        Route::put('/kelola-murid/update/{id}', [MuridController::class, 'update'])->name('murid.update');
-        Route::delete('/kelola-murid/destroy/{id}', [MuridController::class, 'destroy'])->name('murid.destroy');
+        Route::get('/kelola-murid/edit/{hashId}', [MuridController::class, 'edit'])->name('murid.edit');
+        Route::put('/kelola-murid/update/{hashId}', [MuridController::class, 'update'])->name('murid.update');
+        Route::delete('/kelola-murid/destroy/{hashId}', [MuridController::class, 'destroy'])->name('murid.destroy');
         
         // LANJUT PERIODE
-        Route::get('/kelola-murid/lanjut-periode/{id}', [MuridController::class, 'lanjutPeriodeForm'])->name('murid.lanjut-periode-form');
+        Route::get('/kelola-murid/lanjut-periode/{hashId}', [MuridController::class, 'lanjutPeriodeForm'])->name('murid.lanjut-periode-form');
         Route::post('/kelola-murid/lanjut-periode', [MuridController::class, 'lanjutPeriode'])->name('murid.lanjut-periode');
         
         // ========== MASTER DATA (SUB MENU) ==========
@@ -242,62 +246,60 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/master-data/harga-paket', [MasterDataController::class, 'indexPaket'])->name('master-data.harga-paket');
         Route::get('/master-data/harga-paket/create', [MasterDataController::class, 'createPaket'])->name('master-data.harga-paket.create');
         Route::post('/master-data/harga-paket/store', [MasterDataController::class, 'storePaket'])->name('master-data.harga-paket.store');
-        Route::get('/master-data/harga-paket/edit/{id}', [MasterDataController::class, 'editPaket'])->name('master-data.harga-paket.edit');
-        Route::put('/master-data/harga-paket/update/{id}', [MasterDataController::class, 'updatePaket'])->name('master-data.harga-paket.update');
-        Route::delete('/master-data/harga-paket/destroy/{id}', [MasterDataController::class, 'destroyPaket'])->name('master-data.harga-paket.destroy');
+        Route::get('/master-data/harga-paket/edit/{hashId}', [MasterDataController::class, 'editPaket'])->name('master-data.harga-paket.edit');
+        Route::put('/master-data/harga-paket/update/{hashId}', [MasterDataController::class, 'updatePaket'])->name('master-data.harga-paket.update');
+        Route::delete('/master-data/harga-paket/destroy/{hashId}', [MasterDataController::class, 'destroyPaket'])->name('master-data.harga-paket.destroy');
         
         // Master Data - Kelas
         Route::get('/master-data/kelas', [MasterDataController::class, 'indexKelas'])->name('master-data.kelas');
         Route::get('/master-data/kelas/create', [MasterDataController::class, 'createKelas'])->name('master-data.kelas.create');
         Route::post('/master-data/kelas/store', [MasterDataController::class, 'storeKelas'])->name('master-data.kelas.store');
-        Route::get('/master-data/kelas/edit/{id}', [MasterDataController::class, 'editKelas'])->name('master-data.kelas.edit');
-        Route::put('/master-data/kelas/update/{id}', [MasterDataController::class, 'updateKelas'])->name('master-data.kelas.update');
-        Route::delete('/master-data/kelas/destroy/{id}', [MasterDataController::class, 'destroyKelas'])->name('master-data.kelas.destroy');
+        Route::get('/master-data/kelas/edit/{hashId}', [MasterDataController::class, 'editKelas'])->name('master-data.kelas.edit');
+        Route::put('/master-data/kelas/update/{hashId}', [MasterDataController::class, 'updateKelas'])->name('master-data.kelas.update');
+        Route::delete('/master-data/kelas/destroy/{hashId}', [MasterDataController::class, 'destroyKelas'])->name('master-data.kelas.destroy');
         
         // Master Data - Ruang
         Route::get('/master-data/ruang', [MasterDataController::class, 'indexRuang'])->name('master-data.ruang');
         Route::get('/master-data/ruang/create', [MasterDataController::class, 'createRuang'])->name('master-data.ruang.create');
         Route::post('/master-data/ruang/store', [MasterDataController::class, 'storeRuang'])->name('master-data.ruang.store');
-        Route::get('/master-data/ruang/edit/{id}', [MasterDataController::class, 'editRuang'])->name('master-data.ruang.edit');
-        Route::put('/master-data/ruang/update/{id}', [MasterDataController::class, 'updateRuang'])->name('master-data.ruang.update');
-        Route::delete('/master-data/ruang/destroy/{id}', [MasterDataController::class, 'destroyRuang'])->name('master-data.ruang.destroy');
+        Route::get('/master-data/ruang/edit/{hashId}', [MasterDataController::class, 'editRuang'])->name('master-data.ruang.edit');
+        Route::put('/master-data/ruang/update/{hashId}', [MasterDataController::class, 'updateRuang'])->name('master-data.ruang.update');
+        Route::delete('/master-data/ruang/destroy/{hashId}', [MasterDataController::class, 'destroyRuang'])->name('master-data.ruang.destroy');
         
         // Master Data - Periode
         Route::get('/master-data/periode', [MasterDataController::class, 'indexPeriode'])->name('master-data.periode');
         Route::get('/master-data/periode/create', [MasterDataController::class, 'createPeriode'])->name('master-data.periode.create');
         Route::post('/master-data/periode/store', [MasterDataController::class, 'storePeriode'])->name('master-data.periode.store');
-        Route::get('/master-data/periode/edit/{id}', [MasterDataController::class, 'editPeriode'])->name('master-data.periode.edit');
-        Route::put('/master-data/periode/update/{id}', [MasterDataController::class, 'updatePeriode'])->name('master-data.periode.update');
-        Route::delete('/master-data/periode/destroy/{id}', [MasterDataController::class, 'destroyPeriode'])->name('master-data.periode.destroy');
+        Route::get('/master-data/periode/edit/{hashId}', [MasterDataController::class, 'editPeriode'])->name('master-data.periode.edit');
+        Route::put('/master-data/periode/update/{hashId}', [MasterDataController::class, 'updatePeriode'])->name('master-data.periode.update');
+        Route::delete('/master-data/periode/destroy/{hashId}', [MasterDataController::class, 'destroyPeriode'])->name('master-data.periode.destroy');
         
         // ========== PEMBAYARAN (SUB MENU) ==========
-        Route::get('/pembayaran/tagihan', [PembayaranController::class, 'indexTagihan'])->name('pembayaran.tagihan');
-        Route::get('/pembayaran/riwayat', [PembayaranController::class, 'indexRiwayat'])->name('pembayaran.riwayat');
-        Route::get('/pembayaran/create', [PembayaranController::class, 'create'])->name('pembayaran.create');
-        Route::post('/pembayaran/store', [PembayaranController::class, 'store'])->name('pembayaran.store');
-        Route::get('/pembayaran/edit/{id}', [PembayaranController::class, 'edit'])->name('pembayaran.edit');
-        Route::put('/pembayaran/update/{id}', [PembayaranController::class, 'update'])->name('pembayaran.update');
-        Route::delete('/pembayaran/destroy/{id}', [PembayaranController::class, 'destroy'])->name('pembayaran.destroy');
+        Route::get('/pembayaran/create', [PembayaranMuridController::class, 'create'])->name('pembayaran.create');
+        Route::post('/pembayaran/store', [PembayaranMuridController::class, 'store'])->name('pembayaran.store');
+        Route::delete('/pembayaran/destroy/{hashId}', [PembayaranMuridController::class, 'destroy'])->name('pembayaran.destroy');
+        
         // TRANSAKSI PEMASUKAN (Pembayaran Murid)
-        Route::get('/transaksi/pemasukan', [PembayaranController::class, 'indexPemasukan'])->name('transaksi.pemasukan');
-        Route::get('/pembayaran/detail/{id}', [PembayaranController::class, 'detail'])->name('pembayaran.detail');
+        Route::get('/transaksi/pemasukan', [PemasukanController::class, 'index'])->name('transaksi.pemasukan');
+        Route::get('/pembayaran/detail/{hashId}', [DetailPembayaranController::class, 'detail'])->name('pembayaran.detail');
 
         // TRANSAKSI PEMASUKAN LAIN
-        Route::get('/transaksi/pemasukan-lain', [PembayaranController::class, 'indexPemasukanLain'])->name('transaksi.pemasukan-lain');
-        Route::get('/pemasukan-lain/create', [PembayaranController::class, 'createPemasukanLain'])->name('pemasukan-lain.create');
-        Route::delete('/pemasukan-lain/destroy/{id}', [PembayaranController::class, 'destroyPemasukanLain'])->name('pemasukan-lain.destroy');
+        Route::get('/transaksi/pemasukan-lain', [PemasukanLainController::class, 'index'])->name('transaksi.pemasukan-lain');
+        Route::get('/pemasukan-lain/create', [PemasukanLainController::class, 'create'])->name('pemasukan-lain.create');
+        Route::post('/pemasukan-lain/store', [PemasukanLainController::class, 'store'])->name('pemasukan-lain.store');
+        Route::delete('/pemasukan-lain/destroy/{hashId}', [PemasukanLainController::class, 'destroy'])->name('pemasukan-lain.destroy');
 
         // TRANSAKSI PENGELUARAN (Pengeluaran Lain)
-        Route::get('/transaksi/pengeluaran', [PembayaranController::class, 'indexPengeluaran'])->name('transaksi.pengeluaran');
-        Route::get('/pengeluaran/create', [PembayaranController::class, 'createPengeluaran'])->name('pengeluaran.create');
-        Route::post('/pengeluaran/store', [PembayaranController::class, 'storePengeluaran'])->name('pengeluaran.store');
-        Route::delete('/pengeluaran/destroy/{id}', [PembayaranController::class, 'destroyPengeluaran'])->name('pengeluaran.destroy');
+        Route::get('/transaksi/pengeluaran', [PengeluaranController::class, 'index'])->name('transaksi.pengeluaran');
+        Route::get('/pengeluaran/create', [PengeluaranController::class, 'create'])->name('pengeluaran.create');
+        Route::post('/pengeluaran/store', [PengeluaranController::class, 'store'])->name('pengeluaran.store');
+        Route::delete('/pengeluaran/destroy/{hashId}', [PengeluaranController::class, 'destroy'])->name('pengeluaran.destroy');
 
         // TRANSAKSI PENGGAJIAN
-        Route::get('/transaksi/penggajian', [PembayaranController::class, 'indexPenggajian'])->name('transaksi.penggajian');
-        Route::post('/penggajian/bayar/{id}', [PembayaranController::class, 'bayarGaji'])->name('penggajian.bayar');
-        Route::get('/penggajian/detail/{id}', [PembayaranController::class, 'detailPenggajian'])->name('penggajian.detail');
-        Route::get('/penggajian/slip/{id}', [PembayaranController::class, 'slipGaji'])->name('penggajian.slip');
+        Route::get('/transaksi/penggajian', [PenggajianController::class, 'index'])->name('transaksi.penggajian');
+        Route::post('/penggajian/bayar/{hashId}', [PenggajianController::class, 'bayar'])->name('penggajian.bayar');
+        Route::get('/penggajian/detail/{hashId}', [PenggajianController::class, 'detail'])->name('penggajian.detail');
+        Route::get('/penggajian/slip/{hashId}', [PenggajianController::class, 'slip'])->name('penggajian.slip');
         
         // DATA TENTOR
         Route::get('/data-tentor', [KelolaTentorController::class, 'index'])->name('data-tentor');
@@ -308,11 +310,11 @@ Route::middleware(['auth'])->group(function () {
         
         // KELOLA PRESENSI
         Route::get('/kelola-presensi', [KelolaPresensiController::class, 'index'])->name('kelola-presensi');
-        Route::get('/kelola-presensi/{id}', [KelolaPresensiController::class, 'show'])->name('kelola-presensi.show');
-        Route::post('/kelola-presensi/{id}/verify', [KelolaPresensiController::class, 'verify'])->name('kelola-presensi.verify');
-        Route::post('/kelola-presensi/{id}/unverify', [KelolaPresensiController::class, 'unverify'])->name('kelola-presensi.unverify');
-        Route::delete('/kelola-presensi/{id}', [KelolaPresensiController::class, 'destroy'])->name('kelola-presensi.destroy');
-        Route::get('/kelola-presensi/download/{id}', [KelolaPresensiController::class, 'downloadFoto'])->name('kelola-presensi.download');
+        Route::get('/kelola-presensi/{hashId}', [KelolaPresensiController::class, 'show'])->name('kelola-presensi.show');
+        Route::post('/kelola-presensi/{hashId}/verify', [KelolaPresensiController::class, 'verify'])->name('kelola-presensi.verify');
+        Route::post('/kelola-presensi/{hashId}/unverify', [KelolaPresensiController::class, 'unverify'])->name('kelola-presensi.unverify');
+        Route::delete('/kelola-presensi/{hashId}', [KelolaPresensiController::class, 'destroy'])->name('kelola-presensi.destroy');
+        Route::get('/kelola-presensi/download/{hashId}', [KelolaPresensiController::class, 'downloadFoto'])->name('kelola-presensi.download');
         
         // REKAP GAJI
         Route::get('/rekap-gaji', function () {
@@ -321,28 +323,25 @@ Route::middleware(['auth'])->group(function () {
     });
     
     // ========== TENTOR ONLY ==========
-Route::middleware(['role:tentor'])->prefix('tentor')->name('tentor.')->group(function () {
-    
-    // PENGAJARAN (Gabungan Presensi + Riwayat)
-    Route::get('/pengajaran', [PresensiController::class, 'pengajaran'])->name('pengajaran');
-
-    Route::post('/presensi/batal', [PresensiController::class, 'batal'])->name('presensi.batal');
-    
-    // PRESENSI
-    Route::post('/presensi/masuk', [PresensiController::class, 'masuk'])->name('presensi.masuk');
-    Route::post('/presensi/laporan', [PresensiController::class, 'simpanLaporan'])->name('presensi.laporan');
-    Route::post('/presensi/keluar', [PresensiController::class, 'keluar'])->name('presensi.keluar');
-    Route::get('/presensi/cek-status', [PresensiController::class, 'cekStatus'])->name('presensi.cek-status');
-    
-    // RIWAYAT PRESENSI (tetap ada untuk keperluan AJAX)
-    Route::get('/riwayat-presensi', [PresensiController::class, 'riwayat'])->name('riwayat-presensi');
-});
+    Route::middleware(['role:tentor'])->prefix('tentor')->name('tentor.')->group(function () {
+        
+        // PENGAJARAN (Gabungan Presensi + Riwayat)
+        Route::get('/pengajaran', [PresensiController::class, 'pengajaran'])->name('pengajaran');
+        Route::post('/presensi/batal', [PresensiController::class, 'batal'])->name('presensi.batal');
+        
+        // PRESENSI
+        Route::post('/presensi/masuk', [PresensiController::class, 'masuk'])->name('presensi.masuk');
+        Route::post('/presensi/laporan', [PresensiController::class, 'simpanLaporan'])->name('presensi.laporan');
+        Route::post('/presensi/keluar', [PresensiController::class, 'keluar'])->name('presensi.keluar');
+        Route::get('/presensi/cek-status', [PresensiController::class, 'cekStatus'])->name('presensi.cek-status');
+        
+    });
 });
 
 // ========== API ROUTES ==========
 Route::middleware(['auth'])->group(function () {
     Route::get('/search-murid', [MuridController::class, 'search'])->name('search.murid');
-    Route::get('/get-harga-paket/{id}', [MuridController::class, 'getHargaPaket'])->name('get.harga.paket');
-    Route::get('/get-murid-paket/{id}', [PembayaranController::class, 'getMuridPaket'])->name('get.murid.paket');
-    Route::get('/cek-status-pembayaran/{id}', [PembayaranController::class, 'cekStatusPembayaran'])->name('cek.status.pembayaran');
+    Route::get('/get-harga-paket/{hashId}', [MuridController::class, 'getHargaPaket'])->name('get.harga.paket');
+    Route::get('/get-murid-paket/{hashId}', [PembayaranMuridController::class, 'getMuridPaket'])->name('get.murid.paket');
+    Route::get('/cek-status-pembayaran/{hashId}', [PembayaranMuridController::class, 'cekStatusPembayaran'])->name('cek.status.pembayaran');
 });

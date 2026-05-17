@@ -10,7 +10,7 @@
         <span id="alertErrorText"></span>
     </div>
 
-    <form action="{{ route($role . '.master-data.harga-paket.update', $paket->id_paket) }}" method="POST">
+    <form action="{{ route($role . '.master-data.harga-paket.update', $hashId) }}" method="POST">
         @csrf
         @method('PUT')
         

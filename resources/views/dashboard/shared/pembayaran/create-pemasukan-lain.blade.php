@@ -12,10 +12,9 @@
         <span id="alertErrorText"></span>
     </div>
 
-    <form id="mainForm" action="{{ route($role . '.pembayaran.store') }}" method="POST">
+    {{-- FORM dengan route yang BENAR --}}
+    <form id="mainForm" action="{{ route($role . '.pemasukan-lain.store') }}" method="POST">
         @csrf
-
-        <input type="hidden" name="kategori_pemasukan" value="lainnya">
 
         {{-- Tanggal --}}
         <div style="margin-bottom: 15px;">
@@ -26,14 +25,14 @@
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;">
         </div>
 
-        {{-- Jenis --}}
+        {{-- Jenis Pembayaran --}}
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                Jenis <span style="color: #EF4444;">*</span>
+                Jenis Pembayaran <span style="color: #EF4444;">*</span>
             </label>
             <select name="jenis_pembayaran_lainnya" id="jenis_pembayaran_lainnya"
                     style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; cursor: pointer; color: #374151;">
-                <option value="">Pilih Jenis</option>
+                <option value="">Pilih Jenis Pembayaran</option>
                 <option value="Tunai">Tunai</option>
                 <option value="Transfer">Transfer</option>
             </select>
@@ -48,12 +47,12 @@
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;">
         </div>
 
-        {{-- Total --}}
+        {{-- Total Pembayaran --}}
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">
-                Total <span style="color: #EF4444;">*</span>
+                Total Pembayaran <span style="color: #EF4444;">*</span>
             </label>
-            <input type="text" name="total_pembayaran_lainnya" id="total_pembayaran_lainnya" placeholder="Masukkan Total"
+            <input type="text" name="total_pembayaran_lainnya" id="total_pembayaran_lainnya" placeholder="Masukkan Total Pembayaran"
                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; color: #374151; box-sizing: border-box;">
         </div>
@@ -74,7 +73,7 @@
                 Keluar
             </button>
             <button type="submit" id="btnSimpan"
-                    style="padding: 11px 40px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 15px; cursor: pointer; font-family: 'Poppins', sans-serif; box-shadow: 0 4px 10px rgba(245,158,11,0.25);">
+                    style="padding: 11px 40px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 15px; cursor: pointer; font-family: 'Poppins', sans-serif; box-shadow: 0 4px 10px rgba(77,11,135,0.25);">
                 Simpan
             </button>
         </div>
@@ -176,10 +175,34 @@
         if (cont) cont.innerHTML = '';
     }
 
-    /* SUBMIT */
+    /* SUBMIT dengan VALIDASI */
     if (form) {
         form.addEventListener('submit', function (e) {
             e.preventDefault();
+            
+            // ========== VALIDASI FORM ==========
+            const tanggal = document.querySelector('#tanggal_lainnya').value;
+            const jenis = document.querySelector('#jenis_pembayaran_lainnya').value;
+            const sumber = document.querySelector('#sumber_pemasukan').value;
+            const total = document.querySelector('#total_pembayaran_lainnya').value;
+            
+            if (!tanggal) {
+                tampilError('Tanggal harus diisi');
+                return;
+            }
+            if (!jenis) {
+                tampilError('Jenis pembayaran harus diisi');
+                return;
+            }
+            if (!sumber) {
+                tampilError('Sumber pemasukan harus diisi');
+                return;
+            }
+            if (!total || parseInt(total) < 1000) {
+                tampilError('Total pembayaran minimal Rp 1.000');
+                return;
+            }
+            // ========== END VALIDASI ==========
 
             const orig = btnSimpan.innerHTML;
             btnSimpan.disabled = true;
@@ -189,27 +212,41 @@
             fetch(form.action, {
                 method: 'POST',
                 body: fd,
-                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '', 'Accept': 'application/json' }
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest', 
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '', 
+                    'Accept': 'application/json' 
+                }
             })
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    formChanged = false; formSubmitted = true;
+                    formChanged = false; 
+                    formSubmitted = true;
                     if (pesanSukses) pesanSukses.textContent = data.message || 'Pemasukan berhasil disimpan.';
                     modalSukses.style.display = 'flex';
                 } else {
                     let msg = data.message || 'Terjadi kesalahan.';
                     if (data.errors) msg = Object.values(data.errors).flat().join('\n');
                     tampilError(msg);
-                    btnSimpan.disabled = false; btnSimpan.innerHTML = orig;
+                    btnSimpan.disabled = false; 
+                    btnSimpan.innerHTML = orig;
                 }
             })
-            .catch(err => { tampilError('Koneksi gagal: ' + err.message); btnSimpan.disabled = false; btnSimpan.innerHTML = orig; });
+            .catch(err => { 
+                tampilError('Koneksi gagal: ' + err.message); 
+                btnSimpan.disabled = false; 
+                btnSimpan.innerHTML = orig; 
+            });
         });
     }
 
     function tampilError(msg) {
-        if (alertError && alertErrorText) { alertErrorText.textContent = msg; alertError.style.display = 'flex'; setTimeout(() => alertError.style.display = 'none', 5000); }
+        if (alertError && alertErrorText) { 
+            alertErrorText.textContent = msg; 
+            alertError.style.display = 'flex'; 
+            setTimeout(() => alertError.style.display = 'none', 5000); 
+        }
     }
 })();
 </script>

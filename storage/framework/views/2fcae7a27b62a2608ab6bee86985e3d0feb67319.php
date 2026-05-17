@@ -230,7 +230,13 @@
 <div style="padding: 10px; font-family: 'Poppins', sans-serif;">
     <div style="width: 100%;">
 
-        
+        <?php
+            $currentMonth = date('n');
+            $currentYear = date('Y');
+            $selectedBulan = request('bulan', $currentMonth);
+            $selectedTahun = request('tahun', $currentYear);
+        ?>
+
         <div style="margin-bottom: 25px;">
             <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
                 <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?>
@@ -240,7 +246,6 @@
             <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Presensi & Riwayat Pengajaran</p>
         </div>
 
-        
         <div id="alertSuccess" class="alert-custom alert-success">
             <i class="fas fa-check-circle"></i> <span id="successMessage"></span>
         </div>
@@ -248,7 +253,6 @@
             <i class="fas fa-exclamation-circle"></i> <span id="errorMessage"></span>
         </div>
 
-        
         <div class="presensi-flex">
             <div class="presensi-card">
                 <div class="card-header-custom">
@@ -275,7 +279,6 @@
             </div>
         </div>
 
-        
         <div style="margin-top: 40px;">
             <div style="margin-bottom: 20px;">
                 <h2 style="font-size: 22px; font-weight: 700; color: #111827; margin: 0;">Riwayat Pengajaran</h2>
@@ -290,22 +293,22 @@
                                style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px;">
                     </div>
 
-                    <?php $bulanSekarang = date('n'); $requestBulan = request('bulan'); ?>
+                    
                     <select name="bulan" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; font-size: 13px; min-width: 140px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
+                        <option value="">Semua Bulan</option>
                         <?php for($i = 1; $i <= 12; $i++): ?>
-                            <?php $selected = $requestBulan ? ($requestBulan == $i) : ($bulanSekarang == $i); ?>
-                            <option value="<?php echo e($i); ?>" <?php echo e($selected ? 'selected' : ''); ?>>
+                            <option value="<?php echo e($i); ?>" <?php echo e($selectedBulan == $i ? 'selected' : ''); ?>>
                                 <?php echo e(\Carbon\Carbon::create()->month($i)->translatedFormat('F')); ?>
 
                             </option>
                         <?php endfor; ?>
                     </select>
 
-                    <?php $tahunSekarang = date('Y'); $requestTahun = request('tahun'); ?>
+                    
                     <select name="tahun" style="padding: 10px 12px; border-radius: 12px; border: 1px solid #E5E7EB; font-size: 13px; min-width: 100px; background: white; outline: none; cursor: pointer;" onchange="this.form.submit()">
-                        <?php for($year = $tahunSekarang - 2; $year <= $tahunSekarang + 1; $year++): ?>
-                            <?php $selected = $requestTahun ? ($requestTahun == $year) : ($tahunSekarang == $year); ?>
-                            <option value="<?php echo e($year); ?>" <?php echo e($selected ? 'selected' : ''); ?>><?php echo e($year); ?></option>
+                        <option value="">Semua Tahun</option>
+                        <?php for($year = date('Y') - 2; $year <= date('Y') + 1; $year++): ?>
+                            <option value="<?php echo e($year); ?>" <?php echo e($selectedTahun == $year ? 'selected' : ''); ?>><?php echo e($year); ?></option>
                         <?php endfor; ?>
                     </select>
                     
@@ -330,7 +333,7 @@
                                 <th style="padding: 15px; font-weight: 700;">Jam Masuk</th>
                                 <th style="padding: 15px; font-weight: 700;">Jam Keluar</th>
                                 <th style="padding: 15px; font-weight: 700; text-align: center;">Status Murid</th>
-                            </tr>
+                            </td>
                         </thead>
                         <tbody style="color: #374151;">
                             <?php $__empty_1 = true; $__currentLoopData = $riwayat; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
@@ -402,7 +405,6 @@
     </div>
 </div>
 
-
 <div class="modal-overlay" id="modalLaporan">
     <div class="modal-content">
         <div class="card-header-custom" style="margin-bottom: 20px;">
@@ -466,7 +468,6 @@
                 <img id="previewFoto" alt="Preview Foto">
             </div>
 
-            
             <div style="display: flex; gap: 12px;">
                 <button type="button" class="btn-submit" id="btnKeluarDariPopup" 
                         style="background: #EF4444; flex: 1;">
@@ -479,7 +480,6 @@
         </form>
     </div>
 </div>
-
 
 <div class="modal-overlay" id="modalKonfirmasiBatalLaporan">
     <div class="modal-confirm">
@@ -500,7 +500,6 @@
         </div>
     </div>
 </div>
-
 
 <div class="modal-overlay" id="modalKonfirmasiKeluar">
     <div class="modal-confirm">
@@ -524,7 +523,6 @@
 </div>
 
 <script>
-    // ========== ELEMENTS ==========
     const btnMasuk = document.getElementById('btnMasuk');
     const btnKeluar = document.getElementById('btnKeluar');
     const modalLaporan = document.getElementById('modalLaporan');
@@ -560,13 +558,11 @@
         }
     }
     
-    // Auto-fill jenjang
     kelasSelect?.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         jenjangHidden.value = selectedOption.getAttribute('data-jenjang') || '';
     });
     
-    // Upload foto
     uploadArea?.addEventListener('click', function() { fotoInput.click(); });
     fotoInput?.addEventListener('change', function(e) {
         if (e.target.files && e.target.files[0]) {
@@ -582,7 +578,6 @@
         }
     });
     
-    // ========== BTN MASUK ==========
     btnMasuk?.addEventListener('click', function() {
         fetch('<?php echo e(route("tentor.presensi.masuk")); ?>', {
             method: 'POST',
@@ -602,17 +597,14 @@
         });
     });
     
-    // ========== BTN KELUAR DARI POPUP ==========
     btnKeluarDariPopup?.addEventListener('click', function() {
         modalKonfirmasiBatalLaporan.style.display = 'flex';
     });
     
-    // Tombol Tidak
     btnTidakBatalLaporan?.addEventListener('click', function() {
         modalKonfirmasiBatalLaporan.style.display = 'none';
     });
     
-    // Tombol Iya (batalkan presensi)
     btnYaBatalLaporan?.addEventListener('click', function() {
         modalKonfirmasiBatalLaporan.style.display = 'none';
         modalLaporan.style.display = 'none';
@@ -633,7 +625,6 @@
             }
         });
         
-        // Reset form
         ['kelasSelect','ruangSelect','keteranganInput','fotoInput'].forEach(id => {
             const el = document.getElementById(id); if (el) { el.disabled = false; el.value = ''; }
         });
@@ -650,7 +641,6 @@
         btnSubmit.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Laporan';
     });
     
-    // ========== BTN KIRIM LAPORAN ==========
     formLaporan?.addEventListener('submit', function(e) {
         e.preventDefault();
         if (!fotoInput.files[0]) { showAlert('error', 'Foto kegiatan wajib diupload!'); return; }
@@ -693,7 +683,6 @@
         });
     });
     
-    // ========== BTN KELUAR (HALAMAN UTAMA) ==========
     btnKeluar?.addEventListener('click', function() {
         if (!laporanTerkirim) {
             showAlert('error', 'Silakan isi laporan terlebih dahulu!');
@@ -753,7 +742,6 @@
         });
     });
     
-    // Tutup modal (klik di luar)
     modalKonfirmasiKeluar?.addEventListener('click', function(e) {
         if (e.target === modalKonfirmasiKeluar) modalKonfirmasiKeluar.style.display = 'none';
     });
@@ -762,7 +750,6 @@
         if (e.target === modalKonfirmasiBatalLaporan) modalKonfirmasiBatalLaporan.style.display = 'none';
     });
     
-    // Cek status saat load
     fetch('<?php echo e(route("tentor.presensi.cek-status")); ?>')
         .then(r => r.json())
         .then(data => {
@@ -793,8 +780,7 @@
                 }
             }
         });
-        
-    // Riwayat pagination
+    
     document.getElementById('perPageSelect')?.addEventListener('change', function() {
         document.getElementById('perPageInput').value = this.value;
         document.getElementById('filterForm').submit();

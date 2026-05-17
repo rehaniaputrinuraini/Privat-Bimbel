@@ -10,62 +10,57 @@
         <p style="color: #374151; font-size: 13px; margin: 0 0 4px 0;">
             {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
         </p>
-        <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; letter-spacing: -0.5px; line-height: 1.2;">
-            Daftar Kelas
-        </h1>
+        <h1 style="font-size: 26px; font-weight: 700; color: #111827; margin: 0;">Daftar Kelas</h1>
         <p style="color: #374151; font-size: 14px; margin: 4px 0 0 0;">Manajemen Data Kelas Bimbel</p>
     </div>
 
-    {{-- SESSION SUCCESS --}}
     @if(session('success'))
         <div style="background: #D1FAE5; color: #065F46; padding: 12px; border-radius: 10px; margin-bottom: 20px;">
             <i class="fas fa-check-circle"></i> {{ session('success') }}
         </div>
     @endif
 
-    {{-- ACTIONS BAR --}}
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px;">
         <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
             <div style="position: relative; width: 300px;">
                 <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
                 <input type="text" id="searchInput" placeholder="Cari Nama Kelas atau Jenjang..." 
-                       style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px; color: #374151;">
+                       style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; outline: none; background: white; font-size: 14px;">
             </div>
         </div>
         
-        <button onclick="bukaModalCreate()" style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: 0.3s; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
+        <button onclick="bukaModalCreate()" style="background-color: #4D0B87; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; box-shadow: 0 4px 6px rgba(77,11,135,0.2);">
             <i class="fas fa-plus"></i> Tambah
         </button>
     </div>
 
-    {{-- TABEL --}}
     <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #F3F4F6;">
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
                 <thead>
                     <tr style="background: #F3E8FF; color: #111827;">
-                        <th style="padding: 15px; font-weight: 700; text-align: center; width: 50px;">No</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Nama Kelas</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Jenjang</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Jumlah Murid</th>
-                        <th style="padding: 15px; font-weight: 700; text-align: center;">Aksi</th>
+                        <th style="padding: 15px; text-align: center; width: 50px;">No</th>
+                        <th style="padding: 15px; text-align: center;">Nama Kelas</th>
+                        <th style="padding: 15px; text-align: center;">Jenjang</th>
+                        <th style="padding: 15px; text-align: center;">Jumlah Murid</th>
+                        <th style="padding: 15px; text-align: center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody" style="color: #374151;">
                     @forelse($kelas as $index => $item)
-                    <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                    <tr style="border-bottom: 1px solid #F3F4F6;">
                         <td style="padding: 15px; text-align: center;">{{ $kelas->firstItem() + $index }}</td>
                         <td style="padding: 15px; text-align: center;">{{ $item->nama_kelas }}</td>
                         <td style="padding: 15px; text-align: center;">{{ $item->jenjang }}</td>
                         <td style="padding: 15px; text-align: center;">{{ $item->jumlah_murid ?? 0 }}</td>
                         <td style="padding: 15px; text-align: center;">
                             <div style="display: flex; gap: 8px; justify-content: center;">
-                                <button onclick="bukaModalEdit({{ $item->id_kelas }})" 
-                                   style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; white-space: nowrap;">
+                                <button onclick="bukaModalEdit('{{ hash_id($item->id_kelas) }}')" 
+                                   style="background: #5EB37E; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 12px;">
                                     <i class="far fa-edit"></i> Edit
                                 </button>
-                                <button type="button" onclick="bukaModalHapus('{{ $item->id_kelas }}', '{{ $item->nama_kelas }}')" 
-                                        style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; white-space: nowrap;">
+                                <button type="button" onclick="bukaModalHapus('{{ hash_id($item->id_kelas) }}', '{{ $item->nama_kelas }}')" 
+                                        style="background: #E35D5D; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 12px;">
                                     <i class="fas fa-trash"></i> Hapus
                                 </button>
                             </div>
@@ -84,17 +79,15 @@
         </div>
     </div>
     
-    {{-- PAGINATION --}}
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px;">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <select id="pageSelect" style="padding: 8px 12px; border-radius: 10px; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; background: white; outline: none; cursor: pointer;">
                 <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 baris</option>
                 <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 baris</option>
                 <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 baris</option>
             </select>
             <span style="color: #374151; font-size: 13px;">Menampilkan {{ $kelas->total() ?? 0 }} data</span>
         </div>
-
         <div style="display: flex; gap: 5px;">
             @if ($kelas->onFirstPage())
                 <button disabled style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F3F4F6; color: #9CA3AF; cursor: not-allowed;"><i class="fas fa-angle-double-left"></i></button>
@@ -107,7 +100,7 @@
             @php $start = max(1, $kelas->currentPage() - 2); $end = min($kelas->lastPage(), $kelas->currentPage() + 2); @endphp
             @for ($i = $start; $i <= $end; $i++)
                 @if ($i == $kelas->currentPage())
-                    <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600; cursor: pointer;">{{ $i }}</button>
+                    <button style="width: 35px; height: 35px; border-radius: 8px; background: #4D0B87; color: white; border: none; font-weight: 600;">{{ $i }}</button>
                 @else
                     <a href="{{ $kelas->url($i) }}&per_page={{ request('per_page', 10) }}" style="width: 35px; height: 35px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #374151; display: flex; align-items: center; justify-content: center; text-decoration: none;">{{ $i }}</a>
                 @endif
@@ -155,8 +148,8 @@
             });
     }
 
-    function bukaModalEdit(id) {
-        fetch("{{ route($role . '.master-data.kelas.edit', '') }}/" + id)
+    function bukaModalEdit(hashId) {
+        fetch("{{ route($role . '.master-data.kelas.edit', '') }}/" + hashId)
             .then(r => r.text())
             .then(html => {
                 document.getElementById('modalContent').innerHTML = html;
@@ -170,8 +163,6 @@
         document.getElementById('modalContent').innerHTML = '';
     }
 
-    // ⛔ TIDAK BISA TUTUP DENGAN KLIK DI LUAR
-
     function pasangEventHandler() {
         const mc = document.getElementById('modalContent');
         if (!mc) return;
@@ -181,7 +172,7 @@
         const btnSimpan = mc.querySelector('#btnSimpan');
         const btnUpdate = mc.querySelector('#btnUpdate');
         const modalBatal = mc.querySelector('#modalBatal');
-        const modalPindahHalaman = mc.querySelector('#modalPindahHalaman');
+        const modalPindah = mc.querySelector('#modalPindahHalaman');
         const modalSukses = mc.querySelector('#modalSukses');
         const btnTidakBatal = mc.querySelector('#btnTidakBatal');
         const btnYaKeluar = mc.querySelector('#btnYaKeluar');
@@ -192,14 +183,12 @@
         const alertErrorText = mc.querySelector('#alertErrorText');
         const pesanSukses = mc.querySelector('#pesanSukses');
         
-        let formChanged = false;
-        let formSubmitted = false;
+        let formChanged = false, formSubmitted = false;
         
         if (form) {
-            const inputs = form.querySelectorAll('input:not([readonly]), select, textarea');
-            inputs.forEach(function(input) {
-                input.addEventListener('input', function() { if (!formSubmitted) formChanged = true; });
-                input.addEventListener('change', function() { if (!formSubmitted) formChanged = true; });
+            form.querySelectorAll('input:not([readonly]), select, textarea').forEach(el => {
+                el.addEventListener('input', () => { if (!formSubmitted) formChanged = true; });
+                el.addEventListener('change', () => { if (!formSubmitted) formChanged = true; });
             });
         }
         
@@ -207,7 +196,7 @@
             btnKeluar.addEventListener('click', function(e) {
                 e.preventDefault();
                 if (formChanged && !formSubmitted) {
-                    if (modalPindahHalaman) modalPindahHalaman.style.display = 'flex';
+                    if (modalPindah) modalPindah.style.display = 'flex';
                 } else {
                     if (modalBatal) modalBatal.style.display = 'flex';
                 }
@@ -216,26 +205,24 @@
         
         if (btnTidakBatal) btnTidakBatal.addEventListener('click', () => { if (modalBatal) modalBatal.style.display = 'none'; });
         if (btnYaKeluar) btnYaKeluar.addEventListener('click', () => { formChanged = false; if (modalBatal) modalBatal.style.display = 'none'; tutupModalForm(); });
-        if (modalBatal) modalBatal.addEventListener('click', function(e) { if (e.target === modalBatal) modalBatal.style.display = 'none'; });
-        
-        if (btnTidakPindah) btnTidakPindah.addEventListener('click', () => { if (modalPindahHalaman) modalPindahHalaman.style.display = 'none'; });
-        if (btnYaPindah) btnYaPindah.addEventListener('click', () => { formChanged = false; if (modalPindahHalaman) modalPindahHalaman.style.display = 'none'; tutupModalForm(); });
-        if (modalPindahHalaman) modalPindahHalaman.addEventListener('click', function(e) { if (e.target === modalPindahHalaman) modalPindahHalaman.style.display = 'none'; });
-        
+        if (modalBatal) modalBatal.addEventListener('click', e => { if (e.target === modalBatal) modalBatal.style.display = 'none'; });
+        if (btnTidakPindah) btnTidakPindah.addEventListener('click', () => { if (modalPindah) modalPindah.style.display = 'none'; });
+        if (btnYaPindah) btnYaPindah.addEventListener('click', () => { formChanged = false; if (modalPindah) modalPindah.style.display = 'none'; tutupModalForm(); });
+        if (modalPindah) modalPindah.addEventListener('click', e => { if (e.target === modalPindah) modalPindah.style.display = 'none'; });
         if (btnOkSukses) btnOkSukses.addEventListener('click', () => { if (modalSukses) modalSukses.style.display = 'none'; tutupModalForm(); window.location.reload(); });
-        if (modalSukses) modalSukses.addEventListener('click', function(e) { if (e.target === modalSukses) { modalSukses.style.display = 'none'; tutupModalForm(); window.location.reload(); } });
+        if (modalSukses) modalSukses.addEventListener('click', e => { if (e.target === modalSukses) { modalSukses.style.display = 'none'; tutupModalForm(); window.location.reload(); } });
         
         if (form) {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                const formData = new FormData(form);
-                const submitBtn = btnSimpan || btnUpdate;
-                const originalText = submitBtn ? submitBtn.innerHTML : 'Simpan';
-                if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...'; }
+                const fd = new FormData(form);
+                const btn = btnSimpan || btnUpdate;
+                const orig = btn ? btn.innerHTML : 'Simpan';
+                if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...'; }
                 
                 fetch(form.action, {
                     method: 'POST',
-                    body: formData,
+                    body: fd,
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
@@ -245,25 +232,23 @@
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
-                        formChanged = false;
-                        formSubmitted = true;
+                        formChanged = false; formSubmitted = true;
                         if (pesanSukses) pesanSukses.textContent = data.message || 'Data berhasil disimpan.';
                         if (modalSukses) modalSukses.style.display = 'flex';
                     } else {
-                        let errorMsg = data.message || 'Gagal menyimpan data';
-                        if (data.errors) { errorMsg = ''; for (let field in data.errors) { errorMsg += data.errors[field].join('\n') + '\n'; } }
-                        if (alertError && alertErrorText) { alertErrorText.textContent = errorMsg; alertError.style.display = 'flex'; setTimeout(() => { alertError.style.display = 'none'; }, 5000); }
-                        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalText; }
+                        let msg = data.message || 'Gagal';
+                        if (data.errors) { msg = ''; for (let f in data.errors) msg += data.errors[f].join('\n') + '\n'; }
+                        if (alertError && alertErrorText) { alertErrorText.textContent = msg; alertError.style.display = 'flex'; setTimeout(() => alertError.style.display = 'none', 5000); }
+                        if (btn) { btn.disabled = false; btn.innerHTML = orig; }
                     }
                 })
                 .catch(err => {
-                    if (alertError && alertErrorText) { alertErrorText.textContent = 'Terjadi kesalahan: ' + err.message; alertError.style.display = 'flex'; setTimeout(() => { alertError.style.display = 'none'; }, 5000); }
-                    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = originalText; }
+                    if (alertError && alertErrorText) { alertErrorText.textContent = 'Error: ' + err.message; alertError.style.display = 'flex'; setTimeout(() => alertError.style.display = 'none', 5000); }
+                    if (btn) { btn.disabled = false; btn.innerHTML = orig; }
                 });
             });
         }
 
-        // ========== AUTO-DETECT JENJANG ==========
         const namaKelasInput = mc.querySelector('#nama_kelas');
         const jenjangSelect = mc.querySelector('#jenjang');
         
@@ -271,17 +256,11 @@
             namaKelasInput.addEventListener('input', function() {
                 var nama = this.value.trim();
                 var match = nama.match(/^(\d+)/);
-                
                 if (match) {
                     var angka = parseInt(match[1]);
-                    
-                    if (angka >= 1 && angka <= 6) {
-                        jenjangSelect.value = 'SD';
-                    } else if (angka >= 7 && angka <= 9) {
-                        jenjangSelect.value = 'SMP';
-                    } else if (angka >= 10 && angka <= 12) {
-                        jenjangSelect.value = 'SMA';
-                    }
+                    if (angka >= 1 && angka <= 6) { jenjangSelect.value = 'SD'; }
+                    else if (angka >= 7 && angka <= 9) { jenjangSelect.value = 'SMP'; }
+                    else if (angka >= 10 && angka <= 12) { jenjangSelect.value = 'SMA'; }
                 }
             });
         }
@@ -290,13 +269,12 @@
     document.getElementById('searchInput').addEventListener('keyup', function() {
         let val = this.value.toLowerCase();
         document.querySelectorAll('#tableBody tr').forEach(row => {
-            let text = row.innerText.toLowerCase();
-            row.style.display = text.includes(val) ? '' : 'none';
+            row.style.display = row.innerText.toLowerCase().includes(val) ? '' : 'none';
         });
     });
 
-    function bukaModalHapus(id, nama) {
-        document.getElementById('formHapus').action = "{{ route($role . '.master-data.kelas.destroy', '') }}/" + id;
+    function bukaModalHapus(hashId, nama) {
+        document.getElementById('formHapus').action = "{{ route($role . '.master-data.kelas.destroy', '') }}/" + hashId;
         document.getElementById('pesanHapus').innerHTML = `Apakah Anda <strong>benar-benar yakin</strong> ingin menghapus kelas <strong>${nama}</strong>?<br><br><small style="color:#EF4444;">⚠️ <strong>PERINGATAN:</strong> Data akan dihapus <strong>secara permanen</strong> dari database. Semua data murid yang terdaftar di kelas ini akan <strong>kehilangan data kelas</strong> dan tidak dapat dikembalikan.</small>`;
         document.getElementById('modalHapus').style.display = 'flex';
     }
@@ -305,21 +283,11 @@
         document.getElementById('modalHapus').style.display = 'none';
     }
 
-    // ⛔ TIDAK BISA TUTUP MODAL HAPUS DENGAN KLIK DI LUAR
-
     document.getElementById('pageSelect').addEventListener('change', function() {
         let url = new URL(window.location.href);
         url.searchParams.set('per_page', this.value);
         url.searchParams.delete('page');
         window.location.href = url.toString();
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const perPage = urlParams.get('per_page');
-        if (perPage && document.getElementById('pageSelect')) {
-            document.getElementById('pageSelect').value = perPage;
-        }
     });
 </script>
 @endsection

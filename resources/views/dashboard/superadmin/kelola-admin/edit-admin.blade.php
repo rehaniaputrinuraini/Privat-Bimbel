@@ -10,7 +10,7 @@
         <span id="alertErrorText"></span>
     </div>
 
-    <form id="mainForm" action="{{ route('superadmin.kelola-admin.update', $admin->id_user) }}" method="POST">
+    <form id="mainForm" action="{{ route('superadmin.kelola-admin.update', $hashId) }}" method="POST">
         @csrf
         @method('PUT')
         <input type="hidden" name="_method" value="PUT">
@@ -109,3 +109,113 @@
         <button type="button" id="btnOkSukses" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: #10B981; color: white; font-weight: 600; font-size: 13px; cursor: pointer;">OK</button>
     </div>
 </div>
+
+<script>
+    // Variabel hashId harus dikirim dari controller
+    var hashId = '{{ $hashId }}';
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.getElementById('mainForm');
+        var btnKeluar = document.getElementById('btnKeluar');
+        var btnUpdate = document.getElementById('btnUpdate');
+        var modalBatal = document.getElementById('modalBatal');
+        var modalPindahHalaman = document.getElementById('modalPindahHalaman');
+        var modalSukses = document.getElementById('modalSukses');
+        var alertError = document.getElementById('alertError');
+        var alertErrorText = document.getElementById('alertErrorText');
+        var pesanSukses = document.getElementById('pesanSukses');
+        var formChanged = false;
+
+        if (form) {
+            form.querySelectorAll('input:not([readonly]), select, textarea').forEach(function(el) {
+                el.addEventListener('input', function() { formChanged = true; });
+                el.addEventListener('change', function() { formChanged = true; });
+            });
+        }
+
+        function tampilkanError(pesan) {
+            alertErrorText.textContent = pesan;
+            alertError.style.display = 'flex';
+            setTimeout(function() { alertError.style.display = 'none'; }, 5000);
+        }
+
+        if (btnKeluar) {
+            btnKeluar.addEventListener('click', function() {
+                if (formChanged) {
+                    if (modalPindahHalaman) modalPindahHalaman.style.display = 'flex';
+                } else {
+                    if (modalBatal) modalBatal.style.display = 'flex';
+                }
+            });
+        }
+
+        // Event listener untuk modal batal
+        var btnTidakBatal = document.getElementById('btnTidakBatal');
+        var btnYaKeluar = document.getElementById('btnYaKeluar');
+        var btnTidakPindah = document.getElementById('btnTidakPindah');
+        var btnYaPindah = document.getElementById('btnYaPindah');
+        var btnOkSukses = document.getElementById('btnOkSukses');
+
+        if (btnTidakBatal) btnTidakBatal.addEventListener('click', function() { if (modalBatal) modalBatal.style.display = 'none'; });
+        if (btnYaKeluar) btnYaKeluar.addEventListener('click', function() { 
+            if (modalBatal) modalBatal.style.display = 'none'; 
+            if (window.parent && window.parent.tutupModalForm) window.parent.tutupModalForm();
+        });
+        if (btnTidakPindah) btnTidakPindah.addEventListener('click', function() { if (modalPindahHalaman) modalPindahHalaman.style.display = 'none'; });
+        if (btnYaPindah) btnYaPindah.addEventListener('click', function() { 
+            if (modalPindahHalaman) modalPindahHalaman.style.display = 'none'; 
+            if (window.parent && window.parent.tutupModalForm) window.parent.tutupModalForm();
+        });
+        if (btnOkSukses) btnOkSukses.addEventListener('click', function() { 
+            if (modalSukses) modalSukses.style.display = 'none'; 
+            setTimeout(function() {
+                if (window.parent && window.parent.tutupModalForm) window.parent.tutupModalForm();
+                window.parent.location.reload();
+            }, 300);
+        });
+
+        // Klik di luar modal
+        if (modalBatal) modalBatal.addEventListener('click', function(e) { if (e.target === modalBatal) modalBatal.style.display = 'none'; });
+        if (modalPindahHalaman) modalPindahHalaman.addEventListener('click', function(e) { if (e.target === modalPindahHalaman) modalPindahHalaman.style.display = 'none'; });
+        if (modalSukses) modalSukses.addEventListener('click', function(e) { if (e.target === modalSukses) modalSukses.style.display = 'none'; });
+
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var formData = new FormData(form);
+                if (btnUpdate) { btnUpdate.disabled = true; btnUpdate.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...'; }
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(function(response) { return response.json().then(function(data) { return { status: response.status, data: data }; }); })
+                .then(function(result) {
+                    if (result.data.success) {
+                        if (pesanSukses) pesanSukses.textContent = result.data.message || 'Data admin berhasil diupdate.';
+                        if (modalSukses) modalSukses.style.display = 'flex';
+                    } else {
+                        var err = result.data.message || 'Gagal menyimpan data';
+                        if (result.data.errors) {
+                            err = '';
+                            for (var f in result.data.errors) {
+                                err += result.data.errors[f].join('\n') + '\n';
+                            }
+                        }
+                        tampilkanError(err);
+                        if (btnUpdate) { btnUpdate.disabled = false; btnUpdate.innerHTML = 'Update'; }
+                    }
+                })
+                .catch(function(err) {
+                    tampilkanError('Terjadi kesalahan: ' + err.message);
+                    if (btnUpdate) { btnUpdate.disabled = false; btnUpdate.innerHTML = 'Update'; }
+                });
+            });
+        }
+    });
+</script>

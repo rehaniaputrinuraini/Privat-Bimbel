@@ -118,10 +118,15 @@ class KelolaTentorController extends Controller
         }
     }
     
-    public function edit($id)
+    public function edit($hashId)
     {
         if (auth()->user()->peran != 'superadmin') {
             abort(403, 'Unauthorized action.');
+        }
+        
+        $id = unhash_id($hashId);
+        if (!$id) {
+            abort(404, 'Data tidak ditemukan');
         }
         
         $tentor = Pegawai::with('user')->where('jenis_pegawai', 'tentor')->findOrFail($id);
@@ -131,10 +136,15 @@ class KelolaTentorController extends Controller
         ]);
     }
     
-    public function update(Request $request, $id)
+    public function update(Request $request, $hashId)
     {
         if (auth()->user()->peran != 'superadmin') {
             abort(403, 'Unauthorized action.');
+        }
+        
+        $id = unhash_id($hashId);
+        if (!$id) {
+            return response()->json(['success' => false, 'message' => 'Data tidak valid'], 404);
         }
         
         $tentor = Pegawai::with('user')->where('jenis_pegawai', 'tentor')->findOrFail($id);
@@ -190,10 +200,15 @@ class KelolaTentorController extends Controller
         }
     }
     
-    public function updatePassword(Request $request, $id)
+    public function updatePassword(Request $request, $hashId)
     {
         if (auth()->user()->peran != 'superadmin') {
             abort(403, 'Unauthorized action.');
+        }
+        
+        $id = unhash_id($hashId);
+        if (!$id) {
+            return response()->json(['success' => false, 'message' => 'Data tidak valid'], 404);
         }
         
         $request->validate([
@@ -212,10 +227,15 @@ class KelolaTentorController extends Controller
         }
     }
     
-    public function toggleStatus($id)
+    public function toggleStatus($hashId)
     {
         if (auth()->user()->peran != 'superadmin') {
             abort(403, 'Unauthorized action.');
+        }
+        
+        $id = unhash_id($hashId);
+        if (!$id) {
+            return redirect()->back()->with('error', 'Data tidak valid');
         }
         
         try {
@@ -235,10 +255,15 @@ class KelolaTentorController extends Controller
         }
     }
     
-    public function destroy($id)
+    public function destroy($hashId)
     {
         if (auth()->user()->peran != 'superadmin') {
             abort(403, 'Unauthorized action.');
+        }
+        
+        $id = unhash_id($hashId);
+        if (!$id) {
+            return redirect()->back()->with('error', 'Data tidak valid');
         }
         
         DB::beginTransaction();
@@ -263,12 +288,14 @@ class KelolaTentorController extends Controller
         }
     }
 
-    // =============================================
-    // GET DETAIL GAJI TENTOR (UNTUK COLLAPSIBLE ROW)
-    // =============================================
-    public function getDetailGaji($id)
+    public function getDetailGaji($hashId)
     {
         try {
+            $id = unhash_id($hashId);
+            if (!$id) {
+                return response()->json(['success' => false, 'message' => 'Data tidak valid'], 404);
+            }
+            
             $tentor = Pegawai::where('jenis_pegawai', 'tentor')->findOrFail($id);
             
             return response()->json([

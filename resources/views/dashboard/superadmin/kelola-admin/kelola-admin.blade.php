@@ -58,6 +58,9 @@
             </thead>
             <tbody id="tableBody" style="color: #374151;">
                 @forelse($admin as $index => $item)
+                @php
+                    $hashId = hash_id($item->id_user);
+                @endphp
                 <tr style="border-bottom: 1px solid #F3F4F6; transition: 0.2s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                     <td style="padding: 15px; text-align: center;">{{ $admin->firstItem() + $index }}</td>
                     <td style="padding: 15px;">AD{{ str_pad($item->id_user, 4, '0', STR_PAD_LEFT) }}</td>
@@ -82,19 +85,19 @@
                     </td>
                     <td style="padding: 15px; white-space: nowrap;">
                     <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: nowrap;">
-                        <button onclick="bukaModalEdit({{ $item->id_user }})" 
+                        <button onclick="bukaModalEdit('{{ $hashId }}')" 
                         style="background: #5EB37E; color: white; padding: 5px 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 10px; white-space: nowrap;">
                             <i class="far fa-edit"></i> Edit
                         </button>
-                        <button onclick="bukaModalPassword({{ $item->id_user }}, '{{ $item->pegawai->nama_lengkap ?? $item->username }}')" 
+                        <button onclick="bukaModalPassword('{{ $hashId }}', '{{ $item->pegawai->nama_lengkap ?? $item->username }}')" 
                         style="background: #F59E0B; color: white; padding: 5px 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 10px; white-space: nowrap;">
                             <i class="fas fa-key"></i> Password
                         </button>
-                        <button type="button" onclick="bukaModalHapus('{{ $item->id_user }}', '{{ $item->pegawai->nama_lengkap ?? $item->username }}')" 
+                        <button type="button" onclick="bukaModalHapus('{{ $hashId }}', '{{ $item->pegawai->nama_lengkap ?? $item->username }}')" 
                                 style="background: #E35D5D; color: white; padding: 5px 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 10px; white-space: nowrap;">
                             <i class="fas fa-trash"></i> Hapus
                         </button>
-                        <button type="button" onclick="bukaModalToggle('{{ $item->id_user }}', '{{ $item->pegawai->nama_lengkap ?? $item->username }}', '{{ $item->status }}')" 
+                        <button type="button" onclick="bukaModalToggle('{{ $hashId }}', '{{ $item->pegawai->nama_lengkap ?? $item->username }}', '{{ $item->status }}')" 
                                 style="background: {{ $item->status == 1 ? '#EF4444' : '#10B981' }}; color: white; padding: 5px 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 10px; white-space: nowrap;">
                             <i class="fas {{ $item->status == 1 ? 'fa-ban' : 'fa-check' }}"></i> {{ $item->status == 1 ? 'Nonaktifkan' : 'Aktifkan' }}
                         </button>
@@ -202,8 +205,8 @@
     }
 
     // ========== BUKA MODAL EDIT ==========
-    function bukaModalEdit(id) {
-        fetch("{{ route('superadmin.kelola-admin.edit', '') }}/" + id)
+    function bukaModalEdit(hashId) {
+        fetch("{{ route('superadmin.kelola-admin.edit', '') }}/" + hashId)
             .then(r => r.text())
             .then(html => {
                 document.getElementById('modalContent').innerHTML = html;
@@ -217,8 +220,6 @@
         document.getElementById('modalForm').style.display = 'none';
         document.getElementById('modalContent').innerHTML = '';
     }
-
-    // ⛔ TIDAK BISA TUTUP DENGAN KLIK DI LUAR - DIHAPUS
 
     // ========== PASANG EVENT HANDLER ==========
     function pasangEventHandler() {
@@ -313,7 +314,7 @@
     }
 
     // ========== MODAL UBAH PASSWORD ==========
-function bukaModalPassword(id, nama) {
+function bukaModalPassword(hashId, nama) {
     const html = `
     <div style="padding:20px;font-family:'Poppins',sans-serif;background:#FFF;border-radius:16px">
         <div style="margin-bottom:20px;padding-bottom:14px;border-bottom:1.5px solid #F3F4F6">
@@ -427,7 +428,7 @@ function bukaModalPassword(id, nama) {
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
 
-            fetch("{{ route('superadmin.kelola-admin.updatePassword', '') }}/" + id, {
+            fetch("{{ route('superadmin.kelola-admin.updatePassword', '') }}/" + hashId, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -460,8 +461,8 @@ function bukaModalPassword(id, nama) {
 }
 
     // ========== MODAL TOGGLE STATUS ==========
-    function bukaModalToggle(id, nama, status) {
-        document.getElementById('formToggle').action = "{{ route('superadmin.kelola-admin.toggleStatus', ':id') }}".replace(':id', id);
+    function bukaModalToggle(hashId, nama, status) {
+        document.getElementById('formToggle').action = "{{ route('superadmin.kelola-admin.toggleStatus', '') }}/" + hashId;
         
         if (status == 1) {
             document.getElementById('toggleIcon').innerHTML = '<i class="fas fa-ban" style="color:#EF4444;"></i>';
@@ -501,8 +502,8 @@ function bukaModalPassword(id, nama) {
     });
 
     // ========== MODAL HAPUS ==========
-    function bukaModalHapus(id, nama) {
-        document.getElementById('formHapus').action = "{{ route('superadmin.kelola-admin.destroy', ':id') }}".replace(':id', id);
+    function bukaModalHapus(hashId, nama) {
+        document.getElementById('formHapus').action = "{{ route('superadmin.kelola-admin.destroy', '') }}/" + hashId;
         document.getElementById('pesanHapus').innerHTML = `Apakah Anda <strong>benar-benar yakin</strong> ingin menghapus data admin <strong>${nama}</strong>?<br><br><small style="color:#EF4444;">⚠️ <strong>PERINGATAN:</strong> Data akan dihapus <strong>secara permanen</strong> dari database. Semua data yang berhubungan dengan admin ini juga akan <strong>tidak dapat dikembalikan</strong>.</small>`;
         document.getElementById('modalHapus').style.display = 'flex';
     }

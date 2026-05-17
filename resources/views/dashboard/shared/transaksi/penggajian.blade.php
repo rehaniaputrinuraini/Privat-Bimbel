@@ -66,19 +66,23 @@
                     <td style="padding: 15px;">{{ $item->nama }}</td>
                     <td style="padding: 15px;">{{ $item->mapel }}</td>
                     <td style="padding: 15px; text-align: center;">{{ $item->grade }}</td>
+                    
                     <td style="padding: 15px; text-align: center;">
-                        {{ $item->jumlah_sesi }} Sesi ({{ $item->hari_hadir }} Hari)
-                        <br><small style="color:#9CA3AF;">{{ $item->daftar_tanggal }}</small>
+                        {{ $item->jumlah_sesi }} Sesi ({{ $item->hari_unik }} Hari)
                     </td>
+                    
                     <td style="padding: 15px; text-align: right; font-weight: 600; color: #4D0B87;">Rp {{ number_format($item->total_honor, 0, ',', '.') }}</td>
+                    
                     <td style="padding: 15px; text-align: right;">
                         Rp {{ number_format($item->uang_makan, 0, ',', '.') }}
-                        <br><small style="color:#9CA3AF;">(Rp {{ number_format($item->uang_makan_per_hari, 0, ',', '.') }} × {{ $item->hari_hadir }} hari)</small>
+                        <br><small style="color:#9CA3AF;">(Rp {{ number_format($item->uang_makan_per_hari, 0, ',', '.') }} × {{ $item->hari_unik }} hari)</small>
                     </td>
+                    
                     <td style="padding: 15px; text-align: right;">
                         Rp {{ number_format($item->uang_transport, 0, ',', '.') }}
-                        <br><small style="color:#9CA3AF;">(Rp {{ number_format($item->uang_transport_per_hari, 0, ',', '.') }} × {{ $item->hari_hadir }} hari)</small>
+                        <br><small style="color:#9CA3AF;">(Rp {{ number_format($item->uang_transport_per_hari, 0, ',', '.') }} × {{ $item->hari_unik }} hari)</small>
                     </td>
+                    
                     <td style="padding: 15px; text-align: right; font-weight: 700; color: #4D0B87;">Rp {{ number_format($item->total_gaji, 0, ',', '.') }}</td>
                     <td style="padding: 15px; text-align: center;">
                         @if($item->sudah_dibayar)
@@ -89,14 +93,12 @@
                     </td>
                     <td style="padding: 15px; text-align: center;">
                         <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
-                            {{-- Tombol Detail --}}
-                            <button onclick="bukaDetailPenggajian({{ $item->id_pegawai }})"
+                            <button onclick="bukaDetailPenggajian('{{ hash_id($item->id_pegawai) }}')"
                                     style="background: #4D0B87; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; font-family: 'Poppins', sans-serif; white-space: nowrap;">
                                 <i class="fas fa-eye"></i> Detail
                             </button>
-                            {{-- Tombol Bayar --}}
                             @if(!$item->sudah_dibayar)
-                                <button type="button" onclick="klikBayar('{{ $item->id_pegawai }}', '{{ $item->nama }}', {{ $item->total_gaji }}, {{ $item->jumlah_sesi }})" 
+                                <button type="button" onclick="klikBayar('{{ hash_id($item->id_pegawai) }}', '{{ $item->nama }}', {{ $item->total_gaji }}, {{ $item->jumlah_sesi }})" 
                                         style="background: #10B981; color: white; padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; font-size: 11px; font-weight: 600; white-space: nowrap; font-family: 'Poppins', sans-serif;">
                                     <i class="fas fa-money-bill-wave"></i> Bayar
                                 </button>
@@ -195,10 +197,10 @@
     /* ================================================================
        BUKA MODAL DETAIL PENGGAJIAN
     ================================================================ */
-    function bukaDetailPenggajian(idPegawai) {
+    function bukaDetailPenggajian(hashId) {
         const bulan = document.getElementById('filterBulan').value;
         const tahun = document.getElementById('filterTahun').value;
-        const url = "{{ url($role . '/penggajian/detail') }}/" + idPegawai + "?bulan=" + bulan + "&tahun=" + tahun;
+        const url = "{{ url($role . '/penggajian/detail') }}/" + hashId + "?bulan=" + bulan + "&tahun=" + tahun;
         
         fetch(url)
             .then(r => r.text())
@@ -224,7 +226,7 @@
     /* ================================================================
        BAYAR GAJI
     ================================================================ */
-    function klikBayar(id, nama, total, sesi) {
+    function klikBayar(hashId, nama, total, sesi) {
         const today = new Date();
         const currentMonth = today.getMonth() + 1;
         const currentYear = today.getFullYear();
@@ -244,7 +246,7 @@
             return;
         }
 
-        bayarData = { id, nama, total, sesi };
+        bayarData = { id: hashId, nama, total, sesi };
         document.getElementById('pesanBayar').innerHTML = 
             `Apakah Anda <strong>benar-benar yakin</strong> ingin membayar gaji <strong>${nama}</strong> sebesar <strong>Rp ${new Intl.NumberFormat('id-ID').format(total)}</strong> untuk <strong>${sesi} sesi</strong>?<br><br><small style="color:#EF4444;">⚠️ <strong>PERINGATAN:</strong> Pembayaran tidak dapat dibatalkan setelah dikonfirmasi.</small>`;
         document.getElementById('modalBayar').style.display = 'flex';

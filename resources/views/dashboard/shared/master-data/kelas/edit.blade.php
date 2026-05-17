@@ -10,7 +10,7 @@
         <span id="alertErrorText"></span>
     </div>
 
-    <form id="mainForm" action="{{ route($role . '.master-data.kelas.update', $kelas->id_kelas) }}" method="POST">
+    <form id="mainForm" action="{{ route($role . '.master-data.kelas.update', ['hashId' => hash_id($kelas->id_kelas)]) }}" method="POST">
         @csrf
         @method('PUT')
         <input type="hidden" name="id_periode" value="{{ $periodeAktif->id_periode ?? $kelas->id_periode ?? '' }}">
@@ -18,18 +18,18 @@
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">ID Kelas</label>
             <input type="text" value="KLS{{ str_pad($kelas->id_kelas, 4, '0', STR_PAD_LEFT) }}" readonly 
-                   style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px; font-family: 'Poppins', sans-serif;">
+                   style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px;">
         </div>
 
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Nama Kelas <span style="color: #EF4444;">*</span></label>
             <input type="text" name="nama_kelas" id="nama_kelas" value="{{ old('nama_kelas', $kelas->nama_kelas) }}" required
-                   style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif;">
+                   style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px;">
         </div>
 
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Jenjang <span style="color: #EF4444;">*</span></label>
-            <select name="jenjang" id="jenjang" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif; cursor: pointer;">
+            <select name="jenjang" id="jenjang" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; cursor: pointer;">
                 <option value="SD" {{ old('jenjang', $kelas->jenjang) == 'SD' ? 'selected' : '' }}>SD</option>
                 <option value="SMP" {{ old('jenjang', $kelas->jenjang) == 'SMP' ? 'selected' : '' }}>SMP</option>
                 <option value="SMA" {{ old('jenjang', $kelas->jenjang) == 'SMA' ? 'selected' : '' }}>SMA</option>
@@ -39,7 +39,7 @@
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Jumlah Murid</label>
             <input type="text" value="{{ $kelas->jumlah_murid ?? 0 }}" readonly 
-                   style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px; font-family: 'Poppins', sans-serif;">
+                   style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px;">
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px; padding-top: 16px; border-top: 1.5px solid #F3F4F6;">
@@ -48,14 +48,14 @@
                 Keluar
             </button>
             <button type="submit" id="btnUpdate"
-                    style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(77, 11, 135, 0.2);">
+                    style="padding: 10px 45px; border: none; background: #4D0B87; color: white; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(77,11,135,0.2);">
                 Simpan
             </button>
         </div>
     </form>
 </div>
 
-{{-- MODALS --}}
+{{-- MODALS (sama seperti sebelumnya, disalin) --}}
 <div id="modalBatal" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>

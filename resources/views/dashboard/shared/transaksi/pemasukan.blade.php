@@ -64,8 +64,8 @@
             <select id="filterTagihan"
                     style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
                 <option value="">Semua Tagihan</option>
-                <option value="Tidak Ada">Tidak Ada Tagihan</option>
-                <option value="Ada">Ada Tagihan</option>
+                <option value="Tidak Ada">Tidak Ada</option>
+                <option value="Ada">Ada</option>
             </select>
             <select id="filterPeriode"
                     style="flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
@@ -106,14 +106,14 @@
                         @endif
                     </td>
                     <td style="padding: 15px; text-align: center;">
-                        @if($t->status_tagihan == 'Lunas' || $t->status_tagihan == 'Uang Muka')
+                        @if($t->status_tagihan == 'Tidak Ada')
                             <span style="padding:5px 12px;border-radius:20px;background:#D1FAE5;color:#065F46;font-size:12px;font-weight:600;">Tidak Ada</span>
                         @else
                             <span style="padding:5px 12px;border-radius:20px;background:#FEE2E2;color:#EF4444;font-size:12px;font-weight:600;">Ada</span>
                         @endif
                     </td>
                     <td style="padding: 15px; text-align: center;">
-                        <button onclick="bukaDetailPembayaran({{ $t->id_murid }})"
+                        <button onclick="bukaDetailPembayaran('{{ hash_id($t->id_murid) }}')"
                                 style="background: #4D0B87; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; font-family: 'Poppins', sans-serif;">
                             <i class="fas fa-eye"></i> Detail
                         </button>
@@ -223,8 +223,8 @@
     /* ================================================================
     BUKA MODAL DETAIL PEMBAYARAN MURID
     =============================================================== */
-    function bukaDetailPembayaran(idMurid) {
-        const baseUrl = "{{ url($role . '/pembayaran/detail') }}/" + idMurid;
+    function bukaDetailPembayaran(hashId) {
+        const baseUrl = "{{ url($role . '/pembayaran/detail') }}/" + hashId;
         
         fetch(baseUrl)
             .then(r => r.text())

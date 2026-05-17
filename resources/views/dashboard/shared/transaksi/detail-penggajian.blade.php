@@ -32,8 +32,8 @@
                 <p style="color: #111827; font-weight: 600; font-size: 15px; margin: 0;">{{ $jumlahSesi ?? $detailPresensi->count() }} Sesi</p>
             </div>
             <div>
-                <p style="color: #6B7280; font-size: 12px; margin: 0 0 2px 0;">Hari Hadir</p>
-                <p style="color: #111827; font-weight: 600; font-size: 15px; margin: 0;">{{ $hariHadir }} Hari</p>
+                <p style="color: #6B7280; font-size: 12px; margin: 0 0 2px 0;">Hari Mengajar</p>
+                <p style="color: #111827; font-weight: 600; font-size: 15px; margin: 0;">{{ $hariUnik ?? 0 }} Hari</p>
             </div>
         </div>
     </div>
@@ -89,14 +89,14 @@
                 <tr style="background: #FAFAFA; font-weight: 600;">
                     <td style="padding: 10px 12px; text-align: left;">
                         Uang Makan
-                        <br><small style="color: #9CA3AF; font-weight: 400;">(Rp {{ number_format($uangMakanPerHari, 0, ',', '.') }} × {{ $hariHadir }} hari)</small>
-                    </td>
+                        <br><small style="color: #9CA3AF; font-weight: 400;">(Rp {{ number_format($uangMakanPerHari, 0, ',', '.') }} × {{ $hariUnik ?? 0 }} hari)</small>
+                     </td>
                     <td style="padding: 10px 12px; text-align: right; color: #F59E0B;">Rp {{ number_format($totalUangMakan, 0, ',', '.') }}</td>
                 </tr>
                 <tr style="background: #FAFAFA; font-weight: 600;">
                     <td style="padding: 10px 12px; text-align: left;">
                         Uang Transport
-                        <br><small style="color: #9CA3AF; font-weight: 400;">(Rp {{ number_format($uangTransportPerHari, 0, ',', '.') }} × {{ $hariHadir }} hari)</small>
+                        <br><small style="color: #9CA3AF; font-weight: 400;">(Rp {{ number_format($uangTransportPerHari, 0, ',', '.') }} × {{ $hariUnik ?? 0 }} hari)</small>
                     </td>
                     <td style="padding: 10px 12px; text-align: right; color: #3B82F6;">Rp {{ number_format($totalUangTransport, 0, ',', '.') }}</td>
                 </tr>
