@@ -19,6 +19,13 @@
     
     <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 20px;">
         <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+            
+            <div style="position: relative; flex: 1; min-width: 250px;">
+                <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9CA3AF;"></i>
+                <input type="text" id="searchTentor" placeholder="Cari Nama Tentor..." 
+                       style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none;">
+            </div>
+
             <select id="filterBulan" onchange="filterGaji()"
                     style="flex: 1; min-width: 130px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
                 <option value="">Semua Bulan</option>
@@ -26,6 +33,7 @@
                     <option value="<?php echo e($i); ?>" <?php echo e(($bulan == $i || (!request('bulan') && date('n') == $i)) ? 'selected' : ''); ?>><?php echo e(Carbon\Carbon::create()->month($i)->translatedFormat('F')); ?></option>
                 <?php endfor; ?>
             </select>
+
             <select id="filterTahun" onchange="filterGaji()"
                     style="flex: 1; min-width: 100px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
                 <option value="">Semua Tahun</option>
@@ -33,6 +41,7 @@
                     <option value="<?php echo e($i); ?>" <?php echo e(($tahun == $i || (!request('tahun') && date('Y') == $i)) ? 'selected' : ''); ?>><?php echo e($i); ?></option>
                 <?php endfor; ?>
             </select>
+
             <select id="filterPeriode" onchange="filterGaji()"
                     style="flex: 1; min-width: 130px; padding: 10px 14px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-size: 13px; font-family: 'Poppins', sans-serif; outline: none; cursor: pointer;">
                 <option value="">Semua Periode</option>
@@ -195,6 +204,40 @@
         if (periode) params.push(`periode=${periode}`);
         window.location.href = params.length ? `?${params.join('&')}` : window.location.pathname;
     }
+
+    // ================================================================
+    // FILTER PENCARIAN NAMA TENTOR (CLIENT-SIDE)
+    // ================================================================
+    document.getElementById('searchTentor')?.addEventListener('keyup', function() {
+        let searchValue = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#tableBody tr');
+        let noData = true;
+        
+        rows.forEach(row => {
+            let namaTentor = row.cells[1]?.innerText.toLowerCase() || '';
+            if (namaTentor.includes(searchValue)) {
+                row.style.display = '';
+                noData = false;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        let existingMsg = document.querySelector('#noDataMessage');
+        if (noData && rows.length > 0) {
+            if (!existingMsg) {
+                let msgRow = document.createElement('tr');
+                msgRow.id = 'noDataMessage';
+                msgRow.innerHTML = `<td colspan="11" style="padding: 40px; text-align: center; color: #9CA3AF;">
+                                        <i class="fas fa-user-slash" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
+                                        Tentor tidak ditemukan
+                                    <\/td>`;
+                document.querySelector('#tableBody').appendChild(msgRow);
+            }
+        } else if (existingMsg) {
+            existingMsg.remove();
+        }
+    });
 
     /* ================================================================
        BUKA MODAL DETAIL PENGGAJIAN

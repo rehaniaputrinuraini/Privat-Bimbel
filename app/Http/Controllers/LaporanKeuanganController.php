@@ -17,7 +17,7 @@ class LaporanKeuanganController extends Controller
         // Tipe laporan: 'bulan' atau 'periode'
         $tipe = $request->tipe ?? 'bulan';
         
-        // Default ke bulan dan tahun saat ini
+        // 🔥 Default ke bulan dan tahun saat ini (tidak perlu dari database)
         $bulan = $request->bulan ?? date('n');
         $tahun = $request->tahun ?? date('Y');
         $periode = $request->periode ?? $this->getPeriodeSekarang();
@@ -135,17 +135,16 @@ class LaporanKeuanganController extends Controller
                 ->sum('kredit');
         }
         
-        // Data untuk dropdown
-        $bulanTersedia = TransaksiUmum::selectRaw('DISTINCT MONTH(tanggal_bayar) as bulan')
-            ->whereNotNull('tanggal_bayar')
-            ->orderBy('bulan')
-            ->pluck('bulan');
+        // 🔥 PERBAIKAN: Data untuk dropdown (selalu tampilkan 1-12 untuk bulan, dan range tahun untuk tahun)
+        $currentYear = date('Y');
         
-        $tahunTersedia = TransaksiUmum::selectRaw('DISTINCT YEAR(tanggal_bayar) as tahun')
-            ->whereNotNull('tanggal_bayar')
-            ->orderBy('tahun', 'desc')
-            ->pluck('tahun');
+        // Bulan: selalu 1-12 (bukan dari database)
+        $bulanTersedia = range(1, 12);
         
+        // Tahun: range 5 tahun kebelakang hingga 1 tahun ke depan
+        $tahunTersedia = range($currentYear - 4, $currentYear + 1);
+        
+        // Periode tersedia (tetap dari database atau generate manual)
         $periodeTersedia = $this->getPeriodeTersedia();
         
         return view('dashboard.shared.laporan-keuangan.laporan-keuangan', compact(
@@ -309,10 +308,16 @@ class LaporanKeuanganController extends Controller
     
     private function getPeriodeTersedia()
     {
+        // 🔥 Ambil dari database atau generate manual
         $tahunList = TransaksiUmum::selectRaw('DISTINCT YEAR(tanggal_bayar) as tahun')
             ->whereNotNull('tanggal_bayar')
             ->orderBy('tahun', 'desc')
             ->pluck('tahun');
+        
+        // Jika database kosong, gunakan tahun sekarang dan tahun depan
+        if ($tahunList->isEmpty()) {
+            $tahunList = collect([date('Y'), date('Y') + 1]);
+        }
         
         $periodeList = [];
         foreach ($tahunList as $tahun) {

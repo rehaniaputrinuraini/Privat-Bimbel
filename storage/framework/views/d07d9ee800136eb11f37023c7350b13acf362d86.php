@@ -1,6 +1,6 @@
-@php
+<?php
     $hashId = $hashId ?? hash_id($admin->id_user);
-@endphp
+?>
 
 <div style="padding: 20px; font-family: 'Poppins', sans-serif; background: #FFFFFF; border-radius: 16px;">
     
@@ -14,38 +14,38 @@
         <span id="alertErrorText"></span>
     </div>
 
-    <form id="mainForm" action="{{ route('superadmin.kelola-admin.update', $hashId) }}" method="POST">
-        @csrf
-        @method('PUT')
+    <form id="mainForm" action="<?php echo e(route('superadmin.kelola-admin.update', $hashId)); ?>" method="POST">
+        <?php echo csrf_field(); ?>
+        <?php echo method_field('PUT'); ?>
         
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">ID Admin</label>
-            <input type="text" value="AD{{ str_pad($admin->id_user, 4, '0', STR_PAD_LEFT) }}" readonly 
+            <input type="text" value="AD<?php echo e(str_pad($admin->id_user, 4, '0', STR_PAD_LEFT)); ?>" readonly 
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #F3F4F6; outline: none; color: #6B7280; font-size: 14px; font-family: 'Poppins', sans-serif;">
         </div>
 
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Nama Lengkap <span style="color: #EF4444;">*</span></label>
-            <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap', $admin->pegawai->nama_lengkap ?? '') }}" required
+            <input type="text" name="nama_lengkap" value="<?php echo e(old('nama_lengkap', $admin->pegawai->nama_lengkap ?? '')); ?>" required
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif;">
         </div>
 
         <div style="margin-bottom: 15px;">
             <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Alamat</label>
             <textarea name="alamat" rows="2"
-                      style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-family: 'Poppins', sans-serif; font-size: 14px; resize: vertical;">{{ old('alamat', $admin->pegawai->alamat ?? '') }}</textarea>
+                      style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-family: 'Poppins', sans-serif; font-size: 14px; resize: vertical;"><?php echo e(old('alamat', $admin->pegawai->alamat ?? '')); ?></textarea>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; margin-bottom: 15px;">
             <div>
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">No HP</label>
-                <input type="text" name="no_hp" value="{{ old('no_hp', $admin->pegawai->no_hp ?? '') }}" placeholder="08xxxxxxxxxx"
+                <input type="text" name="no_hp" value="<?php echo e(old('no_hp', $admin->pegawai->no_hp ?? '')); ?>" placeholder="08xxxxxxxxxx"
                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif;">
             </div>
             <div>
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Email <span style="color: #EF4444;">*</span></label>
-                <input type="email" name="email" value="{{ old('email', $admin->email) }}" required
+                <input type="email" name="email" value="<?php echo e(old('email', $admin->email)); ?>" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif;">
             </div>
         </div>
@@ -53,13 +53,13 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; margin-bottom: 15px;">
             <div>
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Gaji Pokok (Rp)</label>
-                <input type="text" name="gaji_pokok" value="{{ old('gaji_pokok', $admin->pegawai->gaji_pokok ?? 0) }}"
+                <input type="text" name="gaji_pokok" value="<?php echo e(old('gaji_pokok', $admin->pegawai->gaji_pokok ?? 0)); ?>"
                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif;">
             </div>
             <div>
                 <label style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 6px;">Username <span style="color: #EF4444;">*</span></label>
-                <input type="text" name="username" value="{{ old('username', $admin->username) }}" required
+                <input type="text" name="username" value="<?php echo e(old('username', $admin->username)); ?>" required
                        style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #FFFFFF; outline: none; font-size: 14px; font-family: 'Poppins', sans-serif;">
             </div>
         </div>
@@ -77,7 +77,7 @@
     </form>
 </div>
 
-{{-- MODAL KONFIRMASI BATAL --}}
+
 <div id="modalBatal" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -90,7 +90,7 @@
     </div>
 </div>
 
-{{-- MODAL PERINGATAN PERUBAHAN BELUM DISIMPAN --}}
+
 <div id="modalPindahHalaman" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -103,7 +103,7 @@
     </div>
 </div>
 
-{{-- MODAL SUKSES --}}
+
 <div id="modalSukses" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15); font-family: 'Poppins', sans-serif;">
         <div style="color: #10B981; font-size: 50px; margin-bottom: 10px;"><i class="fas fa-check-circle"></i></div>
@@ -253,4 +253,4 @@
             });
         }
     })();
-</script>
+</script><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/superadmin/kelola-admin/edit-admin.blade.php ENDPATH**/ ?>

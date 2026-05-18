@@ -1,6 +1,6 @@
-@php
+<?php
     $hashId = $hashId ?? hash_id($tentor->id_pegawai);
-@endphp
+?>
 
 <div style="padding: 20px; font-family: 'Poppins', sans-serif; background: #FFFFFF; border-radius: 16px;">
     
@@ -16,29 +16,29 @@
     <div style="display: flex; gap: 14px; margin-bottom: 18px;">
         <div style="flex: 1; padding: 10px 15px; background: #F9FAFB; border-radius: 10px; border: 1px solid #E5E7EB;">
             <span style="font-size: 11px; color: #9CA3AF; display: block;">ID Tentor</span>
-            <span style="font-weight: 700; color: #4D0B87; font-size: 14px;">#{{ $tentor->id_pegawai }}</span>
+            <span style="font-weight: 700; color: #4D0B87; font-size: 14px;">#<?php echo e($tentor->id_pegawai); ?></span>
         </div>
     </div>
 
-    <form id="mainForm" action="{{ route('superadmin.kelola-tentor.update', $hashId) }}" method="POST">
-        @csrf 
-        @method('PUT')
+    <form id="mainForm" action="<?php echo e(route('superadmin.kelola-tentor.update', $hashId)); ?>" method="POST">
+        <?php echo csrf_field(); ?> 
+        <?php echo method_field('PUT'); ?>
 
         <div style="margin-bottom: 15px;">
             <label style="font-weight: 600; font-size: 14px; color: #374151;">Nama Lengkap <span style="color: #EF4444;">*</span></label>
-            <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap', $tentor->nama_lengkap) }}" required 
+            <input type="text" name="nama_lengkap" value="<?php echo e(old('nama_lengkap', $tentor->nama_lengkap)); ?>" required 
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; outline: none; font-size: 14px;">
         </div>
         
         <div style="margin-bottom: 15px;">
             <label style="font-weight: 600; font-size: 14px; color: #374151;">Alamat <span style="color: #EF4444;">*</span></label>
             <textarea name="alamat" rows="2" required 
-                      style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; outline: none; font-size: 14px; resize: vertical;">{{ old('alamat', $tentor->alamat) }}</textarea>
+                      style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; outline: none; font-size: 14px; resize: vertical;"><?php echo e(old('alamat', $tentor->alamat)); ?></textarea>
         </div>
         
         <div style="margin-bottom: 15px;">
             <label style="font-weight: 600; font-size: 14px; color: #374151;">No HP <span style="color: #EF4444;">*</span></label>
-            <input type="tel" name="no_hp" value="{{ old('no_hp', $tentor->no_hp) }}" required 
+            <input type="tel" name="no_hp" value="<?php echo e(old('no_hp', $tentor->no_hp)); ?>" required 
                    oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
                    style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; outline: none; font-size: 14px;">
         </div>
@@ -47,7 +47,7 @@
             <div>
                 <div style="margin-bottom: 15px;">
                     <label style="font-weight: 600; font-size: 14px; color: #374151;">Mapel <span style="color: #EF4444;">*</span></label>
-                    <input type="text" name="mapel" value="{{ old('mapel', $tentor->mapel) }}" required 
+                    <input type="text" name="mapel" value="<?php echo e(old('mapel', $tentor->mapel)); ?>" required 
                            style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; outline: none; font-size: 14px;">
                 </div>
                 
@@ -55,28 +55,28 @@
                     <label style="font-weight: 600; font-size: 14px; color: #374151;">Grade <span style="color: #EF4444;">*</span></label>
                     <select name="grade" required style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; outline: none; font-size: 14px;">
                         <option value="">Pilih</option>
-                        <option value="A" {{ old('grade', $tentor->grade) == 'A' ? 'selected' : '' }}>A</option>
-                        <option value="B" {{ old('grade', $tentor->grade) == 'B' ? 'selected' : '' }}>B</option>
+                        <option value="A" <?php echo e(old('grade', $tentor->grade) == 'A' ? 'selected' : ''); ?>>A</option>
+                        <option value="B" <?php echo e(old('grade', $tentor->grade) == 'B' ? 'selected' : ''); ?>>B</option>
                     </select>
                 </div>
                 
                 <div style="margin-bottom: 15px;">
                     <label style="font-weight: 600; font-size: 14px; color: #374151;">HR SD</label>
-                    <input type="text" name="hr_sd" value="{{ old('hr_sd', $tentor->hr_sd) }}" 
+                    <input type="text" name="hr_sd" value="<?php echo e(old('hr_sd', $tentor->hr_sd)); ?>" 
                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
                            style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; outline: none; font-size: 14px;">
                 </div>
                 
                 <div style="margin-bottom: 15px;">
                     <label style="font-weight: 600; font-size: 14px; color: #374151;">HR SMP</label>
-                    <input type="text" name="hr_smp" value="{{ old('hr_smp', $tentor->hr_smp) }}" 
+                    <input type="text" name="hr_smp" value="<?php echo e(old('hr_smp', $tentor->hr_smp)); ?>" 
                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
                            style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; outline: none; font-size: 14px;">
                 </div>
                 
                 <div style="margin-bottom: 15px;">
                     <label style="font-weight: 600; font-size: 14px; color: #374151;">HR SMA</label>
-                    <input type="text" name="hr_sma" value="{{ old('hr_sma', $tentor->hr_sma) }}" 
+                    <input type="text" name="hr_sma" value="<?php echo e(old('hr_sma', $tentor->hr_sma)); ?>" 
                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
                            style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; outline: none; font-size: 14px;">
                 </div>
@@ -85,27 +85,27 @@
             <div>
                 <div style="margin-bottom: 15px;">
                     <label style="font-weight: 600; font-size: 14px; color: #374151;">Uang Makan</label>
-                    <input type="text" name="uang_makan" value="{{ old('uang_makan', $tentor->uang_makan) }}" 
+                    <input type="text" name="uang_makan" value="<?php echo e(old('uang_makan', $tentor->uang_makan)); ?>" 
                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
                            style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; outline: none; font-size: 14px;">
                 </div>
                 
                 <div style="margin-bottom: 15px;">
                     <label style="font-weight: 600; font-size: 14px; color: #374151;">Uang Transport</label>
-                    <input type="text" name="uang_transport" value="{{ old('uang_transport', $tentor->uang_transport) }}" 
+                    <input type="text" name="uang_transport" value="<?php echo e(old('uang_transport', $tentor->uang_transport)); ?>" 
                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
                            style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; outline: none; font-size: 14px;">
                 </div>
                 
                 <div style="margin-bottom: 15px;">
                     <label style="font-weight: 600; font-size: 14px; color: #374151;">Email <span style="color: #EF4444;">*</span></label>
-                    <input type="email" name="email" value="{{ old('email', $tentor->user->email ?? '') }}" required 
+                    <input type="email" name="email" value="<?php echo e(old('email', $tentor->user->email ?? '')); ?>" required 
                            style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; outline: none; font-size: 14px;">
                 </div>
                 
                 <div style="margin-bottom: 15px;">
                     <label style="font-weight: 600; font-size: 14px; color: #374151;">Username <span style="color: #EF4444;">*</span></label>
-                    <input type="text" name="username" value="{{ old('username', $tentor->user->username ?? '') }}" required 
+                    <input type="text" name="username" value="<?php echo e(old('username', $tentor->user->username ?? '')); ?>" required 
                            style="width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid #E5E7EB; outline: none; font-size: 14px;">
                 </div>
             </div>
@@ -118,7 +118,7 @@
     </form>
 </div>
 
-{{-- MODALS --}}
+
 <div id="modalBatal" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); align-items: center; justify-content: center;">
     <div style="background: white; padding: 25px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.15);">
         <div style="color: #F59E0B; font-size: 40px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
@@ -306,4 +306,4 @@
             });
         }
     })();
-</script>
+</script><?php /**PATH C:\xampp\htdocs\Privat-Bimbel\resources\views/dashboard/superadmin/kelola-tentor/edit-tentor.blade.php ENDPATH**/ ?>
